@@ -75,6 +75,11 @@ class DemoAPI {
       store.set('demo:users', users);
       if (store.get('demo:session') === 'u_admin') store.del('demo:session');
     }
+    // demo only: if this browser has accounts but no administrator, the oldest account becomes administrator
+    if (users.length && !users.some(u => u.isAdmin)) {
+      users.slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))[0].isAdmin = true;
+      store.set('demo:users', users);
+    }
     const sid = store.get('demo:session');
     this._user = this._pub(users.find(u => u.id === sid));
     await this._loadCatalog();
