@@ -529,3 +529,9 @@ body.reading::before { background: var(--rd-bg, #F7F6F1); }
 .lang-note .chip .ico { width: 16px; height: 16px; }
 
 .pass-recovery { outline: 2px solid var(--pista-strong); }
+
+/* phones & tablets: Safari zooms into any field with text under 16px — keep every field at 16px so it never zooms */
+@media (max-width: 1024px), (pointer: coarse) {
+  input, select, textarea, .input,
+  .search select, .search input, .results-bar select, #lib-sort, .field input, .field select, .field textarea { font-size: 16px !important; }
+}
