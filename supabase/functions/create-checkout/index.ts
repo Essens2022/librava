@@ -18,9 +18,14 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
   try {
-    const STRIPE = Deno.env.get('STRIPE_SECRET_KEY');
+    // remove spaces / invisible characters that sneak in when a key is copied from a web page
+    const STRIPE = (Deno.env.get('STRIPE_SECRET_KEY') || '').replace(/[^\x21-\x7E]/g, '');
     const SITE = (Deno.env.get('SITE_URL') || 'https://librava.store').replace(/[#?].*$/, '');
     if (!STRIPE) return json({ error: 'pay.notConfigured' }, 503);
+    if (!/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/.test(STRIPE)) {
+      console.error('STRIPE_SECRET_KEY has the wrong format (starts with: ' + STRIPE.slice(0, 8) + ', length ' + STRIPE.length + ')');
+      return json({ error: 'Payments are being set up: the Stripe secret key saved in Supabase is not a valid sk_ key.' }, 503);
+    }
 
     const url = Deno.env.get('SUPABASE_URL')!;
     const userClient = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
@@ -76,7 +81,10 @@ Deno.serve(async (req) => {
       body: p,
     });
     const session = await res.json();
-    if (!res.ok) return json({ error: session?.error?.message || 'Stripe error' }, 502);
+    if (!res.ok) {
+      await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+      return json({ error: session?.error?.message || 'Stripe error' }, 502);
+    }
 
     await admin.from('orders').update({ stripe_session_id: session.id }).eq('id', order.id);
     return json({ url: session.url });
