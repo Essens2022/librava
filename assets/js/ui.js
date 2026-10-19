@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { t, money, getLang, setLang, LANGS } from './i18n.js';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js';
 import { esc, store, $, $$ } from './util.js';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
@@ -108,6 +108,7 @@ export function renderChrome() {
     <a class="logo" href="#/" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</a>
     <span class="spacer"></span>
     ${searchForm('s1')}
+    ${langBtn('hdr-btn')}
     <a class="hdr-btn hdr-account" href="#/account"><span><small>${hello}</small><b class="acc-label">${u ? esc(t('nav.account')) : esc(t('acc.signIn'))}</b></span><span class="menu-icon-only">${icon('user')}</span></a>
     <a class="hdr-btn hdr-lib" href="#/library"><span><small>${esc(t('nav.libraryShort'))}</small><b>${esc(t('nav.library'))}</b></span></a>
     <a class="hdr-btn cart-btn" href="#/cart" aria-label="${esc(t('nav.cart'))}">${icon('cart')}<span class="cart-count">0</span><b class="cart-label">${esc(t('nav.cart'))}</b></a>
@@ -124,7 +125,7 @@ export function renderChrome() {
   </nav></div>`;
 
   $('#drawer').innerHTML = `
-    <div class="drawer-head">${icon('user')} ${hello}</div>
+    <div class="drawer-head"><span class="drawer-hello">${icon('user')} ${hello}</span>${langBtn('drawer-lang')}</div>
     <div class="drawer-body">
       <h3>${esc(t('nav.browse'))}</h3>
       ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
@@ -140,8 +141,6 @@ export function renderChrome() {
       <hr>
       <h3>${esc(t('nav.theme'))}</h3>
       ${themePills()}
-      <h3>${esc(t('nav.language'))}</h3>
-      <div class="lang-pills">${LANGS.map(l => `<button class="pill ${l === getLang() ? 'on' : ''}" data-lang="${l}">${esc(t('lang.' + l))}</button>`).join('')}</div>
       ${u ? `<hr><button class="dlink" data-signout>${esc(t('acc.signOut'))} ${icon('logout')}</button>` : ''}
     </div>`;
 
@@ -156,14 +155,27 @@ export function renderChrome() {
         <div><h4>${esc(t('foot.contact'))}</h4><p style="user-select:all">${esc(CONFIG.supportEmail)}</p></div>
       </div>
       <div class="foot-bottom">
-        <div class="lang-pills">${LANGS.map(l => `<button class="pill ${l === getLang() ? 'on' : ''}" data-lang="${l}">${icon('globe', 'ico sr-hide')} ${esc(t('lang.' + l))}</button>`).join('')}</div>
+        ${langBtn('foot-lang')}
         ${themePills()}
         <a class="logo" href="#/">${logoHTML()}</a>
         <span>${esc(t('foot.rights', { year, site: CONFIG.siteName }))}</span>
       </div>
     </div></footer>`;
-  $$('.foot .pill .ico').forEach(i => { i.style.width = '14px'; i.style.height = '14px'; });
   updateCartCount();
+}
+
+// ---------------- language button & picker ----------------
+function langBtn(cls) {
+  const l = getLang();
+  return `<button class="lang-btn ${cls}" data-lang-open aria-label="${esc(t('nav.chooseLanguage'))}: ${esc(langName(l))}">${icon('globe')}<b>${l.toUpperCase()}</b>${icon('chevD', 'ico chev')}</button>`;
+}
+export function openLangPicker() {
+  const cur = getLang();
+  modal(`<div class="lang-head"><h2>${icon('globe')} ${esc(t('nav.chooseLanguage'))}</h2><button class="rd-btn" data-close aria-label="${esc(t('nav.close'))}">${icon('close')}</button></div>
+    <div class="lang-list" role="listbox" aria-label="${esc(t('nav.chooseLanguage'))}">
+      ${LANGS.map(([code, native]) => `<button role="option" aria-selected="${code === cur}" class="lang-opt ${code === cur ? 'on' : ''}" data-lang="${code}" lang="${code}">
+        <span class="lang-code">${code.toUpperCase()}</span><span class="lang-native">${esc(native)}</span>${code === cur ? icon('check') : ''}</button>`).join('')}
+    </div>`, { onMount(m) { m.classList.add('lang-modal'); m.querySelector('.lang-opt.on')?.focus(); } });
 }
 
 export function openDrawer(open) {
@@ -267,10 +279,17 @@ export function bindGlobal() {
     if (e.target.closest('#drawer a')) openDrawer(false);
     const tb = e.target.closest('[data-theme-set]');
     if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); return; }
+    if (e.target.closest('[data-lang-open]')) { openLangPicker(); return; }
     const lb = e.target.closest('[data-lang]');
-    if (lb) { setLang(lb.dataset.lang); openDrawer(false); window.dispatchEvent(new Event('librava:rerender')); return; }
+    if (lb) {
+      lb.closest('.modal-wrap')?.remove();
+      await setLang(lb.dataset.lang);
+      openDrawer(false);
+      window.dispatchEvent(new Event('librava:rerender'));
+      return;
+    }
     if (e.target.closest('[data-top]')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-signout]')) { openDrawer(false); await api.signOut(); go('/'); }
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') openDrawer(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { openDrawer(false); document.querySelector('.lang-modal')?.closest('.modal-wrap')?.remove(); } });
 }

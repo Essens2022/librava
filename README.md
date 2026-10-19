@@ -6,7 +6,9 @@ Magazin online pentru cărți digitale, cu structura unui mare magazin de cărț
 - **EPUB** pentru text care se adaptează ecranului, cu mărime de font, fundal alb / sepia / noapte și cuprins.
 - Pagina la care ai rămas și semnele de carte se salvează automat în cont.
 - Vizitatorii pot citi un extras gratuit înainte să cumpere.
-- Interfață în română, italiană și engleză. Se adaptează automat la modul întunecat.
+- Interfață în 24 de limbi: toate limbile mari ale Europei plus engleza (Anglia, America). Site-ul se deschide automat în limba telefonului sau calculatorului vizitatorului (engleză dacă limba lui nu e disponibilă), iar vizitatorul o poate schimba din butonul cu globul.
+- Magazinul arată doar cărțile în limba aleasă. Când adaugi o carte, alegi limba ei în panoul de administrare. Din căutare se pot vedea, la cerere, și cărțile în toate limbile.
+- Temă luminoasă implicit, cu opțiune de temă întunecată sau „ca telefonul”.
 
 ---
 
@@ -106,7 +108,7 @@ Sfaturi:
 - **Nume:** `siteName` în `config.js` (și titlul din `index.html`, `manifest.webmanifest`).
 - **Culori:** variabilele de la începutul `assets/css/style.css` (`--hdr`, `--pista`, `--amber` etc.), cu o variantă pentru modul întunecat.
 - **Categorii:** lista `CATS` din `assets/js/ui.js` plus traducerile `cat.*` din `i18n.js`.
-- **Texte și limbi:** `assets/js/i18n.js`.
+- **Texte și limbi:** română, italiană și engleză sunt în `assets/js/i18n.js`; celelalte limbi au câte un fișier în `assets/js/lang/` (de exemplu `fr.js`). Lista limbilor afișate în buton este `LANGS` din `i18n.js`.
 
 ## Structura fișierelor
 

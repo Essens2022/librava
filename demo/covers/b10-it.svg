@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<rect width="400" height="600" fill="#FFF8E7"/>
+<circle cx="60" cy="330" r="26" fill="#93C572"/><circle cx="130" cy="330" r="26" fill="#FF7B54"/><circle cx="200" cy="330" r="26" fill="#3D84A8"/><circle cx="270" cy="330" r="26" fill="#93C572"/><circle cx="340" cy="330" r="26" fill="#FF7B54"/><circle cx="60" cy="420" r="26" fill="#3D84A8"/><circle cx="130" cy="420" r="26" fill="#93C572"/><circle cx="200" cy="420" r="26" fill="#FF7B54"/><circle cx="270" cy="420" r="26" fill="#3D84A8"/><circle cx="340" cy="420" r="26" fill="#93C572"/><text x="200" y="560" font-size="40" text-anchor="middle" font-family="Georgia,serif" font-weight="700" fill="#3D84A8">1 2 3 … 10</text>
+<rect x="0" y="0" width="14" height="600" fill="#000" opacity=".12"/>
+<text x="34" y="92" font-size="40" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#1A1A1A">Conta con gli</text><text x="34" y="136.8" font-size="40" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#1A1A1A">animali</text><text x="34" y="192" font-size="16" font-family="Helvetica, Arial, sans-serif" fill="#1A1A1A" opacity=".8">I numeri da 1 a 10</text>
+<text x="34" y="578" font-size="18" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="2" fill="#1A1A1A">ANA CIREȘ</text>
+</svg>

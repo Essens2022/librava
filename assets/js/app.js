@@ -54,7 +54,7 @@ async function route() {
 function rerender() { renderChrome(); route(); }
 
 async function boot() {
-  setLang(getLang());
+  await setLang(getLang(), { remember: false });
   applyTheme();
   if (IS_DEMO) {
     const b = document.createElement('div');

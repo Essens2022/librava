@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<rect width="400" height="600" fill="#0F3D3E"/>
+<rect x="50" y="490" width="38" height="70" rx="4" fill="#E2DCC8" opacity=".9"/><rect x="102" y="460" width="38" height="100" rx="4" fill="#93C572" opacity=".9"/><rect x="154" y="407" width="38" height="153" rx="4" fill="#F1A208" opacity=".9"/><rect x="206" y="358" width="38" height="202" rx="4" fill="#E2DCC8" opacity=".9"/><rect x="258" y="294" width="38" height="266" rx="4" fill="#93C572" opacity=".9"/><rect x="310" y="240" width="38" height="320" rx="4" fill="#F1A208" opacity=".9"/><path d="M60 470 L130 420 L200 430 L270 330 L350 260" stroke="#F1A208" stroke-width="6" fill="none" stroke-linecap="round"/>
+<rect x="0" y="0" width="14" height="600" fill="#000" opacity=".12"/>
+<text x="34" y="92" font-size="40" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">Your First</text><text x="34" y="136.8" font-size="40" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">€1,000 Online</text><text x="34" y="192" font-size="16" font-family="Helvetica, Arial, sans-serif" fill="#FFFFFF" opacity=".8">A realistic guide to digital</text><text x="34" y="212" font-size="16" font-family="Helvetica, Arial, sans-serif" fill="#FFFFFF" opacity=".8">projects</text>
+<text x="34" y="578" font-size="18" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="2" fill="#FFFFFF">ANDREI POPA</text>
+</svg>

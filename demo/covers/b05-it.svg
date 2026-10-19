@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<rect width="400" height="600" fill="#14213D"/>
+<circle cx="200" cy="420" r="150" fill="#93C572" opacity=".18"/><circle cx="200" cy="420" r="105" fill="#93C572" opacity=".25"/><path d="M225 300 L150 440 H205 L180 560 L265 405 H210 Z" fill="#FCA311"/>
+<rect x="0" y="0" width="14" height="600" fill="#000" opacity=".12"/>
+<text x="34" y="92" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">Allenamento a</text><text x="34" y="128.96" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">casa in 20</text><text x="34" y="165.92000000000002" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">minuti</text><text x="34" y="213" font-size="16" font-family="Helvetica, Arial, sans-serif" fill="#FFFFFF" opacity=".8">Senza attrezzi, per ogni livello</text>
+<text x="34" y="578" font-size="18" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="2" fill="#FFFFFF">SORIN VLAD</text>
+</svg>

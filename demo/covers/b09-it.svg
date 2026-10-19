@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<rect width="400" height="600" fill="#13293D"/>
+<path d="M200 330 L-60 180 L-60 330Z" fill="#F4B942" opacity=".35"/><path d="M200 330 L460 200 L460 330Z" fill="#F4B942" opacity=".25"/><path d="M180 330 H220 L235 520 H165Z" fill="#E8F1D9"/><rect x="172" y="390" width="56" height="18" fill="#C44536"/><rect x="168" y="460" width="64" height="18" fill="#C44536"/><rect x="178" y="305" width="44" height="28" fill="#F4B942"/><path d="M0 520 Q100 490 200 515 T400 505 V600 H0Z" fill="#93C572" opacity=".9"/>
+<rect x="0" y="0" width="14" height="600" fill="#000" opacity=".12"/>
+<text x="34" y="92" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">La figlia del</text><text x="34" y="128.96" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">guardiano del</text><text x="34" y="165.92000000000002" font-size="33" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#FFFFFF">faro</text><text x="34" y="213" font-size="16" font-family="Helvetica, Arial, sans-serif" fill="#FFFFFF" opacity=".8">Romanzo</text>
+<text x="34" y="578" font-size="18" font-family="Helvetica, Arial, sans-serif" font-weight="700" letter-spacing="2" fill="#FFFFFF">HANNAH WARD</text>
+</svg>

@@ -20,6 +20,13 @@ const D = {
     'nav.admin': 'Panou administrare',
     'nav.language': 'Limba',
     'nav.theme': 'Aspect',
+    'nav.chooseLanguage': 'Alege limba',
+    'lang.all': 'Toate limbile',
+    'lang.noBooks': 'Încă nu avem cărți în {lang}.',
+    'lang.noBooksHint': 'Adăugăm titluri noi în fiecare lună. Între timp poți răsfoi cărțile în alte limbi.',
+    'lang.seeAll': 'Vezi cărțile în toate limbile',
+    'lang.showing': 'Cărți în {lang}',
+    'search.bookLang': 'Limba cărții',
     'theme.light': 'Luminos',
     'theme.dark': 'Întunecat',
     'theme.auto': 'Ca telefonul',
@@ -80,7 +87,6 @@ const D = {
     'book.related': 'Din aceeași categorie',
     'book.notFound': 'Cartea nu a fost găsită.',
     'book.backHome': 'Înapoi la magazin',
-    'lang.ro': 'Română', 'lang.it': 'Italiană', 'lang.en': 'Engleză',
     'rev.title': 'Recenzii clienți',
     'rev.outOf': '{avg} din 5',
     'rev.global': '{n} evaluări',
@@ -307,6 +313,13 @@ const D = {
     'nav.admin': 'Pannello di gestione',
     'nav.language': 'Lingua',
     'nav.theme': 'Aspetto',
+    'nav.chooseLanguage': 'Scegli la lingua',
+    'lang.all': 'Tutte le lingue',
+    'lang.noBooks': 'Non abbiamo ancora libri in {lang}.',
+    'lang.noBooksHint': 'Aggiungiamo nuovi titoli ogni mese. Nel frattempo puoi sfogliare i libri in altre lingue.',
+    'lang.seeAll': 'Vedi i libri in tutte le lingue',
+    'lang.showing': 'Libri in {lang}',
+    'search.bookLang': 'Lingua del libro',
     'theme.light': 'Chiaro',
     'theme.dark': 'Scuro',
     'theme.auto': 'Come il dispositivo',
@@ -367,7 +380,6 @@ const D = {
     'book.related': 'Della stessa categoria',
     'book.notFound': 'Libro non trovato.',
     'book.backHome': 'Torna al negozio',
-    'lang.ro': 'Rumeno', 'lang.it': 'Italiano', 'lang.en': 'Inglese',
     'rev.title': 'Recensioni dei clienti',
     'rev.outOf': '{avg} su 5',
     'rev.global': '{n} valutazioni',
@@ -594,6 +606,13 @@ const D = {
     'nav.admin': 'Admin panel',
     'nav.language': 'Language',
     'nav.theme': 'Appearance',
+    'nav.chooseLanguage': 'Choose language',
+    'lang.all': 'All languages',
+    'lang.noBooks': 'We don\'t have books in {lang} yet.',
+    'lang.noBooksHint': 'We add new titles every month. Meanwhile, you can browse books in other languages.',
+    'lang.seeAll': 'See books in all languages',
+    'lang.showing': 'Books in {lang}',
+    'search.bookLang': 'Book language',
     'theme.light': 'Light',
     'theme.dark': 'Dark',
     'theme.auto': 'Match device',
@@ -654,7 +673,6 @@ const D = {
     'book.related': 'More in this category',
     'book.notFound': 'Book not found.',
     'book.backHome': 'Back to the store',
-    'lang.ro': 'Romanian', 'lang.it': 'Italian', 'lang.en': 'English',
     'rev.title': 'Customer reviews',
     'rev.outOf': '{avg} out of 5',
     'rev.global': '{n} ratings',
@@ -864,24 +882,79 @@ const D = {
   },
 };
 
-let lang = store.get('lang') || CONFIG.defaultLang;
-if (!D[lang]) lang = 'ro';
+// ---------------------------------------------------------------------
+//  Interface languages. ro / it / en are bundled above; every other
+//  language is loaded on demand from ./lang/<code>.js
+// ---------------------------------------------------------------------
+export const LANGS = [
+  ['en', 'English'], ['fr', 'Français'], ['de', 'Deutsch'], ['es', 'Español'], ['it', 'Italiano'],
+  ['pt', 'Português'], ['nl', 'Nederlands'], ['pl', 'Polski'], ['ro', 'Română'], ['cs', 'Čeština'],
+  ['sk', 'Slovenčina'], ['hu', 'Magyar'], ['bg', 'Български'], ['hr', 'Hrvatski'], ['sl', 'Slovenščina'],
+  ['el', 'Ελληνικά'], ['da', 'Dansk'], ['sv', 'Svenska'], ['no', 'Norsk'], ['fi', 'Suomi'],
+  ['et', 'Eesti'], ['lv', 'Latviešu'], ['lt', 'Lietuvių'], ['uk', 'Українська'],
+];
+const CODES = LANGS.map(l => l[0]);
+const ALIASES = { nb: 'no', nn: 'no' };
+export function langNative(code) { return (LANGS.find(l => l[0] === code) || [code, code.toUpperCase()])[1]; }
 
-export const LANGS = ['ro', 'it', 'en'];
+// first language of the visitor's device that we support, otherwise English
+export function detectLang() {
+  const prefs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en']);
+  for (const p of prefs) {
+    let base = String(p).toLowerCase().split(/[-_]/)[0];
+    base = ALIASES[base] || base;
+    if (CODES.includes(base)) return base;
+  }
+  return 'en';
+}
+
+let lang = (() => { const s = store.get('lang'); return CODES.includes(s) ? s : detectLang(); })();
+
 export function getLang() { return lang; }
-export function setLang(l) { if (D[l]) { lang = l; store.set('lang', l); document.documentElement.lang = l; } }
+export function isLangChosen() { return CODES.includes(store.get('lang')); }
+
+export async function loadLang(l) {
+  if (D[l]) return true;
+  try { const m = await import(`./lang/${l}.js`); D[l] = m.default; return true; }
+  catch (e) { console.warn('Language file missing:', l, e); return false; }
+}
+// remember=false when the language came from the device, true when the visitor picked it
+export async function setLang(l, { remember = true } = {}) {
+  if (!CODES.includes(l)) l = 'en';
+  if (!(await loadLang(l))) l = 'en';
+  lang = l;
+  if (remember) store.set('lang', l);
+  document.documentElement.lang = l;
+}
+
 export function t(key, vars) {
-  let s = (D[lang] && D[lang][key]) ?? D.ro[key] ?? key;
+  let s = (D[lang] && D[lang][key]) ?? D.en[key] ?? key;
   if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
   return s;
 }
-const LOCALE = { ro: 'ro-RO', it: 'it-IT', en: 'en-GB' };
+
+// number/date formatting follows the device region when it matches the language (en-US vs en-GB…)
+function locale() {
+  const prefs = navigator.languages || [navigator.language];
+  const m = prefs.find(x => x && (ALIASES[x.toLowerCase().split(/[-_]/)[0]] || x.toLowerCase().split(/[-_]/)[0]) === lang);
+  return m || (lang === 'no' ? 'nb' : lang === 'en' ? 'en-GB' : lang);
+}
+// language name in the visitor's own language, e.g. "Romanian", "rumeno", "roumain"
+// inSentence=true keeps the language's own casing ("inglese", "anglais", but "Englisch")
+export function langName(code, inSentence = false) {
+  if (!code) return '';
+  try {
+    const n = new Intl.DisplayNames([locale()], { type: 'language' }).of(code);
+    if (n && n.toLowerCase() !== code) return inSentence ? n : n.charAt(0).toLocaleUpperCase(locale()) + n.slice(1);
+  } catch { }
+  return langNative(code);
+}
 export function money(cents, currency = CONFIG.currency) {
-  return new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency }).format((cents || 0) / 100);
+  return new Intl.NumberFormat(locale(), { style: 'currency', currency }).format((cents || 0) / 100);
 }
 export function fmtDate(d) {
   if (!d) return '';
   const dt = new Date(d);
   if (isNaN(dt)) return '';
-  return new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
+  return new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
 }

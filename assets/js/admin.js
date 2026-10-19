@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { t, money, fmtDate } from './i18n.js';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js';
 import { esc, $, $$, loadScript, norm } from './util.js';
 import { api } from './api.js';
 import { icon, go, toast, coverHTML, confirmBox, errText, CATS } from './ui.js';
@@ -51,7 +51,7 @@ async function booksList(body) {
     <div class="table-wrap"><table class="adm-table">
       <thead><tr><th>${esc(t('admin.colTitle'))}</th><th style="text-align:right">${esc(t('admin.colPrice'))}</th><th style="text-align:right">${esc(t('admin.colSales'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
       <tbody>${books.map(b => `<tr data-row="${esc(norm(b.title + ' ' + b.author))}">
-        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(b.format.toUpperCase())}</div></div></div></td>
+        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(b.format.toUpperCase())} · ${esc((b.language || '').toUpperCase())}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
         <td class="num">${salesBy[b.id] || 0}</td>
         <td><span class="status ${b.status === 'published' ? 'live' : 'draft'}">${esc(b.status === 'published' ? t('admin.live') : t('admin.draft'))}</span></td>
@@ -71,7 +71,7 @@ async function booksList(body) {
 }
 
 function bookForm(body, b) {
-  const v = b || { language: 'ro', status: 'published', price_cents: 0, category: 'fiction', published_at: new Date().toISOString().slice(0, 10) };
+  const v = b || { language: getLang(), status: 'published', price_cents: 0, category: 'fiction', published_at: new Date().toISOString().slice(0, 10) };
   const files = { cover: null, file: null, sample: null };
   const eur = c => c ? (c / 100).toFixed(2) : '';
   body.innerHTML = `<form id="bk-form" novalidate>
@@ -81,7 +81,7 @@ function bookForm(body, b) {
       <label class="field"><span>${esc(t('admin.f.author'))} *</span><input id="f-author" required maxlength="120" value="${esc(v.author || '')}"></label>
       <label class="field"><span>${esc(t('admin.f.category'))} *</span><select id="f-category">${CATS.map(c => `<option value="${c}" ${v.category === c ? 'selected' : ''}>${esc(t('cat.' + c))}</option>`).join('')}</select></label>
       <label class="field full"><span>${esc(t('admin.f.description'))}</span><textarea id="f-description" maxlength="4000">${esc(v.description || '')}</textarea><small>${esc(t('admin.f.descriptionHelp'))}</small></label>
-      <label class="field"><span>${esc(t('admin.f.language'))}</span><select id="f-language">${['ro', 'it', 'en'].map(l => `<option value="${l}" ${v.language === l ? 'selected' : ''}>${esc(t('lang.' + l))}</option>`).join('')}</select></label>
+      <label class="field"><span>${esc(t('admin.f.language'))}</span><select id="f-language">${LANGS.map(([l, native]) => `<option value="${l}" ${v.language === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(native)}</option>`).join('')}</select></label>
       <label class="field"><span>${esc(t('admin.f.keywords'))}</span><input id="f-keywords" value="${esc((v.keywords || []).join(', '))}"><small>${esc(t('admin.f.keywordsHelp'))}</small></label>
     </div></section>
 
