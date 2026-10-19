@@ -1,11 +1,11 @@
-import { CONFIG } from './config.js?v=20261019201923';
-import { t, getLang, setLang } from './i18n.js?v=20261019201923';
-import { esc, $, $$ } from './util.js?v=20261019201923';
-import { api, chooseBackend } from './api.js?v=20261019201923';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019201923';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019201923';
-import { viewReader } from './reader.js?v=20261019201923';
-import { viewAdmin } from './admin.js?v=20261019201923';
+import { CONFIG } from './config.js?v=20261019203508';
+import { t, getLang, setLang } from './i18n.js?v=20261019203508';
+import { esc, $, $$ } from './util.js?v=20261019203508';
+import { api, chooseBackend } from './api.js?v=20261019203508';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019203508';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019203508';
+import { viewReader } from './reader.js?v=20261019203508';
+import { viewAdmin } from './admin.js?v=20261019203508';
 
 let cleanup = null, seq = 0;
 
@@ -32,6 +32,7 @@ async function route() {
   app.replaceChildren(el);
   const reading = parts[0] === 'read';
   $('#hdr').hidden = reading; $('#foot').hidden = reading;
+  document.documentElement.classList.toggle('reading', reading);
   const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
   openDrawer(false);
   document.querySelectorAll('.modal-wrap').forEach(m => m.remove());

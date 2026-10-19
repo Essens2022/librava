@@ -83,3 +83,23 @@ export function loadScript(src) {
     document.head.appendChild(s);
   });
 }
+
+// ---- book descriptions with simple formatting, like Amazon KDP (only safe tags, no attributes, no scripts)
+const DESC_TAGS = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'SUB', 'SUP']);
+export const hasTags = s => /<\/?(p|br|b|strong|i|em|u|h[4-6]|ul|ol|li|sub|sup)\b/i.test(String(s || ''));
+export function safeHTML(src) {
+  const s = String(src || '');
+  if (!hasTags(s)) return esc(s);
+  const doc = new DOMParser().parseFromString('<div>' + s + '</div>', 'text/html');
+  const walk = node => [...node.childNodes].map(n => {
+    if (n.nodeType === 3) return esc(n.textContent);
+    if (n.nodeType !== 1) return '';
+    if (/^(SCRIPT|STYLE|IFRAME|OBJECT|NOSCRIPT|TEMPLATE|SVG|MATH)$/.test(n.tagName)) return '';   // dropped with their content
+    const tag = n.tagName === 'H1' || n.tagName === 'H2' || n.tagName === 'H3' ? 'H4' : n.tagName;
+    if (!DESC_TAGS.has(tag)) return walk(n);           // unknown tag: keep its text only
+    const t = tag.toLowerCase();
+    return t === 'br' ? '<br>' : `<${t}>${walk(n)}</${t}>`;
+  }).join('');
+  return walk(doc.body.firstChild);
+}
+export const plainText = s => hasTags(s) ? (new DOMParser().parseFromString(String(s), 'text/html').body.textContent || '') : String(s || '');

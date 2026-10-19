@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019201923';
-import { getLang } from './i18n.js?v=20261019201923';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019201923';
+import { CONFIG } from './config.js?v=20261019203508';
+import { getLang } from './i18n.js?v=20261019203508';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019203508';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019201923')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019203508')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -213,7 +213,7 @@ class DemoAPI {
   async getReadSource(book, { preview } = {}) {
     const owned = (await this.owns(book.id)) || this._user?.isAdmin;
     if (!owned && !preview) throw new Error('not-owned');
-    if (!owned && book.sample_path) return { url: book.sample_path, kind: book.sample_kind || 'pdf', limited: false };
+    if (!owned && book.sample_path) return { url: book.sample_path, kind: book.sample_kind || 'pdf', limited: true, sample: true };
     return { url: book.file_path, kind: book.format, limited: !owned };
   }
   async getProgress(bookId) {
@@ -523,7 +523,7 @@ class SupabaseAPI {
       return { url: data.signedUrl, kind: book.format, limited: false };
     }
     if (preview && book.sample_path) {
-      return { url: this.sb.storage.from('samples').getPublicUrl(book.sample_path).data.publicUrl, kind: book.sample_path.endsWith('.epub') ? 'epub' : 'pdf', limited: false };
+      return { url: this.sb.storage.from('samples').getPublicUrl(book.sample_path).data.publicUrl + (book.updated_at ? '?v=' + encodeURIComponent(book.updated_at) : ''), kind: book.sample_path.endsWith('.epub') ? 'epub' : 'pdf', limited: true, sample: true };
     }
     throw new Error('not-owned');
   }
@@ -766,7 +766,7 @@ class ServerAPI {
   async getReadSource(book, { preview } = {}) {
     const owned = await this.owns(book.id);
     if (owned || this._user?.isAdmin) return { url: '/api/read/' + encodeURIComponent(book.id), kind: book.format, limited: false };
-    if (preview && book.sample_path) return { url: book.sample_path, kind: book.sample_kind || 'pdf', limited: false };
+    if (preview && book.sample_path) return { url: book.sample_path, kind: book.sample_kind || 'pdf', limited: true, sample: true };
     throw new Error('not-owned');
   }
   async getProgress(bookId) {

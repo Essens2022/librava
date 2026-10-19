@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019201923';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019201923';
-import { esc, $, $$, loadScript, norm, debounce } from './util.js?v=20261019201923';
-import { api } from './api.js?v=20261019201923';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019201923';
+import { CONFIG } from './config.js?v=20261019203508';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019203508';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText } from './util.js?v=20261019203508';
+import { api } from './api.js?v=20261019203508';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019203508';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -375,9 +375,99 @@ async function devicePreview(box, doc) {
   }
 }
 
+// ---------------------------------------------------------------- previewer (like KDP: see the book on phone, tablet and computer before publishing)
+const DEVICES = { phone: [375, 740], tablet: [768, 1024], desktop: [1180, 760] };
+async function openPreviewer(source, kind) {
+  modal(`<div class="pv"><div class="pv-top"><b>${esc(t('pv.title'))}</b>
+      <div class="seg">${Object.keys(DEVICES).map(d => `<button type="button" data-dev="${d}" class="${d === 'phone' ? 'on' : ''}">${esc(t('pv.' + d))}</button>`).join('')}</div>
+      <button type="button" class="btn btn-ghost btn-sm" data-close>✕</button></div>
+    <div class="pv-stage"><div class="pv-device"><div class="pv-screen"></div></div></div>
+    <div class="pv-nav"><button type="button" class="btn btn-ghost" data-pv="prev">‹ ${esc(t('pv.prev'))}</button><span class="pv-pos muted"></span><button type="button" class="btn btn-ghost" data-pv="next">${esc(t('pv.next'))} ›</button></div>
+    <p class="muted pv-note">${esc(t('pv.note'))}</p></div>`, {
+    onMount: async (m, close) => {
+      m.classList.add('modal-wide');
+      const stage = m.querySelector('.pv-stage'), dev = m.querySelector('.pv-device'), scr = m.querySelector('.pv-screen'), pos = m.querySelector('.pv-pos');
+      const buf = source instanceof Blob ? await source.arrayBuffer() : await (await fetch(source)).arrayBuffer();
+      let device = 'phone', engine = null;
+      const fit = () => {
+        const [w, h] = DEVICES[device];
+        scr.style.width = w + 'px'; scr.style.height = h + 'px';
+        const k = Math.min(1, (stage.clientWidth - 20) / (w + 24), (window.innerHeight * 0.62) / (h + 24));
+        dev.style.transform = `scale(${k})`; dev.style.width = (w + 24) + 'px'; dev.style.height = (h + 24) + 'px';
+        stage.style.height = ((h + 24) * k + 8) + 'px'; dev.dataset.dev = device;
+      };
+      if (kind === 'pdf') {
+        const lib = await pdfLib(); const doc = await lib.getDocument({ data: buf.slice(0) }).promise;
+        let n = 1; const cv = document.createElement('canvas'); scr.appendChild(cv); scr.classList.add('pdf');
+        const draw = async () => {
+          const page = await doc.getPage(n), [w, h] = DEVICES[device], vp1 = page.getViewport({ scale: 1 });
+          const scale = Math.min(w / vp1.width, h / vp1.height), vp = page.getViewport({ scale: scale * 2 });
+          cv.width = vp.width; cv.height = vp.height; cv.style.width = vp.width / 2 + 'px'; cv.style.height = vp.height / 2 + 'px';
+          await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+          pos.textContent = t('reader.pageShort', { n, total: doc.numPages });
+        };
+        engine = { draw, next: () => { if (n < doc.numPages) { n++; draw(); } }, prev: () => { if (n > 1) { n--; draw(); } } };
+      } else {
+        await loadScript(VENDOR('jszip.min.js')); await loadScript(VENDOR('epub.min.js'));
+        const book = window.ePub(buf); let rendition = null;
+        const draw = async () => {
+          const loc = rendition?.currentLocation()?.start?.cfi; rendition?.destroy(); scr.innerHTML = '';
+          const [w, h] = DEVICES[device];
+          rendition = book.renderTo(scr, { width: w, height: h, flow: 'paginated', spread: device === 'desktop' ? 'auto' : 'none', allowScriptedContent: false });
+          rendition.themes.default({ body: { 'font-size': device === 'phone' ? '17px' : '18px', 'line-height': '1.55', padding: '0 6px' } });
+          rendition.on('relocated', l => { pos.textContent = l?.start?.displayed ? t('pv.screen', { n: l.start.displayed.page, total: l.start.displayed.total }) : ''; });
+          await rendition.display(loc || undefined);
+        };
+        engine = { draw, next: () => rendition?.next(), prev: () => rendition?.prev() };
+      }
+      fit(); await engine.draw();
+      m.querySelectorAll('[data-dev]').forEach(b => b.onclick = async () => { device = b.dataset.dev; m.querySelectorAll('[data-dev]').forEach(x => x.classList.toggle('on', x === b)); fit(); await engine.draw(); });
+      m.querySelector('[data-pv="next"]').onclick = () => engine.next();
+      m.querySelector('[data-pv="prev"]').onclick = () => engine.prev();
+      const key = e => { if (!m.isConnected) { document.removeEventListener('keydown', key); return; } if (e.key === 'ArrowRight') engine.next(); if (e.key === 'ArrowLeft') engine.prev(); if (e.key === 'Escape') close(); };
+      document.addEventListener('keydown', key);
+    },
+  });
+}
+
+// ---------------------------------------------------------------- automatic free sample ("Look inside")
+const SAMPLE_PAGES = 6;
+async function makeSample(file) {
+  if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+    await loadScript(VENDOR('pdf-lib.min.js'));
+    const { PDFDocument } = window.PDFLib;
+    const src = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+    const out = await PDFDocument.create();
+    const n = Math.min(SAMPLE_PAGES, src.getPageCount());
+    (await out.copyPages(src, [...Array(n).keys()])).forEach(p => out.addPage(p));
+    out.setTitle((src.getTitle() || '') + ' (sample)');
+    return { file: new File([await out.save()], 'sample.pdf', { type: 'application/pdf' }), pages: n };
+  }
+  // EPUB: keep the first chapters (about 10% of the book, at least 2), remove the rest
+  await loadScript(VENDOR('jszip.min.js'));
+  const zip = await window.JSZip.loadAsync(file);
+  const cont = await zip.file('META-INF/container.xml').async('string');
+  const opfPath = /full-path="([^"]+)"/.exec(cont)[1];
+  const base = opfPath.includes('/') ? opfPath.replace(/[^/]+$/, '') : '';
+  const opf = new DOMParser().parseFromString(await zip.file(opfPath).async('string'), 'application/xml');
+  const items = Object.fromEntries([...opf.getElementsByTagName('item')].map(i => [i.getAttribute('id'), i]));
+  const refs = [...opf.getElementsByTagName('itemref')];
+  const keep = Math.min(refs.length, Math.max(2, Math.ceil(refs.length * 0.1)));
+  refs.slice(keep).forEach(r => {
+    const it = items[r.getAttribute('idref')];
+    if (it && !/\bnav\b/.test(it.getAttribute('properties') || '')) { zip.remove(base + decodeURIComponent(it.getAttribute('href'))); it.remove(); }
+    r.remove();
+  });
+  zip.file(opfPath, new XMLSerializer().serializeToString(opf));
+  zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+  const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
+  return { file: new File([blob], 'sample.epub', { type: 'application/epub+zip' }), chapters: keep };
+}
+
 // ---------------------------------------------------------------- A+ content editor
 const APLUS = {
   banner: { imgs: 1, rec: [1940, 600], min: [970, 300] },
+  header: { imgs: 1, rec: [970, 600], min: [485, 300] },
   image_text: { imgs: 1, rec: [600, 600], min: [300, 300] },
   three: { imgs: 3, rec: [600, 600], min: [300, 300] },
   text: { imgs: 0 },
@@ -394,6 +484,7 @@ function aplusEditor(root, modules, getBookId) {
         return `<div class="ap-mod" data-i="${i}"><div class="ap-head"><b>${i + 1}. ${esc(t('ap.type.' + m.type))}</b>
           <span><button type="button" class="btn btn-ghost btn-sm" data-up="${i}" ${i ? '' : 'disabled'} aria-label="↑">↑</button><button type="button" class="btn btn-ghost btn-sm" data-down="${i}" ${i < modules.length - 1 ? '' : 'disabled'} aria-label="↓">↓</button><button type="button" class="btn btn-ghost btn-sm" data-rm="${i}">${esc(t('admin.delete'))}</button></span></div>
           ${m.type === 'banner' ? `${imgSlot(0)}<input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.headline'))}" value="${esc(m.title || '')}">` : ''}
+          ${m.type === 'header' ? `${imgSlot(0)}<input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.title'))}" value="${esc(m.title || '')}"><textarea class="input" data-f="text" maxlength="2000" rows="4" placeholder="${esc(t('ap.text'))}">${esc(m.text || '')}</textarea>` : ''}
           ${m.type === 'image_text' ? `<div class="ap-it ${m.side === 'right' ? 'right' : ''}">${imgSlot(0)}<div class="ap-col"><input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.title'))}" value="${esc(m.title || '')}"><textarea class="input" data-f="text" maxlength="1500" rows="5" placeholder="${esc(t('ap.text'))}">${esc(m.text || '')}</textarea>
             <label class="check"><input type="checkbox" data-side ${m.side === 'right' ? 'checked' : ''}> ${esc(t('ap.imageRight'))}</label></div></div>` : ''}
           ${m.type === 'three' ? `<div class="ap-three">${[0, 1, 2].map(k => `<div>${imgSlot(k)}<input class="input" data-cap="${k}" data-cf="title" maxlength="80" placeholder="${esc(t('ap.title'))}" value="${esc(m.caps?.[k]?.title || '')}"><textarea class="input" data-cap="${k}" data-cf="text" maxlength="400" rows="3" placeholder="${esc(t('ap.text'))}">${esc(m.caps?.[k]?.text || '')}</textarea></div>`).join('')}</div>` : ''}
@@ -480,7 +571,12 @@ function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.contributors'))}</h3><p>${esc(t('kdp.contributorsHelp'))}</p></div>
         <div class="kdp-fields"><div id="contribs">${(v.contributors || []).map(contribRow).join('')}</div><button type="button" class="btn btn-ghost btn-sm" id="add-contrib">+ ${esc(t('kdp.addContributor'))}</button></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.description'))}</h3><p>${esc(t('admin.f.descriptionHelp'))}</p></div>
-        <div class="kdp-fields"><textarea id="f-description" class="input" maxlength="4000" rows="9">${esc(v.description || '')}</textarea><small class="muted" id="desc-count"></small></div></div>
+        <div class="kdp-fields"><div class="desc-ed">
+          <div class="desc-bar" role="toolbar"><div class="desc-tools">${[['b', '<b>B</b>'], ['i', '<i>I</i>'], ['u', '<u>U</u>'], ['h4', 'H'], ['ul', '• ' + esc(t('kdp.list'))], ['p', '¶']].map(([k, l]) => `<button type="button" class="btn btn-ghost btn-sm" data-wrap="${k}" title="${esc(t('kdp.fmt.' + k))}">${l}</button>`).join('')}</div>
+            <div class="seg"><button type="button" class="on" data-dmode="code">${esc(t('kdp.descCode'))}</button><button type="button" data-dmode="view">${esc(t('kdp.descView'))}</button></div></div>
+          <textarea id="f-description" class="input" maxlength="4000" rows="10" spellcheck="true">${esc(v.description || '')}</textarea>
+          <div class="desc rich desc-view" id="desc-view" hidden></div></div>
+          <small class="muted"><span id="desc-count"></span> · ${esc(t('kdp.descTags'))}</small></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.rights'))}</h3><p>${esc(t('kdp.rightsHelp'))}</p></div>
         <div class="kdp-fields radios"><label class="check"><input type="radio" name="rights" value="own" ${v.rights !== 'public' ? 'checked' : ''}> ${esc(t('kdp.rightsOwn'))}</label>
           <label class="check"><input type="radio" name="rights" value="public" ${v.rights === 'public' ? 'checked' : ''}> ${esc(t('kdp.rightsPublic'))}</label></div></div>
@@ -501,13 +597,16 @@ function bookForm(body, b, startStep = 1) {
         <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
           <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
           <div class="fcheck" id="fcheck" ${fileCheck ? '' : 'hidden'}></div><div id="devprev"></div>
+          <button type="button" class="btn btn-dark" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button>
           <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
         <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
           <div style="flex:1;min-width:220px"><label class="drop" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('kdp.uploadCover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
           <div class="kdp-warn" id="cov-warn" hidden></div></div></div></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.sample'))}</h3><p>${esc(t('admin.f.sampleHelp'))}</p></div>
-        <div class="kdp-fields"><label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${v.sample_path ? '✓ ' + esc(t('kdp.sampleKept')) : 'EPUB / PDF'}</span><br><small>${esc(t('kdp.sampleTip'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label></div></div>
+        <div class="kdp-fields"><label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${v.sample_path ? '✓ ' + esc(t('kdp.sampleKept')) : 'EPUB / PDF'}</span><br><small>${esc(t('kdp.sampleTip'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
+          <div class="kdp-ok" id="sample-ok" ${v.sample_path ? '' : 'hidden'}>✓ ${esc(t('kdp.sampleReady'))}</div>
+          <button type="button" class="btn btn-ghost btn-sm" id="b-mksample" ${(v.file_path || v.file_name) && !v.sample_path ? '' : 'hidden'}>${icon('eye')} ${esc(t('kdp.makeSample'))}</button></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.details'))}</h3><p>${esc(t('kdp.detailsHelp'))}</p></div>
         <div class="kdp-fields two"><label class="field"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
           <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label></div></div>
@@ -515,7 +614,7 @@ function bookForm(body, b, startStep = 1) {
 
     <section class="kdp-step" data-pane="3" hidden>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('ap.heading'))}</h3><p>${esc(t('ap.help'))}</p>
-        <ul class="ap-specs"><li>${esc(t('ap.type.banner'))}: 1940 × 600 px</li><li>${esc(t('ap.type.image_text'))}: 600 × 600 px</li><li>${esc(t('ap.type.three'))}: 3 × 600 × 600 px</li></ul></div>
+        <ul class="ap-specs"><li>${esc(t('ap.type.banner'))}: 1940 × 600 px</li><li>${esc(t('ap.type.header'))}: 970 × 600 px</li><li>${esc(t('ap.type.image_text'))}: 600 × 600 px</li><li>${esc(t('ap.type.three'))}: 3 × 600 × 600 px</li></ul></div>
         <div class="kdp-fields" id="aplus-root"></div></div>
     </section>
 
@@ -530,7 +629,8 @@ function bookForm(body, b, startStep = 1) {
         <div class="kdp-fields"><label class="field" style="max-width:220px"><span>${esc(t('admin.f.published'))}</span><input id="f-date" type="date" value="${esc(String(v.published_at || '').slice(0, 10))}"></label>
           <label class="check"><input type="checkbox" id="f-featured" ${v.is_featured ? 'checked' : ''}> ${esc(t('admin.f.featured'))}</label></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.checklist'))}</h3><p>${esc(t('kdp.checklistHelp'))}</p></div>
-        <div class="kdp-fields"><ul class="checklist" id="checklist"></ul></div></div>
+        <div class="kdp-fields"><ul class="checklist" id="checklist"></ul>
+          <button type="button" class="btn btn-ghost" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button></div></div>
     </section>
 
     <div class="error" id="f-err" hidden></div>
@@ -544,7 +644,20 @@ function bookForm(body, b, startStep = 1) {
   const radio = n => body.querySelector(`input[name="${n}"]:checked`)?.value;
   const cents = s => { const n = parseFloat(String(s).replace(',', '.')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
   const authorName = () => [val('f-first'), val('f-last')].filter(Boolean).join(' ');
-  const has = { file: !!(v.file_path || v.file_name), cover: !!v.cover_url };
+  const has = { file: !!(v.file_path || v.file_name), cover: !!v.cover_url, sample: !!v.sample_path };
+  let ownSample = false;
+  const autoSample = async (src) => {
+    const ok = $('#sample-ok', body), btn = $('#b-mksample', body);
+    ok.hidden = false; ok.textContent = t('kdp.sampleMaking');
+    try {
+      const r = await makeSample(src);
+      files.sample = r.file; has.sample = true;
+      ok.textContent = '✓ ' + (r.pages ? t('kdp.sampleAutoPdf', { n: r.pages }) : t('kdp.sampleAutoEpub', { n: r.chapters }));
+      $('#n-sample', body).textContent = r.file.name + ' · ' + (r.file.size / 1048576).toFixed(1) + ' MB';
+      btn.hidden = true;
+    } catch (e) { console.warn(e); ok.textContent = '⚠ ' + t('kdp.sampleFail'); }
+    refresh();
+  };
 
   // ---- what each step still needs (shown on the tabs and in the final checklist)
   const checks = () => {
@@ -552,10 +665,11 @@ function bookForm(body, b, startStep = 1) {
     return [
       { step: 1, ok: !!val('f-title'), label: t('kdp.ck.title') },
       { step: 1, ok: !!val('f-first'), label: t('kdp.ck.author') },
-      { step: 1, ok: val('f-description').length >= 30, label: t('kdp.ck.description') },
+      { step: 1, ok: plainText(val('f-description')).trim().length >= 30, label: t('kdp.ck.description') },
       { step: 2, ok: has.file || !!files.file, label: t('kdp.ck.manuscript') },
       { step: 2, ok: has.cover || !!files.cover, label: t('kdp.ck.cover') },
       { step: 2, ok: !(fileCheck?.items || []).some(x => x.level === 'error'), label: t('kdp.ck.fileOk') },
+      { step: 2, ok: has.sample || !!files.sample, label: t('kdp.ck.sample') },
       { step: 4, ok: free || price >= 49, label: t('kdp.ck.price') },
     ];
   };
@@ -590,6 +704,19 @@ function bookForm(body, b, startStep = 1) {
     body.querySelector('.kdp-tabs').scrollIntoView({ block: 'nearest' });
   };
   $$('.kdp-tab', body).forEach(tb => tb.onclick = () => show(+tb.dataset.step));
+  // description: HTML code like on KDP, with a button that shows how it will look
+  const ta = $('#f-description', body), dv = $('#desc-view', body);
+  const setMode = m => {
+    $$('[data-dmode]', body).forEach(x => x.classList.toggle('on', x.dataset.dmode === m));
+    if (m === 'view') { dv.innerHTML = safeHTML(ta.value) || `<p class="muted">${esc(t('kdp.descEmpty'))}</p>`; dv.style.minHeight = ta.offsetHeight + 'px'; }
+    ta.hidden = m === 'view'; dv.hidden = m !== 'view'; $('.desc-tools', body).style.visibility = m === 'view' ? 'hidden' : 'visible';
+  };
+  $$('[data-dmode]', body).forEach(x => x.onclick = () => setMode(x.dataset.dmode));
+  $$('[data-wrap]', body).forEach(x => x.onclick = () => {
+    const k = x.dataset.wrap, a = ta.selectionStart, z = ta.selectionEnd, sel = ta.value.slice(a, z) || t('kdp.fmt.' + k);
+    const ins = k === 'ul' ? '<ul>\n' + sel.split('\n').map(l => '<li>' + l + '</li>').join('\n') + '\n</ul>' : `<${k}>${sel}</${k}>`;
+    ta.setRangeText(ins, a, z, 'end'); ta.focus(); refresh();
+  });
   body.addEventListener('input', refresh);
   body.addEventListener('change', refresh);
 
@@ -623,13 +750,16 @@ function bookForm(body, b, startStep = 1) {
       probe.src = url;
     }
     if (kind === 'file') {
+      $$('[data-open-preview]', body).forEach(x => x.hidden = false);
       const box = $('#fcheck', body); box.hidden = false; box.innerHTML = `<div class="spinner"></div> ${esc(t('fc.checking'))}`;
       $('#devprev', body).innerHTML = '';
       fileCheck = await analyzeManuscript(file, val('f-language'));
       drawCheck();
       if (fileCheck.meta.pages) $('#f-pages', body).value = fileCheck.meta.pages;
       if (fileCheck.meta.doc) { try { await devicePreview($('#devprev', body), fileCheck.meta.doc); } catch { } }
+      if (!ownSample && !fileCheck.items.some(x => x.level === 'error')) await autoSample(file);
     }
+    if (kind === 'sample') { ownSample = true; has.sample = true; $('#sample-ok', body).hidden = false; $('#sample-ok', body).textContent = '✓ ' + t('kdp.sampleOwn'); $('#b-mksample', body).hidden = true; }
     refresh();
   };
   for (const kind of ['cover', 'file', 'sample']) {
@@ -649,6 +779,23 @@ function bookForm(body, b, startStep = 1) {
       ${fileCheck.meta.kind === 'epub' ? `<small class="muted">${esc(t('fc.epubAdapts'))}</small>` : ''}`;
   }
   if (fileCheck) drawCheck();
+  $$('[data-open-preview]', body).forEach(btn => btn.onclick = async () => {
+    btn.disabled = true;
+    try {
+      if (files.file) await openPreviewer(files.file, /\.epub$/i.test(files.file.name) ? 'epub' : 'pdf');
+      else { const src = await api.getReadSource({ ...v, id: bookId }, {}); await openPreviewer(src.url, v.format === 'epub' ? 'epub' : 'pdf'); }
+    } catch (x) { toast(errText(x), { error: true }); }
+    btn.disabled = false;
+  });
+  $('#b-mksample', body).onclick = async e => {
+    const btn = e.currentTarget; btn.disabled = true;
+    try {
+      const srcInfo = await api.getReadSource({ ...v, id: bookId }, {});
+      const blob = await (await fetch(srcInfo.url)).blob();
+      await autoSample(new File([blob], v.format === 'epub' ? 'book.epub' : 'book.pdf', { type: blob.type }));
+    } catch (x) { toast(errText(x), { error: true }); }
+    btn.disabled = false;
+  };
   const getAplus = hasAplus ? aplusEditor($('#aplus-root', body), aplusModules, () => bookId) : () => [];
   if (!hasAplus) $('[data-pane="3"]', body).remove();
 

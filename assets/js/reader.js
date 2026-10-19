@@ -2,12 +2,12 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019201923';
-import { t } from './i18n.js?v=20261019201923';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261019201923';
-import { api } from './api.js?v=20261019201923';
-import { icon, go, toast, cart, errText } from './ui.js?v=20261019201923';
-import { startCheckout } from './views.js?v=20261019201923';
+import { CONFIG } from './config.js?v=20261019203508';
+import { t } from './i18n.js?v=20261019203508';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261019203508';
+import { api } from './api.js?v=20261019203508';
+import { icon, go, toast, cart, errText } from './ui.js?v=20261019203508';
+import { startCheckout } from './views.js?v=20261019203508';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -238,7 +238,8 @@ class PdfEngine {
     lib.GlobalWorkerOptions.workerSrc = VENDOR('pdf.worker.min.js');
     this.doc = await lib.getDocument({ url: this.src.url, isEvalSupported: false }).promise;
     this.total = this.doc.numPages;
-    this.limit = this.src.limited ? Math.min(this.total, CONFIG.previewPages) : this.total;
+    // a separate sample file is shown whole; otherwise only the first pages of the full book
+    this.limit = this.src.limited && !this.src.sample ? Math.min(this.total, CONFIG.previewPages) : this.total;
     this.vps = [];
     const start = Math.min(Math.max(1, Number(this.cb.progress?.page) || 1), this.limit);
     await this.show(start);
@@ -352,7 +353,7 @@ const EPUB_THEMES = {
   dark: { color: '#D9DEDA', link: '#A4D17F' },
 };
 class EpubEngine {
-  constructor(box, stage, src, settings, cb) { Object.assign(this, { box, stage, src, settings, cb }); this.percent = 0; this.ready = false; }
+  constructor(box, stage, src, settings, cb) { Object.assign(this, { box, stage, src, settings, cb }); this.percent = 0; this.ready = false; this.limitPct = src.sample ? 0.985 : CONFIG.previewPercent; }
   async init() {
     await loadScript(VENDOR('jszip.min.js'));
     await loadScript(VENDOR('epub.min.js'));
@@ -392,7 +393,7 @@ class EpubEngine {
     else pct = loc.start.percentage || 0;
     if (loc.atEnd) pct = 1;
     this.percent = pct;
-    if (this.src.limited && this.ready && pct > CONFIG.previewPercent) this.cb.onLimit();
+    if (this.src.limited && this.ready && pct > this.limitPct) this.cb.onLimit();
     const chap = this.chapterLabel(loc.start.href);
     const p = Math.round(pct * 100);
     this.cb.onUpdate({ max: 1000, value: Math.round(pct * 1000), label: (chap ? chap + ' · ' : '') + t('reader.percent', { p }), loc: cfi });
@@ -412,7 +413,7 @@ class EpubEngine {
     if (layoutChanged) { try { r.spread(this.settings.spread ? 'auto' : 'none', 900); } catch { } }
   }
   next() {
-    if (this.src.limited && this.ready && this.percent >= CONFIG.previewPercent) { this.cb.onLimit(); return; }
+    if (this.src.limited && this.ready && this.percent >= this.limitPct) { this.cb.onLimit(); return; }
     this.rendition?.next();
   }
   prev() { this.rendition?.prev(); }
@@ -420,7 +421,7 @@ class EpubEngine {
   seek(v) {
     if (!this.ready) return;
     let pct = v / 1000;
-    if (this.src.limited) pct = Math.min(pct, CONFIG.previewPercent);
+    if (this.src.limited) pct = Math.min(pct, this.limitPct);
     this.rendition.display(this.book.locations.cfiFromPercentage(pct));
   }
   resize() { try { this.rendition?.resize(); } catch { } }

@@ -15,7 +15,7 @@ export const CONFIG = {
 
   // --- Magazin ---
   currency: 'EUR',
-  previewPages: 4,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
+  previewPages: 6,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
   previewPercent: 0.25,         // ce procent dintr-un EPUB vede gratuit (în modul demo)
   supportEmail: 'contact@librava.store',
 
