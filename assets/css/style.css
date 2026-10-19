@@ -535,3 +535,21 @@ body.reading::before { background: var(--rd-bg, #F7F6F1); }
   input, select, textarea, .input,
   .search select, .search input, .results-bar select, #lib-sort, .field input, .field select, .field textarea { font-size: 16px !important; }
 }
+
+/* ---------- phones: header must fit the screen exactly ---------- */
+@media (max-width: 520px) {
+  .hdr-row { gap: 2px; }
+  .hdr-row > .hdr-btn, .hdr-row > .lang-btn { padding-left: 5px; padding-right: 5px; }
+  .hdr-account .acc-label { display: none; }
+  .logo { padding: 4px 2px; gap: 6px; }
+  .logo svg { width: 26px; height: 26px; }
+  .logo-word { font-size: 21px; }
+  .cart-btn { padding-right: 4px; }
+  .cart-btn .ico { width: 30px; height: 30px; }
+  .cart-count { left: 15px; }
+  .hdr-row > .lang-btn .ico { width: 18px; height: 18px; }
+}
+@media (max-width: 360px) { .logo-word { font-size: 19px; } .logo svg { display: none; } }
+/* last guard: the page itself never pans sideways (carousels and tables still scroll inside their own box) */
+html, body { overflow-x: clip; overscroll-behavior-x: none; }
+.adm-table { min-width: 0; }
