@@ -1,6 +1,7 @@
 // Creates a Stripe Checkout session for the books in the cart.
 // Deploy:  supabase functions deploy create-checkout
-// Secrets: STRIPE_SECRET_KEY, SITE_URL  (SUPABASE_* are provided automatically)
+// Secret: STRIPE_SECRET_KEY (Supabase → Edge Functions → Secrets). SUPABASE_* are provided automatically.
+// SITE_URL is optional: the shop address is not a secret, https://librava.store is used by default.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const cors = {
@@ -18,19 +19,19 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
   try {
     const STRIPE = Deno.env.get('STRIPE_SECRET_KEY');
-    const SITE = (Deno.env.get('SITE_URL') || '').replace(/[#?].*$/, '');
-    if (!STRIPE || !SITE) return json({ error: 'Plata nu este configurată încă (STRIPE_SECRET_KEY / SITE_URL).' }, 500);
+    const SITE = (Deno.env.get('SITE_URL') || 'https://librava.store').replace(/[#?].*$/, '');
+    if (!STRIPE) return json({ error: 'pay.notConfigured' }, 503);
 
     const url = Deno.env.get('SUPABASE_URL')!;
     const userClient = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
     });
     const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return json({ error: 'Intră în cont înainte de plată.' }, 401);
+    if (!user) return json({ error: 'lib.loginNeeded' }, 401);
 
     const body = await req.json().catch(() => ({}));
     const ids: string[] = Array.isArray(body.book_ids) ? body.book_ids.filter((x: unknown) => typeof x === 'string' && UUID.test(x)).slice(0, 50) : [];
-    if (!ids.length) return json({ error: 'Coșul este gol.' }, 400);
+    if (!ids.length) return json({ error: 'cart.empty' }, 400);
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
@@ -40,14 +41,14 @@ Deno.serve(async (req) => {
     const { data: owned } = await admin.from('purchases').select('book_id').eq('user_id', user.id).in('book_id', ids);
     const ownedSet = new Set((owned || []).map((p) => p.book_id));
     const toBuy = (books || []).filter((b) => b.price_cents > 0 && !ownedSet.has(b.id));
-    if (!toBuy.length) return json({ error: 'Ai deja toate cărțile din coș.' }, 400);
+    if (!toBuy.length) return json({ error: 'cart.empty' }, 400);
 
     const currency = (toBuy[0].currency || 'eur').toLowerCase();
     const amount = toBuy.reduce((s, b) => s + b.price_cents, 0);
     const { data: order, error: oErr } = await admin.from('orders').insert({
-      user_id: user.id, currency, amount_cents: amount,
-      items: toBuy.map((b) => ({ book_id: b.id, price_cents: b.price_cents })),
-    }).select('id').single();
+      user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount,
+      items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: b.price_cents })),
+    }).select('id, reference').single();
     if (oErr) throw oErr;
 
     const base = SITE.endsWith('/') ? SITE : SITE + '/';
@@ -59,6 +60,7 @@ Deno.serve(async (req) => {
     if (user.email) p.set('customer_email', user.email);
     p.set('locale', 'auto');
     p.set('metadata[order_id]', order.id);
+    p.set('metadata[reference]', order.reference);
     p.set('payment_intent_data[metadata][order_id]', order.id);
     toBuy.forEach((b, i) => {
       p.set(`line_items[${i}][quantity]`, '1');

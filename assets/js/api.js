@@ -530,7 +530,6 @@ class SupabaseAPI {
   }
 
   // ---- admin ----
-  async adminBooks() { return filterBooks(await this._loadCatalog(true), { includeDrafts: true, sort: 'newest' }); }
   async _upload(bucket, path, file) {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
@@ -558,6 +557,110 @@ class SupabaseAPI {
     const { data, error } = await this.sb.from('purchases').select('*, book:books(id,title,author,cover_path,updated_at)').order('created_at', { ascending: false }).limit(1000);
     this._err(error);
     return data.map(p => ({ ...p, book: p.book ? { ...p.book, cover_url: this._coverUrl(p.book) } : null }));
+  }
+
+  // ---- account ----
+  async pendingOrders() {
+    if (!this._user) return [];
+    const { data } = await this.sb.from('orders').select('*').eq('user_id', this._user.id).eq('status', 'pending').eq('method', 'bank').order('created_at', { ascending: false });
+    return data || [];
+  }
+  async deleteAccount(password) {
+    if (this.hasPassword()) {
+      const { error } = await this.sb.auth.signInWithPassword({ email: this._user.email, password });
+      if (error) throw new Error('acc.err.currentWrong');
+    }
+    const { error } = await this.sb.functions.invoke('delete-account', { body: {} });
+    if (error) { let msg = error.message; try { msg = (await error.context.json()).error || msg; } catch { } throw new Error(msg); }
+    await this.sb.auth.signOut().catch(() => { });
+    this._user = null; this._lib = null; this.listeners.forEach(cb => cb(null));
+  }
+
+  // ---- full admin panel (the database rules let only the administrator read these) ----
+  async _all(table, select = '*', build = q => q) {
+    const out = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await build(this.sb.from(table).select(select)).range(from, from + 999);
+      this._err(error); out.push(...data);
+      if (data.length < 1000) return out;
+    }
+  }
+  async adminBooks() {
+    const [books, P] = await Promise.all([this._loadCatalog(true), this._all('purchases', 'book_id,price_cents')]);
+    const rev = {}; for (const p of P) rev[p.book_id] = (rev[p.book_id] || 0) + (p.price_cents || 0);
+    return filterBooks(books, { includeDrafts: true, sort: 'newest' }).map(b => ({ ...b, revenue_cents: rev[b.id] || 0 }));
+  }
+  async adminOverview() {
+    const [books, P, users, pend] = await Promise.all([
+      this._loadCatalog(true), this._all('purchases', 'book_id,price_cents,currency,created_at,customer_email', q => q.order('created_at', { ascending: false })),
+      this._all('profiles', 'id,created_at'), this.sb.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('method', 'bank'),
+    ]);
+    const day = d => new Date(d).toISOString().slice(0, 10);
+    const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+    const since = n => P.filter(p => new Date(p.created_at) >= new Date(today - (n - 1) * 864e5));
+    const sum = l => l.reduce((s, p) => s + (p.price_cents || 0), 0);
+    const daily = [];
+    for (let i = 29; i >= 0; i--) { const d = new Date(today - i * 864e5).toISOString().slice(0, 10); const l = P.filter(p => day(p.created_at) === d); daily.push({ date: d, revenue_cents: sum(l), count: l.length }); }
+    const by = {}; for (const p of P) { by[p.book_id] = by[p.book_id] || { n: 0, sum: 0 }; by[p.book_id].n++; by[p.book_id].sum += p.price_cents || 0; }
+    const top = Object.entries(by).map(([id, v]) => ({ book: books.find(b => b.id === id), ...v })).filter(x => x.book).sort((a, b) => b.sum - a.sum || b.n - a.n).slice(0, 5);
+    const live = books.filter(b => !b.deleted_at);
+    return {
+      revenue: { today: sum(since(1)), d7: sum(since(7)), d30: sum(since(30)), all: sum(P) },
+      counts: { sold: P.filter(p => p.price_cents > 0).length, free: P.filter(p => !p.price_cents).length, pending: pend.count || 0, customers: users.length,
+        new_customers_30: users.filter(u => new Date(u.created_at) >= new Date(today - 29 * 864e5)).length, books: live.length, published: live.filter(b => b.status === 'published').length },
+      currency: CONFIG.currency, daily, top,
+      recent: P.slice(0, 8).map(p => ({ ...p, email: p.customer_email, title: books.find(b => b.id === p.book_id)?.title || '' })),
+    };
+  }
+  async adminOrders(status = 'pending') {
+    let q = this.sb.from('orders').select('*').order('created_at', { ascending: false }).limit(1000);
+    if (status !== 'all') q = q.eq('status', status);
+    const { data, error } = await q; this._err(error);
+    return data;
+  }
+  async confirmOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'paid' }); this._err(error); }
+  async cancelOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'cancelled' }); this._err(error); }
+  async adminCustomers(q = '') {
+    const [users, P] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at')]);
+    const n = norm(q);
+    return users.filter(u => !n || norm((u.email || '') + ' ' + (u.full_name || '')).includes(n)).map(u => {
+      const mine = P.filter(p => p.user_id === u.id);
+      return { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, books: mine.length, spent_cents: mine.reduce((s, p) => s + (p.price_cents || 0), 0),
+        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.is_admin };
+    });
+  }
+  async adminCustomer(id) {
+    const { data: u, error } = await this.sb.from('profiles').select('*').eq('id', id).maybeSingle(); this._err(error);
+    if (!u) throw new Error('Not found.');
+    const [{ data: P }, { data: O }] = await Promise.all([
+      this.sb.from('purchases').select('*, book:books(*)').eq('user_id', id).order('created_at', { ascending: false }),
+      this.sb.from('orders').select('*').eq('user_id', id).order('created_at', { ascending: false }),
+    ]);
+    return {
+      customer: { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, isAdmin: !!u.is_admin },
+      purchases: (P || []).filter(p => p.book).map(p => ({ created_at: p.created_at, price_cents: p.price_cents, currency: p.currency, gift: !!p.gift, book: { ...p.book, cover_url: this._coverUrl(p.book) } })),
+      orders: O || [],
+    };
+  }
+  async grantBook(userId, bookId) {
+    const { data: u } = await this.sb.from('profiles').select('email').eq('id', userId).maybeSingle();
+    const { error } = await this.sb.from('purchases').insert({ user_id: userId, book_id: bookId, price_cents: 0, currency: CONFIG.currency.toLowerCase(), gift: true, customer_email: u?.email || null });
+    if (error && !/duplicate/i.test(error.message)) this._err(error);
+  }
+  async revokeBook(userId, bookId) { const { error } = await this.sb.from('purchases').delete().eq('user_id', userId).eq('book_id', bookId); this._err(error); }
+  async adminReviews() {
+    const [{ data, error }, books, users] = await Promise.all([this.sb.from('reviews').select('*').order('created_at', { ascending: false }).limit(1000), this._loadCatalog(true), this._all('profiles', 'id,email')]);
+    this._err(error);
+    return data.map(r => ({ ...r, book_title: books.find(b => b.id === r.book_id)?.title || '', email: users.find(u => u.id === r.user_id)?.email || '' }));
+  }
+  async deleteReview(id) { const { error } = await this.sb.from('reviews').delete().eq('id', id); this._err(error); this._catalog = null; }
+  async setBookStatus(id, status) { const { error } = await this.sb.from('books').update({ status, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); this._catalog = null; }
+  async exportSales() {
+    const [P, books] = await Promise.all([this._all('purchases', '*', q => q.order('created_at', { ascending: false })), this._loadCatalog(true)]);
+    const rows = [['date', 'customer_email', 'book', 'author', 'amount', 'currency', 'gift']];
+    for (const p of P) { const b = books.find(x => x.id === p.book_id) || {}; rows.push([p.created_at, p.customer_email || '', b.title || '', b.author || '', ((p.price_cents || 0) / 100).toFixed(2).replace('.', ','), (p.currency || CONFIG.currency).toUpperCase(), p.gift ? 'yes' : '']); }
+    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    return { blob: new Blob([csv], { type: 'text/csv;charset=utf-8' }) };
   }
 }
 
@@ -687,7 +790,7 @@ class ServerAPI {
 // ---------------------------------------------------------------------
 export let api = new DemoAPI();
 export async function chooseBackend() {
-  if (CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) { api = new SupabaseAPI(); api.supportsGoogle = true; return api; }
+  if (CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) { api = new SupabaseAPI(); api.supportsGoogle = !!CONFIG.googleLogin; return api; }
   if (location.protocol.startsWith('http')) {
     try {
       const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 5000);

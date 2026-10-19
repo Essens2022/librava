@@ -42,9 +42,9 @@ Deno.serve(async (req) => {
   const orderId = session.metadata?.order_id;
   const { data: order, error } = await admin.from('orders').select('*').eq('id', orderId).maybeSingle();
   if (error || !order) { console.error('order not found', orderId, error); return new Response('order not found', { status: 200 }); }
-  if (order.status === 'paid') return new Response('already processed', { status: 200 });
+  if (order.status !== 'pending') return new Response('already processed', { status: 200 });
 
-  const email = session.customer_details?.email || session.customer_email || null;
+  const email = session.customer_details?.email || session.customer_email || order.email || null;
   const rows = (order.items as { book_id: string; price_cents: number }[]).map((it) => ({
     user_id: order.user_id, book_id: it.book_id, order_id: order.id,
     price_cents: it.price_cents, currency: order.currency, customer_email: email,
@@ -52,6 +52,6 @@ Deno.serve(async (req) => {
   const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
   if (pErr) { console.error(pErr); return new Response('db error', { status: 500 }); } // Stripe will retry
 
-  await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString(), stripe_session_id: session.id }).eq('id', order.id);
+  await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString(), stripe_session_id: session.id, email: email || order.email }).eq('id', order.id).eq('status', 'pending');
   return new Response('ok', { status: 200 });
 });

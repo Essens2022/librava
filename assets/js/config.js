@@ -1,14 +1,16 @@
 // =====================================================================
 //  LIBRAVA — configurare
-//  Lasă supabaseUrl gol ca să rulezi în MODUL DEMO (date în browser).
-//  Completează-le (vezi README.md) ca site-ul să lucreze cu baza de date reală.
+//  Site-ul lucrează cu proiectul Supabase „librava” (baza de date reală).
+//  Aici stau DOAR adrese și cheia PUBLICĂ (făcută să fie văzută în browser; datele sunt
+//  protejate de regulile din baza de date). Parolele și cheile secrete (Stripe sk_..., whsec_...,
+//  service_role) stau numai în Supabase → Edge Functions → Secrets, niciodată în cod.
 // =====================================================================
 export const CONFIG = {
   siteName: 'Librava',
 
   // --- Supabase (Settings → API în proiectul tău Supabase) ---
-  supabaseUrl: '',        // ex: 'https://abcdxyz.supabase.co'
-  supabaseAnonKey: '',    // DOAR cheia publică "anon" / "publishable". Nu pune aici niciodată
+  supabaseUrl: 'https://pgyprsklpewfsqtkljha.supabase.co',        // ex: 'https://abcdxyz.supabase.co'
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBneXByc2tscGV3ZnNxdGtsamhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MjMyMTUsImV4cCI6MjEwNzk5OTIxNX0.n7FHB6BDYJFx_mq-av7wReXykZmSzQw4zrX6q5Dk7uM',    // DOAR cheia publică "anon" / "publishable". Nu pune aici niciodată
                           // cheia service_role sau chei Stripe sk_... (acelea stau doar în Supabase secrets).
 
   // --- Magazin ---
@@ -18,7 +20,7 @@ export const CONFIG = {
   supportEmail: 'contact@librava.store',
 
   // --- Login cu Google (activează providerul în Supabase → Authentication) ---
-  googleLogin: true,
+  googleLogin: false,          // devine true după ce activezi Google în Supabase → Authentication → Providers
 };
 
 export const IS_DEMO = !CONFIG.supabaseUrl || !CONFIG.supabaseAnonKey;

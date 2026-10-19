@@ -64,11 +64,14 @@ create index if not exists books_status_idx on public.books (status, published_a
 -- ---------- orders (comenzi Stripe în așteptare / plătite) ----------
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  items jsonb not null,                 -- [{ "book_id": "...", "price_cents": 499 }]
+  user_id uuid references auth.users(id) on delete set null,
+  reference text unique not null default ('LIB-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 6))),
+  email text,
+  method text not null default 'card' check (method in ('card', 'bank', 'gift')),
+  items jsonb not null,                 -- [{ "book_id": "...", "title": "...", "price_cents": 499 }]
   amount_cents int not null,
   currency text not null default 'eur',
-  status text not null default 'pending' check (status in ('pending', 'paid')),
+  status text not null default 'pending' check (status in ('pending', 'paid', 'cancelled')),
   stripe_session_id text unique,
   created_at timestamptz not null default now(),
   paid_at timestamptz
@@ -77,9 +80,10 @@ create table if not exists public.orders (
 -- ---------- purchases (o carte deținută de un utilizator) ----------
 create table if not exists public.purchases (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
   book_id uuid not null references public.books(id) on delete restrict,
   order_id uuid references public.orders(id),
+  gift boolean not null default false,
   price_cents int not null default 0,
   currency text not null default 'eur',
   customer_email text,
@@ -133,6 +137,15 @@ begin
   update public.books set sales_count = sales_count + 1 where id = new.book_id;
   return null;
 end $$;
+create or replace function public.drop_sales()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  update public.books set sales_count = greatest(sales_count - 1, 0) where id = old.book_id;
+  return null;
+end $$;
+drop trigger if exists purchases_unsales on public.purchases;
+create trigger purchases_unsales after delete on public.purchases
+  for each row execute function public.drop_sales();
 drop trigger if exists purchases_sales on public.purchases;
 create trigger purchases_sales after insert on public.purchases
   for each row execute function public.bump_sales();
@@ -151,6 +164,38 @@ begin
 end $$;
 revoke all on function public.claim_free_book(uuid) from public, anon;
 grant execute on function public.claim_free_book(uuid) to authenticated;
+
+-- ---------- admin: confirm / cancel an order (e.g. when Stripe's message was lost) ----------
+create or replace function public.admin_set_order(p_order uuid, p_status text)
+returns void language plpgsql security definer set search_path = public as $$
+declare o public.orders;
+begin
+  if not public.is_admin() then raise exception 'admin.notAdmin'; end if;
+  select * into o from public.orders where id = p_order for update;
+  if o.id is null or o.status <> 'pending' then raise exception 'Order not pending.'; end if;
+  if p_status = 'paid' then
+    insert into public.purchases (user_id, book_id, order_id, price_cents, currency, customer_email)
+    select o.user_id, (it->>'book_id')::uuid, o.id, (it->>'price_cents')::int, o.currency, o.email
+    from jsonb_array_elements(o.items) it
+    on conflict (user_id, book_id) do nothing;
+    update public.orders set status = 'paid', paid_at = now() where id = o.id;
+  elsif p_status = 'cancelled' then
+    update public.orders set status = 'cancelled' where id = o.id;
+  else raise exception 'bad status'; end if;
+end $$;
+revoke all on function public.admin_set_order(uuid, text) from public, anon;
+grant execute on function public.admin_set_order(uuid, text) to authenticated;
+
+-- ---------- a customer deletes their own account (sales records stay, without the account) ----------
+create or replace function public.delete_my_account()
+returns void language plpgsql security definer set search_path = public, auth as $$
+begin
+  if auth.uid() is null then raise exception 'Not signed in'; end if;
+  if public.is_admin() then raise exception 'The administrator account cannot be deleted here.'; end if;
+  delete from auth.users where id = auth.uid();
+end $$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
 
 -- =====================================================================
 --  Row Level Security
@@ -187,6 +232,10 @@ create policy "orders read own" on public.orders for select using (user_id = aut
 -- purchases: read own; admin reads all (inserts only via claim_free_book or the Stripe webhook)
 drop policy if exists "purchases read" on public.purchases;
 create policy "purchases read" on public.purchases for select using (user_id = auth.uid() or public.is_admin());
+drop policy if exists "purchases admin insert" on public.purchases;
+create policy "purchases admin insert" on public.purchases for insert with check (public.is_admin());
+drop policy if exists "purchases admin delete" on public.purchases;
+create policy "purchases admin delete" on public.purchases for delete using (public.is_admin());
 
 -- reading progress: fully private to each reader
 drop policy if exists "progress own" on public.reading_progress;
@@ -237,4 +286,5 @@ create policy "buyers read book files" on storage.objects for select using (
 --  După ce îți creezi contul pe site, fă-te administrator
 --  (înlocuiește adresa cu emailul tău și rulează doar linia de mai jos):
 -- update public.profiles set is_admin = true where email = 'emailul-tau@exemplu.com';
+-- (nobody can make themselves admin from the site: is_admin is not writable by users)
 -- =====================================================================
