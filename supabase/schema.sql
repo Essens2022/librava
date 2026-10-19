@@ -63,7 +63,9 @@ create table if not exists public.books (
   contributors jsonb not null default '[]',
   rights text not null default 'own' check (rights in ('own', 'public')),
   categories text[] not null default '{}',
-  age_min int, age_max int, adult boolean not null default false, isbn text
+  age_min int, age_max int, adult boolean not null default false, isbn text,
+  aplus jsonb not null default '[]',   -- A+ modules shown on the book page
+  file_check jsonb                     -- result of the manuscript check at upload
 );
 create index if not exists books_status_idx on public.books (status, published_at desc);
 
