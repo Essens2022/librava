@@ -103,3 +103,38 @@ export function safeHTML(src) {
   return walk(doc.body.firstChild);
 }
 export const plainText = s => hasTags(s) ? (new DOMParser().parseFromString(String(s), 'text/html').body.textContent || '') : String(s || '');
+
+// ---- every uploaded image is made light (default max 60 KB) while keeping it sharp:
+// resized to the size the site really shows, saved as WebP (JPEG where the browser can't make WebP),
+// quality lowered step by step only as much as needed.
+export async function compressImage(file, { maxW = 1200, maxH = 1200, maxBytes = 60 * 1024, name = 'image' } = {}) {
+  if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return file;
+  const bmp = await new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = rej; im.src = u; });
+  let scale = Math.min(1, maxW / bmp.naturalWidth, maxH / bmp.naturalHeight);
+  const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+  const encode = (type, q) => new Promise(r => canvas.toBlob(r, type, q));
+  let best = null;
+  for (let round = 0; round < 8; round++) {
+    canvas.width = Math.max(1, Math.round(bmp.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(bmp.naturalHeight * scale));
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    let type = 'image/webp';
+    const probe = await encode(type, 0.9);
+    if (!probe || probe.type !== 'image/webp') type = 'image/jpeg';
+    // highest quality that still fits
+    let lo = 0.5, hi = 0.95, fit = null;
+    for (let i = 0; i < 7; i++) {
+      const q = (lo + hi) / 2, b = await encode(type, q);
+      if (b && b.size <= maxBytes) { fit = b; lo = q; } else hi = q;
+    }
+    if (!fit) { const b = await encode(type, 0.5); if (b && b.size <= maxBytes) fit = b; }
+    if (fit) { best = fit; break; }
+    scale *= 0.85;                       // still too heavy at good quality: make it a bit smaller
+  }
+  if (!best) best = await encode('image/jpeg', 0.6);
+  if (best.size >= file.size && file.size <= maxBytes) return file;   // the original was already light
+  const ext = best.type === 'image/webp' ? 'webp' : 'jpg';
+  const out = new File([best], `${name}.${ext}`, { type: best.type });
+  out.optimized = { from: file.size, to: best.size, w: canvas.width, h: canvas.height };
+  return out;
+}

@@ -1,11 +1,11 @@
-import { CONFIG } from './config.js?v=20261019205252';
-import { t, getLang, setLang } from './i18n.js?v=20261019205252';
-import { esc, $, $$ } from './util.js?v=20261019205252';
-import { api, chooseBackend } from './api.js?v=20261019205252';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019205252';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019205252';
-import { viewReader } from './reader.js?v=20261019205252';
-import { viewAdmin } from './admin.js?v=20261019205252';
+import { CONFIG } from './config.js?v=20261019205759';
+import { t, getLang, setLang } from './i18n.js?v=20261019205759';
+import { esc, $, $$ } from './util.js?v=20261019205759';
+import { api, chooseBackend } from './api.js?v=20261019205759';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019205759';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019205759';
+import { viewReader } from './reader.js?v=20261019205759';
+import { viewAdmin } from './admin.js?v=20261019205759';
 
 let cleanup = null, seq = 0;
 

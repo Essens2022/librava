@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019205252';
-import { getLang } from './i18n.js?v=20261019205252';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019205252';
+import { CONFIG } from './config.js?v=20261019205759';
+import { getLang } from './i18n.js?v=20261019205759';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019205759';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019205252')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019205759')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -558,6 +558,19 @@ class SupabaseAPI {
   async _upload(bucket, path, file) {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
+  }
+  // used by "optimise existing images": swap a book's cover / A+ images for the light versions
+  async replaceCover(book, file) {
+    const p = `${book.id}/cover-${Date.now()}.${fileExt(file.name) || 'webp'}`;
+    await this._upload('covers', p, file);
+    const { error } = await this.sb.from('books').update({ cover_path: p, updated_at: new Date().toISOString() }).eq('id', book.id);
+    this._err(error);
+    if (book.cover_path && book.cover_path !== p) await this.sb.storage.from('covers').remove([book.cover_path]).catch(() => { });
+    this._catalog = null;
+  }
+  async updateAplus(bookId, aplus) {
+    const { error } = await this.sb.from('books').update({ aplus, updated_at: new Date().toISOString() }).eq('id', bookId);
+    this._err(error); this._catalog = null;
   }
   async uploadAplusImage(bookId, file) {
     const ext = fileExt(file.name) || 'jpg';

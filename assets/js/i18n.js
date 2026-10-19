@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261019205252';
-import { store } from './util.js?v=20261019205252';
+import { CONFIG } from './config.js?v=20261019205759';
+import { store } from './util.js?v=20261019205759';
 
 const D = {
   ro: {
@@ -390,6 +390,12 @@ const D = {
     'kdp.lidHelp': 'Cod unic al cărții în magazinul Librava, ca ASIN-ul de la Amazon. Nu e un ISBN: ISBN-urile reale le dă doar agenția națională ISBN (în Italia, ISBN Italia; în România, Biblioteca Națională).',
     'book.share': 'Distribuie cartea',
     'book.linkCopied': 'Linkul cărții a fost copiat.',
+    'img.optimized': 'Imagine optimizată: {from} → {to} ({w} × {h} px)',
+    'img.optHelp': 'Toate imaginile se micșorează automat la maximum 60 KB când le încarci. Pentru cele încărcate înainte:',
+    'img.optBtn': 'Optimizează imaginile existente',
+    'img.working': 'Optimizez… carte {n} din {total}',
+    'img.optDone': 'Gata: {n} imagini optimizate, {kb} KB economisiți.',
+    'img.optNothing': 'Toate imaginile sunt deja ușoare (sub 60 KB).',
     'acc.checkEmail': 'Ți-am trimis un email de confirmare. Deschide linkul din el, apoi intră în cont.',
     'acc.resetSent': 'Dacă adresa există, ți-am trimis un link pentru schimbarea parolei.',
     'acc.enterEmail': 'Scrie adresa de email mai întâi.',
@@ -1017,6 +1023,12 @@ const D = {
     'kdp.lidHelp': 'Codice unico del libro nel negozio Librava, come l\'ASIN di Amazon. Non è un ISBN: gli ISBN veri li rilascia solo l\'agenzia nazionale (in Italia, ISBN Italia).',
     'book.share': 'Condividi il libro',
     'book.linkCopied': 'Link del libro copiato.',
+    'img.optimized': 'Immagine ottimizzata: {from} → {to} ({w} × {h} px)',
+    'img.optHelp': 'Tutte le immagini vengono alleggerite automaticamente a massimo 60 KB al caricamento. Per quelle caricate prima:',
+    'img.optBtn': 'Ottimizza le immagini esistenti',
+    'img.working': 'Ottimizzo… libro {n} di {total}',
+    'img.optDone': 'Fatto: {n} immagini ottimizzate, {kb} KB risparmiati.',
+    'img.optNothing': 'Tutte le immagini sono già leggere (sotto 60 KB).',
     'acc.checkEmail': 'Ti abbiamo inviato un\'email di conferma. Apri il link e poi accedi.',
     'acc.resetSent': 'Se l\'indirizzo esiste, ti abbiamo inviato un link per cambiare la password.',
     'acc.enterEmail': 'Scrivi prima l\'indirizzo email.',
@@ -1644,6 +1656,12 @@ const D = {
     'kdp.lidHelp': 'Unique code of the book in the Librava store, like Amazon\'s ASIN. It is not an ISBN: real ISBNs are issued only by your national ISBN agency.',
     'book.share': 'Share this book',
     'book.linkCopied': 'Book link copied.',
+    'img.optimized': 'Image optimised: {from} → {to} ({w} × {h} px)',
+    'img.optHelp': 'All images are made light automatically (max 60 KB) when uploaded. For the ones uploaded before:',
+    'img.optBtn': 'Optimise existing images',
+    'img.working': 'Optimising… book {n} of {total}',
+    'img.optDone': 'Done: {n} images optimised, {kb} KB saved.',
+    'img.optNothing': 'All images are already light (under 60 KB).',
     'acc.checkEmail': 'We sent you a confirmation email. Open the link in it, then sign in.',
     'acc.resetSent': 'If the address exists, we sent you a password reset link.',
     'acc.enterEmail': 'Type your email address first.',
@@ -1917,7 +1935,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261019205252`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261019205759`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

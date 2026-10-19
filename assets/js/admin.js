@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019205252';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019205252';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText } from './util.js?v=20261019205252';
-import { api } from './api.js?v=20261019205252';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019205252';
+import { CONFIG } from './config.js?v=20261019205759';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019205759';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261019205759';
+import { api } from './api.js?v=20261019205759';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019205759';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -118,7 +118,7 @@ async function booksList(body) {
     return;
   }
   const langs = [...new Set(books.map(b => b.language))];
-  body.innerHTML = `<div class="panel">
+  body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
     <div class="adm-filters">
       <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
       <select class="input" id="adm-st" aria-label="${esc(t('admin.colStatus'))}"><option value="">${esc(t('admin.filter.all'))}</option><option value="published">${esc(t('admin.filter.published'))}</option><option value="draft">${esc(t('admin.filter.draft'))}</option></select>
@@ -141,6 +141,12 @@ async function booksList(body) {
           <button class="btn btn-ghost btn-sm" data-del="${esc(b.id)}" title="${esc(t('admin.delete'))}">${icon('trash', 'ico')}<span class="sr">${esc(t('admin.delete'))}</span></button>
         </td></tr>`).join('')}</tbody>
     </table></div></div>`;
+  $('#b-optimize', body)?.addEventListener('click', async e => {
+    const btn = e.currentTarget; btn.disabled = true;
+    const r = await optimizeExisting(btn);
+    toast(r.done ? t('img.optDone', { n: r.done, kb: Math.round(r.saved / 1024) }) : t('img.optNothing'), { ms: 6000 });
+    booksList(body);
+  });
   const apply = () => {
     const q = norm($('#adm-q', body).value), st = $('#adm-st', body).value, l = $('#adm-lang', body).value, c = $('#adm-cat', body).value;
     $$('[data-row]', body).forEach(r => { r.hidden = (q && !r.dataset.q.includes(q)) || (st && r.dataset.st !== st) || (l && r.dataset.lang !== l) || (c && r.dataset.cat !== c); });
@@ -251,6 +257,7 @@ async function reviews(body) {
 
 // ---------------------------------------------------------------- manuscript check (sizes, readability on phone & tablet)
 const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
+const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(n / 1024) + ' KB';
 async function pdfLib() {
   await loadScript(VENDOR('pdf.min.js'));
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = VENDOR('pdf.worker.min.js');
@@ -373,6 +380,46 @@ async function devicePreview(box, doc) {
     cv.width = vp.width; cv.height = vp.height; cv.style.width = (vp.width / 2) + 'px'; cv.style.height = (vp.height / 2) + 'px';
     await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
   }
+}
+
+// ---------------------------------------------------------------- make the images already uploaded light (max 60 KB)
+async function optimizeExisting(btn) {
+  const fetchFile = async (url, name) => { const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const b = await r.blob(); return new File([b], name, { type: b.type }); };
+  const books = await api.adminBooks();
+  let done = 0, saved = 0, checked = 0;
+  for (const b of books) {
+    btn.textContent = t('img.working', { n: ++checked, total: books.length });
+    try {
+      if (b.cover_url && !/\.svg(\?|$)/i.test(b.cover_url)) {
+        const f = await fetchFile(b.cover_url, 'cover');
+        if (f.size > 60 * 1024) { const light = await compressImage(f, { maxW: 1000, maxH: 1600, name: 'cover' }); if (light.size < f.size) { await api.replaceCover(b, light); saved += f.size - light.size; done++; } }
+      }
+      if ((b.aplus || []).length) {
+        let changed = false;
+        const mods = [];
+        for (const m of b.aplus) {
+          const spec = APLUS[m.type] || {};
+          const imgs = [];
+          for (const im of (m.imgs || [])) {
+            if (!im) { imgs.push(null); continue; }
+            const clean = { ref: im.ref, w: im.w, h: im.h };
+            try {
+              const f = await fetchFile(im.url || im.ref, 'aplus');
+              if (f.size > 60 * 1024) {
+                const big = spec.rec && spec.rec[0] > 1000;
+                const light = await compressImage(f, { maxW: big ? 1600 : (spec.rec?.[0] || 970), maxH: big ? 500 : (spec.rec?.[1] || 600), name: 'aplus' });
+                if (light.size < f.size) { const up = await api.uploadAplusImage(b.id, light); clean.ref = up.ref; changed = true; saved += f.size - light.size; done++; }
+              }
+            } catch { }
+            imgs.push(clean);
+          }
+          mods.push({ ...m, imgs });
+        }
+        if (changed) await api.updateAplus(b.id, mods.map(m => ({ ...m, imgs: m.imgs.map(i => i && { ref: i.ref, w: i.w, h: i.h }) })));
+      }
+    } catch (e) { console.warn('optimize', b.id, e); }
+  }
+  return { done, saved };
 }
 
 // ---------------------------------------------------------------- previewer (like KDP: see the book on phone, tablet and computer before publishing)
@@ -512,7 +559,8 @@ function aplusEditor(root, modules, getBookId) {
       else if (Math.abs(w / h - spec.rec[0] / spec.rec[1]) > 0.15 * (spec.rec[0] / spec.rec[1])) warn = t('ap.ratio', { w, h, rw: spec.rec[0], rh: spec.rec[1] });
       const slot = e.target.closest('[data-img]'); slot.classList.add('busy');
       try {
-        const up = await api.uploadAplusImage(getBookId(), file);
+        const light = await compressImage(file, { maxW: spec.rec[0] > 1000 ? 1600 : spec.rec[0], maxH: spec.rec[0] > 1000 ? 500 : spec.rec[1], name: 'aplus' });
+        const up = await api.uploadAplusImage(getBookId(), light);
         m.imgs = m.imgs || []; m.imgs[k] = { ref: up.ref, url: up.url, w, h, warn };
       } catch (x) { toast(errText(x), { error: true }); }
       draw();
@@ -737,8 +785,15 @@ function bookForm(body, b, startStep = 1) {
     if (!file) return;
     if (kind !== 'cover' && !/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     if (kind === 'cover' && !/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
+    if (kind === 'cover') {
+      const original = file;
+      file = await compressImage(original, { maxW: 1000, maxH: 1600, name: 'cover' });
+      file._original = original;
+    }
     files[kind] = file;
-    $('#n-' + kind, body).textContent = `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
+    $('#n-' + kind, body).textContent = file.optimized
+      ? t('img.optimized', { from: kb(file.optimized.from), to: kb(file.optimized.to), w: file.optimized.w, h: file.optimized.h })
+      : `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
     if (kind === 'file') $('#file-ok', body).hidden = false;
     if (kind === 'cover') {
       const img = $('#cov-prev', body), url = URL.createObjectURL(file);
@@ -750,7 +805,7 @@ function bookForm(body, b, startStep = 1) {
         const r = h / w; if (r < 1.4 || r > 1.75) msgs.push(t('kdp.coverRatio', { w, h }));
         warn.innerHTML = msgs.map(esc).join('<br>'); warn.hidden = !msgs.length;
       };
-      probe.src = url;
+      probe.src = URL.createObjectURL(file._original || file);
     }
     if (kind === 'file') {
       $$('[data-open-preview]', body).forEach(x => x.hidden = false);

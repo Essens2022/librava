@@ -868,3 +868,5 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 @keyframes qa-pop { 50% { transform: scale(1.25); } }
 @media (pointer: coarse) { .quick-add { width: 38px; height: 38px; } }
 .share-btn { margin-top: 8px; }
+.img-opt { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 12px; border-radius: 10px; background: var(--pista-soft); font-size: 14px; }
+.img-opt .ico { width: 18px; height: 18px; vertical-align: -4px; }
