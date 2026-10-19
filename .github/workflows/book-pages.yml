@@ -1,0 +1,30 @@
+# Keeps /book/<id>/ share pages up to date (cover + title in WhatsApp/Facebook link previews).
+name: Book share pages
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: book-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/book-pages.mjs
+      - name: Publish if something changed
+        run: |
+          git add -A book
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update book share pages"
+          git push origin HEAD:main
+          git push origin HEAD:gh-pages

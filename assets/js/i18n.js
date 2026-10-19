@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261019204330';
-import { store } from './util.js?v=20261019204330';
+import { CONFIG } from './config.js?v=20261019205252';
+import { store } from './util.js?v=20261019205252';
 
 const D = {
   ro: {
@@ -132,6 +132,7 @@ const D = {
     'cart.checkout': 'Finalizează comanda',
     'cart.loginToCheckout': 'Intră în cont pentru a finaliza comanda',
     'cart.ownedRemoved': 'Am scos din coș cărțile pe care le ai deja.',
+    'cart.owned': 'Ai deja această carte în bibliotecă.',
     'cart.added': 'Adăugat în coș',
     'cart.digital': 'Livrare digitală instantă',
     'cart.redirecting': 'Te trimitem la plata securizată…',
@@ -387,6 +388,8 @@ const D = {
     'kdp.lidMake': 'Generează cod',
     'kdp.lidNew': 'Generează altul',
     'kdp.lidHelp': 'Cod unic al cărții în magazinul Librava, ca ASIN-ul de la Amazon. Nu e un ISBN: ISBN-urile reale le dă doar agenția națională ISBN (în Italia, ISBN Italia; în România, Biblioteca Națională).',
+    'book.share': 'Distribuie cartea',
+    'book.linkCopied': 'Linkul cărții a fost copiat.',
     'acc.checkEmail': 'Ți-am trimis un email de confirmare. Deschide linkul din el, apoi intră în cont.',
     'acc.resetSent': 'Dacă adresa există, ți-am trimis un link pentru schimbarea parolei.',
     'acc.enterEmail': 'Scrie adresa de email mai întâi.',
@@ -756,6 +759,7 @@ const D = {
     'cart.checkout': 'Procedi all\'ordine',
     'cart.loginToCheckout': 'Accedi per completare l\'ordine',
     'cart.ownedRemoved': 'Abbiamo tolto dal carrello i libri che hai già.',
+    'cart.owned': 'Hai già questo libro nella tua libreria.',
     'cart.added': 'Aggiunto al carrello',
     'cart.digital': 'Consegna digitale immediata',
     'cart.redirecting': 'Ti portiamo al pagamento sicuro…',
@@ -1011,6 +1015,8 @@ const D = {
     'kdp.lidMake': 'Genera codice',
     'kdp.lidNew': 'Generane un altro',
     'kdp.lidHelp': 'Codice unico del libro nel negozio Librava, come l\'ASIN di Amazon. Non è un ISBN: gli ISBN veri li rilascia solo l\'agenzia nazionale (in Italia, ISBN Italia).',
+    'book.share': 'Condividi il libro',
+    'book.linkCopied': 'Link del libro copiato.',
     'acc.checkEmail': 'Ti abbiamo inviato un\'email di conferma. Apri il link e poi accedi.',
     'acc.resetSent': 'Se l\'indirizzo esiste, ti abbiamo inviato un link per cambiare la password.',
     'acc.enterEmail': 'Scrivi prima l\'indirizzo email.',
@@ -1380,6 +1386,7 @@ const D = {
     'cart.checkout': 'Proceed to checkout',
     'cart.loginToCheckout': 'Sign in to check out',
     'cart.ownedRemoved': 'We removed books you already own from your cart.',
+    'cart.owned': 'You already own this book.',
     'cart.added': 'Added to cart',
     'cart.digital': 'Instant digital delivery',
     'cart.redirecting': 'Taking you to secure payment…',
@@ -1635,6 +1642,8 @@ const D = {
     'kdp.lidMake': 'Generate code',
     'kdp.lidNew': 'Generate another',
     'kdp.lidHelp': 'Unique code of the book in the Librava store, like Amazon\'s ASIN. It is not an ISBN: real ISBNs are issued only by your national ISBN agency.',
+    'book.share': 'Share this book',
+    'book.linkCopied': 'Book link copied.',
     'acc.checkEmail': 'We sent you a confirmation email. Open the link in it, then sign in.',
     'acc.resetSent': 'If the address exists, we sent you a password reset link.',
     'acc.enterEmail': 'Type your email address first.',
@@ -1908,7 +1917,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261019204330`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261019205252`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

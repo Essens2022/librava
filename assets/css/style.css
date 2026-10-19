@@ -858,3 +858,13 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .pv-note { font-size: 13px; text-align: center; margin: 10px 0 0; }
 .lid-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .lid-row input { max-width: 220px; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }
+/* “+” quick add on book covers, like Amazon */
+.cover-wrap { position: relative; }
+.quick-add { position: absolute; right: 6px; bottom: 6px; width: 34px; height: 34px; border-radius: 50%; border: 0; display: grid; place-items: center;
+  background: var(--cart-btn); color: #15240f; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.28); z-index: 2; transition: transform .12s, background .15s; }
+.quick-add:hover { background: var(--cart-btn-hover); transform: scale(1.08); }
+.quick-add.in { background: var(--pista-strong); color: #fff; font-size: 17px; }
+.quick-add.pop { animation: qa-pop .35s ease; }
+@keyframes qa-pop { 50% { transform: scale(1.25); } }
+@media (pointer: coarse) { .quick-add { width: 38px; height: 38px; } }
+.share-btn { margin-top: 8px; }

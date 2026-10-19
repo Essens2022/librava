@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261019204330';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019204330';
-import { esc, store, $, $$ } from './util.js?v=20261019204330';
+import { CONFIG } from './config.js?v=20261019205252';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019205252';
+import { esc, store, $, $$ } from './util.js?v=20261019205252';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,7 +12,7 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261019204330';
+import { api } from './api.js?v=20261019205252';
 
 // ---------------- icons ----------------
 const P = {
@@ -51,6 +51,7 @@ const P = {
   shield: '<path d="M12 3l8 3v6c0 4.6-3.3 8.3-8 9-4.7-.7-8-4.4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1-.8-1.4-.8-2.3 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+  share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
 };
 export function icon(name, cls = 'ico') {
@@ -232,9 +233,10 @@ export function ratingHTML(b) {
   if (!b.rating_count) return '';
   return `<div class="rating-line">${stars(b.rating_avg)} <span class="muted">${b.rating_count}</span></div>`;
 }
+const quickAdd = b => `<button type="button" class="quick-add ${cart.has(b.id) ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t('book.addToCart'))}" title="${esc(t('book.addToCart'))}">${cart.has(b.id) ? '✓' : '+'}</button>`;
 export function cardHTML(b) {
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
-    ${coverHTML(b)}
+    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
     <div class="card-title">${esc(b.title)}</div>
     <div class="card-author">${esc(b.author)}</div>
     ${ratingHTML(b)}
@@ -244,7 +246,7 @@ export function cardHTML(b) {
 }
 export function rcardHTML(b) {
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">
-    ${coverHTML(b)}
+    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
     <div class="rinfo">
       <div class="card-title">${esc(b.title)}</div>
       <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
@@ -310,6 +312,16 @@ export function bindGlobal() {
       e.preventDefault();
       go(href);
     });
+  } else {
+    // hash links stay in the same page even when the address bar shows /it/ or /book/<id>/
+    document.addEventListener('click', e => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target.closest('a[href^="#/"]');
+      if (!a || a.target) return;
+      e.preventDefault();
+      const h = a.getAttribute('href');
+      if (location.hash === h) window.dispatchEvent(new Event('librava:navigate')); else location.hash = h;
+    });
   }
   document.addEventListener('submit', e => {
     const f = e.target.closest('[data-search]');
@@ -320,6 +332,19 @@ export function bindGlobal() {
     f.q.blur();
     go('/search?' + p.toString());
   });
+  // the “+” on book covers: add to cart without opening the book
+  document.addEventListener('click', async e => {
+    const qa = e.target.closest('[data-quick-add]');
+    if (qa) {
+      e.preventDefault(); e.stopPropagation();
+      const id = qa.dataset.quickAdd;
+      if (await api.owns(id).catch(() => null)) { toast(t('cart.owned')); return; }
+      if (cart.has(id)) { toast(t('book.inCart')); return; }
+      cart.add(id); toast(t('cart.added'));
+      $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.textContent = '✓'; });
+      return;
+    }
+  }, true);
   document.addEventListener('click', async e => {
     if (e.target.closest('[data-drawer]')) { openDrawer(true); return; }
     if (e.target.closest('#scrim') || e.target.closest('#drawer-close')) { openDrawer(false); return; }

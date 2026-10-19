@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=20261019204330';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019204330';
-import { esc, $, $$, safeHTML, hasTags } from './util.js?v=20261019204330';
-import { api } from './api.js?v=20261019204330';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019204330';
+import { CONFIG } from './config.js?v=20261019205252';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019205252';
+import { esc, $, $$, safeHTML, hasTags } from './util.js?v=20261019205252';
+import { api } from './api.js?v=20261019205252';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019205252';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -219,6 +219,7 @@ export async function viewBook(el, id) {
         <hr>
         <div class="note">${icon('bolt')} <span>${esc(t('book.instant'))}</span></div>
         <div class="note">${icon('devices')} <span>${esc(t('book.readAnywhere'))}</span></div>
+        <button class="btn btn-ghost btn-block share-btn" data-share>${icon('share')} ${esc(t('book.share'))}</button>
       </aside>
     </div>
 
@@ -254,6 +255,14 @@ export async function viewBook(el, id) {
   const desc = $('#desc', el), more = $('#desc-more', el);
   requestAnimationFrame(() => { if (desc.scrollHeight > desc.clientHeight + 4) more.hidden = false; });
   more.onclick = () => { const c = desc.classList.toggle('clamped'); more.textContent = t(c ? 'book.more' : 'book.less'); };
+  // share: the /book/<id>/ address shows the cover, title and price in WhatsApp & co.
+  $('[data-share]', el)?.addEventListener('click', async () => {
+    const url = location.origin + '/book/' + encodeURIComponent(b.id) + '/';
+    try {
+      if (navigator.share) { await navigator.share({ title: b.title, text: b.title + ' — ' + b.author, url }); return; }
+      await navigator.clipboard.writeText(url); toast(t('book.linkCopied'));
+    } catch (e) { if (e?.name !== 'AbortError') { try { await navigator.clipboard.writeText(url); toast(t('book.linkCopied')); } catch { prompt('', url); } } }
+  });
   const jump = $('[data-jump]', el);
   if (jump) jump.onclick = e => { e.preventDefault(); $('#reviews', el).scrollIntoView({ behavior: 'smooth' }); };
 
