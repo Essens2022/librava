@@ -67,6 +67,13 @@ Deno.serve(async (req) => {
     p.set('metadata[order_id]', order.id);
     p.set('metadata[reference]', order.reference);
     p.set('payment_intent_data[metadata][order_id]', order.id);
+    // the payment page shows "Librava" with the shop's colours, even if the Stripe account has another name
+    p.set('branding_settings[display_name]', 'Librava');
+    p.set('branding_settings[button_color]', '#4F7F33');
+    p.set('branding_settings[background_color]', '#FFFFFF');
+    p.set('branding_settings[border_style]', 'rounded');
+    // on the buyer's card statement: "<account prefix>* LIBRAVA"
+    p.set('payment_intent_data[statement_descriptor_suffix]', 'LIBRAVA');
     toBuy.forEach((b, i) => {
       p.set(`line_items[${i}][quantity]`, '1');
       p.set(`line_items[${i}][price_data][currency]`, currency);
@@ -75,12 +82,19 @@ Deno.serve(async (req) => {
       p.set(`line_items[${i}][price_data][product_data][description]`, `eBook · ${b.author}`.slice(0, 250));
     });
 
-    const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    const send = () => fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${STRIPE}`, 'Content-Type': 'application/x-www-form-urlencoded' },
       body: p,
     });
-    const session = await res.json();
+    let res = await send();
+    let session = await res.json();
+    // if this Stripe account's API version doesn't know the branding options, pay without them rather than fail
+    if (!res.ok && /branding_settings|statement_descriptor/.test(String(session?.error?.param || session?.error?.message || ''))) {
+      for (const k of [...p.keys()]) if (k.startsWith('branding_settings') || k.includes('statement_descriptor')) p.delete(k);
+      res = await send();
+      session = await res.json();
+    }
     if (!res.ok) {
       await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
       return json({ error: session?.error?.message || 'Stripe error' }, 502);
