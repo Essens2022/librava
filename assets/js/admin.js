@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019203508';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019203508';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText } from './util.js?v=20261019203508';
-import { api } from './api.js?v=20261019203508';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019203508';
+import { CONFIG } from './config.js?v=20261019204330';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019204330';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText } from './util.js?v=20261019204330';
+import { api } from './api.js?v=20261019204330';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019204330';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -609,7 +609,10 @@ function bookForm(body, b, startStep = 1) {
           <button type="button" class="btn btn-ghost btn-sm" id="b-mksample" ${(v.file_path || v.file_name) && !v.sample_path ? '' : 'hidden'}>${icon('eye')} ${esc(t('kdp.makeSample'))}</button></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.details'))}</h3><p>${esc(t('kdp.detailsHelp'))}</p></div>
         <div class="kdp-fields two"><label class="field"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
-          <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label></div></div>
+          <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label>
+          <div class="field" style="grid-column:1/-1"><span>${esc(t('kdp.lid'))} (${esc(t('kdp.optional'))})</span>
+            <div class="lid-row"><input id="f-lid" class="input" readonly placeholder="—" value="${esc(v.librava_id || '')}"><button type="button" class="btn btn-ghost btn-sm" id="b-lid">${esc(v.librava_id ? t('kdp.lidNew') : t('kdp.lidMake'))}</button><button type="button" class="btn btn-ghost btn-sm" id="b-lid-rm" ${v.librava_id ? '' : 'hidden'}>${esc(t('admin.delete'))}</button></div>
+            <small>${esc(t('kdp.lidHelp'))}</small></div></div></div>
     </section>
 
     <section class="kdp-step" data-pane="3" hidden>
@@ -787,6 +790,10 @@ function bookForm(body, b, startStep = 1) {
     } catch (x) { toast(errText(x), { error: true }); }
     btn.disabled = false;
   });
+  // internal Librava code (like Amazon's ASIN). It is NOT an ISBN: real ISBNs come only from the national ISBN agency.
+  const newLid = () => { const A = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; const r = crypto.getRandomValues(new Uint8Array(7)); return 'LBV' + [...r].map(x => A[x % A.length]).join(''); };
+  $('#b-lid', body).onclick = e => { $('#f-lid', body).value = newLid(); e.currentTarget.textContent = t('kdp.lidNew'); $('#b-lid-rm', body).hidden = false; };
+  $('#b-lid-rm', body).onclick = e => { $('#f-lid', body).value = ''; e.currentTarget.hidden = true; $('#b-lid', body).textContent = t('kdp.lidMake'); };
   $('#b-mksample', body).onclick = async e => {
     const btn = e.currentTarget; btn.disabled = true;
     try {
@@ -812,7 +819,7 @@ function bookForm(body, b, startStep = 1) {
       rights: radio('rights') || 'own', adult: radio('adult') === 'yes',
       age_min: amin === '' ? null : +amin, age_max: amax === '' ? null : +amax,
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
-      pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null,
+      pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
       published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,
       ...(hasAplus ? { aplus: getAplus() } : {}),

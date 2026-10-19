@@ -856,3 +856,5 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .pv-screen.pdf { background: #3a4040; }
 .pv-nav { display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 12px; }
 .pv-note { font-size: 13px; text-align: center; margin: 10px 0 0; }
+.lid-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lid-row input { max-width: 220px; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }

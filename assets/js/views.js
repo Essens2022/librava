@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=20261019203508';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019203508';
-import { esc, $, $$, safeHTML, hasTags } from './util.js?v=20261019203508';
-import { api } from './api.js?v=20261019203508';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019203508';
+import { CONFIG } from './config.js?v=20261019204330';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019204330';
+import { esc, $, $$, safeHTML, hasTags } from './util.js?v=20261019204330';
+import { api } from './api.js?v=20261019204330';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019204330';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -211,6 +211,7 @@ export async function viewBook(el, id) {
           ${b.edition ? `<div><small>${esc(t('book.edition'))}</small><b>${b.edition}</b></div>` : ''}
           ${b.age_min != null || b.age_max != null ? `<div><small>${esc(t('book.age'))}</small><b>${esc(b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 }))}</b></div>` : ''}
           ${b.isbn ? `<div><small>ISBN</small><b>${esc(b.isbn)}</b></div>` : ''}
+          ${b.librava_id ? `<div><small>${esc(t('kdp.lidShort'))}</small><b>${esc(b.librava_id)}</b></div>` : ''}
         </div>
       </div>
       <aside class="buybox">

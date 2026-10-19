@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261019203508';
-import { store } from './util.js?v=20261019203508';
+import { CONFIG } from './config.js?v=20261019204330';
+import { store } from './util.js?v=20261019204330';
 
 const D = {
   ro: {
@@ -382,6 +382,11 @@ const D = {
     'pv.next': 'Înainte',
     'pv.screen': 'Ecranul {n} din {total} (capitol)',
     'pv.note': 'Așa vor vedea cititorii cartea pe fiecare dispozitiv. Răsfoiește cu săgețile sau cu tastele ← →. Clienții pot mări textul și schimba tema în cititor.',
+    'kdp.lid': 'Cod intern Librava',
+    'kdp.lidShort': 'Cod Librava',
+    'kdp.lidMake': 'Generează cod',
+    'kdp.lidNew': 'Generează altul',
+    'kdp.lidHelp': 'Cod unic al cărții în magazinul Librava, ca ASIN-ul de la Amazon. Nu e un ISBN: ISBN-urile reale le dă doar agenția națională ISBN (în Italia, ISBN Italia; în România, Biblioteca Națională).',
     'acc.checkEmail': 'Ți-am trimis un email de confirmare. Deschide linkul din el, apoi intră în cont.',
     'acc.resetSent': 'Dacă adresa există, ți-am trimis un link pentru schimbarea parolei.',
     'acc.enterEmail': 'Scrie adresa de email mai întâi.',
@@ -1001,6 +1006,11 @@ const D = {
     'pv.next': 'Avanti',
     'pv.screen': 'Schermata {n} di {total} (capitolo)',
     'pv.note': 'Così i lettori vedranno il libro su ogni dispositivo. Sfoglia con le frecce o con i tasti ← →.',
+    'kdp.lid': 'Codice interno Librava',
+    'kdp.lidShort': 'Codice Librava',
+    'kdp.lidMake': 'Genera codice',
+    'kdp.lidNew': 'Generane un altro',
+    'kdp.lidHelp': 'Codice unico del libro nel negozio Librava, come l\'ASIN di Amazon. Non è un ISBN: gli ISBN veri li rilascia solo l\'agenzia nazionale (in Italia, ISBN Italia).',
     'acc.checkEmail': 'Ti abbiamo inviato un\'email di conferma. Apri il link e poi accedi.',
     'acc.resetSent': 'Se l\'indirizzo esiste, ti abbiamo inviato un link per cambiare la password.',
     'acc.enterEmail': 'Scrivi prima l\'indirizzo email.',
@@ -1620,6 +1630,11 @@ const D = {
     'pv.next': 'Next',
     'pv.screen': 'Screen {n} of {total} (chapter)',
     'pv.note': 'This is how readers will see the book on each device. Page through with the arrows or the ← → keys.',
+    'kdp.lid': 'Librava internal code',
+    'kdp.lidShort': 'Librava code',
+    'kdp.lidMake': 'Generate code',
+    'kdp.lidNew': 'Generate another',
+    'kdp.lidHelp': 'Unique code of the book in the Librava store, like Amazon\'s ASIN. It is not an ISBN: real ISBNs are issued only by your national ISBN agency.',
     'acc.checkEmail': 'We sent you a confirmation email. Open the link in it, then sign in.',
     'acc.resetSent': 'If the address exists, we sent you a password reset link.',
     'acc.enterEmail': 'Type your email address first.',
@@ -1893,7 +1908,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261019203508`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261019204330`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

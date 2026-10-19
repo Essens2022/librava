@@ -65,7 +65,8 @@ create table if not exists public.books (
   categories text[] not null default '{}',
   age_min int, age_max int, adult boolean not null default false, isbn text,
   aplus jsonb not null default '[]',   -- A+ modules shown on the book page
-  file_check jsonb                     -- result of the manuscript check at upload
+  file_check jsonb,                    -- result of the manuscript check at upload
+  librava_id text                      -- internal book code (like an ASIN), unique
 );
 create index if not exists books_status_idx on public.books (status, published_at desc);
 
