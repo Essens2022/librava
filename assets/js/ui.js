@@ -1,6 +1,17 @@
 import { CONFIG } from './config.js';
 import { t, money, getLang, setLang, LANGS } from './i18n.js';
 import { esc, store, $, $$ } from './util.js';
+
+// ---------------- theme: light by default, the visitor can switch ----------------
+export const THEMES = ['light', 'dark', 'auto'];
+export function getTheme() { const v = store.get('theme'); return THEMES.includes(v) ? v : 'light'; }
+export function applyTheme(v = getTheme()) {
+  const root = document.documentElement;
+  if (v === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', v);
+  const dark = v === 'dark' || (v === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
+}
+const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
 import { api } from './api.js';
 
 // ---------------- icons ----------------
@@ -127,6 +138,8 @@ export function renderChrome() {
       ${u?.isAdmin ? `<a href="#/admin">${esc(t('nav.admin'))} ${icon('gear')}</a>` : ''}
       <a href="#/help">${esc(t('nav.help'))} ${icon('help')}</a>
       <hr>
+      <h3>${esc(t('nav.theme'))}</h3>
+      ${themePills()}
       <h3>${esc(t('nav.language'))}</h3>
       <div class="lang-pills">${LANGS.map(l => `<button class="pill ${l === getLang() ? 'on' : ''}" data-lang="${l}">${esc(t('lang.' + l))}</button>`).join('')}</div>
       ${u ? `<hr><button class="dlink" data-signout>${esc(t('acc.signOut'))} ${icon('logout')}</button>` : ''}
@@ -144,6 +157,7 @@ export function renderChrome() {
       </div>
       <div class="foot-bottom">
         <div class="lang-pills">${LANGS.map(l => `<button class="pill ${l === getLang() ? 'on' : ''}" data-lang="${l}">${icon('globe', 'ico sr-hide')} ${esc(t('lang.' + l))}</button>`).join('')}</div>
+        ${themePills()}
         <a class="logo" href="#/">${logoHTML()}</a>
         <span>${esc(t('foot.rights', { year, site: CONFIG.siteName }))}</span>
       </div>
@@ -251,6 +265,8 @@ export function bindGlobal() {
     if (e.target.closest('[data-drawer]')) { openDrawer(true); return; }
     if (e.target.closest('#scrim') || e.target.closest('#drawer-close')) { openDrawer(false); return; }
     if (e.target.closest('#drawer a')) openDrawer(false);
+    const tb = e.target.closest('[data-theme-set]');
+    if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); return; }
     const lb = e.target.closest('[data-lang]');
     if (lb) { setLang(lb.dataset.lang); openDrawer(false); window.dispatchEvent(new Event('librava:rerender')); return; }
     if (e.target.closest('[data-top]')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }

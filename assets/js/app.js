@@ -2,7 +2,7 @@ import { CONFIG, IS_DEMO } from './config.js';
 import { t, getLang, setLang } from './i18n.js';
 import { esc, $, $$ } from './util.js';
 import { api } from './api.js';
-import { renderChrome, bindGlobal, icon, openDrawer } from './ui.js';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme } from './ui.js';
 import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js';
 import { viewReader } from './reader.js';
 import { viewAdmin } from './admin.js';
@@ -55,6 +55,7 @@ function rerender() { renderChrome(); route(); }
 
 async function boot() {
   setLang(getLang());
+  applyTheme();
   if (IS_DEMO) {
     const b = document.createElement('div');
     b.id = 'demo-bar'; b.className = 'demo-bar'; b.textContent = t('common.demoBanner');
