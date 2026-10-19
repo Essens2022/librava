@@ -1,0 +1,42 @@
+# =====================================================================
+#  LIBRAVA — Apache rules for Hostinger (public_html)
+# =====================================================================
+Options -Indexes
+DirectoryIndex index.html
+RewriteEngine On
+
+# always HTTPS, without www
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+# private files are never served
+RewriteRule ^(server|supabase|\.git|\.github)(/|$) - [F,L]
+RewriteRule ^(README\.md|HOSTINGER\.md|CNAME|\.gitignore|\.htaccess)$ - [F,L]
+
+# API
+RewriteRule ^api(/.*)?$ api/index.php [L,QSA]
+
+# real files and folders are served as they are
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# every other address (/book/…, /library, /account…) opens the shop
+RewriteRule ^ index.html [L]
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # always check for a new version of the site (updates appear immediately)
+  <FilesMatch "\.(html|js|css|webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(png|jpg|svg|webp|woff2)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>

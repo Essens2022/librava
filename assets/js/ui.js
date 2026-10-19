@@ -87,11 +87,25 @@ export const cart = {
 export function updateCartCount() { $$('.cart-count').forEach(el => el.textContent = cart.get().length); }
 
 // ---------------- navigation ----------------
+// Two address styles: "#/book/x" (static hosting, e.g. GitHub Pages) or clean "/book/x" (own server).
+export let pathMode = false;
+export function setPathMode(v) { pathMode = !!v; }
+export function currentPath() { return pathMode ? location.pathname + location.search : (location.hash.slice(1) || '/'); }
 export function go(path) {
+  if (pathMode) {
+    if (location.pathname + location.search !== path) history.pushState(null, '', path);
+    window.dispatchEvent(new Event('librava:navigate'));
+    return;
+  }
   if (location.hash === '#' + path) window.dispatchEvent(new HashChangeEvent('hashchange'));
   else location.hash = path;
 }
-export function link(path) { return '#' + path; }
+export function link(path) { return pathMode ? path : '#' + path; }
+// in clean-address mode every "#/x" link printed by the views becomes "/x"
+export function fixLinks(root = document) {
+  if (!pathMode) return;
+  root.querySelectorAll('a[href^="#/"]').forEach(a => a.setAttribute('href', a.getAttribute('href').slice(1) || '/'));
+}
 
 // ---------------- header / drawer / footer ----------------
 export function renderChrome() {
@@ -264,6 +278,22 @@ export function errText(e) {
 }
 
 export function bindGlobal() {
+  if (pathMode) {
+    fixLinks();
+    let pending = false;
+    new MutationObserver(() => { if (pending) return; pending = true; queueMicrotask(() => { pending = false; fixLinks(); }); })
+      .observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('click', e => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      let a = e.target.closest('a[href]');
+      if (!a || a.target || a.hasAttribute('download')) return;
+      let href = a.getAttribute('href');
+      if (href.startsWith('#/')) href = href.slice(1) || '/';
+      if (!href.startsWith('/') || href.startsWith('//') || href.startsWith('/api/')) return;
+      e.preventDefault();
+      go(href);
+    });
+  }
   document.addEventListener('submit', e => {
     const f = e.target.closest('[data-search]');
     if (!f) return;

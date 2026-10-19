@@ -553,3 +553,77 @@ body.reading::before { background: var(--rd-bg, #F7F6F1); }
 /* last guard: the page itself never pans sideways (carousels and tables still scroll inside their own box) */
 html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .adm-table { min-width: 0; }
+
+/* bank transfer instructions */
+.bank-card { gap: 10px; }
+.bank-row { display: grid; grid-template-columns: minmax(0, 120px) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; }
+.bank-val { word-break: break-all; font-variant-numeric: tabular-nums; }
+@media (max-width: 420px) { .bank-row { grid-template-columns: minmax(0, 1fr) auto; } .bank-row > .muted { grid-column: 1 / -1; } }
+.pending-order { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.pending-order:last-child { border-bottom: 0; }
+.danger-zone { border: 1px solid color-mix(in srgb, var(--deal) 40%, transparent); }
+
+/* ---------------- admin panel ---------------- */
+.adm-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.adm-head h1 { font-size: 26px; }
+.adm-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; text-decoration: none; }
+.adm-tabs a:hover { color: var(--fg); text-decoration: none; }
+.adm-tabs a.on { color: var(--fg); border-bottom-color: var(--pista-strong); }
+.adm-tabs .ico { width: 17px; height: 17px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.kpi small { display: block; color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+.kpi b { font-size: 24px; font-variant-numeric: tabular-nums; }
+.kpis-sm .kpi b { font-size: 20px; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi b { font-size: 19px; } }
+.alert-pending { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border: 2px solid var(--amber); color: var(--fg); flex-wrap: wrap; }
+.alert-pending:hover { text-decoration: none; background: var(--surface-2); }
+.alert-pending > .ico { color: var(--amber-hover); }
+.alert-pending span { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--link); font-weight: 600; }
+.alert-pending span .ico { width: 16px; height: 16px; }
+.chart-panel { margin-bottom: 12px; }
+.chart-wrap { position: relative; margin-top: 10px; overflow-x: auto; }
+.rev-chart { width: 100%; min-width: 480px; height: auto; display: block; }
+.rev-chart .grid line { stroke: var(--line); stroke-width: 1; }
+.rev-chart text { fill: var(--muted); font-size: 11px; font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
+.rev-chart .hit { fill: transparent; }
+.rev-chart .mark { fill: var(--pista-strong); }
+.rev-chart .bar.on .hit { fill: color-mix(in srgb, var(--pista) 14%, transparent); }
+.rev-chart .bar:focus { outline: none; }
+.rev-chart .bar:focus-visible .hit { stroke: var(--focus); stroke-width: 2; }
+.chart-tip { position: absolute; background: var(--hdr); color: var(--hdr-fg); font-size: 12px; padding: 6px 10px; border-radius: 8px; pointer-events: none; white-space: nowrap; box-shadow: var(--shadow); }
+.adm-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 12px; }
+@media (max-width: 800px) { .adm-two { grid-template-columns: minmax(0, 1fr); } }
+.adm-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--fg); font-size: 14px; }
+.adm-line:last-child { border-bottom: 0; }
+a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
+.adm-line > span { display: flex; flex-direction: column; min-width: 0; }
+.adm-line > span.adm-book { flex-direction: row; min-width: 0; }
+.adm-line .adm-book > span { display: flex; flex-direction: column; min-width: 0; }
+.adm-line small { font-size: 12px; }
+.adm-line .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.export-box { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.export-box p { margin: 4px 0 0; font-size: 13px; }
+.export-box .ico { width: 18px; height: 18px; transform: rotate(180deg); }
+.adm-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.adm-filters .input { width: auto; flex: 1 1 160px; min-width: 0; padding: 8px 10px; }
+.adm-filters #adm-q, .adm-filters #cu-q { flex: 2 1 240px; }
+.status-btn { border: 0; cursor: pointer; }
+.status-btn:hover { filter: brightness(.95); }
+.row-actions { white-space: nowrap; text-align: right; }
+.row-actions .ico { width: 17px; height: 17px; }
+.seg-tabs { display: inline-flex; gap: 4px; background: var(--surface); padding: 4px; border-radius: 999px; box-shadow: var(--shadow); margin-bottom: 12px; flex-wrap: wrap; }
+.seg-tabs a { padding: 7px 14px; border-radius: 999px; color: var(--muted); font-weight: 600; font-size: 14px; }
+.seg-tabs a:hover { text-decoration: none; color: var(--fg); }
+.seg-tabs a.on { background: var(--hdr); color: var(--hdr-fg); }
+.click-row { cursor: pointer; }
+.click-row:hover td { background: var(--surface-2); }
+.back-link { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 10px; font-weight: 600; }
+.back-link .ico { width: 16px; height: 16px; }
+.adm-review .btn .ico { width: 15px; height: 15px; }
+
+/* coming soon (live site before the server is connected) */
+.soon { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(circle at 30% 20%, var(--pista-soft), transparent 60%), var(--bg); }
+.soon-card { max-width: 520px; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 40px 28px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+.soon-logo { font-family: 'Literata', serif; font-weight: 700; font-size: 34px; color: var(--pista-strong); margin-bottom: 12px; }
+.soon-card h1 { font-size: 24px; margin: 0 0 10px; }
+.soon-card p { color: var(--muted); margin: 0 0 22px; line-height: 1.55; }

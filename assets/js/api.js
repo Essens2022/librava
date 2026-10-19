@@ -3,9 +3,12 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG, IS_DEMO } from './config.js';
+import { CONFIG } from './config.js';
+import { getLang } from './i18n.js';
 import { store, uid, blobs, norm, loadScript } from './util.js';
-import { DEMO_BOOKS } from './demo-data.js';
+// Demo mode exists only for local development (localhost). The live site never loads fake books.
+export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+let DEMO_BOOKS = [];
 
 
 // ---------- shared catalog filtering / sorting ----------
@@ -68,6 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -221,7 +225,8 @@ class DemoAPI {
   // ---- reviews ----
   _allReviews() {
     const seeded = DEMO_BOOKS.flatMap(b => (b.seed_reviews || []).map((r, i) => ({ id: `seed_${b.id}_${i}`, book_id: b.id, user_id: null, ...r, created_at: b.published_at, verified: true })));
-    return [...seeded, ...store.get('demo:reviews', [])];
+    const hidden = store.get('demo:hiddenReviews', []);
+    return [...seeded, ...store.get('demo:reviews', [])].filter(r => !hidden.includes(r.id));
   }
   async listReviews(bookId) { return this._allReviews().filter(r => r.book_id === bookId).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))); }
   async addReview(bookId, rating, body) {
@@ -234,7 +239,12 @@ class DemoAPI {
   async myReview(bookId) { return store.get('demo:reviews', []).find(r => r.book_id === bookId && r.user_id === this._user?.id) || null; }
 
   // ---- admin ----
-  async adminBooks() { await this._loadCatalog(); return filterBooks(this._catalog.filter(b => !b.deleted_at), { includeDrafts: true, sort: 'newest' }); }
+  async adminBooks() {
+    await this._loadCatalog();
+    const P = store.get('demo:purchases', []);
+    return filterBooks(this._catalog.filter(b => !b.deleted_at), { includeDrafts: true, sort: 'newest' })
+      .map(b => ({ ...b, revenue_cents: P.filter(p => p.book_id === b.id).reduce((s, p) => s + (p.price_cents || 0), 0) }));
+  }
   async saveBook(data, files = {}) {
     const custom = store.get('demo:books', { added: [], overrides: {}, deleted: [] });
     const id = data.id || uid('bk_');
@@ -270,6 +280,82 @@ class DemoAPI {
     if (!this._catalog) await this._loadCatalog();
     const all = store.get('demo:purchases', []);
     return all.map(p => ({ ...p, book: this._catalog.find(b => b.id === p.book_id) }));
+  }
+
+  // ---- full admin panel (demo: computed from what is saved in this browser) ----
+  _users() { return store.get('demo:users', []); }
+  async adminOverview() {
+    if (!this._catalog) await this._loadCatalog();
+    const P = store.get('demo:purchases', []), users = this._users();
+    const day = d => new Date(d).toISOString().slice(0, 10);
+    const today = new Date(); today.setUTCHours(0, 0, 0, 0);
+    const since = n => P.filter(p => new Date(p.created_at) >= new Date(today - (n - 1) * 864e5));
+    const sum = list => list.reduce((s, p) => s + (p.price_cents || 0), 0);
+    const daily = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today - i * 864e5).toISOString().slice(0, 10);
+      const l = P.filter(p => day(p.created_at) === d);
+      daily.push({ date: d, revenue_cents: sum(l), count: l.length });
+    }
+    const by = {};
+    for (const p of P) { by[p.book_id] = by[p.book_id] || { n: 0, sum: 0 }; by[p.book_id].n++; by[p.book_id].sum += p.price_cents || 0; }
+    const top = Object.entries(by).map(([id, v]) => ({ book: this._catalog.find(b => b.id === id), ...v })).filter(x => x.book).sort((a, b) => b.sum - a.sum || b.n - a.n).slice(0, 5);
+    const books = this._catalog.filter(b => !b.deleted_at);
+    return {
+      revenue: { today: sum(since(1)), d7: sum(since(7)), d30: sum(since(30)), all: sum(P) },
+      counts: { sold: P.filter(p => p.price_cents > 0).length, free: P.filter(p => !p.price_cents).length, pending: 0, customers: users.length,
+        new_customers_30: users.filter(u => new Date(u.createdAt) >= new Date(today - 29 * 864e5)).length, books: books.length, published: books.filter(b => b.status === 'published').length },
+      currency: CONFIG.currency, daily, top,
+      recent: P.slice().sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 8)
+        .map(p => ({ ...p, email: p.customer_email, title: this._catalog.find(b => b.id === p.book_id)?.title || '', book_id: p.book_id })),
+    };
+  }
+  async adminOrders(status = 'pending') {
+    if (status === 'pending' || status === 'cancelled') return [];
+    if (!this._catalog) await this._loadCatalog();
+    return store.get('demo:purchases', []).filter(p => p.price_cents > 0).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+      .map(p => ({ id: p.id, reference: 'DEMO-' + String(p.id).slice(-6).toUpperCase(), amount_cents: p.price_cents, currency: p.currency || CONFIG.currency, method: 'demo', status: 'paid',
+        created_at: p.created_at, email: p.customer_email, items: [{ book_id: p.book_id, title: this._catalog.find(b => b.id === p.book_id)?.title || '', price_cents: p.price_cents }] }));
+  }
+  async adminCustomers(q = '') {
+    const P = store.get('demo:purchases', []), n = norm(q);
+    return this._users().filter(u => !n || norm(u.email + ' ' + u.name).includes(n)).map(u => {
+      const mine = P.filter(p => p.user_id === u.id);
+      return { id: u.id, email: u.email, name: u.name, created_at: u.createdAt, books: mine.length, spent_cents: mine.reduce((s, p) => s + (p.price_cents || 0), 0),
+        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.isAdmin };
+    }).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  }
+  async adminCustomer(id) {
+    if (!this._catalog) await this._loadCatalog();
+    const u = this._users().find(x => x.id === id);
+    if (!u) throw new Error('Not found.');
+    const purchases = store.get('demo:purchases', []).filter(p => p.user_id === id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+      .map(p => { const book = this._catalog.find(b => b.id === p.book_id); return book && { created_at: p.created_at, price_cents: p.price_cents, currency: p.currency, gift: !!p.gift, book }; }).filter(Boolean);
+    return { customer: { id: u.id, email: u.email, name: u.name, created_at: u.createdAt, isAdmin: !!u.isAdmin }, purchases, orders: [] };
+  }
+  async grantBook(userId, bookId) {
+    const all = store.get('demo:purchases', []); const u = this._users().find(x => x.id === userId);
+    if (!all.some(p => p.user_id === userId && p.book_id === bookId)) all.push({ id: uid('p_'), user_id: userId, book_id: bookId, price_cents: 0, currency: CONFIG.currency, created_at: new Date().toISOString(), customer_email: u?.email, gift: true });
+    store.set('demo:purchases', all); await this._loadCatalog();
+  }
+  async revokeBook(userId, bookId) { store.set('demo:purchases', store.get('demo:purchases', []).filter(p => !(p.user_id === userId && p.book_id === bookId))); await this._loadCatalog(); }
+  async adminReviews() {
+    if (!this._catalog) await this._loadCatalog();
+    const users = this._users();
+    return this._allReviews().sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).map(r => ({ ...r, book_title: this._catalog.find(b => b.id === r.book_id)?.title || '', email: users.find(u => u.id === r.user_id)?.email || '' }));
+  }
+  async deleteReview(id) {
+    store.set('demo:reviews', store.get('demo:reviews', []).filter(r => r.id !== id));
+    const hidden = store.get('demo:hiddenReviews', []); if (!hidden.includes(id)) hidden.push(id); store.set('demo:hiddenReviews', hidden);
+    await this._loadCatalog();
+  }
+  async setBookStatus(id, status) { await this.saveBook({ id, status }); }
+  async exportSales() {
+    if (!this._catalog) await this._loadCatalog();
+    const rows = [['date', 'customer_email', 'book', 'author', 'amount', 'currency']];
+    for (const p of store.get('demo:purchases', [])) { const b = this._catalog.find(x => x.id === p.book_id) || {}; rows.push([p.created_at, p.customer_email || '', b.title || '', b.author || '', ((p.price_cents || 0) / 100).toFixed(2).replace('.', ','), p.currency || CONFIG.currency]); }
+    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    return { blob: new Blob([csv], { type: 'text/csv;charset=utf-8' }) };
   }
 }
 
@@ -475,4 +561,142 @@ class SupabaseAPI {
   }
 }
 
-export const api = IS_DEMO ? new DemoAPI() : new SupabaseAPI();
+// =====================================================================
+//  OWN SERVER (PHP + MySQL on Hostinger) — used automatically when /api answers
+// =====================================================================
+class ServerAPI {
+  constructor(health) {
+    this.listeners = []; this._user = null; this._catalog = null; this._lib = null;
+    this.isDemo = false; this.isServer = true; this.supportsGoogle = false;
+    this.payments = (health && health.payments) || { bank: false, card: false };
+  }
+  async _call(method, path, body, form) {
+    const opt = { method, credentials: 'same-origin', headers: { 'X-Librava': '1', 'X-Librava-Lang': getLang() } };
+    if (form) opt.body = form;
+    else if (body !== undefined) { opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+    let r;
+    try { r = await fetch('/api' + path, opt); } catch { throw new Error('reader.error'); }
+    let j = {};
+    try { j = await r.json(); } catch { }
+    if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    return j;
+  }
+  _set(u) { const before = this._user?.id; this._user = u || null; this._lib = null; if (before !== this._user?.id) this.listeners.forEach(cb => cb(this._user)); }
+
+  async init() { const r = await this._call('GET', '/auth/me'); this._user = r.user; }
+  user() { return this._user; }
+  onAuthChange(cb) { this.listeners.push(cb); }
+
+  async signUp({ email, password, name }) { const r = await this._call('POST', '/auth/register', { email, password, name }); this._set(r.user); return {}; }
+  async signIn({ email, password }) { const r = await this._call('POST', '/auth/login', { email, password }); this._set(r.user); }
+  async signInGoogle() { throw new Error('Google login is not available.'); }
+  async signOut() { await this._call('POST', '/auth/logout').catch(() => { }); this._set(null); }
+  async resetPassword(email) { await this._call('POST', '/auth/forgot', { email }); }
+  async resetWithToken(token, password) { const r = await this._call('POST', '/auth/reset', { token, password }); this._set(r.user); }
+  async updateProfile({ name }) { const r = await this._call('POST', '/profile', { name }); this._user = r.user; this.listeners.forEach(cb => cb(this._user)); }
+  hasPassword() { return true; }
+  async changePassword(current, next) {
+    if (next.length < 6) throw new Error('acc.err.short');
+    await this._call('POST', '/auth/password', { current, next });
+  }
+  async deleteAccount(password) { await this._call('POST', '/auth/delete', { password }); this._set(null); }
+
+  // ---- catalog ----
+  async _loadCatalog() { this._catalog = (await this._call('GET', '/books')).books; return this._catalog; }
+  async listBooks(o = {}) { if (!this._catalog) await this._loadCatalog(); return filterBooks(this._catalog, o); }
+  async getBook(id) {
+    if (this._catalog) { const b = this._catalog.find(x => x.id === id); if (b) return b; }
+    try { return (await this._call('GET', '/books/' + encodeURIComponent(id))).book; } catch { return null; }
+  }
+
+  // ---- library ----
+  async _loadLib() { if (!this._user) return []; this._lib = (await this._call('GET', '/library')).items; return this._lib; }
+  async library() { return this._user ? await this._loadLib() : []; }
+  async owns(bookId) {
+    if (!this._user) return null;
+    if (!this._lib) await this._loadLib();
+    const x = this._lib.find(i => i.book.id === bookId);
+    return x ? x.purchase : null;
+  }
+  async orders() { const l = this._user ? await this._loadLib() : []; return l.map(x => ({ ...x.purchase, book: x.book })); }
+  async pendingOrders() { return this._user ? (await this._call('GET', '/orders')).orders : []; }
+  async claimFree(bookId) { await this._call('POST', '/claim/' + encodeURIComponent(bookId)); this._lib = null; }
+  async checkout(bookIds, method) {
+    const r = await this._call('POST', '/checkout', { book_ids: bookIds, method: method || '' });
+    this._lib = null; this._catalog = null;
+    return r;
+  }
+
+  // ---- reading ----
+  async getReadSource(book, { preview } = {}) {
+    const owned = await this.owns(book.id);
+    if (owned || this._user?.isAdmin) return { url: '/api/read/' + encodeURIComponent(book.id), kind: book.format, limited: false };
+    if (preview && book.sample_path) return { url: book.sample_path, kind: book.sample_kind || 'pdf', limited: false };
+    throw new Error('not-owned');
+  }
+  async getProgress(bookId) {
+    if (!this._user) return store.get('guestprog:' + bookId, null);
+    return (await this._call('GET', '/progress/' + encodeURIComponent(bookId))).progress;
+  }
+  async saveProgress(bookId, d) {
+    if (!this._user) { store.set('guestprog:' + bookId, d); return; }
+    const body = {}; for (const k of ['location', 'percent', 'page', 'bookmarks']) if (k in d) body[k] = d[k];
+    await this._call('POST', '/progress/' + encodeURIComponent(bookId), body);
+  }
+
+  // ---- reviews ----
+  async listReviews(bookId) { return (await this._call('GET', '/reviews/' + encodeURIComponent(bookId))).reviews; }
+  async addReview(bookId, rating, body) { await this._call('POST', '/reviews/' + encodeURIComponent(bookId), { rating, body }); this._catalog = null; }
+  async myReview(bookId) {
+    if (!this._user) return null;
+    return (await this.listReviews(bookId)).find(r => r.user_id === this._user.id) || null;
+  }
+
+  // ---- admin ----
+  async adminBooks() { return filterBooks((await this._call('GET', '/admin/books')).books, { includeDrafts: true, sort: 'newest' }); }
+  async saveBook(data, files = {}) {
+    const f = new FormData();
+    const clean = { ...data }; delete clean.cover_url; delete clean.sample_path; delete clean.rating_avg; delete clean.rating_count; delete clean.sales_count;
+    f.append('data', JSON.stringify(clean));
+    if (files.cover) f.append('cover', files.cover);
+    if (files.file) f.append('file', files.file);
+    if (files.sample) f.append('sample', files.sample);
+    const r = await this._call('POST', '/admin/books', undefined, f);
+    this._catalog = null;
+    return r.id;
+  }
+  async deleteBook(id) { await this._call('POST', '/admin/books/' + encodeURIComponent(id) + '/delete'); this._catalog = null; }
+  async salesStats() { return (await this._call('GET', '/admin/sales')).sales; }
+  async adminOrders(status = 'pending') { return (await this._call('GET', '/admin/orders?status=' + encodeURIComponent(status))).orders; }
+  async adminOverview() { return await this._call('GET', '/admin/overview'); }
+  async adminCustomers(q = '') { return (await this._call('GET', '/admin/customers?q=' + encodeURIComponent(q))).customers; }
+  async adminCustomer(id) { return await this._call('GET', '/admin/customers/' + encodeURIComponent(id)); }
+  async grantBook(userId, bookId) { await this._call('POST', '/admin/customers/' + userId + '/grant', { book_id: bookId }); }
+  async revokeBook(userId, bookId) { await this._call('POST', '/admin/customers/' + userId + '/revoke', { book_id: bookId }); }
+  async adminReviews() { return (await this._call('GET', '/admin/reviews')).reviews; }
+  async deleteReview(id) { await this._call('POST', '/admin/reviews/' + id + '/delete'); this._catalog = null; }
+  async setBookStatus(id, status) { await this._call('POST', '/admin/books/' + encodeURIComponent(id) + '/status', { status }); this._catalog = null; }
+  async exportSales() { return { url: '/api/admin/export/sales.csv' }; }
+  async confirmOrder(id) { await this._call('POST', '/admin/orders/' + id + '/paid'); }
+  async cancelOrder(id) { await this._call('POST', '/admin/orders/' + id + '/cancel'); }
+}
+
+// ---------------------------------------------------------------------
+//  Which backend? Supabase if configured, otherwise our own server if
+//  /api answers (Hostinger), otherwise the in-browser demo (GitHub Pages).
+// ---------------------------------------------------------------------
+export let api = new DemoAPI();
+export async function chooseBackend() {
+  if (CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) { api = new SupabaseAPI(); api.supportsGoogle = true; return api; }
+  if (location.protocol.startsWith('http')) {
+    try {
+      const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 5000);
+      const r = await fetch('/api/health', { headers: { 'X-Librava': '1' }, signal: ctl.signal, cache: 'no-store' });
+      clearTimeout(tm);
+      const ct = r.headers.get('content-type') || '';
+      if (r.ok && ct.includes('json')) { const h = await r.json(); if (h.ok) { api = new ServerAPI(h); return api; } }
+    } catch { }
+  }
+  if (!DEMO_ALLOWED) { api = null; return null; }   // live site without a server: no fake store
+  return api;
+}

@@ -15,7 +15,7 @@ export const CONFIG = {
   currency: 'EUR',
   previewPages: 4,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
   previewPercent: 0.25,         // ce procent dintr-un EPUB vede gratuit (în modul demo)
-  supportEmail: 'contact@librava.example',
+  supportEmail: 'contact@librava.store',
 
   // --- Login cu Google (activează providerul în Supabase → Authentication) ---
   googleLogin: true,

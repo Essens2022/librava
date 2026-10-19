@@ -1,8 +1,8 @@
-import { CONFIG, IS_DEMO } from './config.js';
+import { CONFIG } from './config.js';
 import { t, getLang, setLang } from './i18n.js';
 import { esc, $, $$ } from './util.js';
-import { api } from './api.js';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme } from './ui.js';
+import { api, chooseBackend } from './api.js';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js';
 import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js';
 import { viewReader } from './reader.js';
 import { viewAdmin } from './admin.js';
@@ -10,19 +10,29 @@ import { viewAdmin } from './admin.js';
 let cleanup = null, seq = 0;
 
 async function route() {
-  // home page shows as plain https://librava.store (no "#/")
-  if (location.hash === '#/' || location.hash === '#') history.replaceState(null, '', location.pathname + location.search);
-  const raw = decodeURI(location.hash.slice(1)) || '/';
+  if (pathMode) {
+    // an old "#/x" link opened on the server version → turn it into the clean address
+    if (location.hash.startsWith('#/')) history.replaceState(null, '', location.hash.slice(1) || '/');
+  } else if (location.hash === '#/' || location.hash === '#') {
+    // home page shows as plain https://librava.store (no "#/")
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  let raw = currentPath();
+  try { raw = decodeURI(raw); } catch { }
   let [path, qs = ''] = raw.split('?');
   path = path.split('#')[0];
   const q = new URLSearchParams(qs.split('#')[0]);
   const parts = path.split('/').filter(Boolean).map(decodeURIComponent);
   if (cleanup) { try { cleanup(); } catch { } cleanup = null; }
   const my = ++seq;
-  const el = $('#app');
+  // every navigation renders into its own fresh container: a slower, older page can never overwrite a newer one
+  const app = $('#app');
+  const el = document.createElement('div');
+  el.className = 'route';
+  app.replaceChildren(el);
   const reading = parts[0] === 'read';
   $('#hdr').hidden = reading; $('#foot').hidden = reading;
-  const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !IS_DEMO;
+  const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
   openDrawer(false);
   document.title = CONFIG.siteName;
   if (!reading) window.scrollTo(0, 0);
@@ -46,6 +56,7 @@ async function route() {
   } catch (e) {
     console.error(e);
     if (my !== seq) return;
+    if (!el.isConnected) return;
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('info')}<p>${esc(t('common.error', { msg: e.message || e }))}</p><a class="btn btn-dark" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
   }
   // highlight current strip link
@@ -55,10 +66,23 @@ async function route() {
 
 function rerender() { renderChrome(); route(); }
 
+// shown on the live domain while the real server (hosting) is not connected yet
+function comingSoon() {
+  $('#hdr').hidden = true; $('#foot').hidden = true;
+  $('#app').innerHTML = `<div class="soon"><div class="soon-card">
+    <div class="soon-logo">${esc(CONFIG.siteName)}</div>
+    <h1>${esc(t('soon.title'))}</h1>
+    <p>${esc(t('soon.text'))}</p>
+    ${CONFIG.supportEmail ? `<a class="btn btn-dark" href="mailto:${esc(CONFIG.supportEmail)}">${esc(CONFIG.supportEmail)}</a>` : ''}
+  </div></div>`;
+}
+
 async function boot() {
   await setLang(getLang(), { remember: false });
   applyTheme();
-  if (IS_DEMO) {
+  if (!(await chooseBackend())) { comingSoon(); return; }
+  setPathMode(!!api.isServer);
+  if (api.isDemo) {
     const b = document.createElement('div');
     b.id = 'demo-bar'; b.className = 'demo-bar'; b.textContent = t('common.demoBanner');
     $('#hdr').after(b);
@@ -72,9 +96,11 @@ async function boot() {
   bindGlobal();
   api.onAuthChange(() => rerender());
   window.addEventListener('librava:rerender', () => { const b = $('#demo-bar'); if (b) b.textContent = t('common.demoBanner'); rerender(); });
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', () => { if (!pathMode || location.hash.startsWith('#/')) route(); });
+  window.addEventListener('popstate', () => { if (pathMode) route(); });
+  window.addEventListener('librava:navigate', route);
   // Stripe sends the buyer back to ?paid=1#/library — move the flag into the hash route
-  if (new URLSearchParams(location.search).get('paid')) {
+  if (!pathMode && new URLSearchParams(location.search).get('paid')) {
     history.replaceState(null, '', location.pathname + '#/library?paid=1');
   }
   route();

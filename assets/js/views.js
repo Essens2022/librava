@@ -2,7 +2,7 @@ import { CONFIG } from './config.js';
 import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js';
 import { esc, $, $$ } from './util.js';
 import { api } from './api.js';
-import { icon, stars, starPath, cart, go, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -291,6 +291,7 @@ export async function startCheckout(ids) {
     const res = await api.checkout(ids);
     if (res.mode === 'done') { cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
     if (res.mode === 'redirect') { toast(t('cart.redirecting')); location.href = res.url; return; }
+    if (res.mode === 'bank') { cart.set(cart.get().filter(id => !ids.includes(id))); showBankOrder(res); return; }
     // demo payment sheet
     const books = (await Promise.all(res.paid.map(id => api.getBook(id)))).filter(Boolean);
     modal(`<h2>${esc(t('pay.demoTitle'))}</h2>
@@ -309,6 +310,33 @@ export async function startCheckout(ids) {
       }
     });
   } catch (e) { toast(t('pay.error', { msg: errText(e) }), { error: true, ms: 6000 }); }
+}
+
+// bank-transfer instructions after an order (own server)
+function showBankOrder(res) {
+  const o = res.order, b = res.bank || {};
+  const amount = money(o.amount_cents, (o.currency || CONFIG.currency).toUpperCase());
+  const row = (label, value, copy) => !value ? '' : `<div class="bank-row"><span class="muted">${esc(label)}</span><b class="bank-val">${esc(value)}</b>${copy ? `<button class="btn btn-ghost btn-sm" data-copy="${esc(value)}">${esc(t('pay.copy'))}</button>` : ''}</div>`;
+  modal(`<h2>${esc(t('pay.bankTitle'))}</h2>
+    <p style="margin:0;font-size:15px;line-height:1.5">${esc(t('pay.bankText', { ref: o.reference, amount }))}</p>
+    <div class="paycard bank-card">
+      ${row(t('pay.holder'), b.holder, true)}
+      ${row(t('pay.iban'), b.iban, true)}
+      ${row(t('pay.bic'), b.bic, true)}
+      ${row(t('pay.bankName'), b.bank, false)}
+      ${row(t('pay.reference'), o.reference, true)}
+      <div class="bank-row" style="border-top:1px solid var(--line);padding-top:8px"><span class="muted">Total</span><b class="bank-val">${esc(amount)}</b></div>
+    </div>
+    ${res.emailed ? `<p class="muted" style="margin:0;font-size:13px">${esc(t('pay.emailSent'))}</p>` : ''}
+    <div class="actions"><button class="btn btn-buy" data-close>${esc(t('pay.close'))}</button></div>`, {
+    onMount(m, close) {
+      m.querySelectorAll('[data-copy]').forEach(btn => btn.onclick = async () => {
+        try { await navigator.clipboard.writeText(btn.dataset.copy); btn.textContent = t('pay.copied'); }
+        catch { const r = document.createRange(); r.selectNodeContents(btn.previousElementSibling); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+      });
+      m.querySelector('[data-close]').addEventListener('click', () => go('/account'));
+    }
+  });
 }
 
 // =====================================================================
@@ -352,14 +380,20 @@ export async function viewCart(el) {
 //  ACCOUNT (auth + overview)
 // =====================================================================
 export async function viewAccount(el, q) {
+  if (q.get('mode') === 'reset' && q.get('token') && api.resetWithToken) return viewReset(el, q.get('token'));
   const u = api.user();
   if (!u) return viewAuth(el, q.get('mode') === 'register' ? 'register' : 'login');
   const orders = await api.orders();
+  const pending = api.pendingOrders ? await api.pendingOrders().catch(() => []) : [];
   const recovery = q.get('mode') === 'newpass';
   const needCurrent = !recovery && api.hasPassword();
   el.innerHTML = `<div class="wrap page" style="max-width:1000px">
     <h1 style="font-size:28px;font-weight:600;margin-bottom:4px">${esc(t('acc.title'))}</h1>
     <p class="muted" style="margin:0 0 18px">${esc(u.email)} · ${esc(t('acc.memberSince', { date: fmtDate(u.createdAt) }))}</p>
+    ${pending.length ? `<section class="panel" style="margin-bottom:18px;border:2px solid var(--amber)"><h2 class="section-title" style="font-size:19px;margin-bottom:6px">${esc(t('acc.pending'))}</h2>
+      ${pending.map(o => `<div class="pending-order"><span>${esc(t('acc.pendingItem', { ref: o.reference, amount: money(o.amount_cents, (o.currency || CONFIG.currency).toUpperCase()) }))}</span>
+        <span class="muted" style="font-size:13px">${o.items.map(i => esc(i.title)).join(' · ')}</span></div>`).join('')}
+    </section>` : ''}
     <div class="account-grid">
       <a class="panel acc-tile" href="#/library">${icon('library')}<div><b>${esc(t('nav.library'))}</b><span class="muted" style="font-size:14px">${esc(t('lib.emptyHint'))}</span></div></a>
       ${u.isAdmin ? `<a class="panel acc-tile" href="#/admin">${icon('gear')}<div><b>${esc(t('nav.admin'))}</b><span class="muted" style="font-size:14px">${esc(t('admin.add'))} · ${esc(t('admin.sales'))}</span></div></a>` : ''}
@@ -389,7 +423,22 @@ export async function viewAccount(el, q) {
         <div class="full"><button class="btn btn-dark" type="submit">${esc(t('acc.save'))}</button></div>
       </form>
     </section>
+    ${api.deleteAccount && !u.isAdmin ? `<section class="panel danger-zone" style="margin-top:18px"><h2 class="section-title" style="font-size:19px;margin-bottom:6px">${esc(t('acc.delete'))}</h2>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('acc.deleteText'))}</p>
+      <form id="del-form" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap" novalidate>
+        <label class="field" style="flex:1;min-width:200px"><span>${esc(t('acc.deleteConfirm'))}</span><input id="del-pass" type="password" autocomplete="current-password" required></label>
+        <button class="btn btn-ghost" type="submit" style="color:var(--deal);border-color:var(--deal)">${esc(t('acc.deleteBtn'))}</button>
+      </form><div class="error" id="del-err" hidden></div></section>` : ''}
   </div>`;
+  $('#del-form', el)?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#del-err', el); err.hidden = true;
+    const pw = $('#del-pass', el).value;
+    if (!pw) { err.textContent = t('acc.err.currentWrong'); err.hidden = false; return; }
+    if (!await confirmBox(t('acc.deleteText'), { ok: t('acc.deleteBtn'), danger: true })) return;
+    try { await api.deleteAccount(pw); toast(t('acc.deleted')); go('/'); }
+    catch (x) { err.textContent = errText(x); err.hidden = false; }
+  });
   const pf = $('#pass-form', el);
   pf.onsubmit = async e => {
     e.preventDefault();
@@ -411,6 +460,28 @@ export async function viewAccount(el, q) {
   $('#prof', el).onsubmit = async e => { e.preventDefault(); try { await api.updateProfile({ name: $('#prof-name', el).value.trim() }); toast(t('acc.saved')); } catch (err) { toast(errText(err), { error: true }); } };
 }
 
+// opened from the "reset password" email (own server)
+function viewReset(el, token) {
+  el.innerHTML = `<div class="wrap page"><div class="auth"><div class="panel">
+    <h1>${esc(t('acc.setNewPass'))}</h1>
+    <form id="rs-form" style="display:flex;flex-direction:column;gap:12px" novalidate>
+      <label class="field"><span>${esc(t('acc.newPass'))}</span><input id="rs-1" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label class="field"><span>${esc(t('acc.confirmPass'))}</span><input id="rs-2" type="password" autocomplete="new-password" minlength="6" required></label>
+      <div class="error" id="rs-err" hidden></div>
+      <button class="btn btn-buy btn-block" type="submit">${esc(t('acc.save'))}</button>
+    </form></div></div></div>`;
+  $('#rs-form', el).onsubmit = async e => {
+    e.preventDefault();
+    const err = $('#rs-err', el); err.hidden = true;
+    const a = $('#rs-1', el).value, b = $('#rs-2', el).value;
+    const fail = m => { err.textContent = m; err.hidden = false; };
+    if (a.length < 6) return fail(t('acc.err.short'));
+    if (a !== b) return fail(t('acc.err.mismatch'));
+    try { await api.resetWithToken(token, a); toast(t('acc.passChanged')); go('/library'); }
+    catch (x) { fail(errText(x)); }
+  };
+}
+
 function viewAuth(el, mode) {
   const reg = mode === 'register';
   el.innerHTML = `<div class="wrap page"><div class="auth">
@@ -425,7 +496,7 @@ function viewAuth(el, mode) {
         <button class="btn btn-buy btn-block" type="submit">${esc(reg ? t('acc.register') : t('acc.signIn'))}</button>
         ${!reg ? `<button type="button" class="linkbtn" data-forgot style="font-size:13px;align-self:flex-start">${esc(t('acc.forgot'))}</button>` : ''}
       </form>
-      ${!api.isDemo && CONFIG.googleLogin ? `<div class="or">${esc(t('acc.or'))}</div>
+      ${api.supportsGoogle && CONFIG.googleLogin ? `<div class="or">${esc(t('acc.or'))}</div>
         <button class="btn btn-ghost btn-block" data-google><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>${esc(t('acc.google'))}</button>` : ''}
     </div>
     <div class="auth-switch">${reg ? `${esc(t('acc.haveAccount'))} <a href="#/account">${esc(t('acc.signIn'))}</a>`
@@ -468,7 +539,7 @@ export async function viewLibrary(el, q) {
   if (q.get('paid')) {
     toast(t('pay.success'));
     // the payment confirmation from Stripe can take a few seconds to arrive
-    setTimeout(() => { if (location.hash.startsWith('#/library')) go('/library'); }, 4000);
+    setTimeout(() => { if (currentPath().startsWith('/library')) go('/library'); }, 4000);
   }
   let items = await api.library();
   const sort = q.get('sort') || 'recent';
