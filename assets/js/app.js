@@ -1,11 +1,11 @@
-import { CONFIG } from './config.js?v=20261019184850';
-import { t, getLang, setLang } from './i18n.js?v=20261019184850';
-import { esc, $, $$ } from './util.js?v=20261019184850';
-import { api, chooseBackend } from './api.js?v=20261019184850';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019184850';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019184850';
-import { viewReader } from './reader.js?v=20261019184850';
-import { viewAdmin } from './admin.js?v=20261019184850';
+import { CONFIG } from './config.js?v=20261019185522';
+import { t, getLang, setLang } from './i18n.js?v=20261019185522';
+import { esc, $, $$ } from './util.js?v=20261019185522';
+import { api, chooseBackend } from './api.js?v=20261019185522';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019185522';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019185522';
+import { viewReader } from './reader.js?v=20261019185522';
+import { viewAdmin } from './admin.js?v=20261019185522';
 
 let cleanup = null, seq = 0;
 
@@ -34,6 +34,7 @@ async function route() {
   $('#hdr').hidden = reading; $('#foot').hidden = reading;
   const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
   openDrawer(false);
+  document.querySelectorAll('.modal-wrap').forEach(m => m.remove());
   document.title = CONFIG.siteName;
   if (!reading) window.scrollTo(0, 0);
   el.innerHTML = reading ? '' : spinner;

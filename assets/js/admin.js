@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019184850';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019184850';
-import { esc, $, $$, loadScript, norm, debounce } from './util.js?v=20261019184850';
-import { api } from './api.js?v=20261019184850';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars } from './ui.js?v=20261019184850';
+import { CONFIG } from './config.js?v=20261019185522';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019185522';
+import { esc, $, $$, loadScript, norm, debounce } from './util.js?v=20261019185522';
+import { api } from './api.js?v=20261019185522';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars } from './ui.js?v=20261019185522';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -38,7 +38,7 @@ export async function viewAdmin(el, parts) {
   const body = $('#adm-body', el);
   switch (tab) {
     case 'new': return bookForm(body, null);
-    case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null); }
+    case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null, Math.min(3, Math.max(1, parseInt(parts[2]) || 1))); }
     case 'books': return booksList(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
@@ -128,7 +128,8 @@ async function booksList(body) {
     <div class="table-wrap"><table class="adm-table">
       <thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('admin.colPrice'))}</th><th class="num">${esc(t('admin.colSales'))}</th><th class="num">${esc(t('admin.colRevenue'))}</th><th>${esc(t('admin.colRating'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
       <tbody>${books.map(b => `<tr data-row data-q="${esc(norm(b.title + ' ' + b.author))}" data-st="${b.status}" data-lang="${b.language}" data-cat="${b.category}">
-        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(b.format.toUpperCase())} · ${esc(b.language.toUpperCase())}</div></div></div></td>
+        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
+          <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[1, 2, 3].map(n => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t('kdp.edit' + n))}</a>`).join('')}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
         <td class="num">${b.sales_count || 0}</td>
         <td class="num">${money(b.revenue_cents || 0)}</td>
@@ -248,53 +249,175 @@ async function reviews(body) {
   });
 }
 
-// ---------------------------------------------------------------- add / edit book
-function bookForm(body, b) {
-  const v = b || { language: getLang(), status: 'published', price_cents: 0, category: 'fiction', published_at: new Date().toISOString().slice(0, 10) };
+// ---------------------------------------------------------------- publish an eBook (3 steps, like KDP)
+const ROLES = ['author', 'illustrator', 'translator', 'editor', 'foreword', 'photographer'];
+function bookForm(body, b, startStep = 1) {
+  const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
+  let bookId = v.id || null;
+  let step = startStep;
   const files = { cover: null, file: null, sample: null };
   const eur = c => c ? (c / 100).toFixed(2) : '';
-  body.innerHTML = `<form id="bk-form" novalidate>
-    <section class="step"><div class="step-head"><span class="step-num">1</span><h3>${esc(t('admin.step1'))}</h3></div><div class="step-body form-grid">
-      <label class="field full"><span>${esc(t('admin.f.title'))} *</span><input id="f-title" required maxlength="200" value="${esc(v.title || '')}"></label>
-      <label class="field full"><span>${esc(t('admin.f.subtitle'))}</span><input id="f-subtitle" maxlength="200" value="${esc(v.subtitle || '')}"></label>
-      <label class="field"><span>${esc(t('admin.f.author'))} *</span><input id="f-author" required maxlength="120" value="${esc(v.author || '')}"></label>
-      <label class="field"><span>${esc(t('admin.f.category'))} *</span><select id="f-category">${CATS.map(c => `<option value="${c}" ${v.category === c ? 'selected' : ''}>${esc(t('cat.' + c))}</option>`).join('')}</select></label>
-      <label class="field full"><span>${esc(t('admin.f.description'))}</span><textarea id="f-description" maxlength="4000">${esc(v.description || '')}</textarea><small>${esc(t('admin.f.descriptionHelp'))}</small></label>
-      <label class="field"><span>${esc(t('admin.f.language'))}</span><select id="f-language">${LANGS.map(([l, native]) => `<option value="${l}" ${v.language === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(native)}</option>`).join('')}</select></label>
-      <label class="field"><span>${esc(t('admin.f.keywords'))}</span><input id="f-keywords" value="${esc((v.keywords || []).join(', '))}"><small>${esc(t('admin.f.keywordsHelp'))}</small></label>
-    </div></section>
+  const [first0, ...rest0] = String(v.author || '').trim().split(/\s+/);
+  const kws = [...(v.keywords || []), '', '', '', '', '', '', ''].slice(0, 7);
+  const secCats = (v.categories || []).filter(c => c !== v.category);
+  const contribRow = (c = {}) => `<div class="contrib-row"><select class="c-role input" aria-label="${esc(t('kdp.role'))}">${ROLES.map(r => `<option value="${r}" ${c.role === r ? 'selected' : ''}>${esc(t('kdp.role.' + r))}</option>`).join('')}</select>
+    <input class="c-name input" maxlength="120" placeholder="${esc(t('kdp.fullName'))}" value="${esc(c.name || '')}"><button type="button" class="btn btn-ghost btn-sm" data-rm-contrib aria-label="${esc(t('admin.delete'))}">✕</button></div>`;
 
-    <section class="step"><div class="step-head"><span class="step-num">2</span><h3>${esc(t('admin.step2'))}</h3></div><div class="step-body" style="display:flex;flex-direction:column;gap:16px">
-      <div class="field"><span>${esc(t('admin.f.cover'))}</span>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-          <img class="cover-preview" id="cov-prev" alt="" ${v.cover_url ? `src="${esc(v.cover_url)}"` : 'hidden'}>
-          <label class="drop" style="flex:1;min-width:220px" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('admin.f.cover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
-        </div></div>
-      <div class="field"><span>${esc(t('admin.f.file'))} ${b ? '' : '*'}</span>
-        <label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${b?.file_name || b?.file_path ? esc(t('admin.f.fileKeep', { name: b.file_name || String(b.file_path).split('/').pop() })) : 'EPUB / PDF'}</span><br><small>${esc(t('admin.f.fileHelp'))}</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label></div>
-      <div class="field"><span>${esc(t('admin.f.sample'))}</span>
-        <label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${b?.sample_path ? '✓' : 'EPUB / PDF'}</span><br><small>${esc(t('admin.f.sampleHelp'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label></div>
-      <label class="field" style="max-width:220px"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
-    </div></section>
+  body.innerHTML = `<form id="bk-form" class="kdp" novalidate>
+    <div class="kdp-top"><div><span class="muted">${esc(b ? t('kdp.editing') : t('kdp.newEbook'))}</span><h2 id="kdp-title">${esc(v.title || t('kdp.untitled'))}</h2></div>
+      <span class="status ${v.status === 'published' ? 'live' : 'draft'}" id="kdp-status">${esc(v.status === 'published' ? t('kdp.live') : t('kdp.draft'))}</span></div>
+    <nav class="kdp-tabs" role="tablist">${[1, 2, 3].map(n => `<button type="button" role="tab" class="kdp-tab" data-step="${n}"><b>${esc(t('kdp.tab' + n))}</b><span class="kdp-state" id="st-${n}"></span></button>`).join('')}</nav>
 
-    <section class="step"><div class="step-head"><span class="step-num">3</span><h3>${esc(t('admin.step3'))}</h3></div><div class="step-body form-grid">
-      <label class="field"><span>${esc(t('admin.f.price'))}</span><input id="f-price" type="number" min="0" step="0.01" inputmode="decimal" value="${eur(v.price_cents) || '0'}"><small>${esc(t('admin.f.priceHelp'))}</small></label>
-      <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="number" min="0" step="0.01" inputmode="decimal" value="${eur(v.list_price_cents)}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label>
-      <label class="field"><span>${esc(t('admin.f.published'))}</span><input id="f-date" type="date" value="${esc(String(v.published_at || '').slice(0, 10))}"></label>
-      <label class="field"><span>${esc(t('admin.f.status'))}</span><select id="f-status"><option value="published" ${v.status === 'published' ? 'selected' : ''}>${esc(t('admin.f.statusPublished'))}</option><option value="draft" ${v.status !== 'published' ? 'selected' : ''}>${esc(t('admin.f.statusDraft'))}</option></select></label>
-      <label class="check full"><input type="checkbox" id="f-featured" ${v.is_featured ? 'checked' : ''}> ${esc(t('admin.f.featured'))}</label>
-    </div></section>
+    <section class="kdp-step" data-pane="1">
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.language'))}</h3><p>${esc(t('kdp.langHelp'))}</p></div>
+        <div class="kdp-fields"><select id="f-language" class="input">${LANGS.map(([l, native]) => `<option value="${l}" ${v.language === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(native)}</option>`).join('')}</select></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.bookTitle'))}</h3><p>${esc(t('kdp.titleHelp'))}</p></div>
+        <div class="kdp-fields"><label class="field"><span>${esc(t('admin.f.title'))} *</span><input id="f-title" maxlength="200" value="${esc(v.title || '')}"></label>
+          <label class="field"><span>${esc(t('admin.f.subtitle'))} (${esc(t('kdp.optional'))})</span><input id="f-subtitle" maxlength="200" value="${esc(v.subtitle || '')}"></label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.series'))}</h3><p>${esc(t('kdp.seriesHelp'))}</p></div>
+        <div class="kdp-fields two"><label class="field"><span>${esc(t('kdp.seriesName'))}</span><input id="f-series" maxlength="160" value="${esc(v.series_name || '')}"></label>
+          <label class="field"><span>${esc(t('kdp.seriesNumber'))}</span><input id="f-seriesn" type="number" min="1" inputmode="numeric" value="${v.series_number || ''}"></label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.edition'))}</h3><p>${esc(t('kdp.editionHelp'))}</p></div>
+        <div class="kdp-fields"><label class="field" style="max-width:180px"><span>${esc(t('kdp.editionNumber'))} (${esc(t('kdp.optional'))})</span><input id="f-edition" type="number" min="1" inputmode="numeric" value="${v.edition || ''}"></label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.author'))}</h3><p>${esc(t('kdp.authorHelp'))}</p></div>
+        <div class="kdp-fields two"><label class="field"><span>${esc(t('kdp.firstName'))} *</span><input id="f-first" maxlength="60" autocomplete="off" value="${esc(first0 || '')}"></label>
+          <label class="field"><span>${esc(t('kdp.lastName'))}</span><input id="f-last" maxlength="60" autocomplete="off" value="${esc(rest0.join(' '))}"></label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.contributors'))}</h3><p>${esc(t('kdp.contributorsHelp'))}</p></div>
+        <div class="kdp-fields"><div id="contribs">${(v.contributors || []).map(contribRow).join('')}</div><button type="button" class="btn btn-ghost btn-sm" id="add-contrib">+ ${esc(t('kdp.addContributor'))}</button></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.description'))}</h3><p>${esc(t('admin.f.descriptionHelp'))}</p></div>
+        <div class="kdp-fields"><textarea id="f-description" class="input" maxlength="4000" rows="9">${esc(v.description || '')}</textarea><small class="muted" id="desc-count"></small></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.rights'))}</h3><p>${esc(t('kdp.rightsHelp'))}</p></div>
+        <div class="kdp-fields radios"><label class="check"><input type="radio" name="rights" value="own" ${v.rights !== 'public' ? 'checked' : ''}> ${esc(t('kdp.rightsOwn'))}</label>
+          <label class="check"><input type="radio" name="rights" value="public" ${v.rights === 'public' ? 'checked' : ''}> ${esc(t('kdp.rightsPublic'))}</label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.audience'))}</h3><p>${esc(t('kdp.audienceHelp'))}</p></div>
+        <div class="kdp-fields"><div class="radios"><span class="muted" style="font-size:14px">${esc(t('kdp.adultQ'))}</span>
+          <label class="check"><input type="radio" name="adult" value="no" ${!v.adult ? 'checked' : ''}> ${esc(t('kdp.no'))}</label><label class="check"><input type="radio" name="adult" value="yes" ${v.adult ? 'checked' : ''}> ${esc(t('kdp.yes'))}</label></div>
+          <div class="two" style="margin-top:10px"><label class="field"><span>${esc(t('kdp.ageMin'))} (${esc(t('kdp.optional'))})</span><select id="f-agemin"><option value="">—</option>${Array.from({ length: 19 }, (_, i) => `<option ${v.age_min === i ? 'selected' : ''}>${i}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('kdp.ageMax'))} (${esc(t('kdp.optional'))})</span><select id="f-agemax"><option value="">—</option>${Array.from({ length: 19 }, (_, i) => `<option ${v.age_max === i ? 'selected' : ''}>${i}</option>`).join('')}<option value="99" ${v.age_max === 99 ? 'selected' : ''}>18+</option></select></label></div></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.categories'))}</h3><p>${esc(t('kdp.categoriesHelp'))}</p></div>
+        <div class="kdp-fields"><label class="field"><span>${esc(t('kdp.primaryCat'))} *</span><select id="f-category">${CATS.map(c => `<option value="${c}" ${v.category === c ? 'selected' : ''}>${esc(t('cat.' + c))}</option>`).join('')}</select></label>
+          <span class="muted" style="font-size:14px;margin-top:6px">${esc(t('kdp.moreCats'))}</span><div class="cat-checks" id="cat-checks">${CATS.map(c => `<label class="check"><input type="checkbox" value="${c}" ${secCats.includes(c) ? 'checked' : ''}> ${esc(t('cat.' + c))}</label>`).join('')}</div></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.keywords'))}</h3><p>${esc(t('kdp.keywordsHelp'))}</p></div>
+        <div class="kdp-fields kw-grid">${kws.map((k, i) => `<input class="kw input" maxlength="50" aria-label="${esc(t('admin.f.keywords'))} ${i + 1}" placeholder="${i + 1}" value="${esc(k)}">`).join('')}</div></div>
+    </section>
+
+    <section class="kdp-step" data-pane="2" hidden>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
+        <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
+          <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
+          <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
+        <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
+          <div style="flex:1;min-width:220px"><label class="drop" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('kdp.uploadCover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
+          <div class="kdp-warn" id="cov-warn" hidden></div></div></div></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.sample'))}</h3><p>${esc(t('admin.f.sampleHelp'))}</p></div>
+        <div class="kdp-fields"><label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${v.sample_path ? '✓ ' + esc(t('kdp.sampleKept')) : 'EPUB / PDF'}</span><br><small>${esc(t('kdp.sampleTip'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.details'))}</h3><p>${esc(t('kdp.detailsHelp'))}</p></div>
+        <div class="kdp-fields two"><label class="field"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
+          <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label></div></div>
+    </section>
+
+    <section class="kdp-step" data-pane="3" hidden>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.pricing'))}</h3><p>${esc(t('kdp.pricingHelp'))}</p></div>
+        <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
+          <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="number" min="0.49" step="0.01" inputmode="decimal" value="${eur(v.price_cents)}"></label>
+            <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="number" min="0" step="0.01" inputmode="decimal" value="${eur(v.list_price_cents)}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
+            <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
+            <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.release'))}</h3><p>${esc(t('kdp.releaseHelp'))}</p></div>
+        <div class="kdp-fields"><label class="field" style="max-width:220px"><span>${esc(t('admin.f.published'))}</span><input id="f-date" type="date" value="${esc(String(v.published_at || '').slice(0, 10))}"></label>
+          <label class="check"><input type="checkbox" id="f-featured" ${v.is_featured ? 'checked' : ''}> ${esc(t('admin.f.featured'))}</label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.checklist'))}</h3><p>${esc(t('kdp.checklistHelp'))}</p></div>
+        <div class="kdp-fields"><ul class="checklist" id="checklist"></ul></div></div>
+    </section>
+
     <div class="error" id="f-err" hidden></div>
-    <div class="sticky-actions"><a class="btn btn-ghost" href="#/admin">${esc(t('admin.cancel'))}</a><button class="btn btn-buy" type="submit" id="f-save">${esc(t('admin.save'))}</button></div>
+    <div class="kdp-bar"><button type="button" class="btn btn-ghost" id="b-back">← ${esc(t('kdp.back'))}</button>
+      <span class="spacer"></span><button type="button" class="btn btn-ghost" id="b-draft">${esc(t('kdp.saveDraft'))}</button>
+      <button type="button" class="btn btn-buy" id="b-next"></button></div>
   </form>`;
   $$('.drop .ico', body).forEach(i => { i.style.flex = 'none'; });
 
+  const val = id => ($('#' + id, body)?.value || '').trim();
+  const radio = n => body.querySelector(`input[name="${n}"]:checked`)?.value;
+  const cents = s => { const n = parseFloat(String(s).replace(',', '.')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
+  const authorName = () => [val('f-first'), val('f-last')].filter(Boolean).join(' ');
+  const has = { file: !!(v.file_path || v.file_name), cover: !!v.cover_url };
+
+  // ---- what each step still needs (shown on the tabs and in the final checklist)
+  const checks = () => {
+    const free = radio('ptype') === 'free', price = cents(val('f-price'));
+    return [
+      { step: 1, ok: !!val('f-title'), label: t('kdp.ck.title') },
+      { step: 1, ok: !!val('f-first'), label: t('kdp.ck.author') },
+      { step: 1, ok: val('f-description').length >= 30, label: t('kdp.ck.description') },
+      { step: 2, ok: has.file || !!files.file, label: t('kdp.ck.manuscript') },
+      { step: 2, ok: has.cover || !!files.cover, label: t('kdp.ck.cover') },
+      { step: 3, ok: free || price >= 49, label: t('kdp.ck.price') },
+    ];
+  };
+  const refresh = () => {
+    const c = checks();
+    for (const n of [1, 2, 3]) {
+      const mine = c.filter(x => x.step === n), done = mine.filter(x => x.ok).length;
+      const el = $('#st-' + n, body);
+      el.className = 'kdp-state ' + (done === mine.length ? 'done' : done ? 'part' : 'none');
+      el.textContent = done === mine.length ? '✓ ' + t('kdp.complete') : done ? t('kdp.inProgress') : t('kdp.notStarted');
+    }
+    $('#checklist', body).innerHTML = c.map(x => `<li class="${x.ok ? 'ok' : ''}"><span>${x.ok ? '✓' : '○'}</span>${esc(x.label)}${x.ok ? '' : ` <a href="#" data-goto="${x.step}">${esc(t('kdp.fix'))}</a>`}</li>`).join('');
+    $$('[data-goto]', body).forEach(a => a.onclick = e => { e.preventDefault(); show(+a.dataset.goto); });
+    $('#desc-count', body).textContent = t('kdp.chars', { n: val('f-description').length, max: 4000 });
+    $('#kdp-title', body).textContent = val('f-title') || t('kdp.untitled');
+    const free = radio('ptype') === 'free';
+    $('#price-box', body).hidden = free;
+    const p = cents(val('f-price')), fee = p ? Math.round(p * 0.015 + 25) : 0;
+    $('#r-price', body).textContent = p ? money(p, CONFIG.currency) : '—';
+    $('#r-fee', body).textContent = p ? '− ' + money(fee, CONFIG.currency) : '—';
+    $('#r-net', body).textContent = p ? money(Math.max(p - fee, 0), CONFIG.currency) : '—';
+  };
+  const show = n => {
+    step = n;
+    $$('.kdp-step', body).forEach(s => s.hidden = +s.dataset.pane !== n);
+    $$('.kdp-tab', body).forEach(tb => { tb.classList.toggle('on', +tb.dataset.step === n); tb.setAttribute('aria-selected', +tb.dataset.step === n); });
+    $('#b-back', body).style.visibility = n === 1 ? 'hidden' : 'visible';
+    $('#b-next', body).textContent = n < 3 ? t('kdp.saveContinue') + ' →' : t('kdp.publish');
+    $('#f-err', body).hidden = true;
+    refresh();
+    body.querySelector('.kdp-tabs').scrollIntoView({ block: 'nearest' });
+  };
+  $$('.kdp-tab', body).forEach(tb => tb.onclick = () => show(+tb.dataset.step));
+  body.addEventListener('input', refresh);
+  body.addEventListener('change', refresh);
+
+  // contributors
+  $('#add-contrib', body).onclick = () => { if ($$('.contrib-row', body).length < 9) $('#contribs', body).insertAdjacentHTML('beforeend', contribRow()); };
+  $('#contribs', body).addEventListener('click', e => { if (e.target.closest('[data-rm-contrib]')) e.target.closest('.contrib-row').remove(); });
+  // at most 2 extra categories, like KDP's 3 categories in total
+  $('#cat-checks', body).addEventListener('change', e => {
+    const on = $$('#cat-checks input:checked', body);
+    if (on.length > 2) { e.target.checked = false; toast(t('kdp.max3cats'), { error: true }); }
+  });
+
+  // files
   const pick = async (kind, file) => {
     if (!file) return;
     if (kind !== 'cover' && !/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
+    if (kind === 'cover' && !/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     files[kind] = file;
     $('#n-' + kind, body).textContent = `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
-    if (kind === 'cover') { const img = $('#cov-prev', body); img.src = URL.createObjectURL(file); img.hidden = false; }
+    if (kind === 'file') $('#file-ok', body).hidden = false;
+    if (kind === 'cover') {
+      const img = $('#cov-prev', body), url = URL.createObjectURL(file);
+      img.src = url; img.hidden = false; $('#cov-empty', body)?.remove();
+      const probe = new Image();
+      probe.onload = () => {
+        const w = probe.naturalWidth, h = probe.naturalHeight, warn = $('#cov-warn', body), msgs = [];
+        if (w < 625 || h < 1000) msgs.push(t('kdp.coverSmall', { w, h }));
+        const r = h / w; if (r < 1.4 || r > 1.75) msgs.push(t('kdp.coverRatio', { w, h }));
+        warn.innerHTML = msgs.map(esc).join('<br>'); warn.hidden = !msgs.length;
+      };
+      probe.src = url;
+    }
     if (kind === 'file' && /\.pdf$/i.test(file.name)) {
       try {
         await loadScript(new URL('../vendor/pdf.min.js', import.meta.url).href);
@@ -303,6 +426,7 @@ function bookForm(body, b) {
         $('#f-pages', body).value = doc.numPages; doc.destroy();
       } catch { }
     }
+    refresh();
   };
   for (const kind of ['cover', 'file', 'sample']) {
     $('#f-' + kind, body).onchange = e => pick(kind, e.target.files[0]);
@@ -312,34 +436,54 @@ function bookForm(body, b) {
     d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('over'); pick(kind, e.dataTransfer.files[0]); });
   }
 
-  $('#bk-form', body).onsubmit = async e => {
-    e.preventDefault();
-    const err = $('#f-err', body); err.hidden = true;
-    const val = id => $('#' + id, body).value.trim();
-    const missing = [];
-    if (!val('f-title')) missing.push(t('admin.f.title'));
-    if (!val('f-author')) missing.push(t('admin.f.author'));
-    if (missing.length) { err.textContent = t('admin.required', { fields: missing.join(', ') }); err.hidden = false; err.scrollIntoView({ block: 'center' }); return; }
-    if (!b && !files.file) { err.textContent = t('admin.needFile'); err.hidden = false; return; }
-    const cents = s => { const n = parseFloat(String(s).replace(',', '.')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
-    const data = {
-      title: val('f-title'), subtitle: val('f-subtitle') || null, author: val('f-author'), description: val('f-description'),
-      category: val('f-category'), language: val('f-language'),
-      keywords: val('f-keywords').split(',').map(s => s.trim()).filter(Boolean),
-      pages: parseInt(val('f-pages')) || null,
-      price_cents: cents(val('f-price')), list_price_cents: cents(val('f-list')) || null,
-      published_at: val('f-date') || null, status: val('f-status'), is_featured: $('#f-featured', body).checked,
+  // ---- save (draft) or publish
+  const collect = status => {
+    const free = radio('ptype') === 'free';
+    const amin = val('f-agemin'), amax = val('f-agemax');
+    const extra = $$('#cat-checks input:checked', body).map(i => i.value).filter(c => c !== val('f-category'));
+    return {
+      title: val('f-title'), subtitle: val('f-subtitle') || null, author: authorName(), description: val('f-description'),
+      language: val('f-language'), category: val('f-category'), categories: [val('f-category'), ...extra],
+      series_name: val('f-series') || null, series_number: parseInt(val('f-seriesn')) || null, edition: parseInt(val('f-edition')) || null,
+      contributors: $$('.contrib-row', body).map(r => ({ role: r.querySelector('.c-role').value, name: r.querySelector('.c-name').value.trim() })).filter(c => c.name),
+      rights: radio('rights') || 'own', adult: radio('adult') === 'yes',
+      age_min: amin === '' ? null : +amin, age_max: amax === '' ? null : +amax,
+      keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
+      pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null,
+      price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
+      published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,
     };
-    if (b) data.id = b.id;
-    const btn = $('#f-save', body); btn.disabled = true; btn.textContent = t('admin.saving');
+  };
+  const save = async (status, btn) => {
+    const err = $('#f-err', body); err.hidden = true;
+    const fail = m => { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: 'center' }); };
+    if (!val('f-title') || !val('f-first')) { show(1); return fail(t('kdp.needTitleAuthor')); }
+    if (status === 'published') {
+      const missing = checks().filter(c => !c.ok);
+      if (missing.length) { show(missing[0].step); return fail(t('kdp.cannotPublish', { list: missing.map(m => m.label).join(', ') })); }
+    }
+    const data = collect(status);
+    if (bookId) data.id = bookId;
+    const old = btn.textContent; btn.disabled = true; btn.textContent = t('admin.saving');
     try {
-      const id = await api.saveBook(data, files);
-      toast(t('admin.saved'));
-      go('/book/' + encodeURIComponent(id));
-    } catch (x) {
-      err.textContent = t('common.error', { msg: errText(x) }); err.hidden = false;
-      btn.disabled = false; btn.textContent = t('admin.save');
+      bookId = await api.saveBook(data, files);
+      if (files.file) has.file = true; if (files.cover) has.cover = true;
+      files.cover = files.file = files.sample = null;
+      $('#kdp-status', body).className = 'status ' + (status === 'published' ? 'live' : 'draft');
+      $('#kdp-status', body).textContent = status === 'published' ? t('kdp.live') : t('kdp.draft');
+      v.status = status;
+      btn.disabled = false; btn.textContent = old;
+      return true;
+    } catch (x) { fail(t('common.error', { msg: errText(x) })); btn.disabled = false; btn.textContent = old; return false; }
+  };
+  $('#b-back', body).onclick = () => show(Math.max(1, step - 1));
+  $('#b-draft', body).onclick = async e => { if (await save(v.status === 'published' ? 'published' : 'draft', e.currentTarget)) toast(t('kdp.savedDraft')); };
+  $('#b-next', body).onclick = async e => {
+    if (step < 3) { if (await save(v.status === 'published' ? 'published' : 'draft', e.currentTarget)) show(step + 1); return; }
+    if (await save('published', e.currentTarget)) {
+      modal(`<div style="text-align:center"><div style="font-size:44px">🎉</div><h2>${esc(t('kdp.publishedTitle'))}</h2><p class="muted">${esc(t('kdp.publishedText'))}</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><a class="btn btn-buy" href="#/book/${encodeURIComponent(bookId)}" data-close>${esc(t('kdp.viewInStore'))}</a><a class="btn btn-ghost" href="#/admin/books" data-close>${esc(t('kdp.toBookshelf'))}</a></div></div>`);
     }
   };
+  show(startStep);
 }
-

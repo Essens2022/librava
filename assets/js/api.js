@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019184850';
-import { getLang } from './i18n.js?v=20261019184850';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019184850';
+import { CONFIG } from './config.js?v=20261019185522';
+import { getLang } from './i18n.js?v=20261019185522';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019185522';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -15,7 +15,7 @@ let DEMO_BOOKS = [];
 export function filterBooks(all, o = {}) {
   let list = all.slice();
   if (!o.includeDrafts) list = list.filter(b => b.status === 'published');
-  if (o.category) list = list.filter(b => b.category === o.category);
+  if (o.category) list = list.filter(b => b.category === o.category || (b.categories || []).includes(o.category));
   if (o.format) list = list.filter(b => b.format === o.format);
   if (o.lang) list = list.filter(b => b.language === o.lang);
   if (o.featured) list = list.filter(b => b.is_featured);
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019184850')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019185522')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {

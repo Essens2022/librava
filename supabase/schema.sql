@@ -57,7 +57,13 @@ create table if not exists public.books (
   sales_count int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  deleted_at timestamptz
+  deleted_at timestamptz,
+  -- KDP-style details
+  series_name text, series_number int, edition int,
+  contributors jsonb not null default '[]',
+  rights text not null default 'own' check (rights in ('own', 'public')),
+  categories text[] not null default '{}',
+  age_min int, age_max int, adult boolean not null default false, isbn text
 );
 create index if not exists books_status_idx on public.books (status, published_at desc);
 

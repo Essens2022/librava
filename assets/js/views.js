@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=20261019184850';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019184850';
-import { esc, $, $$ } from './util.js?v=20261019184850';
-import { api } from './api.js?v=20261019184850';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills } from './ui.js?v=20261019184850';
+import { CONFIG } from './config.js?v=20261019185522';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019185522';
+import { esc, $, $$ } from './util.js?v=20261019185522';
+import { api } from './api.js?v=20261019185522';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills } from './ui.js?v=20261019185522';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -189,7 +189,8 @@ export async function viewBook(el, id) {
       <div class="book-main book-head">
         <h1>${esc(b.title)}</h1>
         ${b.subtitle ? `<div class="subtitle">${esc(b.subtitle)}</div>` : ''}
-        <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })} <span class="muted">· ${esc(t('book.format.' + b.format))}</span></div>
+        ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
+        <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')} <span class="muted">· ${esc(t('book.format.' + b.format))}</span></div>
         <div class="rating-line" style="margin-top:8px">${b.rating_count ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
       </div>
       <div class="book-main book-body">
@@ -205,7 +206,10 @@ export async function viewBook(el, id) {
           ${b.pages ? `<div><small>${esc(t('book.d.pages'))}</small><b>${b.pages}</b></div>` : ''}
           <div><small>${esc(t('book.d.language'))}</small><b>${esc(langName(b.language))}</b></div>
           ${b.published_at ? `<div><small>${esc(t('book.d.published'))}</small><b>${esc(fmtDate(b.published_at))}</b></div>` : ''}
-          <div><small>${esc(t('book.d.category'))}</small><b><a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a></b></div>
+          <div><small>${esc(t('book.d.category'))}</small><b>${[...new Set([b.category, ...(b.categories || [])])].map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', ')}</b></div>
+          ${b.edition ? `<div><small>${esc(t('book.edition'))}</small><b>${b.edition}</b></div>` : ''}
+          ${b.age_min != null || b.age_max != null ? `<div><small>${esc(t('book.age'))}</small><b>${esc(b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 }))}</b></div>` : ''}
+          ${b.isbn ? `<div><small>ISBN</small><b>${esc(b.isbn)}</b></div>` : ''}
         </div>
       </div>
       <aside class="buybox">
