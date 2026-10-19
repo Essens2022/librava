@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js';
 import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js';
 import { esc, $, $$ } from './util.js';
-import { api, DEMO_ADMIN } from './api.js';
+import { api } from './api.js';
 import { icon, stars, starPath, cart, go, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
@@ -355,6 +355,8 @@ export async function viewAccount(el, q) {
   const u = api.user();
   if (!u) return viewAuth(el, q.get('mode') === 'register' ? 'register' : 'login');
   const orders = await api.orders();
+  const recovery = q.get('mode') === 'newpass';
+  const needCurrent = !recovery && api.hasPassword();
   el.innerHTML = `<div class="wrap page" style="max-width:1000px">
     <h1 style="font-size:28px;font-weight:600;margin-bottom:4px">${esc(t('acc.title'))}</h1>
     <p class="muted" style="margin:0 0 18px">${esc(u.email)} · ${esc(t('acc.memberSince', { date: fmtDate(u.createdAt) }))}</p>
@@ -377,7 +379,35 @@ export async function viewAccount(el, q) {
       </form>
       <button class="btn btn-ghost" style="margin-top:16px" data-signout>${icon('logout')} ${esc(t('acc.signOut'))}</button>
     </section>
+    <section class="panel ${recovery ? 'pass-recovery' : ''}" id="password" style="margin-top:18px"><h2 class="section-title" style="font-size:19px;margin-bottom:12px">${esc(recovery ? t('acc.setNewPass') : t('acc.changePass'))}</h2>
+      <form id="pass-form" class="form-grid" novalidate autocomplete="on">
+        <input type="email" autocomplete="username" value="${esc(u.email)}" hidden>
+        ${needCurrent ? `<label class="field full"><span>${esc(t('acc.currentPass'))}</span><input id="pw-cur" type="password" autocomplete="current-password" required></label>` : ''}
+        <label class="field"><span>${esc(t('acc.newPass'))}</span><input id="pw-new" type="password" autocomplete="new-password" required minlength="6"></label>
+        <label class="field"><span>${esc(t('acc.confirmPass'))}</span><input id="pw-new2" type="password" autocomplete="new-password" required minlength="6"></label>
+        <div class="error full" id="pw-err" hidden></div>
+        <div class="full"><button class="btn btn-dark" type="submit">${esc(t('acc.save'))}</button></div>
+      </form>
+    </section>
   </div>`;
+  const pf = $('#pass-form', el);
+  pf.onsubmit = async e => {
+    e.preventDefault();
+    const err = $('#pw-err', el); err.hidden = true;
+    const cur = needCurrent ? $('#pw-cur', el).value : null, n1 = $('#pw-new', el).value, n2 = $('#pw-new2', el).value;
+    const fail = m => { err.textContent = m; err.hidden = false; };
+    if (needCurrent && !cur) return fail(t('acc.err.currentWrong'));
+    if (n1.length < 6) return fail(t('acc.err.short'));
+    if (n1 !== n2) return fail(t('acc.err.mismatch'));
+    const btn = pf.querySelector('button[type=submit]'); btn.disabled = true;
+    try {
+      await api.changePassword(cur, n1);
+      pf.reset(); toast(t('acc.passChanged'));
+      if (recovery) go('/account');
+    } catch (x) { fail(errText(x)); }
+    btn.disabled = false;
+  };
+  if (recovery) setTimeout(() => $('#password', el).scrollIntoView({ block: 'center' }), 50);
   $('#prof', el).onsubmit = async e => { e.preventDefault(); try { await api.updateProfile({ name: $('#prof-name', el).value.trim() }); toast(t('acc.saved')); } catch (err) { toast(errText(err), { error: true }); } };
 }
 
@@ -386,7 +416,7 @@ function viewAuth(el, mode) {
   el.innerHTML = `<div class="wrap page"><div class="auth">
     <div class="panel">
       <h1>${esc(reg ? t('acc.register') : t('acc.signIn'))}</h1>
-      ${api.isDemo ? `<div class="demo-note">${esc(t('acc.demoHint', { email: DEMO_ADMIN.email, pass: DEMO_ADMIN.pass }))}<br><button class="linkbtn" data-demo-admin style="margin-top:6px;font-weight:700">${esc(t('acc.demoAdmin'))}</button></div>` : ''}
+      ${api.isDemo && reg ? `<div class="demo-note">${esc(t('acc.demoFirstAdmin'))}</div>` : ''}
       <form id="auth-form" style="display:flex;flex-direction:column;gap:12px" novalidate>
         ${reg ? `<label class="field"><span>${esc(t('acc.name'))}</span><input id="a-name" autocomplete="name" required maxlength="80"></label>` : ''}
         <label class="field"><span>${esc(t('acc.email'))}</span><input id="a-email" type="email" autocomplete="email" required></label>
@@ -424,7 +454,6 @@ function viewAuth(el, mode) {
     try { await api.resetPassword(email); toast(t('acc.resetSent')); } catch (x) { show(errText(x)); }
   });
   $('[data-google]', el)?.addEventListener('click', async () => { try { await api.signInGoogle(); } catch (x) { show(errText(x)); } });
-  $('[data-demo-admin]', el)?.addEventListener('click', async () => { await api.signIn({ email: DEMO_ADMIN.email, password: DEMO_ADMIN.pass }); go('/admin'); });
 }
 
 // =====================================================================

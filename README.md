@@ -21,7 +21,7 @@ Site-ul trebuie deschis printr-un server web (dublu-click pe `index.html` nu mer
 - **Pe calculator:** în folderul proiectului rulează `npx serve .` sau `python3 -m http.server 8000`, apoi deschide `http://localhost:8000`.
 - **Direct online:** urcă folderul pe GitHub și activează GitHub Pages (pasul 6).
 
-Cont de administrator în demo: `admin@librava.demo` / `admin123` (există și un buton „Intră ca administrator demo” pe pagina de login).
+În demo nu există niciun cont sau parolă scrisă în cod: **primul cont pe care îl creezi în browserul tău devine administrator** (doar în acel browser). Din contul tău poți schimba parola oricând (Cont → Schimbă parola).
 
 ---
 
@@ -96,6 +96,13 @@ Sfaturi:
 2. **Settings → Pages → Deploy from a branch → main / root**.
 3. Site-ul apare la `https://numele-tau.github.io/numele-repo/`. Poți lega și un domeniu propriu.
 4. După ce treci pe Supabase, folderul `demo/` și fișierul `assets/js/demo-data.js` nu mai sunt folosite și le poți șterge (atunci șterge și importul din `api.js`).
+
+## Securitate: parole și chei
+
+- **Nicio parolă și nicio cheie secretă nu stă în cod.** Parolele clienților sunt păstrate criptat de Supabase. Cheia secretă Stripe (`sk_...`), secretul webhook-ului (`whsec_...`) și cheia `service_role` Supabase se pun doar ca *secrets* în Supabase (`supabase secrets set ...`) și nu ajung niciodată în browser sau pe GitHub.
+- În `config.js` se pun doar adresa proiectului Supabase și cheia **publică** (`anon` / `publishable`). Supabase o face publică intenționat: orice site o trimite browserului, iar datele sunt protejate de regulile de securitate din `schema.sql` (fiecare vede doar ce îi aparține, doar adminul poate încărca cărți).
+- Administratorul se stabilește din baza de date (pasul 3), nu printr-o parolă din cod.
+- Parola se schimbă din **Cont → Schimbă parola**; „Ai uitat parola?” trimite un link pe email, iar după deschiderea lui site-ul cere direct parola nouă.
 
 ## 7. Înainte de lansare
 

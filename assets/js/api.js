@@ -7,7 +7,6 @@ import { CONFIG, IS_DEMO } from './config.js';
 import { store, uid, blobs, norm, loadScript } from './util.js';
 import { DEMO_BOOKS } from './demo-data.js';
 
-export const DEMO_ADMIN = { email: 'admin@librava.demo', pass: 'admin123' };
 
 // ---------- shared catalog filtering / sorting ----------
 export function filterBooks(all, o = {}) {
@@ -69,10 +68,12 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
+    // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
-    if (!users.some(u => u.email === DEMO_ADMIN.email)) {
-      users.push({ id: 'u_admin', email: DEMO_ADMIN.email, pass: await sha(DEMO_ADMIN.pass), name: 'Admin', isAdmin: true, createdAt: '2026-01-10T10:00:00Z' });
+    if (users.some(u => u.id === 'u_admin')) {
+      users = users.filter(u => u.id !== 'u_admin');
       store.set('demo:users', users);
+      if (store.get('demo:session') === 'u_admin') store.del('demo:session');
     }
     const sid = store.get('demo:session');
     this._user = this._pub(users.find(u => u.id === sid));
@@ -88,7 +89,9 @@ class DemoAPI {
     if (password.length < 6) throw new Error('acc.err.short');
     const users = store.get('demo:users', []);
     if (users.some(u => u.email === email)) throw new Error('acc.err.exists');
-    const u = { id: uid('u_'), email, pass: await sha(password), name: name || email.split('@')[0], isAdmin: false, createdAt: new Date().toISOString() };
+    // demo only: the first account created in this browser becomes the administrator (no fixed password anywhere)
+    const isAdmin = !users.some(x => x.isAdmin);
+    const u = { id: uid('u_'), email, pass: await sha(password), name: name || email.split('@')[0], isAdmin, createdAt: new Date().toISOString() };
     users.push(u); store.set('demo:users', users); store.set('demo:session', u.id);
     this._user = this._pub(u); this._emit(); return {};
   }
@@ -101,6 +104,15 @@ class DemoAPI {
     store.set('demo:session', u.id); this._user = this._pub(u); this._emit();
   }
   async signInGoogle() { throw new Error('Google login funcționează doar cu Supabase configurat.'); }
+  hasPassword() { return true; }
+  async changePassword(current, next) {
+    if (next.length < 6) throw new Error('acc.err.short');
+    const users = store.get('demo:users', []);
+    const u = users.find(x => x.id === this._user?.id);
+    if (!u) throw new Error('acc.err.invalid');
+    if (u.pass !== await sha(current)) throw new Error('acc.err.currentWrong');
+    u.pass = await sha(next); store.set('demo:users', users);
+  }
   async signOut() { store.del('demo:session'); this._user = null; this._emit(); }
   async resetPassword() { return true; }
   async updateProfile({ name }) {
@@ -267,7 +279,9 @@ class SupabaseAPI {
     this.sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
     const { data } = await this.sb.auth.getSession();
     await this._setSession(data.session);
-    this.sb.auth.onAuthStateChange(async (_e, session) => {
+    this.sb.auth.onAuthStateChange(async (event, session) => {
+      // the visitor opened the "reset password" link from the email
+      if (event === 'PASSWORD_RECOVERY') setTimeout(() => { location.hash = '#/account?mode=newpass'; }, 0);
       const before = this._user?.id;
       await this._setSession(session);
       if (before !== this._user?.id) { this._lib = null; this.listeners.forEach(cb => cb(this._user)); }
@@ -278,6 +292,7 @@ class SupabaseAPI {
     const u = session.user;
     let profile = null;
     try { const r = await this.sb.from('profiles').select('full_name,is_admin,created_at').eq('id', u.id).maybeSingle(); profile = r.data; } catch { }
+    this._providers = (u.app_metadata && u.app_metadata.providers) || [u.app_metadata?.provider].filter(Boolean);
     this._user = { id: u.id, email: u.email, name: profile?.full_name || u.user_metadata?.full_name || u.email.split('@')[0], isAdmin: !!profile?.is_admin, createdAt: profile?.created_at || u.created_at };
   }
   user() { return this._user; }
@@ -299,6 +314,18 @@ class SupabaseAPI {
   async signInGoogle() {
     const { error } = await this.sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + '#/library' } });
     this._err(error);
+  }
+  // accounts created with Google have no password until they set one
+  hasPassword() { return (this._providers || []).includes('email'); }
+  async changePassword(current, next) {
+    if (next.length < 6) throw new Error('acc.err.short');
+    if (current != null && this.hasPassword()) {
+      const { error } = await this.sb.auth.signInWithPassword({ email: this._user.email, password: current });
+      if (error) throw new Error('acc.err.currentWrong');
+    }
+    const { error } = await this.sb.auth.updateUser({ password: next });
+    this._err(error);
+    if (!this._providers.includes('email')) this._providers.push('email');
   }
   async signOut() { await this.sb.auth.signOut(); this._user = null; this._lib = null; this.listeners.forEach(cb => cb(null)); }
   async resetPassword(email) {

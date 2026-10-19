@@ -527,3 +527,5 @@ body.reading::before { background: var(--rd-bg, #F7F6F1); }
 .lang-note { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 14px; }
 .lang-note .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--pista-soft); color: var(--pista-strong); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 13px; }
 .lang-note .chip .ico { width: 16px; height: 16px; }
+
+.pass-recovery { outline: 2px solid var(--pista-strong); }

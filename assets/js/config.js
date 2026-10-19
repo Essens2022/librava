@@ -8,11 +8,11 @@ export const CONFIG = {
 
   // --- Supabase (Settings → API în proiectul tău Supabase) ---
   supabaseUrl: '',        // ex: 'https://abcdxyz.supabase.co'
-  supabaseAnonKey: '',    // cheia "anon" / "publishable" (e sigură în browser)
+  supabaseAnonKey: '',    // DOAR cheia publică "anon" / "publishable". Nu pune aici niciodată
+                          // cheia service_role sau chei Stripe sk_... (acelea stau doar în Supabase secrets).
 
   // --- Magazin ---
   currency: 'EUR',
-  defaultLang: 'ro',            // 'ro' | 'it' | 'en'
   previewPages: 4,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
   previewPercent: 0.25,         // ce procent dintr-un EPUB vede gratuit (în modul demo)
   supportEmail: 'contact@librava.example',
