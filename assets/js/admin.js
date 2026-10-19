@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019205759';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019205759';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261019205759';
-import { api } from './api.js?v=20261019205759';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019205759';
+import { CONFIG } from './config.js?v=20261019213353';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019213353';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261019213353';
+import { api } from './api.js?v=20261019213353';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019213353';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -382,7 +382,7 @@ async function devicePreview(box, doc) {
   }
 }
 
-// ---------------------------------------------------------------- make the images already uploaded light (max 60 KB)
+// ---------------------------------------------------------------- make the images already uploaded light (max 105 KB)
 async function optimizeExisting(btn) {
   const fetchFile = async (url, name) => { const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const b = await r.blob(); return new File([b], name, { type: b.type }); };
   const books = await api.adminBooks();
@@ -392,7 +392,7 @@ async function optimizeExisting(btn) {
     try {
       if (b.cover_url && !/\.svg(\?|$)/i.test(b.cover_url)) {
         const f = await fetchFile(b.cover_url, 'cover');
-        if (f.size > 60 * 1024) { const light = await compressImage(f, { maxW: 1000, maxH: 1600, name: 'cover' }); if (light.size < f.size) { await api.replaceCover(b, light); saved += f.size - light.size; done++; } }
+        if (f.size > 105 * 1024) { const light = await compressImage(f, { maxW: 1200, maxH: 1920, name: 'cover' }); if (light.size < f.size) { await api.replaceCover(b, light); saved += f.size - light.size; done++; } }
       }
       if ((b.aplus || []).length) {
         let changed = false;
@@ -405,7 +405,7 @@ async function optimizeExisting(btn) {
             const clean = { ref: im.ref, w: im.w, h: im.h };
             try {
               const f = await fetchFile(im.url || im.ref, 'aplus');
-              if (f.size > 60 * 1024) {
+              if (f.size > 105 * 1024) {
                 const big = spec.rec && spec.rec[0] > 1000;
                 const light = await compressImage(f, { maxW: big ? 1600 : (spec.rec?.[0] || 970), maxH: big ? 500 : (spec.rec?.[1] || 600), name: 'aplus' });
                 if (light.size < f.size) { const up = await api.uploadAplusImage(b.id, light); clean.ref = up.ref; changed = true; saved += f.size - light.size; done++; }
@@ -787,7 +787,7 @@ function bookForm(body, b, startStep = 1) {
     if (kind === 'cover' && !/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     if (kind === 'cover') {
       const original = file;
-      file = await compressImage(original, { maxW: 1000, maxH: 1600, name: 'cover' });
+      file = await compressImage(original, { maxW: 1200, maxH: 1920, name: 'cover' });
       file._original = original;
     }
     files[kind] = file;

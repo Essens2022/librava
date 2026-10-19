@@ -104,10 +104,10 @@ export function safeHTML(src) {
 }
 export const plainText = s => hasTags(s) ? (new DOMParser().parseFromString(String(s), 'text/html').body.textContent || '') : String(s || '');
 
-// ---- every uploaded image is made light (default max 60 KB) while keeping it sharp:
+// ---- every uploaded image is made light (default max 105 KB) while keeping it sharp:
 // resized to the size the site really shows, saved as WebP (JPEG where the browser can't make WebP),
 // quality lowered step by step only as much as needed.
-export async function compressImage(file, { maxW = 1200, maxH = 1200, maxBytes = 60 * 1024, name = 'image' } = {}) {
+export async function compressImage(file, { maxW = 1200, maxH = 1200, maxBytes = 105 * 1024, name = 'image' } = {}) {
   if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return file;
   const bmp = await new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = rej; im.src = u; });
   let scale = Math.min(1, maxW / bmp.naturalWidth, maxH / bmp.naturalHeight);
