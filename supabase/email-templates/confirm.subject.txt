@@ -1,0 +1,1 @@
+{{ if eq .Data.lang "ro" }}Confirmă-ți contul Librava{{ else if eq .Data.lang "it" }}Conferma il tuo account Librava{{ else if eq .Data.lang "fr" }}Confirmez votre compte Librava{{ else if eq .Data.lang "de" }}Bestätige dein Librava-Konto{{ else if eq .Data.lang "es" }}Confirma tu cuenta de Librava{{ else }}Confirm your Librava account{{ end }}

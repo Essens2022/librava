@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019182842';
-import { getLang } from './i18n.js?v=20261019182842';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019182842';
+import { CONFIG } from './config.js?v=20261019184850';
+import { getLang } from './i18n.js?v=20261019184850';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019184850';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019182842')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019184850')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -368,6 +368,15 @@ class SupabaseAPI {
   async init() {
     await loadScript(new URL('../vendor/supabase.min.js', import.meta.url).href);
     this.sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
+    // links from Librava's emails (confirm account, reset password, change email) come back as
+    // ?token_hash=...&type=...  — verified here, so they work on any device, not only the one that signed up
+    const qp = new URLSearchParams(location.search);
+    const th = qp.get('token_hash'), ty = qp.get('type');
+    if (th && ty) {
+      const { error } = await this.sb.auth.verifyOtp({ token_hash: th, type: ty });
+      const target = error ? '#/account?mode=linkexpired' : ty === 'recovery' ? '#/account?mode=newpass' : '#/library?welcome=1';
+      history.replaceState(null, '', location.pathname + target);
+    }
     const { data } = await this.sb.auth.getSession();
     await this._setSession(data.session);
     this.sb.auth.onAuthStateChange(async (event, session) => {
@@ -392,7 +401,7 @@ class SupabaseAPI {
 
   async signUp({ email, password, name }) {
     if (password.length < 6) throw new Error('acc.err.short');
-    const { data, error } = await this.sb.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: location.origin + location.pathname + '#/account' } });
+    const { data, error } = await this.sb.auth.signUp({ email, password, options: { data: { full_name: name, lang: getLang() }, emailRedirectTo: location.origin + '/' } });
     if (error && /registered|exists/i.test(error.message)) throw new Error('acc.err.exists');
     this._err(error);
     return { needsConfirm: !data.session };
@@ -420,7 +429,12 @@ class SupabaseAPI {
   }
   async signOut() { await this.sb.auth.signOut(); this._user = null; this._lib = null; this.listeners.forEach(cb => cb(null)); }
   async resetPassword(email) {
-    const { error } = await this.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname + '#/account' });
+    const { error } = await this.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/' });
+    this._err(error);
+  }
+  async changeEmail(email) {
+    const { error } = await this.sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + '/' });
+    if (error && /registered|exists/i.test(error.message)) throw new Error('acc.err.exists');
     this._err(error);
   }
   async updateProfile({ name }) {
@@ -453,7 +467,7 @@ class SupabaseAPI {
   // ---- library ----
   async _loadLib() {
     if (!this._user) return [];
-    const { data, error } = await this.sb.from('purchases').select('*, book:books(*)').eq('user_id', this._user.id).order('created_at', { ascending: false });
+    const { data, error } = await this.sb.from('purchases').select('*, book:books(*), order:orders(reference)').eq('user_id', this._user.id).order('created_at', { ascending: false });
     this._err(error);
     this._lib = data.filter(p => p.book).map(p => ({ ...p, book: { ...p.book, cover_url: this._coverUrl(p.book) } }));
     return this._lib;

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261019182842';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019182842';
-import { esc, store, $, $$ } from './util.js?v=20261019182842';
+import { CONFIG } from './config.js?v=20261019184850';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019184850';
+import { esc, store, $, $$ } from './util.js?v=20261019184850';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -11,8 +11,8 @@ export function applyTheme(v = getTheme()) {
   const dark = v === 'dark' || (v === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
-const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261019182842';
+export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
+import { api } from './api.js?v=20261019184850';
 
 // ---------------- icons ----------------
 const P = {
@@ -48,6 +48,9 @@ const P = {
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9s1.2-6.4 3.7-9z"/>',
   file: '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/>',
   image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.6-3.3 8.3-8 9-4.7-.7-8-4.4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1-.8-1.4-.8-2.3 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
 };
 export function icon(name, cls = 'ico') {
@@ -179,7 +182,7 @@ export function renderChrome() {
 }
 
 // ---------------- language button & picker ----------------
-function langBtn(cls) {
+export function langBtn(cls) {
   const l = getLang();
   return `<button class="lang-btn ${cls}" data-lang-open aria-label="${esc(t('nav.chooseLanguage'))}: ${esc(langName(l))}">${icon('globe')}<b>${l.toUpperCase()}</b>${icon('chevD', 'ico chev')}</button>`;
 }
@@ -308,7 +311,7 @@ export function bindGlobal() {
     if (e.target.closest('#scrim') || e.target.closest('#drawer-close')) { openDrawer(false); return; }
     if (e.target.closest('#drawer a')) openDrawer(false);
     const tb = e.target.closest('[data-theme-set]');
-    if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); return; }
+    if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); window.dispatchEvent(new Event('librava:themechange')); return; }
     if (e.target.closest('[data-lang-open]')) { openLangPicker(); return; }
     const lb = e.target.closest('[data-lang]');
     if (lb) {

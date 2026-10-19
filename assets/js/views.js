@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=20261019182842';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019182842';
-import { esc, $, $$ } from './util.js?v=20261019182842';
-import { api } from './api.js?v=20261019182842';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js?v=20261019182842';
+import { CONFIG } from './config.js?v=20261019184850';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019184850';
+import { esc, $, $$ } from './util.js?v=20261019184850';
+import { api } from './api.js?v=20261019184850';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills } from './ui.js?v=20261019184850';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -379,57 +379,161 @@ export async function viewCart(el) {
 // =====================================================================
 //  ACCOUNT (auth + overview)
 // =====================================================================
-export async function viewAccount(el, q) {
+export async function viewAccount(el, q, sub) {
   if (q.get('mode') === 'reset' && q.get('token') && api.resetWithToken) return viewReset(el, q.get('token'));
   const u = api.user();
-  if (!u) return viewAuth(el, q.get('mode') === 'register' ? 'register' : 'login');
-  const orders = await api.orders();
-  const pending = api.pendingOrders ? await api.pendingOrders().catch(() => []) : [];
-  const recovery = q.get('mode') === 'newpass';
-  const needCurrent = !recovery && api.hasPassword();
-  el.innerHTML = `<div class="wrap page" style="max-width:1000px">
-    <h1 style="font-size:28px;font-weight:600;margin-bottom:4px">${esc(t('acc.title'))}</h1>
-    <p class="muted" style="margin:0 0 18px">${esc(u.email)} · ${esc(t('acc.memberSince', { date: fmtDate(u.createdAt) }))}</p>
-    ${pending.length ? `<section class="panel" style="margin-bottom:18px;border:2px solid var(--amber)"><h2 class="section-title" style="font-size:19px;margin-bottom:6px">${esc(t('acc.pending'))}</h2>
-      ${pending.map(o => `<div class="pending-order"><span>${esc(t('acc.pendingItem', { ref: o.reference, amount: money(o.amount_cents, (o.currency || CONFIG.currency).toUpperCase()) }))}</span>
-        <span class="muted" style="font-size:13px">${o.items.map(i => esc(i.title)).join(' · ')}</span></div>`).join('')}
-    </section>` : ''}
-    <div class="account-grid">
-      <a class="panel acc-tile" href="#/library">${icon('library')}<div><b>${esc(t('nav.library'))}</b><span class="muted" style="font-size:14px">${esc(t('lib.emptyHint'))}</span></div></a>
-      ${u.isAdmin ? `<a class="panel acc-tile" href="#/admin">${icon('gear')}<div><b>${esc(t('nav.admin'))}</b><span class="muted" style="font-size:14px">${esc(t('admin.add'))} · ${esc(t('admin.sales'))}</span></div></a>` : ''}
-      <a class="panel acc-tile" href="#/help">${icon('help')}<div><b>${esc(t('nav.help'))}</b><span class="muted" style="font-size:14px">${esc(t('foot.howRead'))}</span></div></a>
+  if (!u) {
+    const r = viewAuth(el, q.get('mode') === 'register' ? 'register' : 'login');
+    if (q.get('mode') === 'linkexpired') { const n = document.createElement('div'); n.className = 'demo-note'; n.textContent = t('acc.linkExpired'); el.querySelector('.auth .panel h1')?.after(n); }
+    return r;
+  }
+  // the "new password" link from the email opens the security page with the password form ready
+  if (q.get('mode') === 'newpass') return accSecurity(el, u, true);
+  if (sub === 'security') return accSecurity(el, u, false);
+  if (sub === 'orders') return accOrders(el);
+  if (sub === 'preferences') return accPreferences(el);
+  return accHome(el, u);
+}
+
+const crumbs = (here) => `<nav class="acc-crumbs"><a href="#/account">${esc(t('acc.title'))}</a><span>›</span><b>${esc(here)}</b></nav>`;
+const initials = n => (String(n || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('') || '?').toUpperCase();
+const cur = o => (o.currency || CONFIG.currency).toUpperCase();
+
+async function accHome(el, u) {
+  const [orders, pending] = await Promise.all([api.orders(), api.pendingOrders ? api.pendingOrders().catch(() => []) : []]);
+  const tile = (href, ic, title, desc) => `<a class="acc-card" href="${href}"><span class="acc-ico">${icon(ic)}</span><span><b>${esc(title)}</b><span>${esc(desc)}</span></span></a>`;
+  el.innerHTML = `<div class="wrap page acc-wrap">
+    <section class="acc-hero">
+      <div class="acc-avatar" aria-hidden="true">${esc(initials(u.name))}</div>
+      <div class="acc-who"><h1>${esc(t('acc.hello', { name: u.name.split(' ')[0] }))}</h1>
+        <p>${esc(u.email)}</p><p class="muted">${esc(t('acc.memberSince', { date: fmtDate(u.createdAt) }))}</p></div>
+      <div class="acc-stats"><div><b>${orders.length}</b><span>${esc(t('acc.statBooks'))}</span></div>
+        ${u.isAdmin ? `<span class="acc-badge">${icon('gear')} ${esc(t('admin.roleAdmin'))}</span>` : ''}</div>
+    </section>
+    ${pending.length ? `<section class="panel acc-pending"><h2>${esc(t('acc.pending'))}</h2>
+      ${pending.map(o => `<div class="pending-order"><span>${esc(t('acc.pendingItem', { ref: o.reference, amount: money(o.amount_cents, cur(o)) }))}</span>
+        <span class="muted" style="font-size:13px">${(o.items || []).map(i => esc(i.title)).join(' · ')}</span></div>`).join('')}</section>` : ''}
+    <div class="acc-cards">
+      ${tile('#/account/orders', 'box', t('acc.tile.orders'), t('acc.tile.ordersDesc'))}
+      ${tile('#/library', 'library', t('nav.library'), t('acc.tile.libraryDesc'))}
+      ${tile('#/account/security', 'shield', t('acc.tile.security'), t('acc.tile.securityDesc'))}
+      ${tile('#/account/preferences', 'palette', t('acc.tile.prefs'), t('acc.tile.prefsDesc'))}
+      ${tile('#/help', 'help', t('acc.tile.help'), t('acc.tile.helpDesc'))}
+      ${u.isAdmin ? tile('#/admin', 'chart', t('nav.admin'), t('acc.tile.adminDesc')) : ''}
     </div>
-    <section class="panel" style="margin-top:18px"><h2 class="section-title" style="font-size:19px">${esc(t('acc.orders'))}</h2>
-      ${orders.length ? orders.map(o => `<div class="order">
-        <a href="#/book/${encodeURIComponent(o.book_id)}">${o.book ? coverHTML(o.book, { badge: false }) : ''}</a>
-        <div style="min-width:0"><b>${esc(o.book?.title || '')}</b><div class="muted" style="font-size:13px">${esc(t('acc.order', { date: fmtDate(o.created_at) }))}</div></div>
-        <div style="text-align:right"><div class="price" style="font-size:15px">${o.price_cents ? money(o.price_cents, (o.currency || CONFIG.currency).toUpperCase()) : esc(t('book.free'))}</div><a href="#/read/${encodeURIComponent(o.book_id)}" style="font-size:13px">${esc(t('book.readNow'))}</a></div>
-      </div>`).join('') : `<p class="muted">${esc(t('acc.ordersEmpty'))}</p>`}
+    <section class="panel acc-recent">
+      <div class="acc-sec-head"><h2>${esc(t('acc.recentOrders'))}</h2>${orders.length ? `<a href="#/account/orders">${esc(t('acc.seeAllOrders'))}</a>` : ''}</div>
+      ${orders.length ? `<div class="acc-recent-row">${orders.slice(0, 6).map(o => o.book ? `<a class="acc-mini" href="#/read/${encodeURIComponent(o.book_id)}" title="${esc(o.book.title)}">${coverHTML(o.book, { badge: false })}<span>${esc(o.book.title)}</span></a>` : '').join('')}</div>`
+        : `<p class="muted" style="margin:0">${esc(t('acc.ordersEmpty'))} <a href="#/">${esc(t('acc.startShopping'))}</a></p>`}
     </section>
-    <section class="panel" style="margin-top:18px"><h2 class="section-title" style="font-size:19px;margin-bottom:12px">${esc(t('acc.profile'))}</h2>
-      <form id="prof" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-        <label class="field" style="flex:1;min-width:200px"><span>${esc(t('acc.name'))}</span><input id="prof-name" value="${esc(u.name)}" required maxlength="80"></label>
-        <button class="btn btn-dark" type="submit">${esc(t('acc.save'))}</button>
-      </form>
-      <button class="btn btn-ghost" style="margin-top:16px" data-signout>${icon('logout')} ${esc(t('acc.signOut'))}</button>
-    </section>
-    <section class="panel ${recovery ? 'pass-recovery' : ''}" id="password" style="margin-top:18px"><h2 class="section-title" style="font-size:19px;margin-bottom:12px">${esc(recovery ? t('acc.setNewPass') : t('acc.changePass'))}</h2>
-      <form id="pass-form" class="form-grid" novalidate autocomplete="on">
-        <input type="email" autocomplete="username" value="${esc(u.email)}" hidden>
-        ${needCurrent ? `<label class="field full"><span>${esc(t('acc.currentPass'))}</span><input id="pw-cur" type="password" autocomplete="current-password" required></label>` : ''}
-        <label class="field"><span>${esc(t('acc.newPass'))}</span><input id="pw-new" type="password" autocomplete="new-password" required minlength="6"></label>
-        <label class="field"><span>${esc(t('acc.confirmPass'))}</span><input id="pw-new2" type="password" autocomplete="new-password" required minlength="6"></label>
-        <div class="error full" id="pw-err" hidden></div>
-        <div class="full"><button class="btn btn-dark" type="submit">${esc(t('acc.save'))}</button></div>
-      </form>
-    </section>
-    ${api.deleteAccount && !u.isAdmin ? `<section class="panel danger-zone" style="margin-top:18px"><h2 class="section-title" style="font-size:19px;margin-bottom:6px">${esc(t('acc.delete'))}</h2>
-      <p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('acc.deleteText'))}</p>
+    <div class="acc-signout"><button class="btn btn-ghost" data-signout>${icon('logout')} ${esc(t('acc.signOut'))}</button></div>
+  </div>`;
+}
+
+async function accOrders(el) {
+  const list = await api.orders();
+  // group the books bought together into one order, like a receipt
+  const groups = [];
+  for (const p of list) {
+    const key = p.order_id || ('p' + p.id);
+    let g = groups.find(x => x.key === key);
+    if (!g) { g = { key, ref: p.order?.reference || p.reference || null, date: p.created_at, items: [], total: 0, currency: cur(p), gift: !!p.gift }; groups.push(g); }
+    g.items.push(p); g.total += p.price_cents || 0;
+  }
+  el.innerHTML = `<div class="wrap page acc-wrap">${crumbs(t('acc.tile.orders'))}
+    <h1 class="acc-h1">${esc(t('acc.tile.orders'))}</h1>
+    ${groups.length ? groups.map(g => `<article class="order-card">
+      <header><div><span>${esc(t('ord.date'))}</span><b>${esc(fmtDate(g.date))}</b></div>
+        <div><span>${esc(t('ord.total'))}</span><b>${g.total ? esc(money(g.total, g.currency)) : esc(g.gift ? t('ord.gift') : t('book.free'))}</b></div>
+        <div class="ord-num"><span>${esc(t('ord.number'))}</span><b>${esc(g.ref || '—')}</b></div></header>
+      ${g.items.map(p => `<div class="order-line">
+        <a href="#/book/${encodeURIComponent(p.book_id)}" class="ol-cover">${p.book ? coverHTML(p.book, { badge: false }) : ''}</a>
+        <div class="ol-info"><a href="#/book/${encodeURIComponent(p.book_id)}"><b>${esc(p.book?.title || '')}</b></a>
+          <div class="muted">${esc(p.book?.author || '')}</div>
+          <div class="ol-price">${p.price_cents ? esc(money(p.price_cents, cur(p))) : esc(p.gift ? t('ord.gift') : t('book.free'))}</div></div>
+        <div class="ol-actions"><a class="btn btn-cart btn-sm" href="#/read/${encodeURIComponent(p.book_id)}">${esc(t('book.readNow'))}</a>
+          <a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(p.book_id)}#reviews">${esc(t('ord.review'))}</a></div>
+      </div>`).join('')}
+    </article>`).join('') : `<div class="panel empty">${icon('box')}<p>${esc(t('acc.ordersEmpty'))}</p><a class="btn btn-buy" href="#/">${esc(t('acc.startShopping'))}</a></div>`}
+  </div>`;
+}
+
+function accPreferences(el) {
+  const draw = () => {
+    el.innerHTML = `<div class="wrap page acc-wrap">${crumbs(t('acc.tile.prefs'))}
+      <h1 class="acc-h1">${esc(t('acc.tile.prefs'))}</h1>
+      <div class="sec-list">
+        <div class="sec-row"><div><b>${esc(t('nav.chooseLanguage'))}</b><span>${esc(langName(getLang()))}</span><small class="muted">${esc(t('acc.prefLangHint'))}</small></div>${langBtn('lang-btn-light')}</div>
+        <div class="sec-row"><div><b>${esc(t('nav.theme'))}</b><small class="muted">${esc(t('acc.prefThemeHint'))}</small></div>${themePills()}</div>
+      </div></div>`;
+  };
+  draw();
+  const re = () => draw();
+  window.addEventListener('librava:themechange', re);
+  return () => window.removeEventListener('librava:themechange', re);
+}
+
+function accSecurity(el, u, recovery) {
+  const needCurrent = !recovery && api.hasPassword();
+  const canEmail = !!api.changeEmail;
+  el.innerHTML = `<div class="wrap page acc-wrap">${crumbs(t('acc.tile.security'))}
+    <h1 class="acc-h1">${esc(t('acc.tile.security'))}</h1>
+    <div class="sec-list">
+      <div class="sec-row" data-row="name"><div><b>${esc(t('acc.name'))}</b><span>${esc(u.name)}</span></div><button class="btn btn-ghost btn-sm" data-edit="name">${esc(t('sec.edit'))}</button>
+        <form class="sec-form" id="f-name" hidden><label class="field"><span>${esc(t('acc.name'))}</span><input id="prof-name" value="${esc(u.name)}" required maxlength="80" autocomplete="name"></label>
+          <div class="sec-btns"><button class="btn btn-dark btn-sm" type="submit">${esc(t('acc.save'))}</button><button class="btn btn-ghost btn-sm" type="button" data-cancel>${esc(t('sec.cancel'))}</button></div></form></div>
+      <div class="sec-row" data-row="email"><div><b>${esc(t('acc.email'))}</b><span>${esc(u.email)}</span></div>${canEmail ? `<button class="btn btn-ghost btn-sm" data-edit="email">${esc(t('sec.edit'))}</button>` : ''}
+        ${canEmail ? `<form class="sec-form" id="f-email" hidden novalidate><label class="field"><span>${esc(t('sec.newEmail'))}</span><input id="new-email" type="email" required autocomplete="email"></label>
+          <small class="muted">${esc(t('sec.emailHint'))}</small><div class="error" id="em-err" hidden></div>
+          <div class="sec-btns"><button class="btn btn-dark btn-sm" type="submit">${esc(t('acc.save'))}</button><button class="btn btn-ghost btn-sm" type="button" data-cancel>${esc(t('sec.cancel'))}</button></div></form>` : ''}</div>
+      <div class="sec-row ${recovery ? 'open pass-recovery' : ''}" data-row="password" id="password"><div><b>${esc(recovery ? t('acc.setNewPass') : t('acc.password'))}</b><span>••••••••</span></div>${recovery ? '' : `<button class="btn btn-ghost btn-sm" data-edit="password">${esc(t('sec.edit'))}</button>`}
+        <form id="pass-form" class="sec-form form-grid" ${recovery ? '' : 'hidden'} novalidate autocomplete="on">
+          <input type="email" autocomplete="username" value="${esc(u.email)}" hidden>
+          ${needCurrent ? `<label class="field full"><span>${esc(t('acc.currentPass'))}</span><input id="pw-cur" type="password" autocomplete="current-password" required></label>` : ''}
+          <label class="field"><span>${esc(t('acc.newPass'))}</span><input id="pw-new" type="password" autocomplete="new-password" required minlength="6"></label>
+          <label class="field"><span>${esc(t('acc.confirmPass'))}</span><input id="pw-new2" type="password" autocomplete="new-password" required minlength="6"></label>
+          <div class="error full" id="pw-err" hidden></div>
+          <div class="full sec-btns"><button class="btn btn-dark btn-sm" type="submit">${esc(t('acc.save'))}</button>${recovery ? '' : `<button class="btn btn-ghost btn-sm" type="button" data-cancel>${esc(t('sec.cancel'))}</button>`}</div>
+        </form></div>
+    </div>
+    ${api.deleteAccount && !u.isAdmin ? `<details class="sec-close"><summary>${esc(t('sec.closeAccount'))}</summary>
+      <div class="panel danger-zone"><p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('acc.deleteText'))}</p>
       <form id="del-form" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap" novalidate>
         <label class="field" style="flex:1;min-width:200px"><span>${esc(t('acc.deleteConfirm'))}</span><input id="del-pass" type="password" autocomplete="current-password" required></label>
         <button class="btn btn-ghost" type="submit" style="color:var(--deal);border-color:var(--deal)">${esc(t('acc.deleteBtn'))}</button>
-      </form><div class="error" id="del-err" hidden></div></section>` : ''}
+      </form><div class="error" id="del-err" hidden></div></div></details>` : ''}
   </div>`;
+  const open = (row, on) => { const r = $(`[data-row="${row}"]`, el); r.classList.toggle('open', on); const f = r.querySelector('form'); if (f) { f.hidden = !on; if (on) f.querySelector('input:not([hidden])')?.focus(); } };
+  $$('[data-edit]', el).forEach(b => b.onclick = () => open(b.dataset.edit, true));
+  $$('[data-cancel]', el).forEach(b => b.onclick = () => open(b.closest('[data-row]').dataset.row, false));
+  $('#f-name', el).onsubmit = async e => {
+    e.preventDefault();
+    try { await api.updateProfile({ name: $('#prof-name', el).value.trim() }); toast(t('acc.saved')); accSecurity(el, api.user(), false); }
+    catch (x) { toast(errText(x), { error: true }); }
+  };
+  $('#f-email', el)?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#em-err', el); err.hidden = true;
+    const v = $('#new-email', el).value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { err.textContent = t('acc.err.emailInvalid'); err.hidden = false; return; }
+    try { await api.changeEmail(v); toast(t('sec.emailSent', { email: v }), { ms: 6000 }); open('email', false); }
+    catch (x) { err.textContent = errText(x); err.hidden = false; }
+  });
+  const pf = $('#pass-form', el);
+  pf.onsubmit = async e => {
+    e.preventDefault();
+    const err = $('#pw-err', el); err.hidden = true;
+    const c = needCurrent ? $('#pw-cur', el).value : null, n1 = $('#pw-new', el).value, n2 = $('#pw-new2', el).value;
+    const fail = m => { err.textContent = m; err.hidden = false; };
+    if (needCurrent && !c) return fail(t('acc.err.currentWrong'));
+    if (n1.length < 6) return fail(t('acc.err.short'));
+    if (n1 !== n2) return fail(t('acc.err.mismatch'));
+    const btn = pf.querySelector('button[type=submit]'); btn.disabled = true;
+    try { await api.changePassword(c, n1); toast(t('acc.passChanged')); go('/account/security'); }
+    catch (x) { fail(errText(x)); }
+    btn.disabled = false;
+  };
+  if (recovery) setTimeout(() => $('#pw-new', el)?.focus(), 50);
   $('#del-form', el)?.addEventListener('submit', async e => {
     e.preventDefault();
     const err = $('#del-err', el); err.hidden = true;
@@ -439,25 +543,6 @@ export async function viewAccount(el, q) {
     try { await api.deleteAccount(pw); toast(t('acc.deleted')); go('/'); }
     catch (x) { err.textContent = errText(x); err.hidden = false; }
   });
-  const pf = $('#pass-form', el);
-  pf.onsubmit = async e => {
-    e.preventDefault();
-    const err = $('#pw-err', el); err.hidden = true;
-    const cur = needCurrent ? $('#pw-cur', el).value : null, n1 = $('#pw-new', el).value, n2 = $('#pw-new2', el).value;
-    const fail = m => { err.textContent = m; err.hidden = false; };
-    if (needCurrent && !cur) return fail(t('acc.err.currentWrong'));
-    if (n1.length < 6) return fail(t('acc.err.short'));
-    if (n1 !== n2) return fail(t('acc.err.mismatch'));
-    const btn = pf.querySelector('button[type=submit]'); btn.disabled = true;
-    try {
-      await api.changePassword(cur, n1);
-      pf.reset(); toast(t('acc.passChanged'));
-      if (recovery) go('/account');
-    } catch (x) { fail(errText(x)); }
-    btn.disabled = false;
-  };
-  if (recovery) setTimeout(() => $('#password', el).scrollIntoView({ block: 'center' }), 50);
-  $('#prof', el).onsubmit = async e => { e.preventDefault(); try { await api.updateProfile({ name: $('#prof-name', el).value.trim() }); toast(t('acc.saved')); } catch (err) { toast(errText(err), { error: true }); } };
 }
 
 // opened from the "reset password" email (own server)
@@ -536,6 +621,7 @@ export async function viewLibrary(el, q) {
     sessionStorage.setItem('librava:after', '/library');
     return;
   }
+  if (q.get('welcome')) toast(t('acc.emailConfirmed'));
   if (q.get('paid')) {
     toast(t('pay.success'));
     // the payment confirmation from Stripe can take a few seconds to arrive

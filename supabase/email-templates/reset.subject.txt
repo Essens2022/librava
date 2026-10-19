@@ -1,0 +1,1 @@
+{{ if eq .Data.lang "ro" }}Resetează parola Librava{{ else if eq .Data.lang "it" }}Reimposta la password di Librava{{ else if eq .Data.lang "fr" }}Réinitialisez votre mot de passe Librava{{ else if eq .Data.lang "de" }}Setze dein Librava-Passwort zurück{{ else if eq .Data.lang "es" }}Restablece tu contraseña de Librava{{ else }}Reset your Librava password{{ end }}
