@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js';
-import { esc, $, $$ } from './util.js';
-import { api } from './api.js';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js';
+import { CONFIG } from './config.js?v=20261019182842';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019182842';
+import { esc, $, $$ } from './util.js?v=20261019182842';
+import { api } from './api.js?v=20261019182842';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount } from './ui.js?v=20261019182842';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
