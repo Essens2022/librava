@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261019185522';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019185522';
-import { esc, store, $, $$ } from './util.js?v=20261019185522';
+import { CONFIG } from './config.js?v=20261019201923';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019201923';
+import { esc, store, $, $$ } from './util.js?v=20261019201923';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,7 +12,7 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261019185522';
+import { api } from './api.js?v=20261019201923';
 
 // ---------------- icons ----------------
 const P = {
@@ -203,6 +203,19 @@ export function openDrawer(open) {
 }
 
 // ---------------- book card ----------------
+// "From the author" (A+) modules shown on the book page
+export function aplusHTML(mods = []) {
+  const img = im => im && (im.url || im.ref) ? `<img src="${esc(im.url || im.ref)}" alt="" loading="lazy">` : '';
+  const txt = (title, text, tag = 'h3') => `${title ? `<${tag}>${esc(title)}</${tag}>` : ''}${text ? `<p>${esc(text).replace(/\n/g, '<br>')}</p>` : ''}`;
+  const filled = m => (m.imgs || []).some(i => i && (i.url || i.ref)) || m.title || m.text || (m.caps || []).some(c => c && (c.title || c.text));
+  return `<div class="aplus">${mods.filter(filled).map(m => {
+    if (m.type === 'banner') return `<div class="ap-banner">${img(m.imgs?.[0])}${m.title ? `<h3>${esc(m.title)}</h3>` : ''}</div>`;
+    if (m.type === 'image_text') return `<div class="ap-it-view ${m.side === 'right' ? 'right' : ''}">${img(m.imgs?.[0])}<div>${txt(m.title, m.text)}</div></div>`;
+    if (m.type === 'three') return `<div class="ap-three-view">${[0, 1, 2].map(k => `<div>${img(m.imgs?.[k])}${txt(m.caps?.[k]?.title, m.caps?.[k]?.text, 'h4')}</div>`).join('')}</div>`;
+    if (m.type === 'text') return `<div class="ap-text-view">${txt(m.title, m.text)}</div>`;
+    return '';
+  }).join('')}</div>`;
+}
 export function coverHTML(b, { badge = true } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';

@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019185522';
-import { getLang } from './i18n.js?v=20261019185522';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019185522';
+import { CONFIG } from './config.js?v=20261019201923';
+import { getLang } from './i18n.js?v=20261019201923';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261019201923';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019185522')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261019201923')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -145,6 +145,12 @@ class DemoAPI {
           b['_' + key] = b[key];
           b[key] = blob ? URL.createObjectURL(blob) : (key === 'cover_url' ? '' : null);
         }
+      }
+      if (Array.isArray(b.aplus)) {
+        b.aplus = await Promise.all(b.aplus.map(async m => ({ ...m, imgs: await Promise.all((m.imgs || []).map(async im => {
+          if (!String(im.ref || '').startsWith('idb:')) return { ...im, url: im.ref };
+          const blob = await blobs.get(im.ref.slice(4)); return { ...im, url: blob ? URL.createObjectURL(blob) : '' };
+        })) })));
       }
       const rs = reviews.filter(r => r.book_id === b.id);
       b.rating_count = rs.length;
@@ -265,6 +271,11 @@ class DemoAPI {
     store.set('demo:books', custom);
     await this._loadCatalog();
     return id;
+  }
+  async uploadAplusImage(bookId, file) {
+    const key = 'aplus:' + (bookId || 'new') + ':' + uid('');
+    await blobs.put(key, file);
+    return { ref: 'idb:' + key, url: URL.createObjectURL(file) };
   }
   // soft delete: hidden from the store, buyers keep it in their library (same as the Supabase version)
   async deleteBook(id) {
@@ -547,6 +558,13 @@ class SupabaseAPI {
   async _upload(bucket, path, file) {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
+  }
+  async uploadAplusImage(bookId, file) {
+    const ext = fileExt(file.name) || 'jpg';
+    const p = `${bookId || 'new'}/aplus/${crypto.randomUUID()}.${ext}`;
+    await this._upload('covers', p, file);
+    const url = this.sb.storage.from('covers').getPublicUrl(p).data.publicUrl;
+    return { ref: url, url };
   }
   async saveBook(data, files = {}) {
     const id = data.id || crypto.randomUUID();

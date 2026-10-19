@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019185522';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019185522';
-import { esc, $, $$, loadScript, norm, debounce } from './util.js?v=20261019185522';
-import { api } from './api.js?v=20261019185522';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars } from './ui.js?v=20261019185522';
+import { CONFIG } from './config.js?v=20261019201923';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019201923';
+import { esc, $, $$, loadScript, norm, debounce } from './util.js?v=20261019201923';
+import { api } from './api.js?v=20261019201923';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019201923';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -38,7 +38,7 @@ export async function viewAdmin(el, parts) {
   const body = $('#adm-body', el);
   switch (tab) {
     case 'new': return bookForm(body, null);
-    case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null, Math.min(3, Math.max(1, parseInt(parts[2]) || 1))); }
+    case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }
     case 'books': return booksList(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
@@ -129,7 +129,7 @@ async function booksList(body) {
       <thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('admin.colPrice'))}</th><th class="num">${esc(t('admin.colSales'))}</th><th class="num">${esc(t('admin.colRevenue'))}</th><th>${esc(t('admin.colRating'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
       <tbody>${books.map(b => `<tr data-row data-q="${esc(norm(b.title + ' ' + b.author))}" data-st="${b.status}" data-lang="${b.language}" data-cat="${b.category}">
         <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
-          <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[1, 2, 3].map(n => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t('kdp.edit' + n))}</a>`).join('')}</div></div></div></td>
+          <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
         <td class="num">${b.sales_count || 0}</td>
         <td class="num">${money(b.revenue_cents || 0)}</td>
@@ -249,12 +249,207 @@ async function reviews(body) {
   });
 }
 
+// ---------------------------------------------------------------- manuscript check (sizes, readability on phone & tablet)
+const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
+async function pdfLib() {
+  await loadScript(VENDOR('pdf.min.js'));
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = VENDOR('pdf.worker.min.js');
+  return window.pdfjsLib;
+}
+const cm = pt => (pt / 72 * 2.54).toFixed(1).replace('.', ',');
+async function analyzeManuscript(file, bookLang) {
+  const items = [], meta = { name: file.name, size: file.size };
+  const add = (level, key, vars) => items.push({ level, text: t(key, vars) });
+  const mb = file.size / 1048576;
+  if (mb > 500) add('error', 'fc.tooBig', { mb: mb.toFixed(0) });
+  else if (mb > 150) add('warn', 'fc.big', { mb: mb.toFixed(0) });
+  else add('ok', 'fc.sizeOk', { mb: mb.toFixed(1) });
+  if (/\.pdf$/i.test(file.name)) {
+    meta.kind = 'pdf';
+    let doc;
+    try { const lib = await pdfLib(); doc = await lib.getDocument({ data: await file.arrayBuffer() }).promise; }
+    catch (e) { add('error', /password/i.test(e?.name + e?.message) ? 'fc.pdfLocked' : 'fc.pdfBroken'); return { items, meta }; }
+    meta.pages = doc.numPages;
+    const sizes = new Map();
+    const n = Math.min(doc.numPages, 400);
+    for (let i = 1; i <= n; i++) {
+      const pg = await doc.getPage(i); const vp = pg.getViewport({ scale: 1 });
+      const k = Math.round(vp.width / 3) * 3 + 'x' + Math.round(vp.height / 3) * 3;
+      sizes.set(k, (sizes.get(k) || 0) + 1); pg.cleanup();
+    }
+    const [main] = [...sizes.entries()].sort((a, b) => b[1] - a[1]);
+    const [w, h] = main[0].split('x').map(Number);
+    meta.page = { w, h };
+    add('ok', 'fc.pages', { n: doc.numPages });
+    const ratio = h / w;
+    const dims = { w: cm(w), h: cm(h), r: ratio.toFixed(2).replace('.', ',') };
+    if (ratio < 1) add('warn', 'fc.landscape', dims);
+    else if (ratio < 1.2) add('warn', 'fc.square', dims);
+    else if (ratio > 1.85) add('warn', 'fc.tall', dims);
+    else add('ok', 'fc.ratioOk', dims);
+    if (w / 72 * 2.54 > 30) add('warn', 'fc.hugePage', dims);
+    else if (w / 72 * 2.54 < 8) add('warn', 'fc.tinyPage', dims);
+    if (sizes.size > 1) add('warn', 'fc.mixed', { n: doc.numPages - main[1] });
+    // text or only pictures? and how sharp are the pictures?
+    let textPages = 0, minDpi = null;
+    const OPS = window.pdfjsLib.OPS;
+    for (let i = 1; i <= Math.min(doc.numPages, 6); i++) {
+      const pg = await doc.getPage(i);
+      try { const tc = await pg.getTextContent(); if (tc.items.some(x => (x.str || '').trim())) textPages++; } catch { }
+      try {
+        // follow the drawing transforms to know how big each picture is on the page → its real dpi
+        const ol = await pg.getOperatorList(); const vp = pg.getViewport({ scale: 1 });
+        let m = [1, 0, 0, 1, 0, 0]; const stack = [];
+        const mul = (a, b) => [a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1], a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5]];
+        for (let j = 0; j < ol.fnArray.length; j++) {
+          const fn = ol.fnArray[j], args = ol.argsArray[j];
+          if (fn === OPS.save) stack.push(m);
+          else if (fn === OPS.restore) m = stack.pop() || [1, 0, 0, 1, 0, 0];
+          else if (fn === OPS.transform) m = mul(m, args);
+          else if (fn === OPS.paintImageXObject && args && args[1]) {
+            const drawnW = Math.hypot(m[0], m[1]);
+            if (drawnW > vp.width * 0.4) { const dpi = args[1] / (drawnW / 72); minDpi = minDpi === null ? dpi : Math.min(minDpi, dpi); }
+          }
+        }
+      } catch { }
+      pg.cleanup();
+    }
+    if (!textPages) add('warn', 'fc.noText');
+    if (minDpi !== null) {
+      const d = Math.round(minDpi);
+      if (d < 120) add('warn', 'fc.lowDpi', { dpi: d }); else if (d < 200) add('warn', 'fc.midDpi', { dpi: d }); else add('ok', 'fc.dpiOk', { dpi: d });
+      meta.dpi = d;
+    }
+    meta.doc = doc;   // kept for the phone / tablet preview, removed before saving
+  } else if (/\.epub$/i.test(file.name)) {
+    meta.kind = 'epub';
+    try {
+      await loadScript(VENDOR('jszip.min.js'));
+      const zip = await window.JSZip.loadAsync(file);
+      if (zip.file('META-INF/encryption.xml')) { add('error', 'fc.epubDrm'); return { items, meta }; }
+      const cont = await zip.file('META-INF/container.xml')?.async('string');
+      const opfPath = cont && /full-path="([^"]+)"/.exec(cont)?.[1];
+      const opfTxt = opfPath && await zip.file(opfPath)?.async('string');
+      if (!opfTxt) { add('error', 'fc.epubBroken'); return { items, meta }; }
+      const opf = new DOMParser().parseFromString(opfTxt, 'application/xml');
+      const version = opf.documentElement.getAttribute('version') || '?';
+      const manifest = [...opf.getElementsByTagName('item')];
+      const spine = opf.getElementsByTagName('itemref').length;
+      const images = manifest.filter(i => /^image\//.test(i.getAttribute('media-type') || ''));
+      const fixed = /pre-paginated/.test(opfTxt);
+      const hasToc = manifest.some(i => /\bnav\b/.test(i.getAttribute('properties') || '') || /ncx/.test(i.getAttribute('media-type') || ''));
+      const hasCover = manifest.some(i => /cover-image/.test(i.getAttribute('properties') || '')) || /name="cover"/.test(opfTxt);
+      const lang = (opf.getElementsByTagName('dc:language')[0]?.textContent || '').trim().slice(0, 2).toLowerCase();
+      meta.epub = { version, chapters: spine, images: images.length, fixed };
+      add('ok', 'fc.epubOk', { v: version, n: spine });
+      if (fixed) add('warn', 'fc.epubFixed'); else add('ok', 'fc.epubReflow');
+      if (!hasToc) add('warn', 'fc.epubNoToc');
+      if (!hasCover) add('warn', 'fc.epubNoCover');
+      if (lang && bookLang && lang !== bookLang) add('warn', 'fc.epubLang', { a: lang.toUpperCase(), b: bookLang.toUpperCase() });
+      // very large pictures make phones slow
+      let big = 0;
+      for (const im of images.slice(0, 60)) {
+        const href = im.getAttribute('href'); const base = opfPath.includes('/') ? opfPath.replace(/[^/]+$/, '') : '';
+        const f = zip.file(base + decodeURIComponent(href)); if (!f) continue;
+        const sz = (await f.async('uint8array')).length; if (sz > 3 * 1048576) big++;
+      }
+      if (big) add('warn', 'fc.epubBigImages', { n: big });
+    } catch { add('error', 'fc.epubBroken'); }
+  }
+  return { items, meta };
+}
+
+// shows the first page inside a phone and a tablet frame, at the size the reader will use
+async function devicePreview(box, doc) {
+  box.innerHTML = `<div class="dev-row"><figure class="dev phone"><div class="screen"><canvas></canvas></div><figcaption>${esc(t('fc.onPhone'))}</figcaption></figure>
+    <figure class="dev tablet"><div class="screen"><canvas></canvas></div><figcaption>${esc(t('fc.onTablet'))}</figcaption></figure></div>`;
+  const page = await doc.getPage(1);
+  for (const fig of box.querySelectorAll('.dev')) {
+    const scr = fig.querySelector('.screen'), cv = fig.querySelector('canvas');
+    const W = scr.clientWidth, H = scr.clientHeight;
+    const vp1 = page.getViewport({ scale: 1 });
+    const scale = Math.min(W / vp1.width, H / vp1.height);
+    const vp = page.getViewport({ scale: scale * 2 });
+    cv.width = vp.width; cv.height = vp.height; cv.style.width = (vp.width / 2) + 'px'; cv.style.height = (vp.height / 2) + 'px';
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+  }
+}
+
+// ---------------------------------------------------------------- A+ content editor
+const APLUS = {
+  banner: { imgs: 1, rec: [1940, 600], min: [970, 300] },
+  image_text: { imgs: 1, rec: [600, 600], min: [300, 300] },
+  three: { imgs: 3, rec: [600, 600], min: [300, 300] },
+  text: { imgs: 0 },
+};
+function imgSize(file) {
+  return new Promise(res => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 0, h: 0 }); im.src = u; });
+}
+function aplusEditor(root, modules, getBookId) {
+  const draw = () => {
+    root.innerHTML = `${modules.length ? '' : `<p class="muted" style="margin:0">${esc(t('ap.empty'))}</p>`}
+      ${modules.map((m, i) => {
+        const spec = APLUS[m.type];
+        const imgSlot = k => { const im = (m.imgs || [])[k]; return `<label class="ap-img ${im ? 'has' : ''}" data-img="${i}:${k}">${im ? `<img src="${esc(im.url || im.ref)}" alt="">` : `${icon('image')}<small>${esc(t('ap.addImage'))}<br>${spec.rec[0]} × ${spec.rec[1]} px</small>`}<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>${im?.warn ? `<div class="kdp-warn">${esc(im.warn)}</div>` : ''}`; };
+        return `<div class="ap-mod" data-i="${i}"><div class="ap-head"><b>${i + 1}. ${esc(t('ap.type.' + m.type))}</b>
+          <span><button type="button" class="btn btn-ghost btn-sm" data-up="${i}" ${i ? '' : 'disabled'} aria-label="↑">↑</button><button type="button" class="btn btn-ghost btn-sm" data-down="${i}" ${i < modules.length - 1 ? '' : 'disabled'} aria-label="↓">↓</button><button type="button" class="btn btn-ghost btn-sm" data-rm="${i}">${esc(t('admin.delete'))}</button></span></div>
+          ${m.type === 'banner' ? `${imgSlot(0)}<input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.headline'))}" value="${esc(m.title || '')}">` : ''}
+          ${m.type === 'image_text' ? `<div class="ap-it ${m.side === 'right' ? 'right' : ''}">${imgSlot(0)}<div class="ap-col"><input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.title'))}" value="${esc(m.title || '')}"><textarea class="input" data-f="text" maxlength="1500" rows="5" placeholder="${esc(t('ap.text'))}">${esc(m.text || '')}</textarea>
+            <label class="check"><input type="checkbox" data-side ${m.side === 'right' ? 'checked' : ''}> ${esc(t('ap.imageRight'))}</label></div></div>` : ''}
+          ${m.type === 'three' ? `<div class="ap-three">${[0, 1, 2].map(k => `<div>${imgSlot(k)}<input class="input" data-cap="${k}" data-cf="title" maxlength="80" placeholder="${esc(t('ap.title'))}" value="${esc(m.caps?.[k]?.title || '')}"><textarea class="input" data-cap="${k}" data-cf="text" maxlength="400" rows="3" placeholder="${esc(t('ap.text'))}">${esc(m.caps?.[k]?.text || '')}</textarea></div>`).join('')}</div>` : ''}
+          ${m.type === 'text' ? `<input class="input" data-f="title" maxlength="120" placeholder="${esc(t('ap.title'))}" value="${esc(m.title || '')}"><textarea class="input" data-f="text" maxlength="3000" rows="6" placeholder="${esc(t('ap.text'))}">${esc(m.text || '')}</textarea>` : ''}
+        </div>`;
+      }).join('')}
+      ${modules.length < 7 ? `<div class="ap-add"><span class="muted">${esc(t('ap.addModule'))}</span>${Object.keys(APLUS).map(k => `<button type="button" class="btn btn-ghost btn-sm" data-add="${k}">+ ${esc(t('ap.type.' + k))}</button>`).join('')}</div>` : `<p class="muted">${esc(t('ap.max'))}</p>`}
+      ${modules.length ? `<button type="button" class="btn btn-ghost btn-sm" data-preview-aplus>${icon('eye')} ${esc(t('ap.preview'))}</button>` : ''}`;
+  };
+  draw();
+  root.addEventListener('input', e => {
+    const mod = e.target.closest('.ap-mod'); if (!mod) return; const m = modules[+mod.dataset.i];
+    if (e.target.dataset.f) m[e.target.dataset.f] = e.target.value;
+    if (e.target.dataset.cap != null) { m.caps = m.caps || [{}, {}, {}]; m.caps[+e.target.dataset.cap] = { ...(m.caps[+e.target.dataset.cap] || {}), [e.target.dataset.cf]: e.target.value }; }
+  });
+  root.addEventListener('change', async e => {
+    const mod = e.target.closest('.ap-mod'); if (!mod) return; const m = modules[+mod.dataset.i];
+    if (e.target.matches('[data-side]')) { m.side = e.target.checked ? 'right' : 'left'; draw(); return; }
+    if (e.target.type === 'file') {
+      const file = e.target.files[0]; if (!file) return;
+      const [mi, k] = e.target.closest('[data-img]').dataset.img.split(':').map(Number);
+      const spec = APLUS[modules[mi].type], { w, h } = await imgSize(file);
+      let warn = '';
+      if (w < spec.min[0] || h < spec.min[1]) warn = t('ap.tooSmall', { w, h, mw: spec.min[0], mh: spec.min[1] });
+      else if (Math.abs(w / h - spec.rec[0] / spec.rec[1]) > 0.15 * (spec.rec[0] / spec.rec[1])) warn = t('ap.ratio', { w, h, rw: spec.rec[0], rh: spec.rec[1] });
+      const slot = e.target.closest('[data-img]'); slot.classList.add('busy');
+      try {
+        const up = await api.uploadAplusImage(getBookId(), file);
+        m.imgs = m.imgs || []; m.imgs[k] = { ref: up.ref, url: up.url, w, h, warn };
+      } catch (x) { toast(errText(x), { error: true }); }
+      draw();
+    }
+  });
+  root.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.add) { modules.push({ type: b.dataset.add, title: '', text: '', side: 'left', imgs: [], caps: [{}, {}, {}] }); draw(); }
+    else if (b.dataset.rm != null) { modules.splice(+b.dataset.rm, 1); draw(); }
+    else if (b.dataset.up != null) { const i = +b.dataset.up; [modules[i - 1], modules[i]] = [modules[i], modules[i - 1]]; draw(); }
+    else if (b.dataset.down != null) { const i = +b.dataset.down; [modules[i + 1], modules[i]] = [modules[i], modules[i + 1]]; draw(); }
+    else if (b.matches('[data-preview-aplus]')) modal(`<h2 style="margin-top:0">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(modules)}`, {});
+  });
+  return () => modules.map(m => ({ type: m.type, title: m.title || '', text: m.text || '', side: m.side || 'left',
+    imgs: (m.imgs || []).map(im => im ? { ref: im.ref, w: im.w, h: im.h } : null), caps: m.type === 'three' ? (m.caps || []).slice(0, 3).map(c => ({ title: c?.title || '', text: c?.text || '' })) : undefined }));
+}
+
 // ---------------------------------------------------------------- publish an eBook (3 steps, like KDP)
 const ROLES = ['author', 'illustrator', 'translator', 'editor', 'foreword', 'photographer'];
 function bookForm(body, b, startStep = 1) {
   const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
   let bookId = v.id || null;
-  let step = startStep;
+  const hasAplus = !!api.uploadAplusImage;
+  const STEPS = hasAplus ? [1, 2, 3, 4] : [1, 2, 4];
+  const TABK = { 1: 'kdp.tab1', 2: 'kdp.tab2', 3: 'kdp.tabAplus', 4: 'kdp.tab3' };
+  let step = STEPS.includes(startStep) ? startStep : 1;
+  let fileCheck = v.file_check || null;
+  const aplusModules = JSON.parse(JSON.stringify(v.aplus || [])).map((m, i) => ({ ...m, imgs: (m.imgs || []).map((im, k) => im && { ...im, url: (b?.aplus?.[i]?.imgs?.[k]?.url) || im.ref }) }));
   const files = { cover: null, file: null, sample: null };
   const eur = c => c ? (c / 100).toFixed(2) : '';
   const [first0, ...rest0] = String(v.author || '').trim().split(/\s+/);
@@ -266,7 +461,7 @@ function bookForm(body, b, startStep = 1) {
   body.innerHTML = `<form id="bk-form" class="kdp" novalidate>
     <div class="kdp-top"><div><span class="muted">${esc(b ? t('kdp.editing') : t('kdp.newEbook'))}</span><h2 id="kdp-title">${esc(v.title || t('kdp.untitled'))}</h2></div>
       <span class="status ${v.status === 'published' ? 'live' : 'draft'}" id="kdp-status">${esc(v.status === 'published' ? t('kdp.live') : t('kdp.draft'))}</span></div>
-    <nav class="kdp-tabs" role="tablist">${[1, 2, 3].map(n => `<button type="button" role="tab" class="kdp-tab" data-step="${n}"><b>${esc(t('kdp.tab' + n))}</b><span class="kdp-state" id="st-${n}"></span></button>`).join('')}</nav>
+    <nav class="kdp-tabs ${hasAplus ? 'four' : ''}" role="tablist">${STEPS.map(n => `<button type="button" role="tab" class="kdp-tab" data-step="${n}"><b>${esc(t(TABK[n]))}</b><span class="kdp-state" id="st-${n}"></span></button>`).join('')}</nav>
 
     <section class="kdp-step" data-pane="1">
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.language'))}</h3><p>${esc(t('kdp.langHelp'))}</p></div>
@@ -305,6 +500,7 @@ function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
         <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
           <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
+          <div class="fcheck" id="fcheck" ${fileCheck ? '' : 'hidden'}></div><div id="devprev"></div>
           <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
         <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
@@ -318,6 +514,12 @@ function bookForm(body, b, startStep = 1) {
     </section>
 
     <section class="kdp-step" data-pane="3" hidden>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('ap.heading'))}</h3><p>${esc(t('ap.help'))}</p>
+        <ul class="ap-specs"><li>${esc(t('ap.type.banner'))}: 1940 × 600 px</li><li>${esc(t('ap.type.image_text'))}: 600 × 600 px</li><li>${esc(t('ap.type.three'))}: 3 × 600 × 600 px</li></ul></div>
+        <div class="kdp-fields" id="aplus-root"></div></div>
+    </section>
+
+    <section class="kdp-step" data-pane="4" hidden>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.pricing'))}</h3><p>${esc(t('kdp.pricingHelp'))}</p></div>
         <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
           <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="number" min="0.49" step="0.01" inputmode="decimal" value="${eur(v.price_cents)}"></label>
@@ -353,14 +555,16 @@ function bookForm(body, b, startStep = 1) {
       { step: 1, ok: val('f-description').length >= 30, label: t('kdp.ck.description') },
       { step: 2, ok: has.file || !!files.file, label: t('kdp.ck.manuscript') },
       { step: 2, ok: has.cover || !!files.cover, label: t('kdp.ck.cover') },
-      { step: 3, ok: free || price >= 49, label: t('kdp.ck.price') },
+      { step: 2, ok: !(fileCheck?.items || []).some(x => x.level === 'error'), label: t('kdp.ck.fileOk') },
+      { step: 4, ok: free || price >= 49, label: t('kdp.ck.price') },
     ];
   };
   const refresh = () => {
     const c = checks();
-    for (const n of [1, 2, 3]) {
+    for (const n of STEPS) {
       const mine = c.filter(x => x.step === n), done = mine.filter(x => x.ok).length;
       const el = $('#st-' + n, body);
+      if (n === 3) { const k = aplusModules.length; el.className = 'kdp-state ' + (k ? 'done' : 'none'); el.textContent = k ? t('ap.modules', { n: k }) : t('kdp.optionalTab'); continue; }
       el.className = 'kdp-state ' + (done === mine.length ? 'done' : done ? 'part' : 'none');
       el.textContent = done === mine.length ? '✓ ' + t('kdp.complete') : done ? t('kdp.inProgress') : t('kdp.notStarted');
     }
@@ -379,8 +583,8 @@ function bookForm(body, b, startStep = 1) {
     step = n;
     $$('.kdp-step', body).forEach(s => s.hidden = +s.dataset.pane !== n);
     $$('.kdp-tab', body).forEach(tb => { tb.classList.toggle('on', +tb.dataset.step === n); tb.setAttribute('aria-selected', +tb.dataset.step === n); });
-    $('#b-back', body).style.visibility = n === 1 ? 'hidden' : 'visible';
-    $('#b-next', body).textContent = n < 3 ? t('kdp.saveContinue') + ' →' : t('kdp.publish');
+    $('#b-back', body).style.visibility = n === STEPS[0] ? 'hidden' : 'visible';
+    $('#b-next', body).textContent = n < 4 ? t('kdp.saveContinue') + ' →' : t('kdp.publish');
     $('#f-err', body).hidden = true;
     refresh();
     body.querySelector('.kdp-tabs').scrollIntoView({ block: 'nearest' });
@@ -418,13 +622,13 @@ function bookForm(body, b, startStep = 1) {
       };
       probe.src = url;
     }
-    if (kind === 'file' && /\.pdf$/i.test(file.name)) {
-      try {
-        await loadScript(new URL('../vendor/pdf.min.js', import.meta.url).href);
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('../vendor/pdf.worker.min.js', import.meta.url).href;
-        const doc = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-        $('#f-pages', body).value = doc.numPages; doc.destroy();
-      } catch { }
+    if (kind === 'file') {
+      const box = $('#fcheck', body); box.hidden = false; box.innerHTML = `<div class="spinner"></div> ${esc(t('fc.checking'))}`;
+      $('#devprev', body).innerHTML = '';
+      fileCheck = await analyzeManuscript(file, val('f-language'));
+      drawCheck();
+      if (fileCheck.meta.pages) $('#f-pages', body).value = fileCheck.meta.pages;
+      if (fileCheck.meta.doc) { try { await devicePreview($('#devprev', body), fileCheck.meta.doc); } catch { } }
     }
     refresh();
   };
@@ -435,6 +639,18 @@ function bookForm(body, b, startStep = 1) {
     d.addEventListener('dragleave', () => d.classList.remove('over'));
     d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('over'); pick(kind, e.dataTransfer.files[0]); });
   }
+
+  function drawCheck() {
+    const box = $('#fcheck', body); if (!fileCheck) { box.hidden = true; return; }
+    const ic = { ok: '✓', warn: '⚠', error: '✕' };
+    const worst = fileCheck.items.some(x => x.level === 'error') ? 'error' : fileCheck.items.some(x => x.level === 'warn') ? 'warn' : 'ok';
+    box.hidden = false; box.className = 'fcheck ' + worst;
+    box.innerHTML = `<b>${esc(t('fc.title.' + worst))}</b><ul>${fileCheck.items.map(x => `<li class="${x.level}"><span>${ic[x.level]}</span>${esc(x.text)}</li>`).join('')}</ul>
+      ${fileCheck.meta.kind === 'epub' ? `<small class="muted">${esc(t('fc.epubAdapts'))}</small>` : ''}`;
+  }
+  if (fileCheck) drawCheck();
+  const getAplus = hasAplus ? aplusEditor($('#aplus-root', body), aplusModules, () => bookId) : () => [];
+  if (!hasAplus) $('[data-pane="3"]', body).remove();
 
   // ---- save (draft) or publish
   const collect = status => {
@@ -452,6 +668,8 @@ function bookForm(body, b, startStep = 1) {
       pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
       published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,
+      ...(hasAplus ? { aplus: getAplus() } : {}),
+      ...(fileCheck ? { file_check: { items: fileCheck.items, meta: { ...fileCheck.meta, doc: undefined } } } : {}),
     };
   };
   const save = async (status, btn) => {
@@ -476,10 +694,11 @@ function bookForm(body, b, startStep = 1) {
       return true;
     } catch (x) { fail(t('common.error', { msg: errText(x) })); btn.disabled = false; btn.textContent = old; return false; }
   };
-  $('#b-back', body).onclick = () => show(Math.max(1, step - 1));
+  const prevStep = () => STEPS[Math.max(0, STEPS.indexOf(step) - 1)], nextStep = () => STEPS[Math.min(STEPS.length - 1, STEPS.indexOf(step) + 1)];
+  $('#b-back', body).onclick = () => show(prevStep());
   $('#b-draft', body).onclick = async e => { if (await save(v.status === 'published' ? 'published' : 'draft', e.currentTarget)) toast(t('kdp.savedDraft')); };
   $('#b-next', body).onclick = async e => {
-    if (step < 3) { if (await save(v.status === 'published' ? 'published' : 'draft', e.currentTarget)) show(step + 1); return; }
+    if (step < 4) { if (await save(v.status === 'published' ? 'published' : 'draft', e.currentTarget)) show(nextStep()); return; }
     if (await save('published', e.currentTarget)) {
       modal(`<div style="text-align:center"><div style="font-size:44px">🎉</div><h2>${esc(t('kdp.publishedTitle'))}</h2><p class="muted">${esc(t('kdp.publishedText'))}</p>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><a class="btn btn-buy" href="#/book/${encodeURIComponent(bookId)}" data-close>${esc(t('kdp.viewInStore'))}</a><a class="btn btn-ghost" href="#/admin/books" data-close>${esc(t('kdp.toBookshelf'))}</a></div></div>`);

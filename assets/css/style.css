@@ -766,3 +766,61 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .kdp .input:focus { outline: none; border-color: var(--pista-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pista) 45%, transparent); }
 .kdp textarea.input { min-height: 180px; resize: vertical; line-height: 1.5; }
 @media (max-width: 1024px), (pointer: coarse) { .kdp .input { font-size: 16px !important; } }
+
+/* ---------- manuscript check + device preview ---------- */
+.kdp-tabs.four { grid-template-columns: repeat(4, 1fr); }
+.fcheck { border-radius: 10px; padding: 12px 14px; border: 1px solid var(--line); background: var(--surface-2); font-size: 14px; }
+.fcheck.ok { border-color: var(--pista); background: var(--pista-soft); }
+.fcheck.warn { border-color: var(--amber); background: #FFF6E5; color: #3d2a00; }
+.fcheck.error { border-color: var(--deal); background: #FDECEA; color: #5b1410; }
+.fcheck ul { list-style: none; margin: 8px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.fcheck li { display: flex; gap: 8px; line-height: 1.45; }
+.fcheck li span { width: 16px; flex: none; font-weight: 700; }
+.fcheck li.ok span { color: var(--pista-strong); }
+.fcheck li.warn span { color: #B26A00; }
+.fcheck li.error span { color: var(--deal); }
+.fcheck .spinner { display: inline-block; width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; }
+.dev-row { display: flex; gap: 22px; align-items: flex-end; flex-wrap: wrap; margin-top: 4px; }
+.dev { margin: 0; text-align: center; }
+.dev figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.dev .screen { background: #2a2f2e; display: grid; place-items: center; overflow: hidden; border: 6px solid #111; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.dev.phone .screen { width: 150px; height: 320px; border-radius: 22px; }
+.dev.tablet .screen { width: 240px; height: 320px; border-radius: 16px; }
+.dev canvas { display: block; background: #fff; }
+/* ---------- A+ editor ---------- */
+.ap-specs { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.ap-mod { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); }
+.ap-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ap-head span { display: flex; gap: 6px; }
+.ap-img { display: grid; place-items: center; gap: 4px; text-align: center; border: 2px dashed var(--line); border-radius: 8px; min-height: 120px; cursor: pointer; color: var(--muted); background: var(--surface); overflow: hidden; }
+.ap-img:hover { border-color: var(--pista); }
+.ap-img .ico { width: 28px; height: 28px; }
+.ap-img.has { border-style: solid; padding: 0; }
+.ap-img img { width: 100%; height: 100%; max-height: 260px; object-fit: cover; display: block; }
+.ap-img.busy { opacity: .5; }
+.ap-it { display: grid; grid-template-columns: 200px 1fr; gap: 12px; }
+.ap-it.right { grid-template-columns: 1fr 200px; }
+.ap-it.right .ap-img { order: 2; }
+.ap-col { display: flex; flex-direction: column; gap: 8px; }
+.ap-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.ap-three > div { display: flex; flex-direction: column; gap: 6px; }
+.ap-add { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* ---------- A+ on the book page ---------- */
+.aplus { display: flex; flex-direction: column; gap: 22px; }
+.aplus img { width: 100%; display: block; border-radius: 8px; }
+.aplus h3 { font-size: 18px; margin: 10px 0 6px; }
+.aplus h4 { font-size: 16px; margin: 8px 0 4px; }
+.aplus p { margin: 0; line-height: 1.6; color: var(--fg); }
+.ap-banner img { aspect-ratio: 1940 / 600; object-fit: cover; }
+.ap-it-view { display: grid; grid-template-columns: minmax(160px, 38%) 1fr; gap: 18px; align-items: center; }
+.ap-it-view.right img { order: 2; }
+.ap-it-view img { aspect-ratio: 1; object-fit: cover; }
+.ap-three-view { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.ap-three-view img { aspect-ratio: 1; object-fit: cover; }
+@media (max-width: 760px) {
+  .kdp-tabs.four { grid-template-columns: repeat(2, 1fr); }
+  .kdp-tabs.four .kdp-tab:nth-child(3) { border-left: 0; }
+  .kdp-tabs.four .kdp-tab:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .ap-it, .ap-it.right, .ap-three, .ap-it-view, .ap-three-view { grid-template-columns: 1fr; }
+  .ap-it.right .ap-img, .ap-it-view.right img { order: 0; }
+}

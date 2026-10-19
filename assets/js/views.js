@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js?v=20261019185522';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019185522';
-import { esc, $, $$ } from './util.js?v=20261019185522';
-import { api } from './api.js?v=20261019185522';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills } from './ui.js?v=20261019185522';
+import { CONFIG } from './config.js?v=20261019201923';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019201923';
+import { esc, $, $$ } from './util.js?v=20261019201923';
+import { api } from './api.js?v=20261019201923';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019201923';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -200,6 +200,7 @@ export async function viewBook(el, id) {
         <div class="desc clamped" id="desc">${esc(b.description || '')}</div>
         <button class="linkbtn" id="desc-more" hidden>${esc(t('book.more'))}</button>
         <hr>
+        ${(b.aplus || []).some(m => (m.imgs || []).some(Boolean) || m.title || m.text) ? `<h2 class="section-title" style="font-size:18px;margin-bottom:12px">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(b.aplus)}<hr>` : ''}
         <h2 class="section-title" style="font-size:18px">${esc(t('book.details'))}</h2>
         <div class="details">
           <div><small>${esc(t('book.d.format'))}</small><b>${esc(t('book.format.' + b.format))}</b></div>
