@@ -1,0 +1,24 @@
+// =====================================================================
+//  LIBRAVA — configurare
+//  Lasă supabaseUrl gol ca să rulezi în MODUL DEMO (date în browser).
+//  Completează-le (vezi README.md) ca site-ul să lucreze cu baza de date reală.
+// =====================================================================
+export const CONFIG = {
+  siteName: 'Librava',
+
+  // --- Supabase (Settings → API în proiectul tău Supabase) ---
+  supabaseUrl: '',        // ex: 'https://abcdxyz.supabase.co'
+  supabaseAnonKey: '',    // cheia "anon" / "publishable" (e sigură în browser)
+
+  // --- Magazin ---
+  currency: 'EUR',
+  defaultLang: 'ro',            // 'ro' | 'it' | 'en'
+  previewPages: 4,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
+  previewPercent: 0.25,         // ce procent dintr-un EPUB vede gratuit (în modul demo)
+  supportEmail: 'contact@librava.example',
+
+  // --- Login cu Google (activează providerul în Supabase → Authentication) ---
+  googleLogin: true,
+};
+
+export const IS_DEMO = !CONFIG.supabaseUrl || !CONFIG.supabaseAnonKey;

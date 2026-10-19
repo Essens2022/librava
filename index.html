@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Librava</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Librava — cărți digitale color pe care le cumperi și le citești imediat, direct în browser, pe telefon, tabletă sau calculator.">
+<meta name="theme-color" content="#1C2B2D">
+<meta property="og:title" content="Librava — cărți digitale">
+<meta property="og:description" content="Cumperi o carte și o citești imediat, pe orice ecran.">
+<meta property="og:image" content="assets/img/og.png">
+<link rel="icon" href="assets/img/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="hdr" id="hdr"></header>
+<main id="app" tabindex="-1"></main>
+<div id="foot"></div>
+<div class="scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="Meniu"></nav>
+<button class="drawer-close" id="drawer-close" aria-label="Închide"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<noscript><p style="padding:20px">Activează JavaScript ca să folosești magazinul.</p></noscript>
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
