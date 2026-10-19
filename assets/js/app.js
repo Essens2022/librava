@@ -10,6 +10,8 @@ import { viewAdmin } from './admin.js';
 let cleanup = null, seq = 0;
 
 async function route() {
+  // home page shows as plain https://librava.store (no "#/")
+  if (location.hash === '#/' || location.hash === '#') history.replaceState(null, '', location.pathname + location.search);
   const raw = decodeURI(location.hash.slice(1)) || '/';
   let [path, qs = ''] = raw.split('?');
   path = path.split('#')[0];
