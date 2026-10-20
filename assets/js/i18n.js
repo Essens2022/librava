@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021012431';
-import { store } from './util.js?v=20261021012431';
+import { CONFIG } from './config.js?v=20261021014628';
+import { store } from './util.js?v=20261021014628';
 
 const D = {
   ro: {
@@ -42,7 +42,14 @@ const D = {
     'st.searchesHelp': 'Cuvintele căutate. „Fără rezultate” = cărți pe care le vor și nu le ai: idei pentru cărți noi.',
     'st.zero': 'fără rezultate',
     'st.campaigns': 'Campanii (UTM)',
-    'st.campaignsHelp': 'Pune ?utm_source=instagram&utm_campaign=toamna la linkurile tale ca să vezi ce campanie aduce clienți.',
+    'st.campaignsHelp': 'Creează mai jos un link pentru fiecare reclamă sau postare. Când cineva intră pe site prin el, aici vezi câți vizitatori a adus.',
+    'st.c.source': 'Unde îl postezi',
+    'st.c.name': 'Numele campaniei',
+    'st.c.namePh': 'ex. toamna',
+    'st.c.link': 'Linkul campaniei',
+    'st.c.copy': 'Copiază',
+    'st.c.copied': 'Link copiat',
+    'st.c.other': 'Altul',
     'st.books': 'Cărți',
     'st.b.views': 'Vizualizări',
     'st.b.samples': 'Extrase',
@@ -1069,7 +1076,14 @@ const D = {
     'st.searchesHelp': 'Le parole cercate. “Senza risultati” = libri che vogliono e non hai: idee per nuovi libri.',
     'st.zero': 'senza risultati',
     'st.campaigns': 'Campagne (UTM)',
-    'st.campaignsHelp': 'Aggiungi ?utm_source=instagram&utm_campaign=autunno ai tuoi link per vedere quale campagna porta clienti.',
+    'st.campaignsHelp': 'Crea qui sotto un link per ogni pubblicità o post. Quando qualcuno entra nel sito da quel link, qui vedi quanti visitatori ha portato.',
+    'st.c.source': 'Dove lo pubblichi',
+    'st.c.name': 'Nome della campagna',
+    'st.c.namePh': 'es. autunno',
+    'st.c.link': 'Link della campagna',
+    'st.c.copy': 'Copia',
+    'st.c.copied': 'Link copiato',
+    'st.c.other': 'Altro',
     'st.books': 'Libri',
     'st.b.views': 'Visualizzazioni',
     'st.b.samples': 'Estratti',
@@ -2096,7 +2110,14 @@ const D = {
     'st.searchesHelp': 'Words searched on the site. “No results” = books people want that you don’t have yet: ideas for new books.',
     'st.zero': 'no results',
     'st.campaigns': 'Campaigns (UTM)',
-    'st.campaignsHelp': 'Add ?utm_source=instagram&utm_campaign=autumn to your links to see which campaign brings customers.',
+    'st.campaignsHelp': 'Create a link below for each ad or post. When someone visits the shop through it, you see here how many visitors it brought.',
+    'st.c.source': 'Where you post it',
+    'st.c.name': 'Campaign name',
+    'st.c.namePh': 'e.g. autumn',
+    'st.c.link': 'Campaign link',
+    'st.c.copy': 'Copy',
+    'st.c.copied': 'Link copied',
+    'st.c.other': 'Other',
     'st.books': 'Books',
     'st.b.views': 'Views',
     'st.b.samples': 'Samples',
@@ -3120,7 +3141,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021012431`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021014628`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

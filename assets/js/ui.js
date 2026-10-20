@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261021012431';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021012431';
-import { esc, store, $, $$ } from './util.js?v=20261021012431';
+import { CONFIG } from './config.js?v=20261021014628';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021014628';
+import { esc, store, $, $$ } from './util.js?v=20261021014628';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,10 +12,10 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261021012431';
-import { suggest, highlight } from './search.js?v=20261021012431';
-import { track } from './track.js?v=20261021012431';
-import { api } from './api.js?v=20261021012431';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261021014628';
+import { suggest, highlight } from './search.js?v=20261021014628';
+import { track } from './track.js?v=20261021014628';
+import { api } from './api.js?v=20261021014628';
 
 // ---------------- icons ----------------
 const P = {

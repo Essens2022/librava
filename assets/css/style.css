@@ -1457,3 +1457,11 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 .ntf-brand svg { width: 20px; height: 20px; }
 .ntf-brand .logo-word { font-family: var(--font-book); font-weight: 700; font-size: 17px; letter-spacing: -.3px; color: var(--fg); }
 .ntf-brand .logo-word i { font-style: normal; color: var(--pista-strong); }
+
+/* campaign link maker (Statistics) */
+.utm-make { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin: 4px 0 14px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft, rgba(0,0,0,.02)); }
+.utm-make .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; min-width: 0; }
+.utm-out { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 4px; }
+.utm-link { display: flex; gap: 8px; align-items: center; }
+.utm-link code { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 8px; background: var(--card, #fff); border: 1px dashed var(--line); font-size: 13px; overflow-wrap: anywhere; user-select: all; }
+@media (max-width: 520px) { .utm-make { grid-template-columns: minmax(0, 1fr); } }

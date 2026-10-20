@@ -1,14 +1,14 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021012431';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021012431';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021012431';
-import { resetCompanyCache } from './views.js?v=20261021012431';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021012431';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021012431';
-import { api } from './api.js?v=20261021012431';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021012431';
+import { CONFIG } from './config.js?v=20261021014628';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021014628';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021014628';
+import { resetCompanyCache } from './views.js?v=20261021014628';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021014628';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021014628';
+import { api } from './api.js?v=20261021014628';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021014628';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1396,6 +1396,16 @@ async function offerForm(body, id) {
 
 // ---------------------------------------------------------------- statistics: visitors, sources, countries, searches, books, sales funnel
 const FLAG = cc => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌐';
+// builds the tracked link for a campaign (what the visitor sees is just a normal link to the shop)
+function utmMaker(root) {
+  const src = $('#utm-src', root), name = $('#utm-name', root), out = $('#utm-link', root), copy = $('#utm-copy', root);
+  if (!src) return;
+  const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  const make = () => { const p = new URLSearchParams({ utm_source: src.value === 'other' ? 'altro' : src.value }); const c = slug(name.value); if (c) p.set('utm_campaign', c); out.textContent = 'https://librava.store/?' + p.toString(); };
+  src.onchange = make; name.oninput = make; make();
+  copy.onclick = async () => { try { await navigator.clipboard.writeText(out.textContent); } catch { const r = document.createRange(); r.selectNodeContents(out); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); } toast(t('st.c.copied')); };
+}
+
 async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays') || 30)) {
   body.innerHTML = `<div class="panel"><div class="spinner"></div></div>`;
   let d;
@@ -1435,7 +1445,13 @@ async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays'
       <section class="panel"><h3>${esc(t('st.langs'))}</h3>${list(d.langs, '', k => esc(k === '?' ? t('st.unknown') : langName(k)))}</section>
       <section class="panel"><h3>${esc(t('st.devices'))}</h3>${list(d.devices, '', k => esc(t('st.dev.' + k)))}</section>
       <section class="panel"><h3>${esc(t('st.searches'))}</h3><p class="muted st-sub">${esc(t('st.searchesHelp'))}</p>${list(d.searches, '', (k, x) => `${esc(k)}${x.zero ? ` <span class="st-zero">${esc(t('st.zero'))}</span>` : ''}`)}</section>
-      <section class="panel"><h3>${esc(t('st.campaigns'))}</h3><p class="muted st-sub">${esc(t('st.campaignsHelp'))}</p>${list(d.campaigns, '')}</section>
+      <section class="panel"><h3>${esc(t('st.campaigns'))}</h3><p class="muted st-sub">${esc(t('st.campaignsHelp'))}</p>
+        <div class="utm-make">
+          <label class="field"><span>${esc(t('st.c.source'))}</span><select class="input" id="utm-src">${['instagram', 'facebook', 'tiktok', 'youtube', 'whatsapp', 'email', 'other'].map(k => `<option value="${k}">${esc(k === 'other' ? t('st.c.other') : k === 'email' ? 'E-mail' : k === 'tiktok' ? 'TikTok' : k === 'youtube' ? 'YouTube' : k === 'whatsapp' ? 'WhatsApp' : k[0].toUpperCase() + k.slice(1))}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('st.c.name'))}</span><input class="input" id="utm-name" maxlength="40" placeholder="${esc(t('st.c.namePh'))}"></label>
+          <div class="utm-out"><small class="muted">${esc(t('st.c.link'))}</small><div class="utm-link"><code id="utm-link"></code><button type="button" class="btn btn-sm btn-dark" id="utm-copy">${esc(t('st.c.copy'))}</button></div></div>
+        </div>
+        ${list(d.campaigns, '')}</section>
       <section class="panel st-wide"><h3>${esc(t('st.books'))}</h3>${bookRows.length ? `<div class="table-scroll"><table class="adm-table"><thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('st.b.views'))}</th><th class="num">${esc(t('st.b.samples'))}</th><th class="num">${esc(t('st.b.carts'))}</th><th class="num">${esc(t('st.b.sold'))}</th><th class="num">${esc(t('st.conversion'))}</th></tr></thead><tbody>
         ${bookRows.map(b => `<tr><td><a href="#/book/${esc(b.id)}">${esc(b.title)}</a> <small class="muted">${esc((b.lang || '').toUpperCase())}</small></td><td class="num">${n(b.views)}</td><td class="num">${n(b.samples)}</td><td class="num">${n(b.carts)}</td><td class="num">${n(b.sold)}</td><td class="num">${pct(b.sold, b.views)}</td></tr>`).join('')}</tbody></table></div>` : `<p class="muted">${esc(t('st.noData'))}</p>`}</section>
       <section class="panel"><h3>${esc(t('st.pages'))}</h3>${list(d.pages, '')}</section>
@@ -1444,6 +1460,7 @@ async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays'
         <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-dark" href="https://search.google.com/search-console" target="_blank" rel="noopener">Google Search Console</a><a class="btn btn-ghost" href="https://www.bing.com/webmasters" target="_blank" rel="noopener">Bing Webmaster Tools</a><a class="btn btn-ghost" href="/sitemap.xml" target="_blank" rel="noopener">sitemap.xml</a></div></section>
     </div>`;
   $$('[data-days]', body).forEach(b => b.onclick = () => { sessionStorage.setItem('librava:stDays', b.dataset.days); statsAdmin(body, +b.dataset.days); });
+  utmMaker(body);
 }
 
 // ---------------------------------------------------------------- company details (shown on the legal pages)
