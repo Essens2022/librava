@@ -1,5 +1,4 @@
 // Creates a Stripe Checkout session for the books in the cart.
-// Deploy:  supabase functions deploy create-checkout
 // Secret: STRIPE_SECRET_KEY (Supabase → Edge Functions → Secrets). SUPABASE_* are provided automatically.
 // SITE_URL is optional: the shop address is not a secret, https://librava.store is used by default.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -37,6 +36,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const ids: string[] = Array.isArray(body.book_ids) ? body.book_ids.filter((x: unknown) => typeof x === 'string' && UUID.test(x)).slice(0, 50) : [];
     if (!ids.length) return json({ error: 'cart.empty' }, 400);
+    // EU rule for digital content: the buyer must agree to immediate delivery and accept losing the 14-day withdrawal right
+    if (body.waiver !== true) return json({ error: 'pay.waiverNeeded' }, 400);
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
@@ -51,7 +52,7 @@ Deno.serve(async (req) => {
     const currency = (toBuy[0].currency || 'eur').toLowerCase();
     const amount = toBuy.reduce((s, b) => s + b.price_cents, 0);
     const { data: order, error: oErr } = await admin.from('orders').insert({
-      user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount,
+      user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount, waiver_at: new Date().toISOString(),
       items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: b.price_cents })),
     }).select('id, reference').single();
     if (oErr) throw oErr;

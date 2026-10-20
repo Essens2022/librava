@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020181637';
-import { getLang } from './i18n.js?v=20261020181637';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { getLang } from './i18n.js?v=20261020182652';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020182652';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020181637')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020182652')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -272,6 +272,14 @@ class DemoAPI {
     await this._loadCatalog();
     return id;
   }
+  async getSetting(key) { return store.get('demo:setting:' + key, null); }
+  async saveSetting(key, value) { store.set('demo:setting:' + key, value); }
+  async notifications() { return store.get('demo:notifications', []).filter(n => n.published !== false); }
+  async adminNotifications() { return store.get('demo:notifications', []); }
+  async saveNotification(n) { const all = store.get('demo:notifications', []); if (n.id) { const i = all.findIndex(x => x.id === n.id); all[i] = { ...all[i], ...n }; } else all.unshift({ published: true, ...n, id: uid('n_'), created_at: new Date().toISOString() }); store.set('demo:notifications', all); }
+  async deleteNotification(id) { store.set('demo:notifications', store.get('demo:notifications', []).filter(n => n.id !== id)); }
+  async getMarketing() { return !!store.get('demo:marketing:' + this._user?.id, false); }
+  async setMarketing(on) { store.set('demo:marketing:' + this._user?.id, !!on); }
   async uploadAplusImage(bookId, file) {
     const key = 'aplus:' + (bookId || 'new') + ':' + uid('');
     await blobs.put(key, file);
@@ -410,9 +418,9 @@ class SupabaseAPI {
   onAuthChange(cb) { this.listeners.push(cb); }
   _err(error) { if (error) throw new Error(error.message || String(error)); }
 
-  async signUp({ email, password, name }) {
+  async signUp({ email, password, name, marketing }) {
     if (password.length < 6) throw new Error('acc.err.short');
-    const { data, error } = await this.sb.auth.signUp({ email, password, options: { data: { full_name: name, lang: getLang() }, emailRedirectTo: location.origin + '/' } });
+    const { data, error } = await this.sb.auth.signUp({ email, password, options: { data: { full_name: name, lang: getLang(), accepted_terms: 'true', marketing: !!marketing }, emailRedirectTo: location.origin + '/' } });
     if (error && /registered|exists/i.test(error.message)) throw new Error('acc.err.exists');
     this._err(error);
     return { needsConfirm: !data.session };
@@ -505,7 +513,7 @@ class SupabaseAPI {
     for (const b of free) await this.claimFree(b.id);
     const paid = books.filter(b => b.price_cents > 0).map(b => b.id);
     if (!paid.length) return { mode: 'done' };
-    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, return_url: location.origin + location.pathname } });
+    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, return_url: location.origin + location.pathname } });
     if (error) {
       let msg = error.message;
       try { const j = await error.context.json(); msg = j.error || msg; } catch { }
@@ -559,6 +567,15 @@ class SupabaseAPI {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
   }
+  // ---- shop settings (company details for the legal pages) and announcements ----
+  async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
+  async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
+  async notifications() { const { data } = await this.sb.from('notifications').select('*').eq('published', true).order('created_at', { ascending: false }).limit(30); return data || []; }
+  async adminNotifications() { const { data, error } = await this.sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(200); this._err(error); return data; }
+  async saveNotification(n) { const { error } = n.id ? await this.sb.from('notifications').update(n).eq('id', n.id) : await this.sb.from('notifications').insert(n); this._err(error); }
+  async deleteNotification(id) { const { error } = await this.sb.from('notifications').delete().eq('id', id); this._err(error); }
+  async getMarketing() { if (!this._user) return false; const { data } = await this.sb.from('profiles').select('marketing_opt_in').eq('id', this._user.id).maybeSingle(); return !!data?.marketing_opt_in; }
+  async setMarketing(on) { const { error } = await this.sb.from('profiles').update({ marketing_opt_in: !!on }).eq('id', this._user.id); this._err(error); }
   // used by "optimise existing images": swap a book's cover / A+ images for the light versions
   async replaceCover(book, file) {
     const p = `${book.id}/cover-${Date.now()}.${fileExt(file.name) || 'webp'}`;

@@ -1,12 +1,12 @@
-import { CONFIG } from './config.js?v=20261020181637';
-import { t, getLang, setLang } from './i18n.js?v=20261020181637';
-import { esc, $, $$ } from './util.js?v=20261020181637';
-import { api, chooseBackend } from './api.js?v=20261020181637';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go } from './ui.js?v=20261020181637';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261020181637';
-import { offline } from './offline.js?v=20261020181637';
-import { viewReader } from './reader.js?v=20261020181637';
-import { viewAdmin } from './admin.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { t, getLang, setLang } from './i18n.js?v=20261020182652';
+import { esc, $, $$ } from './util.js?v=20261020182652';
+import { api, chooseBackend } from './api.js?v=20261020182652';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent } from './ui.js?v=20261020182652';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261020182652';
+import { offline } from './offline.js?v=20261020182652';
+import { viewReader } from './reader.js?v=20261020182652';
+import { viewAdmin } from './admin.js?v=20261020182652';
 
 let cleanup = null, seq = 0;
 
@@ -52,6 +52,7 @@ async function route() {
       case 'read': res = await viewReader(el, parts[1], q); break;
       case 'admin': res = await viewAdmin(el, parts.slice(1)); break;
       case 'help': res = viewHelp(el); break;
+      case 'legal': res = await viewLegal(el, parts[1]); break;
       default: res = await viewHome(el);
     }
     if (my !== seq) { if (typeof res === 'function') res(); return; }
@@ -113,6 +114,7 @@ async function boot() {
     history.replaceState(null, '', location.pathname + '#/library?paid=1');
   }
   route();
+  setTimeout(showConsent, 400);
 }
 boot();
 

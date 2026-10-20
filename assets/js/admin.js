@@ -1,11 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020181637';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020181637';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020181637';
-import { api } from './api.js?v=20261020181637';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020182652';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020182652';
+import { resetCompanyCache } from './views.js?v=20261020182652';
+import { api } from './api.js?v=20261020182652';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020182652';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -14,6 +15,8 @@ const TABS = [
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
   ['reviews', '/admin/reviews', 'eye', 'admin.tab.reviews'],
+  ['notifications', '/admin/notifications', 'bell', 'ntf.title'],
+  ['settings', '/admin/settings', 'gear', 'set.title'],
 ];
 const full = !!api.adminOverview; // the extended panel needs these data methods
 
@@ -43,6 +46,8 @@ export async function viewAdmin(el, parts) {
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'reviews': return reviews(body);
+    case 'notifications': return notificationsAdmin(body);
+    case 'settings': return settingsAdmin(body);
     default: return overview(body);
   }
 }
@@ -917,4 +922,56 @@ function bookForm(body, b, startStep = 1) {
     }
   };
   show(startStep);
+}
+
+// ---------------------------------------------------------------- announcements shown under the bell
+async function notificationsAdmin(body) {
+  const list = await api.adminNotifications();
+  body.innerHTML = `<div class="adm-two">
+    <form class="panel" id="ntf-form" style="display:flex;flex-direction:column;gap:12px">
+      <h2 class="section-title" style="font-size:19px;margin:0">${esc(t('ntf.new'))}</h2>
+      <label class="field"><span>${esc(t('ap.title'))} *</span><input id="n-title" maxlength="120" required></label>
+      <label class="field"><span>${esc(t('ap.text'))}</span><textarea id="n-body" maxlength="600" rows="4"></textarea></label>
+      <label class="field"><span>${esc(t('ntf.link'))}</span><input id="n-link" maxlength="300" placeholder="#/book/… · #/search?deals=1"></label>
+      <label class="field"><span>${esc(t('ntf.lang'))}</span><select id="n-lang"><option value="">${esc(t('ntf.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}">${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select></label>
+      <button class="btn btn-buy" type="submit">${esc(t('ntf.send'))}</button>
+      <small class="muted">${esc(t('ntf.help'))}</small>
+    </form>
+    <div class="panel"><h2 class="section-title" style="font-size:19px">${esc(t('ntf.sent'))}</h2>
+      ${list.length ? list.map(n => `<div class="adm-line" style="align-items:flex-start"><span><b>${esc(n.title)}</b><small class="muted" style="display:block">${esc(fmtDate(n.created_at))}${n.lang ? ' · ' + esc(n.lang.toUpperCase()) : ''}</small>${n.body ? `<small style="display:block">${esc(n.body)}</small>` : ''}</span>
+        <button class="btn btn-ghost btn-sm" data-del-ntf="${esc(n.id)}">${esc(t('admin.delete'))}</button></div>`).join('') : `<p class="muted">${esc(t('ntf.none'))}</p>`}
+    </div></div>`;
+  $('#ntf-form', body).onsubmit = async e => {
+    e.preventDefault();
+    const title = $('#n-title', body).value.trim(); if (!title) return;
+    try {
+      await api.saveNotification({ title, body: $('#n-body', body).value.trim(), link: $('#n-link', body).value.trim() || null, lang: $('#n-lang', body).value || null, published: true });
+      toast(t('ntf.sentOk')); notificationsAdmin(body); refreshBell(true);
+    } catch (x) { toast(errText(x), { error: true }); }
+  };
+  $$('[data-del-ntf]', body).forEach(b => b.onclick = async () => {
+    if (!await confirmBox(t('admin.delete') + '?', { danger: true })) return;
+    try { await api.deleteNotification(b.dataset.delNtf); notificationsAdmin(body); refreshBell(true); } catch (x) { toast(errText(x), { error: true }); }
+  });
+}
+
+// ---------------------------------------------------------------- company details (shown on the legal pages)
+async function settingsAdmin(body) {
+  const c = (await api.getSetting('company')) || {};
+  const f = (k, label, ph = '') => `<label class="field"><span>${esc(label)}</span><input id="c-${k}" maxlength="200" value="${esc(c[k] || '')}" placeholder="${esc(ph)}"></label>`;
+  body.innerHTML = `<form class="panel" id="set-form" style="display:flex;flex-direction:column;gap:12px;max-width:640px">
+    <h2 class="section-title" style="font-size:19px;margin:0">${esc(t('set.company'))}</h2>
+    <p class="muted" style="margin:0">${esc(t('set.companyHelp'))}</p>
+    ${f('company', t('set.name'), 'Ion Bondari / Librava S.R.L.')}
+    ${f('address', t('set.address'), 'Via …, 00000 Città')}
+    ${f('country', t('set.country'), 'Italia')}
+    ${f('vat', t('set.vat'), 'IT01234567890')}
+    ${f('email', t('set.email'), 'contact@librava.store')}
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-buy" type="submit">${esc(t('acc.save'))}</button><a class="btn btn-ghost" href="#/legal/imprint">${esc(t('set.view'))}</a></div>
+  </form>`;
+  $('#set-form', body).onsubmit = async e => {
+    e.preventDefault();
+    const v = {}; for (const k of ['company', 'address', 'country', 'vat', 'email']) v[k] = $('#c-' + k, body).value.trim();
+    try { await api.saveSetting('company', v); resetCompanyCache(); toast(t('acc.saved')); } catch (x) { toast(errText(x), { error: true }); }
+  };
 }

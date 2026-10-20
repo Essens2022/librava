@@ -24,7 +24,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   // book covers (public) — show the saved copy, refresh in the background
-  if (/\/storage\/v1\/object\/public\/covers\//.test(url.pathname) || url.hostname === 'fonts.gstatic.com' || url.hostname === 'fonts.googleapis.com') {
+  if (/\/storage\/v1\/object\/public\/covers\//.test(url.pathname)) {
     e.respondWith(caches.open(COVERS).then(c => c.match(req).then(hit => {
       const net = fetch(req).then(r => { if (r.ok || r.type === 'opaque') c.put(req, r.clone()); return r; }).catch(() => hit);
       return hit || net;

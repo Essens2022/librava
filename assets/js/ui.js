@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020181637';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020181637';
-import { esc, store, $, $$ } from './util.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020182652';
+import { esc, store, $, $$ } from './util.js?v=20261020182652';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,7 +12,8 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261020181637';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020182652';
+import { api } from './api.js?v=20261020182652';
 
 // ---------------- icons ----------------
 const P = {
@@ -53,6 +54,7 @@ const P = {
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1-.8-1.4-.8-2.3 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
   share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  bell: '<path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
 };
 export function icon(name, cls = 'ico') {
@@ -134,6 +136,7 @@ export function renderChrome() {
     ${langBtn('hdr-btn')}
     <a class="hdr-btn hdr-account" href="#/account"><span><small>${hello}</small><b class="acc-label">${u ? esc(t('nav.account')) : esc(t('acc.signIn'))}</b></span><span class="menu-icon-only">${icon('user')}</span></a>
     <a class="hdr-btn hdr-lib" href="#/library"><span><small>${esc(t('nav.libraryShort'))}</small><b>${esc(t('nav.library'))}</b></span></a>
+    <button class="hdr-btn bell-btn" data-bell aria-label="${esc(t('ntf.title'))}">${icon('bell')}<span class="bell-count" hidden></span></button>
     <a class="hdr-btn cart-btn" href="#/cart" aria-label="${esc(t('nav.cart'))}">${icon('cart')}<span class="cart-count">0</span><b class="cart-label">${esc(t('nav.cart'))}</b></a>
   </div>
   <div class="wrap hdr-mobile-search">${searchForm('s2')}</div></div>
@@ -173,7 +176,8 @@ export function renderChrome() {
     <footer class="foot"><div class="wrap">
       <div class="foot-cols">
         <div><h4>${esc(t('foot.about'))}</h4><p>${esc(t('foot.aboutText', { site: CONFIG.siteName }))}</p></div>
-        <div><h4>${esc(t('foot.help'))}</h4><a href="#/help">${esc(t('foot.howRead'))}</a><a href="#/help">${esc(t('foot.payments'))}</a><a href="#/help#legal">${esc(t('foot.legal'))}</a></div>
+        <div><h4>${esc(t('foot.help'))}</h4><a href="#/help">${esc(t('foot.howRead'))}</a><a href="#/help">${esc(t('foot.payments'))}</a><a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></div>
+        <div><h4>${esc(t('foot.legal'))}</h4>${['terms', 'privacy', 'cookies', 'imprint'].map(p => `<a href="#/legal/${p}">${esc(legalText(getLang()).title[p])}</a>`).join('')}</div>
         <div><h4>${esc(t('nav.browse'))}</h4>${CATS.slice(0, 5).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join('')}</div>
         <div><h4>${esc(t('foot.contact'))}</h4><p style="user-select:all">${esc(CONFIG.supportEmail)}</p></div>
       </div>
@@ -185,6 +189,7 @@ export function renderChrome() {
       </div>
     </div></footer>`;
   updateCartCount();
+  refreshBell();
 }
 
 // ---------------- language button & picker ----------------
@@ -355,6 +360,7 @@ export function bindGlobal() {
     if (e.target.closest('#scrim') || e.target.closest('#drawer-close')) { openDrawer(false); return; }
     if (e.target.closest('#drawer a')) openDrawer(false);
     const tb = e.target.closest('[data-theme-set]');
+    if (e.target.closest('[data-bell]')) { openBell(); return; }
     if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); window.dispatchEvent(new Event('librava:themechange')); return; }
     if (e.target.closest('[data-lang-open]')) { openLangPicker(); return; }
     const lb = e.target.closest('[data-lang]');
@@ -369,4 +375,39 @@ export function bindGlobal() {
     if (e.target.closest('[data-signout]')) { openDrawer(false); await api.signOut(); go('/'); }
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { openDrawer(false); document.querySelector('.lang-modal')?.closest('.modal-wrap')?.remove(); } });
+}
+
+// ---------------------------------------------------------------- consent on the first visit
+export function showConsent() {
+  if (store.get('consent') === LEGAL_VERSION || document.querySelector('.consent')) return;
+  const L = legalText(getLang());
+  const box = document.createElement('div');
+  box.className = 'consent'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', L.consentTitle);
+  box.innerHTML = `<div class="consent-in"><div><b>${esc(L.consentTitle)}</b><p>${esc(L.consentText)}</p>
+      <p class="consent-links"><a href="#/legal/terms">${esc(L.title.terms)}</a> · <a href="#/legal/privacy">${esc(L.title.privacy)}</a> · <a href="#/legal/cookies">${esc(L.title.cookies)}</a></p></div>
+    <button class="btn btn-buy" data-consent-ok>${esc(L.consentOk)}</button></div>`;
+  document.body.appendChild(box);
+  box.querySelector('[data-consent-ok]').onclick = () => { store.set('consent', LEGAL_VERSION); store.set('consent_at', new Date().toISOString()); box.remove(); };
+}
+
+// ---------------------------------------------------------------- notifications from Librava (bell in the header)
+let notifCache = null;
+export async function refreshBell(force) {
+  try {
+    if (!notifCache || force) notifCache = (await api.notifications?.()) || [];
+    const lang = getLang(), read = new Set(store.get('notif:read', []));
+    const mine = notifCache.filter(n => !n.lang || n.lang === lang);
+    const unread = mine.filter(n => !read.has(n.id)).length;
+    $$('.bell-count').forEach(b => { b.textContent = unread > 9 ? '9+' : unread; b.hidden = !unread; });
+    $$('[data-bell]').forEach(b => b.hidden = !mine.length && !api.user()?.isAdmin);
+    return mine;
+  } catch { return []; }
+}
+export async function openBell() {
+  const list = await refreshBell(true);
+  store.set('notif:read', [...new Set([...store.get('notif:read', []), ...list.map(n => n.id)])].slice(-300));
+  refreshBell();
+  modal(`<div class="ntf-head"><h2 style="margin:0">${esc(t('ntf.title'))}</h2><button class="btn btn-ghost btn-sm" data-close>✕</button></div>
+    ${list.length ? `<div class="ntf-list">${list.map(n => `<div class="ntf"><small class="muted">${esc(new Date(n.created_at).toLocaleDateString(getLang()))}</small><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ''}${n.link ? `<a href="${esc(n.link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div>`).join('')}</div>`
+      : `<p class="muted">${esc(t('ntf.empty'))}</p>`}`);
 }

@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261020181637';
-import { store } from './util.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { store } from './util.js?v=20261020182652';
 
 const D = {
   ro: {
@@ -433,6 +433,37 @@ const D = {
     'off.downloaded': 'Descărcarea a pornit. Fișierul e în Descărcări.',
     'off.noInternet': 'Nu ai internet: vezi cărțile salvate pe acest dispozitiv.',
     'off.full': 'Nu mai e spațiu pe dispozitiv. Scoate alte cărți salvate offline.',
+    'ntf.title': 'Notificări',
+    'ntf.open': 'Deschide',
+    'ntf.empty': 'Nicio notificare deocamdată.',
+    'ntf.new': 'Notificare nouă pentru clienți',
+    'ntf.link': 'Link (opțional)',
+    'ntf.lang': 'Pentru cine',
+    'ntf.allLangs': 'Toți clienții (toate limbile)',
+    'ntf.send': 'Publică notificarea',
+    'ntf.help': 'Apare la clopoțelul din meniu, cu un număr roșu până o citesc clienții. Ex.: carte nouă, reducere, noutăți.',
+    'ntf.sent': 'Notificări publicate',
+    'ntf.none': 'Nu ai publicat încă nicio notificare.',
+    'ntf.sentOk': 'Notificarea a fost publicată.',
+    'set.title': 'Setări',
+    'set.company': 'Date firmă',
+    'set.companyHelp': 'Apar în paginile legale (Termeni, Confidențialitate, Date despre vânzător). Sunt obligatorii pentru un magazin online în UE.',
+    'set.name': 'Nume firmă sau nume complet',
+    'set.address': 'Adresă',
+    'set.country': 'Țara',
+    'set.vat': 'Cod fiscal / P.IVA / CUI',
+    'set.email': 'Email de contact',
+    'set.view': 'Vezi pagina publică',
+    'legal.acceptTerms': 'Am citit și accept {terms} și {privacy}.',
+    'legal.newsOptIn': 'Vreau să primesc pe email noutăți și reduceri de la Librava (opțional, mă pot dezabona oricând).',
+    'legal.mustAccept': 'Ca să-ți faci cont trebuie să accepți termenii și politica de confidențialitate.',
+    'legal.waiverTitle': 'Înainte de plată',
+    'legal.waiverText': 'Sunt de acord ca eBook-ul să-mi fie livrat imediat în bibliotecă și înțeleg că astfel îmi pierd dreptul de retragere de 14 zile.',
+    'legal.waiverTerms': 'Se aplică {terms}. Dacă o carte are o problemă, îți returnăm banii: vezi {withdrawal}.',
+    'legal.waiverGo': 'Continuă la plată',
+    'legal.newsTitle': 'Noutăți pe email',
+    'legal.newsHint': 'Cărți noi și reduceri, cel mult de câteva ori pe lună.',
+    'pay.waiverNeeded': 'Confirmă livrarea imediată a cărții ca să continui.',
     'acc.checkEmail': 'Ți-am trimis un email de confirmare. Deschide linkul din el, apoi intră în cont.',
     'acc.resetSent': 'Dacă adresa există, ți-am trimis un link pentru schimbarea parolei.',
     'acc.enterEmail': 'Scrie adresa de email mai întâi.',
@@ -1103,6 +1134,37 @@ const D = {
     'off.downloaded': 'Download avviato. Il file è in Download.',
     'off.noInternet': 'Sei offline: vedi i libri salvati su questo dispositivo.',
     'off.full': 'Spazio esaurito sul dispositivo. Rimuovi altri libri salvati offline.',
+    'ntf.title': 'Notifiche',
+    'ntf.open': 'Apri',
+    'ntf.empty': 'Nessuna notifica per ora.',
+    'ntf.new': 'Nuova notifica per i clienti',
+    'ntf.link': 'Link (facoltativo)',
+    'ntf.lang': 'Per chi',
+    'ntf.allLangs': 'Tutti i clienti (tutte le lingue)',
+    'ntf.send': 'Pubblica la notifica',
+    'ntf.help': 'Appare nella campanella del menu con un numero finché i clienti non la leggono. Es.: nuovo libro, sconto, novità.',
+    'ntf.sent': 'Notifiche pubblicate',
+    'ntf.none': 'Non hai ancora pubblicato notifiche.',
+    'ntf.sentOk': 'Notifica pubblicata.',
+    'set.title': 'Impostazioni',
+    'set.company': 'Dati aziendali',
+    'set.companyHelp': 'Compaiono nelle pagine legali (Termini, Privacy, Dati del venditore). Sono obbligatori per un negozio online nell\'UE.',
+    'set.name': 'Ragione sociale o nome completo',
+    'set.address': 'Indirizzo',
+    'set.country': 'Paese',
+    'set.vat': 'P.IVA / Codice fiscale',
+    'set.email': 'Email di contatto',
+    'set.view': 'Vedi la pagina pubblica',
+    'legal.acceptTerms': 'Ho letto e accetto i {terms} e l\'{privacy}.',
+    'legal.newsOptIn': 'Voglio ricevere via email novità e sconti di Librava (facoltativo, posso disiscrivermi quando voglio).',
+    'legal.mustAccept': 'Per creare l\'account devi accettare i termini e l\'informativa sulla privacy.',
+    'legal.waiverTitle': 'Prima del pagamento',
+    'legal.waiverText': 'Acconsento alla fornitura immediata dell\'eBook nella mia libreria e riconosco di perdere così il diritto di recesso di 14 giorni.',
+    'legal.waiverTerms': 'Si applicano i {terms}. Se un libro ha un problema ti rimborsiamo: vedi {withdrawal}.',
+    'legal.waiverGo': 'Continua al pagamento',
+    'legal.newsTitle': 'Novità via email',
+    'legal.newsHint': 'Nuovi libri e sconti, al massimo poche volte al mese.',
+    'pay.waiverNeeded': 'Conferma la fornitura immediata del libro per continuare.',
     'acc.checkEmail': 'Ti abbiamo inviato un\'email di conferma. Apri il link e poi accedi.',
     'acc.resetSent': 'Se l\'indirizzo esiste, ti abbiamo inviato un link per cambiare la password.',
     'acc.enterEmail': 'Scrivi prima l\'indirizzo email.',
@@ -1773,6 +1835,37 @@ const D = {
     'off.downloaded': 'Download started. The file is in your Downloads.',
     'off.noInternet': 'You\'re offline: showing the books saved on this device.',
     'off.full': 'No space left on the device. Remove other books saved offline.',
+    'ntf.title': 'Notifications',
+    'ntf.open': 'Open',
+    'ntf.empty': 'No notifications yet.',
+    'ntf.new': 'New notification for customers',
+    'ntf.link': 'Link (optional)',
+    'ntf.lang': 'For whom',
+    'ntf.allLangs': 'All customers (all languages)',
+    'ntf.send': 'Publish notification',
+    'ntf.help': 'Shows under the bell in the menu with a counter until customers read it. E.g. new book, discount, news.',
+    'ntf.sent': 'Published notifications',
+    'ntf.none': 'You haven\'t published any notifications yet.',
+    'ntf.sentOk': 'Notification published.',
+    'set.title': 'Settings',
+    'set.company': 'Company details',
+    'set.companyHelp': 'Shown on the legal pages (Terms, Privacy, Seller information). Required for an online shop in the EU.',
+    'set.name': 'Company name or full name',
+    'set.address': 'Address',
+    'set.country': 'Country',
+    'set.vat': 'VAT / tax number',
+    'set.email': 'Contact email',
+    'set.view': 'View public page',
+    'legal.acceptTerms': 'I have read and accept the {terms} and the {privacy}.',
+    'legal.newsOptIn': 'I\'d like to receive news and discounts from Librava by email (optional, unsubscribe any time).',
+    'legal.mustAccept': 'To create an account you need to accept the terms and the privacy policy.',
+    'legal.waiverTitle': 'Before payment',
+    'legal.waiverText': 'I agree that the eBook is delivered to my library immediately and I understand that I thereby lose my 14-day right of withdrawal.',
+    'legal.waiverTerms': 'The {terms} apply. If a book has a problem we refund you: see {withdrawal}.',
+    'legal.waiverGo': 'Continue to payment',
+    'legal.newsTitle': 'Email news',
+    'legal.newsHint': 'New books and discounts, at most a few times a month.',
+    'pay.waiverNeeded': 'Please confirm immediate delivery of the book to continue.',
     'acc.checkEmail': 'We sent you a confirmation email. Open the link in it, then sign in.',
     'acc.resetSent': 'If the address exists, we sent you a password reset link.',
     'acc.enterEmail': 'Type your email address first.',
@@ -2046,7 +2139,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020181637`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020182652`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
@@ -2068,7 +2161,9 @@ export function t(key, vars) {
 function locale() {
   const prefs = navigator.languages || [navigator.language];
   const m = prefs.find(x => x && (ALIASES[x.toLowerCase().split(/[-_]/)[0]] || x.toLowerCase().split(/[-_]/)[0]) === lang);
-  return m || (lang === 'no' ? 'nb' : lang === 'en' ? 'en-GB' : lang);
+  const pick = m || (lang === 'no' ? 'nb' : lang === 'en' ? 'en-GB' : lang);
+  // some browsers report odd tags (e.g. "en-US@posix") that would break every price and date: fall back to the plain code
+  try { return Intl.getCanonicalLocales(pick.replace(/[@.].*$/, ''))[0]; } catch { return lang === 'no' ? 'nb' : lang; }
 }
 // language name in the visitor's own language, e.g. "Romanian", "rumeno", "roumain"
 // inSentence=true keeps the language's own casing ("inglese", "anglais", but "Englisch")

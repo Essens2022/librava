@@ -1,9 +1,10 @@
-import { CONFIG } from './config.js?v=20261020181637';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020181637';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020181637';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020181637';
-import { api } from './api.js?v=20261020181637';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020181637';
+import { CONFIG } from './config.js?v=20261020182652';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020182652';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020182652';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020182652';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020182652';
+import { api } from './api.js?v=20261020182652';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020182652';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -304,6 +305,7 @@ export async function startCheckout(ids) {
     toast(t('cart.ownedRemoved'));
     if (!ids.length) { go('/library'); return; }
   }
+  if (!await waiverConfirm()) return;
   try {
     const res = await api.checkout(ids);
     if (res.mode === 'done') { cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
@@ -482,10 +484,17 @@ function accPreferences(el) {
       <div class="sec-list">
         <div class="sec-row"><div><b>${esc(t('nav.chooseLanguage'))}</b><span>${esc(langName(getLang()))}</span><small class="muted">${esc(t('acc.prefLangHint'))}</small></div>${langBtn('lang-btn-light')}</div>
         <div class="sec-row"><div><b>${esc(t('nav.theme'))}</b><small class="muted">${esc(t('acc.prefThemeHint'))}</small></div>${themePills()}</div>
+        ${api.setMarketing ? `<div class="sec-row"><div><b>${esc(t('legal.newsTitle'))}</b><small class="muted">${esc(t('legal.newsHint'))}</small></div><label class="switch"><input type="checkbox" id="pref-news"><span></span></label></div>` : ''}
       </div></div>`;
   };
   draw();
-  const re = () => draw();
+  const bindNews = async () => {
+    const cb = $('#pref-news', el); if (!cb) return;
+    cb.checked = await api.getMarketing().catch(() => false);
+    cb.onchange = async () => { try { await api.setMarketing(cb.checked); toast(t('acc.saved')); } catch (x) { cb.checked = !cb.checked; toast(errText(x), { error: true }); } };
+  };
+  bindNews();
+  const re = () => { draw(); bindNews(); };
   window.addEventListener('librava:themechange', re);
   return () => window.removeEventListener('librava:themechange', re);
 }
@@ -595,6 +604,8 @@ function viewAuth(el, mode) {
         <label class="field"><span>${esc(t('acc.email'))}</span><input id="a-email" type="email" autocomplete="email" required></label>
         <label class="field"><span>${esc(t('acc.password'))}</span><input id="a-pass" type="password" autocomplete="${reg ? 'new-password' : 'current-password'}" required minlength="6"></label>
         <div class="error" id="a-err" hidden></div>
+        ${reg ? `<label class="check consent-check"><input type="checkbox" id="a-terms" required> <span>${t('legal.acceptTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(legalText(getLang()).title.terms)}</a>`, privacy: `<a href="#/legal/privacy" target="_blank">${esc(legalText(getLang()).title.privacy)}</a>` })}</span></label>
+          <label class="check consent-check"><input type="checkbox" id="a-news"> <span>${esc(t('legal.newsOptIn'))}</span></label>` : ''}
         <button class="btn btn-buy btn-block" type="submit">${esc(reg ? t('acc.register') : t('acc.signIn'))}</button>
         ${!reg ? `<button type="button" class="linkbtn" data-forgot style="font-size:13px;align-self:flex-start">${esc(t('acc.forgot'))}</button>` : ''}
       </form>
@@ -614,7 +625,8 @@ function viewAuth(el, mode) {
     const btn = e.submitter || $('#auth-form button[type=submit]', el); btn.disabled = true;
     try {
       if (reg) {
-        const r = await api.signUp({ email, password, name: $('#a-name', el).value.trim() });
+        if (!$('#a-terms', el).checked) { show(t('legal.mustAccept')); btn.disabled = false; return; }
+        const r = await api.signUp({ email, password, name: $('#a-name', el).value.trim(), marketing: $('#a-news', el).checked });
         if (r.needsConfirm) { show(t('acc.checkEmail')); err.style.color = 'var(--pista-strong)'; btn.disabled = false; return; }
         toast(t('acc.welcome', { name: api.user().name }));
       } else await api.signIn({ email, password });
@@ -719,3 +731,48 @@ export function viewHelp(el) {
 }
 
 export { spinner, updateCartCount };
+
+// =====================================================================
+//  LEGAL PAGES  (#/legal/terms | privacy | cookies | withdrawal | imprint)
+// =====================================================================
+let companyCache = null;
+export async function companyInfo() {
+  if (!companyCache) companyCache = (await api.getSetting?.('company').catch(() => null)) || {};
+  return companyCache;
+}
+export function resetCompanyCache() { companyCache = null; }
+export async function viewLegal(el, page) {
+  const L = legalText(getLang());
+  if (!LEGAL_PAGES.includes(page)) page = 'terms';
+  const c = await companyInfo();
+  const fill = s => esc(s).replace(/\{(company|address|vat|country|email)\}/g, (_, k) => c[k] ? esc(c[k]) : (k === 'email' && CONFIG.supportEmail ? esc(CONFIG.supportEmail) : `<mark class="todo">[${esc(L.todo)}]</mark>`));
+  document.title = L.title[page] + ' · ' + CONFIG.siteName;
+  el.innerHTML = `<div class="wrap page legal-wrap">
+    <nav class="legal-nav">${LEGAL_PAGES.map(p => `<a href="#/legal/${p}" class="${p === page ? 'on' : ''}">${esc(L.title[p])}</a>`).join('')}</nav>
+    <article class="panel legal">
+      <h1>${esc(L.title[page])}</h1>
+      <p class="muted">${esc(L.updated.replace('{date}', fmtDate(LEGAL_VERSION)))}</p>
+      ${page === 'imprint'
+        ? `<dl class="imprint">${L.imprint.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${fill(v)}</dd>`).join('')}</dl>`
+        : L[page].map(([h, p]) => `<h2>${esc(h)}</h2><p>${fill(p)}</p>`).join('')}
+    </article></div>`;
+}
+
+// EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
+function waiverConfirm() {
+  return new Promise(resolve => {
+    let ok = false;
+    const L = legalText(getLang());
+    const close = modal(`<h2 style="margin:0">${esc(t('legal.waiverTitle'))}</h2>
+      <label class="check consent-check"><input type="checkbox" id="w-ok"> <span>${esc(t('legal.waiverText'))}</span></label>
+      <p class="muted" style="margin:0;font-size:13px">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-ghost" data-close>${esc(t('admin.cancel'))}</button><button class="btn btn-buy" id="w-go" disabled>${esc(t('legal.waiverGo'))}</button></div>`, {
+      onMount: (m, closeFn) => {
+        const cb = m.querySelector('#w-ok'), go2 = m.querySelector('#w-go');
+        cb.onchange = () => { go2.disabled = !cb.checked; };
+        go2.onclick = () => { ok = true; closeFn(); resolve(true); };
+        new MutationObserver((_, obs) => { if (!m.isConnected) { obs.disconnect(); if (!ok) resolve(false); } }).observe(document.body, { childList: true });
+      },
+    });
+  });
+}
