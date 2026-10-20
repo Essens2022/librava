@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020233330';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020233330';
-import { esc, store, $, $$ } from './util.js?v=20261020233330';
+import { CONFIG } from './config.js?v=20261020234859';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020234859';
+import { esc, store, $, $$ } from './util.js?v=20261020234859';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,10 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020233330';
-import { suggest, highlight } from './search.js?v=20261020233330';
-import { api } from './api.js?v=20261020233330';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020234859';
+import { suggest, highlight } from './search.js?v=20261020234859';
+import { track } from './track.js?v=20261020234859';
+import { api } from './api.js?v=20261020234859';
 
 // ---------------- icons ----------------
 const P = {
@@ -88,13 +89,15 @@ export function logoHTML() {
 export const CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'teen', 'selfhelp', 'health', 'business', 'cooking', 'education', 'hobby',
   'biography', 'history', 'religion', 'parenting', 'science', 'computers', 'arts', 'comics', 'humor', 'travel', 'sports', 'languages',
   'reference', 'politics', 'engineering', 'medical', 'law', 'lgbtq'];
+// address of a category page, the same as tools/book-pages.mjs writes: /<lang>/<name-in-that-language>/
+export function catSlug(c) { const s = String(t('cat.' + c)).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' ').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); return s.length >= 3 ? s : c; }
 export const MAIN_CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'selfhelp', 'health', 'business', 'cooking', 'education'];
 
 // ---------------- cart ----------------
 export const cart = {
   get() { return store.get('cart', []); },
   has(id) { return this.get().includes(id); },
-  add(id) { const c = this.get(); if (!c.includes(id)) { c.push(id); store.set('cart', c); } updateCartCount(); },
+  add(id) { const c = this.get(); if (!c.includes(id)) { c.push(id); store.set('cart', c); track('add_cart', { book_id: id }); } updateCartCount(); },
   remove(id) { store.set('cart', this.get().filter(x => x !== id)); updateCartCount(); },
   set(ids) { store.set('cart', ids); updateCartCount(); },
   clear() { store.set('cart', []); updateCartCount(); },

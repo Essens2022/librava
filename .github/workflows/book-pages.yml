@@ -1,8 +1,11 @@
-# Keeps /book/<id>/ share pages up to date (cover + title in WhatsApp/Facebook link previews).
-# Started right away by the store when a book is published or changed (share-refresh function),
-# and also on a schedule as a safety net (GitHub runs scheduled jobs only every few hours).
-name: Book share pages
+# Builds the pages search engines index (store home in 24 languages, category pages, one page per book,
+# sitemap.xml, robots.txt) and the share previews (cover + title in WhatsApp/Facebook).
+# Runs after every site update, when a book is published or changed (share-refresh function), and hourly as a safety net.
+name: SEO pages
 on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'assets/**', 'tools/**']
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
@@ -26,8 +29,8 @@ jobs:
       - run: node tools/book-pages.mjs
       - name: Publish if something changed
         run: |
-          git add -A book
+          git add -A book sitemap.xml robots.txt en fr de es it pt nl pl ro cs sk hu bg hr sl el da sv no fi et lv lt uk
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
-          git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update book share pages"
+          git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update SEO pages"
           git push origin HEAD:main
-          git push origin HEAD:gh-pages
+          git push origin HEAD:gh-pages --force

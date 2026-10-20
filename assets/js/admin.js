@@ -1,17 +1,18 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020233330';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020233330';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020233330';
-import { resetCompanyCache } from './views.js?v=20261020233330';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261020233330';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020233330';
-import { api } from './api.js?v=20261020233330';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261020233330';
+import { CONFIG } from './config.js?v=20261020234859';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020234859';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020234859';
+import { resetCompanyCache } from './views.js?v=20261020234859';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261020234859';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020234859';
+import { api } from './api.js?v=20261020234859';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261020234859';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
+  ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
@@ -50,6 +51,7 @@ export async function viewAdmin(el, parts) {
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'reviews': return reviews(body);
+    case 'stats': return statsAdmin(body);
     case 'offers': return parts[1] ? offerForm(body, parts[1]) : offersAdmin(body);
     case 'promos': return parts[1] ? promoForm(body, parts[1]) : promosAdmin(body);
     case 'notifications': return notificationsAdmin(body);
@@ -1366,6 +1368,58 @@ async function offerForm(body, id) {
     try { await api.saveOffer(row); toast(t('of.saved')); go('/admin/offers'); } catch (x) { fail(errText(x)); btn.disabled = false; }
   };
   drawTiers(); draw();
+}
+
+// ---------------------------------------------------------------- statistics: visitors, sources, countries, searches, books, sales funnel
+const FLAG = cc => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌐';
+async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays') || 30)) {
+  body.innerHTML = `<div class="panel"><div class="spinner"></div></div>`;
+  let d;
+  try { d = await api.analytics(days); } catch (x) { body.innerHTML = `<div class="panel">${esc(errText(x))}</div>`; return; }
+  const n = v => new Intl.NumberFormat(getLang()).format(v || 0);
+  const pct = (a, b) => b ? (a / b * 100).toFixed(1).replace('.', ',') + '%' : '—';
+  const delta = (now, before) => { if (!before) return ''; const ch = Math.round((now - before) / before * 100); return `<span class="st-delta ${ch >= 0 ? 'up' : 'down'}">${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch)}%</span>`; };
+  const conv = d.sessions ? d.orders / d.sessions : 0;
+  const kpi = (label, val, extra = '', help = '') => `<div class="st-kpi" title="${esc(help)}"><small>${esc(label)}</small><b>${val}</b>${extra}</div>`;
+  const maxV = Math.max(1, ...d.daily.map(x => x.visitors)), maxR = Math.max(1, ...d.daily.map(x => x.revenue));
+  const chart = (key, max, color, fmt) => `<div class="st-chart" role="img" aria-label="${esc(t('st.' + key))}">${d.daily.map(x => `<div class="st-bar" style="--h:${(x[key] / max * 100).toFixed(1)}%;--c:${color}"><span class="st-tip">${esc(fmtDate(x.day))}<br><b>${fmt(x[key])}</b></span></div>`).join('')}</div>
+    <div class="st-axis"><span>${esc(fmtDate(d.daily[0]?.day))}</span><span>${esc(fmtDate(d.daily[d.daily.length - 1]?.day))}</span></div>`;
+  const list = (items, label, fmtK = k => esc(k)) => { const max = Math.max(1, ...items.map(x => x.n)); const tot = items.reduce((a, x) => a + x.n, 0);
+    return items.length ? `<ul class="st-list">${items.map(x => `<li><span class="st-k">${fmtK(x.k, x)}</span><span class="st-v">${n(x.n)} <small>${pct(x.n, tot)}</small></span><i style="width:${(x.n / max * 100).toFixed(1)}%"></i></li>`).join('')}</ul>` : `<p class="muted">${esc(t('st.noData'))}</p>`; };
+  const srcName = k => esc({ direct: t('st.direct'), google: 'Google', bing: 'Bing', duckduckgo: 'DuckDuckGo', yahoo: 'Yahoo', ecosia: 'Ecosia', yandex: 'Yandex', facebook: 'Facebook', instagram: 'Instagram', whatsapp: 'WhatsApp', tiktok: 'TikTok', youtube: 'YouTube', pinterest: 'Pinterest', x: 'X / Twitter', telegram: 'Telegram', chatgpt: 'ChatGPT', 'google-ads': 'Google Ads' }[k] || k);
+  const f = d.funnel, steps = [['sessions', f.sessions], ['book_view', f.book_view], ['add_cart', f.add_cart], ['checkout', f.checkout], ['paid', f.paid]];
+  const bookRows = (d.books || []).filter(b => b.views || b.sold || b.carts);
+  body.innerHTML = `<div class="panel st-head"><div><h2 class="section-title" style="font-size:19px;margin:0">${esc(t('st.title'))}</h2><p class="muted" style="margin:4px 0 0;max-width:80ch">${esc(t('st.help'))}</p></div>
+      <div class="seg" role="group">${[1, 7, 30, 90, 365].map(x => `<button type="button" data-days="${x}" class="${x === days ? 'on' : ''}">${esc(x === 1 ? t('st.today') : t('st.days', { n: x }))}</button>`).join('')}</div></div>
+    <div class="st-kpis">
+      ${kpi(t('st.visitors'), n(d.visitors), delta(d.visitors, d.prev_visitors), t('st.visitorsHelp'))}
+      ${kpi(t('st.sessions'), n(d.sessions), delta(d.sessions, d.prev_sessions))}
+      ${kpi(t('st.pageviews'), n(d.pageviews), `<small class="muted">${d.sessions ? (d.pageviews / d.sessions).toFixed(1).replace('.', ',') : '0'} / ${esc(t('st.perVisit'))}</small>`)}
+      ${kpi(t('st.orders'), n(d.orders), delta(d.orders, d.prev_orders))}
+      ${kpi(t('st.revenue'), money(d.revenue), delta(d.revenue, d.prev_revenue))}
+      ${kpi(t('st.conversion'), pct(d.orders, d.sessions), '', t('st.conversionHelp'))}
+      ${kpi(t('st.aov'), d.orders ? money(Math.round(d.revenue / d.orders)) : '—')}
+      ${kpi(t('st.discounts'), money(d.discounts))}
+    </div>
+    <div class="st-grid">
+      <section class="panel st-wide"><h3>${esc(t('st.visitorsDay'))}</h3>${chart('visitors', maxV, 'var(--pista-strong)', n)}</section>
+      <section class="panel st-wide"><h3>${esc(t('st.revenueDay'))}</h3>${chart('revenue', maxR, '#E8A33D', v => money(v))}</section>
+      <section class="panel st-wide"><h3>${esc(t('st.funnel'))}</h3><p class="muted st-sub">${esc(t('st.funnelHelp'))}</p>
+        <div class="st-funnel">${steps.map(([k, v], i) => `<div class="st-step"><span>${esc(t('st.f.' + k))}</span><div class="st-fbar"><i style="width:${(v / Math.max(1, f.sessions) * 100).toFixed(1)}%"></i></div><b>${n(v)}</b><small>${i ? pct(v, steps[i - 1][1]) : ''}</small></div>`).join('')}</div></section>
+      <section class="panel"><h3>${esc(t('st.sources'))}</h3><p class="muted st-sub">${esc(t('st.sourcesHelp'))}</p>${list(d.sources, '', srcName)}</section>
+      <section class="panel"><h3>${esc(t('st.countries'))}</h3>${list(d.countries, '', k => `${FLAG(k)} ${esc(k === '?' ? t('st.unknown') : (() => { try { return new Intl.DisplayNames([getLang()], { type: 'region' }).of(k); } catch { return k; } })())}`)}</section>
+      <section class="panel"><h3>${esc(t('st.langs'))}</h3>${list(d.langs, '', k => esc(k === '?' ? t('st.unknown') : langName(k)))}</section>
+      <section class="panel"><h3>${esc(t('st.devices'))}</h3>${list(d.devices, '', k => esc(t('st.dev.' + k)))}</section>
+      <section class="panel"><h3>${esc(t('st.searches'))}</h3><p class="muted st-sub">${esc(t('st.searchesHelp'))}</p>${list(d.searches, '', (k, x) => `${esc(k)}${x.zero ? ` <span class="st-zero">${esc(t('st.zero'))}</span>` : ''}`)}</section>
+      <section class="panel"><h3>${esc(t('st.campaigns'))}</h3><p class="muted st-sub">${esc(t('st.campaignsHelp'))}</p>${list(d.campaigns, '')}</section>
+      <section class="panel st-wide"><h3>${esc(t('st.books'))}</h3>${bookRows.length ? `<div class="table-scroll"><table class="adm-table"><thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('st.b.views'))}</th><th class="num">${esc(t('st.b.samples'))}</th><th class="num">${esc(t('st.b.carts'))}</th><th class="num">${esc(t('st.b.sold'))}</th><th class="num">${esc(t('st.conversion'))}</th></tr></thead><tbody>
+        ${bookRows.map(b => `<tr><td><a href="#/book/${esc(b.id)}">${esc(b.title)}</a> <small class="muted">${esc((b.lang || '').toUpperCase())}</small></td><td class="num">${n(b.views)}</td><td class="num">${n(b.samples)}</td><td class="num">${n(b.carts)}</td><td class="num">${n(b.sold)}</td><td class="num">${pct(b.sold, b.views)}</td></tr>`).join('')}</tbody></table></div>` : `<p class="muted">${esc(t('st.noData'))}</p>`}</section>
+      <section class="panel"><h3>${esc(t('st.pages'))}</h3>${list(d.pages, '')}</section>
+      <section class="panel"><h3>${esc(t('st.hours'))}</h3><div class="st-hours">${Array.from({ length: 24 }, (_, h) => { const v = (d.hours.find(x => x.h === h) || { n: 0 }).n, mx = Math.max(1, ...d.hours.map(x => x.n)); return `<div class="st-bar" style="--h:${(v / mx * 100).toFixed(1)}%;--c:var(--pista-strong)"><span class="st-tip">${h}:00<br><b>${n(v)}</b></span></div>`; }).join('')}</div><div class="st-axis"><span>0:00</span><span>12:00</span><span>23:00</span></div></section>
+      <section class="panel st-wide st-google"><h3>${esc(t('st.google'))}</h3><p>${esc(t('st.googleHelp'))}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-dark" href="https://search.google.com/search-console" target="_blank" rel="noopener">Google Search Console</a><a class="btn btn-ghost" href="https://www.bing.com/webmasters" target="_blank" rel="noopener">Bing Webmaster Tools</a><a class="btn btn-ghost" href="/sitemap.xml" target="_blank" rel="noopener">sitemap.xml</a></div></section>
+    </div>`;
+  $$('[data-days]', body).forEach(b => b.onclick = () => { sessionStorage.setItem('librava:stDays', b.dataset.days); statsAdmin(body, +b.dataset.days); });
 }
 
 // ---------------------------------------------------------------- company details (shown on the legal pages)

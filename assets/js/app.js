@@ -1,12 +1,13 @@
-import { CONFIG } from './config.js?v=20261020233330';
-import { t, getLang, setLang } from './i18n.js?v=20261020233330';
-import { esc, $, $$ } from './util.js?v=20261020233330';
-import { api, chooseBackend } from './api.js?v=20261020233330';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent } from './ui.js?v=20261020233330';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261020233330';
-import { offline } from './offline.js?v=20261020233330';
-import { viewReader } from './reader.js?v=20261020233330';
-import { viewAdmin } from './admin.js?v=20261020233330';
+import { CONFIG } from './config.js?v=20261020234859';
+import { t, getLang, setLang } from './i18n.js?v=20261020234859';
+import { esc, $, $$ } from './util.js?v=20261020234859';
+import { api, chooseBackend } from './api.js?v=20261020234859';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug } from './ui.js?v=20261020234859';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261020234859';
+import { trackPage } from './track.js?v=20261020234859';
+import { offline } from './offline.js?v=20261020234859';
+import { viewReader } from './reader.js?v=20261020234859';
+import { viewAdmin } from './admin.js?v=20261020234859';
 
 let cleanup = null, seq = 0;
 
@@ -66,9 +67,12 @@ async function route() {
   // on librava.store the address bar shows a shareable address: /book/<id>/ for a book (its cover appears
   // in WhatsApp & co.) and /<language>/ elsewhere (the site preview appears in the language of the person sharing)
   if (!pathMode && /(^|\.)librava\.store$/.test(location.hostname)) {
-    const pretty = parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : '/' + getLang() + '/';
+    // the same addresses Google knows: /book/<id>/, /<lang>/<category>/ and /<lang>/
+    const onlyCat = parts[0] === 'search' && q.get('cat') && [...q.keys()].every(k => k === 'cat');
+    const pretty = parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : onlyCat ? `/${getLang()}/${catSlug(q.get('cat'))}/` : '/' + getLang() + '/';
     if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
   }
+  trackPage();
   // highlight current strip link
   const navKey = parts[0] === 'search' ? (q.get('cat') ? 'cat-' + q.get('cat') : q.get('price') === 'free' ? 'free' : q.get('deals') ? 'deals' : q.get('sort') === 'newest' ? 'new' : '') : parts[0] || '';
   $$('.subnav [data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === navKey));

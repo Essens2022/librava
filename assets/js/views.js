@@ -1,12 +1,13 @@
-import { CONFIG } from './config.js?v=20261020233330';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020233330';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020233330';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020233330';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020233330';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020233330';
-import { didYouMean } from './search.js?v=20261020233330';
-import { api } from './api.js?v=20261020233330';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020233330';
+import { CONFIG } from './config.js?v=20261020234859';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020234859';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020234859';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020234859';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020234859';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020234859';
+import { track } from './track.js?v=20261020234859';
+import { didYouMean } from './search.js?v=20261020234859';
+import { api } from './api.js?v=20261020234859';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020234859';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -120,6 +121,7 @@ export async function viewSearch(el, q) {
     const on = (q.get(key) || '') === val;
     return `<a class="fopt ${on ? 'on' : ''}" href="${mk({ [key]: val })}" role="radio" aria-checked="${on}">${on ? icon('check', 'ico') : '<span style="width:22px;display:inline-block"></span>'}${esc(label)}</a>`;
   };
+  if (opts.q) track('search', { q: opts.q, results: books.length });
   const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
   const sortSel = ['relevance', 'bestsellers', 'newest', 'priceAsc', 'priceDesc', 'rating'].map(s => `<option value="${s}" ${(opts.sort || (opts.q ? 'relevance' : 'bestsellers')) === s ? 'selected' : ''}>${esc(t('search.s.' + s))}</option>`).join('');
   const hasFilters = ['cat', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
@@ -180,6 +182,7 @@ export async function viewBook(el, id) {
     return;
   }
   document.title = `${b.title} — ${CONFIG.siteName}`;
+  track('book_view', { book_id: b.id });
   const [owned, reviews, related, myRev] = await Promise.all([
     api.owns(b.id), api.listReviews(b.id),
     api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id).slice(0, 12)),
@@ -290,6 +293,7 @@ export async function viewBook(el, id) {
   // share: the /book/<id>/ address shows the cover, title and price in WhatsApp & co.
   renderBoughtTogether($('#fbt', el), b, owned, offers);
   $('[data-share]', el)?.addEventListener('click', async () => {
+    track('share', { book_id: b.id });
     const url = location.origin + '/book/' + encodeURIComponent(b.id) + '/';
     try {
       if (navigator.share) { await navigator.share({ title: b.title, text: b.title + ' — ' + b.author, url }); return; }
@@ -299,6 +303,7 @@ export async function viewBook(el, id) {
   const jump = $('[data-jump]', el);
   if (jump) jump.onclick = e => { e.preventDefault(); $('#reviews', el).scrollIntoView({ behavior: 'smooth' }); };
 
+  $('[data-preview]', el)?.addEventListener('click', () => track('sample', { book_id: b.id }));
   $('[data-preview]', el)?.addEventListener('click', () => go('/read/' + encodeURIComponent(b.id) + '?preview=1'));
   $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); toast(t('cart.added')); });
   $('[data-buy]', el)?.addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
@@ -336,6 +341,7 @@ export async function startCheckout(ids) {
     if (!ids.length) { go('/library'); return; }
   }
   if (!await waiverConfirm()) return;
+  track('checkout', { value_cents: null });
   try {
     const res = await api.checkout(ids, { coupon: sessionStorage.getItem(COUPON) || null });
     if (res.mode === 'done') { sessionStorage.removeItem(COUPON); cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
@@ -720,6 +726,7 @@ function viewAuth(el, mode) {
     try {
       if (reg) {
         if (!$('#a-terms', el).checked) { show(t('legal.mustAccept')); btn.disabled = false; return; }
+        track('signup');
         const r = await api.signUp({ email, password, name: $('#a-name', el).value.trim(), marketing: $('#a-news', el).checked });
         if (r.needsConfirm) { show(t('acc.checkEmail')); err.style.color = 'var(--pista-strong)'; btn.disabled = false; return; }
         toast(t('acc.welcome', { name: api.user().name }));

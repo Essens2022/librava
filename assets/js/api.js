@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020233330';
-import { applyOffers, offerRunning } from './offers.js?v=20261020233330';
-import { scoreBook } from './search.js?v=20261020233330';
-import { getLang } from './i18n.js?v=20261020233330';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020233330';
+import { CONFIG } from './config.js?v=20261020234859';
+import { applyOffers, offerRunning } from './offers.js?v=20261020234859';
+import { scoreBook } from './search.js?v=20261020234859';
+import { getLang } from './i18n.js?v=20261020234859';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020234859';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -75,7 +75,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020233330')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020234859')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -288,6 +288,12 @@ class DemoAPI {
   async saveOffer(o) { const all = store.get('demo:offers', []); const id = o.id || uid('of_'); const i = all.findIndex(x => x.id === id); const row = { ...(i >= 0 ? all[i] : { created_at: new Date().toISOString(), uses: 0 }), ...o, id, updated_at: new Date().toISOString() }; if (i >= 0) all[i] = row; else all.push(row); store.set('demo:offers', all); return id; }
   async deleteOffer(id) { store.set('demo:offers', store.get('demo:offers', []).filter(o => o.id !== id)); }
   async boughtTogether() { return []; }
+  track() { }
+  async analytics(days) {
+    const day = i => new Date(Date.now() - (days - 1 - i) * 864e5).toISOString().slice(0, 10);
+    return { visitors: 0, sessions: 0, pageviews: 0, orders: 0, revenue: 0, discounts: 0, daily: Array.from({ length: Math.min(days, 90) }, (_, i) => ({ day: day(i), visitors: 0, orders: 0, revenue: 0 })),
+      funnel: { sessions: 0, book_view: 0, add_cart: 0, checkout: 0, paid: 0 }, sources: [], countries: [], langs: [], devices: [], campaigns: [], searches: [], books: [], pages: [], hours: [] };
+  }
   // ---- promotions (home page banners chosen by the shop owner, per language) ----
   async promos(lang) { return store.get('demo:promos', []).filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort); }
   async adminPromos() { return store.get('demo:promos', []).sort(promoSort); }
@@ -638,6 +644,8 @@ class SupabaseAPI {
     if (files.length) await this.sb.storage.from('covers').remove(files).catch(() => { });
   }
   async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
+  track(e) { this.sb.rpc('track', { e }).then(() => { }, () => { }); }
+  async analytics(days) { const { data, error } = await this.sb.rpc('analytics_summary', { days }); this._err(error); return data; }
   // ---- shop settings (company details for the legal pages) and announcements ----
   async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
   async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
