@@ -1,11 +1,12 @@
-import { CONFIG } from './config.js?v=20261019213353';
-import { t, getLang, setLang } from './i18n.js?v=20261019213353';
-import { esc, $, $$ } from './util.js?v=20261019213353';
-import { api, chooseBackend } from './api.js?v=20261019213353';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath } from './ui.js?v=20261019213353';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261019213353';
-import { viewReader } from './reader.js?v=20261019213353';
-import { viewAdmin } from './admin.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { t, getLang, setLang } from './i18n.js?v=20261020163923';
+import { esc, $, $$ } from './util.js?v=20261020163923';
+import { api, chooseBackend } from './api.js?v=20261020163923';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go } from './ui.js?v=20261020163923';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, spinner } from './views.js?v=20261020163923';
+import { offline } from './offline.js?v=20261020163923';
+import { viewReader } from './reader.js?v=20261020163923';
+import { viewAdmin } from './admin.js?v=20261020163923';
 
 let cleanup = null, seq = 0;
 
@@ -42,7 +43,7 @@ async function route() {
   try {
     let res;
     switch (parts[0]) {
-      case undefined: res = await viewHome(el); break;
+      case undefined: if (!navigator.onLine && offline.all().length && api.user()) { go('/library'); return; } res = await viewHome(el); break;
       case 'search': res = await viewSearch(el, q); break;
       case 'book': res = await viewBook(el, parts[1]); break;
       case 'cart': res = await viewCart(el); break;
@@ -114,3 +115,11 @@ async function boot() {
   route();
 }
 boot();
+
+// offline support on the live site (see /sw.js)
+if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostname)) {
+  navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready).then(reg => {
+    const files = performance.getEntriesByType('resource').map(r => r.name).filter(u => u.startsWith(location.origin + '/assets/'));
+    reg.active?.postMessage({ cache: files });
+  }).catch(() => { });
+}

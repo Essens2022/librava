@@ -1,11 +1,11 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019213353';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019213353';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261019213353';
-import { api } from './api.js?v=20261019213353';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020163923';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020163923';
+import { api } from './api.js?v=20261020163923';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML } from './ui.js?v=20261020163923';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -646,7 +646,9 @@ function bookForm(body, b, startStep = 1) {
           <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
           <div class="fcheck" id="fcheck" ${fileCheck ? '' : 'hidden'}></div><div id="devprev"></div>
           <button type="button" class="btn btn-dark" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button>
-          <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p></div></div>
+          <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p>
+          <label class="check"><input type="checkbox" id="f-dl" ${v.allow_download !== false ? 'checked' : ''}> ${esc(t('kdp.allowDownload'))}</label>
+          <label class="check" style="margin-left:26px"><input type="checkbox" id="f-stamp" ${v.stamp_downloads !== false ? 'checked' : ''}> ${esc(t('kdp.stampDownload'))}</label></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
         <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
           <div style="flex:1;min-width:220px"><label class="drop" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('kdp.uploadCover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
@@ -875,6 +877,7 @@ function bookForm(body, b, startStep = 1) {
       age_min: amin === '' ? null : +amin, age_max: amax === '' ? null : +amax,
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
       pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
+      allow_download: $('#f-dl', body).checked, stamp_downloads: $('#f-stamp', body).checked,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
       published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,
       ...(hasAplus ? { aplus: getAplus() } : {}),

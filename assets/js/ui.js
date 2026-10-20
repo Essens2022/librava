@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261019213353';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261019213353';
-import { esc, store, $, $$ } from './util.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020163923';
+import { esc, store, $, $$ } from './util.js?v=20261020163923';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,7 +12,7 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261019213353';
+import { api } from './api.js?v=20261020163923';
 
 // ---------------- icons ----------------
 const P = {
@@ -30,6 +30,7 @@ const P = {
   full: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
   zoomIn: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21M8 11h6M11 8v6"/>',
   zoomOut: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21M8 11h6"/>',
+  download: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',

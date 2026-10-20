@@ -1,8 +1,9 @@
-import { CONFIG } from './config.js?v=20261019213353';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261019213353';
-import { esc, $, $$, safeHTML, hasTags } from './util.js?v=20261019213353';
-import { api } from './api.js?v=20261019213353';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020163923';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020163923';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020163923';
+import { api } from './api.js?v=20261020163923';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020163923';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -642,7 +643,13 @@ export async function viewLibrary(el, q) {
     // the payment confirmation from Stripe can take a few seconds to arrive
     setTimeout(() => { if (currentPath().startsWith('/library')) go('/library'); }, 4000);
   }
-  let items = await api.library();
+  let items, offlineMode = false;
+  try { items = await api.library(); }
+  catch (e) {
+    // no internet: show the books saved on this device
+    items = offline.all().map(o => ({ book: o.book, purchase: { created_at: o.saved_at }, progress: store.get('guestprog:' + o.book.id, null) }));
+    offlineMode = true;
+  }
   const sort = q.get('sort') || 'recent';
   const sorters = {
     recent: (a, b) => String(b.progress?.updated_at || b.purchase.created_at).localeCompare(String(a.progress?.updated_at || a.purchase.created_at)),
@@ -661,15 +668,39 @@ export async function viewLibrary(el, q) {
     ${items.length ? `<div class="panel"><div class="lib-grid">${items.map(({ book: b, progress: p }) => {
       const pct = p?.percent ? Math.round(p.percent * 100) : 0;
       const status = !p ? t('lib.notStarted') : pct >= 99 ? t('lib.finished') : t('lib.read', { p: pct });
-      return `<a class="lib-item" href="#/read/${encodeURIComponent(b.id)}">
+      const off = offline.has(b.id);
+      return `<div class="lib-item"><a href="#/read/${encodeURIComponent(b.id)}">
         ${coverHTML(b, { badge: false })}
         <div class="progress"><i style="width:${pct}%"></i></div>
         <div class="card-title">${esc(b.title)}</div>
-        <div class="lib-status">${esc(status)} · ${esc(t('book.formatShort.' + b.format))}</div>
-      </a>`;
+        <div class="lib-status">${esc(status)} · ${esc(t('book.formatShort.' + b.format))}${off ? ` · <span class="off-tag">${icon('check')} ${esc(t('off.saved'))}</span>` : ''}</div></a>
+        <div class="lib-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-offline="${esc(b.id)}" title="${esc(off ? t('off.removeHint') : t('off.saveHint'))}">${icon(off ? 'trash' : 'devices')} ${esc(off ? t('off.remove') : t('off.save'))}</button>
+          ${b.allow_download !== false && !offlineMode ? `<button type="button" class="btn btn-ghost btn-sm" data-download="${esc(b.id)}" title="${esc(t('off.downloadHint'))}">${icon('download')} ${esc(t('off.download'))}</button>` : ''}
+        </div></div>`;
     }).join('')}</div></div>` : `<div class="panel empty">${icon('library')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lib.empty'))}</h2><p>${esc(t('lib.emptyHint'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div>`}
   </div>`;
   $('#lib-sort', el)?.addEventListener('change', e => go('/library?sort=' + e.target.value));
+  if (offlineMode) $('.lib-head', el).insertAdjacentHTML('afterend', `<div class="demo-note" style="margin-bottom:12px">${esc(t('off.noInternet'))}</div>`);
+  const byId = id => items.find(x => x.book.id === id)?.book;
+  $$('[data-download]', el).forEach(btn => btn.onclick = async () => {
+    const b = byId(btn.dataset.download); const label = btn.innerHTML; btn.disabled = true;
+    try { await downloadBook(b, p => { btn.textContent = Math.round(p * 100) + '%'; }); toast(t('off.downloaded')); }
+    catch (x) { toast(errText(x), { error: true }); }
+    btn.disabled = false; btn.innerHTML = label;
+  });
+  $$('[data-offline]', el).forEach(btn => btn.onclick = async () => {
+    const b = byId(btn.dataset.offline); btn.disabled = true;
+    try {
+      if (offline.has(b.id)) { await offline.remove(b.id); toast(t('off.removed')); }
+      else {
+        const blob = await fetchBookFile(b, p => { btn.textContent = Math.round(p * 100) + '%'; });
+        await offline.save(b, blob); toast(t('off.savedToast', { mb: (blob.size / 1048576).toFixed(1) }));
+        navigator.storage?.persist?.().catch(() => { });
+      }
+    } catch (x) { toast(x?.name === 'QuotaExceededError' ? t('off.full') : errText(x), { error: true }); }
+    viewLibrary(el, q);
+  });
 }
 
 // =====================================================================

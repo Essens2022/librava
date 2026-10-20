@@ -2,29 +2,37 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261019213353';
-import { t } from './i18n.js?v=20261019213353';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261019213353';
-import { api } from './api.js?v=20261019213353';
-import { icon, go, toast, cart, errText } from './ui.js?v=20261019213353';
-import { startCheckout } from './views.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { t } from './i18n.js?v=20261020163923';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261020163923';
+import { offline } from './offline.js?v=20261020163923';
+import { api } from './api.js?v=20261020163923';
+import { icon, go, toast, cart, errText } from './ui.js?v=20261020163923';
+import { startCheckout } from './views.js?v=20261020163923';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
 
 export async function viewReader(el, id, q) {
   const preview = q.get('preview') === '1';
-  const book = await api.getBook(id);
+  let book = null;
+  try { book = await api.getBook(id); } catch { }
+  const saved = preview ? null : await offline.get(id, book);
+  if (!book && saved) book = saved.book;
   if (!book) { go('/'); return; }
   let src;
-  try { src = await api.getReadSource(book, { preview }); }
-  catch (e) {
-    if (e.message === 'not-owned') { go('/book/' + encodeURIComponent(id)); return; }
-    throw e;
+  if (saved) src = { url: URL.createObjectURL(saved.blob), kind: saved.book.format, limited: false, local: true };
+  else {
+    try { src = await api.getReadSource(book, { preview }); }
+    catch (e) {
+      if (e.message === 'not-owned') { go('/book/' + encodeURIComponent(id)); return; }
+      throw e;
+    }
   }
   const settings = { ...defaults, ...(store.get('reader:settings') || {}) };
   const saveSettings = () => store.set('reader:settings', settings);
-  let progress = (src.limited || preview) ? null : await api.getProgress(id);
+  let progress = null;
+  if (!(src.limited || preview)) { try { progress = await api.getProgress(id); } catch { progress = store.get('guestprog:' + id, null); } }
   let bookmarks = Array.isArray(progress?.bookmarks) ? progress.bookmarks : [];
   const user = api.user();
 
@@ -71,6 +79,7 @@ export async function viewReader(el, id, q) {
   // ---- progress saving ----
   const persist = debounce(() => {
     if (src.limited || preview || !engine) return;
+    if (src.local) store.set('guestprog:' + id, { ...engine.state(), bookmarks, updated_at: new Date().toISOString() });
     api.saveProgress(id, { ...engine.state(), bookmarks }).catch(() => { });
   }, 1200);
 

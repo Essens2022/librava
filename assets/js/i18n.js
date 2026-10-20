@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261019213353';
-import { store } from './util.js?v=20261019213353';
+import { CONFIG } from './config.js?v=20261020163923';
+import { store } from './util.js?v=20261020163923';
 
 const D = {
   ro: {
@@ -248,7 +248,6 @@ const D = {
     'kdp.manuscript': 'Manuscris',
     'kdp.uploadManuscript': 'Încarcă manuscrisul eBook',
     'kdp.manuscriptOk': 'Manuscris încărcat',
-    'kdp.drm': 'Protecție inclusă: cartea nu se poate descărca, se deschide doar în contul celui care a cumpărat-o.',
     'kdp.coverHelp': 'Coperta e primul lucru pe care îl văd clienții. Ideal 1600 × 2560 px (raport 1,6:1).',
     'kdp.uploadCover': 'Încarcă coperta',
     'kdp.coverSmall': 'Coperta are {w} × {h} px: e prea mică și poate apărea neclară. Folosește minim 625 × 1000 px.',
@@ -396,6 +395,21 @@ const D = {
     'img.working': 'Optimizez… carte {n} din {total}',
     'img.optDone': 'Gata: {n} imagini optimizate, {kb} KB economisiți.',
     'img.optNothing': 'Toate imaginile sunt deja ușoare (sub 105 KB).',
+    'kdp.drm': 'Cartea se citește în cititorul Librava și, dacă permiți mai jos, se poate descărca de către cel care a cumpărat-o.',
+    'kdp.allowDownload': 'Cumpărătorii pot descărca fișierul (PDF/EPUB) ca să-l citească în aplicația lor preferată',
+    'kdp.stampDownload': 'Scrie discret pe prima pagină a PDF-ului descărcat numele și emailul cumpărătorului (descurajează distribuirea)',
+    'off.save': 'Offline',
+    'off.saveHint': 'Salvează cartea pe acest dispozitiv ca s-o citești fără internet',
+    'off.remove': 'Scoate de pe dispozitiv',
+    'off.removeHint': 'Eliberează spațiu: cartea rămâne în biblioteca ta online',
+    'off.saved': 'pe dispozitiv',
+    'off.savedToast': 'Cartea e salvată pe acest dispozitiv ({mb} MB). O poți citi și fără internet.',
+    'off.removed': 'Cartea a fost scoasă de pe dispozitiv.',
+    'off.download': 'Descarcă',
+    'off.downloadHint': 'Descarcă fișierul ca să-l deschizi în altă aplicație (Apple Books, Google Play Books, Adobe, Kindle…)',
+    'off.downloaded': 'Descărcarea a pornit. Fișierul e în Descărcări.',
+    'off.noInternet': 'Nu ai internet: vezi cărțile salvate pe acest dispozitiv.',
+    'off.full': 'Nu mai e spațiu pe dispozitiv. Scoate alte cărți salvate offline.',
     'acc.checkEmail': 'Ți-am trimis un email de confirmare. Deschide linkul din el, apoi intră în cont.',
     'acc.resetSent': 'Dacă adresa există, ți-am trimis un link pentru schimbarea parolei.',
     'acc.enterEmail': 'Scrie adresa de email mai întâi.',
@@ -881,7 +895,6 @@ const D = {
     'kdp.manuscript': 'Manoscritto',
     'kdp.uploadManuscript': 'Carica il manoscritto dell\'eBook',
     'kdp.manuscriptOk': 'Manoscritto caricato',
-    'kdp.drm': 'Protezione inclusa: il libro non si può scaricare, si apre solo nell\'account di chi l\'ha acquistato.',
     'kdp.coverHelp': 'La copertina è la prima cosa che vedono i clienti. Ideale 1600 × 2560 px (rapporto 1,6:1).',
     'kdp.uploadCover': 'Carica la copertina',
     'kdp.coverSmall': 'La copertina è {w} × {h} px: troppo piccola, potrebbe apparire sfocata. Usa almeno 625 × 1000 px.',
@@ -1029,6 +1042,21 @@ const D = {
     'img.working': 'Ottimizzo… libro {n} di {total}',
     'img.optDone': 'Fatto: {n} immagini ottimizzate, {kb} KB risparmiati.',
     'img.optNothing': 'Tutte le immagini sono già leggere (sotto 105 KB).',
+    'kdp.drm': 'Il libro si legge nel lettore Librava e, se lo consenti qui sotto, può essere scaricato da chi l\'ha acquistato.',
+    'kdp.allowDownload': 'Gli acquirenti possono scaricare il file (PDF/EPUB) per leggerlo nella loro app preferita',
+    'kdp.stampDownload': 'Scrivi discretamente nella prima pagina del PDF scaricato nome ed email dell\'acquirente (scoraggia la condivisione)',
+    'off.save': 'Offline',
+    'off.saveHint': 'Salva il libro su questo dispositivo per leggerlo senza internet',
+    'off.remove': 'Rimuovi dal dispositivo',
+    'off.removeHint': 'Libera spazio: il libro resta nella tua libreria online',
+    'off.saved': 'sul dispositivo',
+    'off.savedToast': 'Libro salvato su questo dispositivo ({mb} MB). Puoi leggerlo anche senza internet.',
+    'off.removed': 'Libro rimosso dal dispositivo.',
+    'off.download': 'Scarica',
+    'off.downloadHint': 'Scarica il file per aprirlo in un\'altra app (Apple Books, Google Play Libri, Adobe, Kindle…)',
+    'off.downloaded': 'Download avviato. Il file è in Download.',
+    'off.noInternet': 'Sei offline: vedi i libri salvati su questo dispositivo.',
+    'off.full': 'Spazio esaurito sul dispositivo. Rimuovi altri libri salvati offline.',
     'acc.checkEmail': 'Ti abbiamo inviato un\'email di conferma. Apri il link e poi accedi.',
     'acc.resetSent': 'Se l\'indirizzo esiste, ti abbiamo inviato un link per cambiare la password.',
     'acc.enterEmail': 'Scrivi prima l\'indirizzo email.',
@@ -1514,7 +1542,6 @@ const D = {
     'kdp.manuscript': 'Manuscript',
     'kdp.uploadManuscript': 'Upload eBook manuscript',
     'kdp.manuscriptOk': 'Manuscript uploaded',
-    'kdp.drm': 'Protection included: the book can\'t be downloaded, it opens only in the buyer\'s account.',
     'kdp.coverHelp': 'The cover is the first thing customers see. Ideal 1600 × 2560 px (1.6:1 ratio).',
     'kdp.uploadCover': 'Upload your cover',
     'kdp.coverSmall': 'Your cover is {w} × {h} px: too small and may look blurry. Use at least 625 × 1000 px.',
@@ -1662,6 +1689,21 @@ const D = {
     'img.working': 'Optimising… book {n} of {total}',
     'img.optDone': 'Done: {n} images optimised, {kb} KB saved.',
     'img.optNothing': 'All images are already light (under 105 KB).',
+    'kdp.drm': 'The book is read in the Librava reader and, if you allow it below, can be downloaded by its buyer.',
+    'kdp.allowDownload': 'Buyers can download the file (PDF/EPUB) to read it in their favourite app',
+    'kdp.stampDownload': 'Discreetly print the buyer\'s name and email on the first page of the downloaded PDF (discourages sharing)',
+    'off.save': 'Offline',
+    'off.saveHint': 'Save the book on this device to read it without internet',
+    'off.remove': 'Remove from device',
+    'off.removeHint': 'Free up space: the book stays in your online library',
+    'off.saved': 'on device',
+    'off.savedToast': 'Book saved on this device ({mb} MB). You can read it without internet.',
+    'off.removed': 'Book removed from this device.',
+    'off.download': 'Download',
+    'off.downloadHint': 'Download the file to open it in another app (Apple Books, Google Play Books, Adobe, Kindle…)',
+    'off.downloaded': 'Download started. The file is in your Downloads.',
+    'off.noInternet': 'You\'re offline: showing the books saved on this device.',
+    'off.full': 'No space left on the device. Remove other books saved offline.',
     'acc.checkEmail': 'We sent you a confirmation email. Open the link in it, then sign in.',
     'acc.resetSent': 'If the address exists, we sent you a password reset link.',
     'acc.enterEmail': 'Type your email address first.',
@@ -1935,7 +1977,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261019213353`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020163923`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
