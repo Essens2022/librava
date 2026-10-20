@@ -1,13 +1,13 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020230611';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020230611';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020230611';
-import { resetCompanyCache } from './views.js?v=20261020230611';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020230611';
-import { api } from './api.js?v=20261020230611';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020230611';
+import { CONFIG } from './config.js?v=20261020231013';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020231013';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020231013';
+import { resetCompanyCache } from './views.js?v=20261020231013';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020231013';
+import { api } from './api.js?v=20261020231013';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020231013';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],

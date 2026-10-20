@@ -1315,3 +1315,19 @@ html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background
 .promo-strip.promo-book.promo-one .promo-act { align-items: flex-start; }
 .promo-one .promo-text, .promo-strip.promo-book.promo-one .promo-text { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; text-align: left; }
 .promo-strip.promo-one .promo-cover img { margin: 0; height: 160px; }
+/* phones: price with "You save" under it on the left, the button on the right */
+@media (max-width: 760px) {
+  .promo-one .promo-act { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 4px; }
+  .promo-one .promo-act .promo-price { grid-column: 1; grid-row: 1; font-size: 26px; }
+  .promo-one .promo-act .promo-save { grid-column: 1; grid-row: 2; font-size: 13px; }
+  .promo-one .promo-act .promo-cta { grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: 11px 20px; font-size: 15px; white-space: nowrap; }
+}
+.pr-live-frame.phone .promo-one .promo-act { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: center; }
+.pr-live-frame.phone .promo-one .promo-act .promo-price { grid-column: 1; grid-row: 1; }
+.pr-live-frame.phone .promo-one .promo-act .promo-save { grid-column: 1; grid-row: 2; }
+.pr-live-frame.phone .promo-one .promo-act .promo-cta { grid-column: 2; grid-row: 1 / span 2; }
+@media (max-width: 760px) {
+  .promo-one .promo-act .promo-price { flex-wrap: nowrap; white-space: nowrap; font-size: 22px; gap: 6px; }
+  .promo-one .promo-act .promo-price s { font-size: 13px; }
+  .promo-one .promo-act .promo-price .badge { font-size: 12px; padding: 2px 6px; }
+}
