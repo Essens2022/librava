@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020163923';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020163923';
-import { esc, store, $, $$ } from './util.js?v=20261020163923';
+import { CONFIG } from './config.js?v=20261020164958';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020164958';
+import { esc, store, $, $$ } from './util.js?v=20261020164958';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,7 +12,7 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { api } from './api.js?v=20261020163923';
+import { api } from './api.js?v=20261020164958';
 
 // ---------------- icons ----------------
 const P = {
@@ -78,7 +78,11 @@ export function logoHTML() {
   return `${LOGO_MARK}<span class="logo-word">${esc(n.slice(0, -2))}<i>${esc(n.slice(-2))}</i></span>`;
 }
 
-export const CATS = ['fiction', 'selfhelp', 'health', 'business', 'kids', 'cooking', 'education', 'hobby'];
+// categories like the Amazon Kindle store; the first ones are shown in the top bar
+export const CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'teen', 'selfhelp', 'health', 'business', 'cooking', 'education', 'hobby',
+  'biography', 'history', 'religion', 'parenting', 'science', 'computers', 'arts', 'comics', 'humor', 'travel', 'sports', 'languages',
+  'reference', 'politics', 'engineering', 'medical', 'law', 'lgbtq'];
+export const MAIN_CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'selfhelp', 'health', 'business', 'cooking', 'education'];
 
 // ---------------- cart ----------------
 export const cart = {
@@ -138,7 +142,7 @@ export function renderChrome() {
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
-    ${CATS.map(c => `<a href="#/search?cat=${c}" data-nav="cat-${c}">${esc(t('cat.' + c))}</a>`).join('')}
+    ${MAIN_CATS.map(c => `<a href="#/search?cat=${c}" data-nav="cat-${c}">${esc(t('cat.' + c))}</a>`).join('')}
     <a href="#/library" data-nav="library">${esc(t('nav.library'))}</a>
     ${u?.isAdmin ? `<a href="#/admin" data-nav="admin">${icon('gear')} ${esc(t('nav.admin'))}</a>` : ''}
   </nav></div>`;

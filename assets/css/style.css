@@ -879,3 +879,5 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .lib-actions .ico { width: 15px; height: 15px; }
 .off-tag { color: var(--pista-strong); font-weight: 600; white-space: nowrap; }
 .off-tag .ico { width: 12px; height: 12px; vertical-align: -1px; }
+.more-cats summary { cursor: pointer; color: var(--link); font-size: 14px; margin: 6px 0; }
+.more-cats[open] summary { margin-bottom: 4px; }

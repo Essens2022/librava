@@ -2,7 +2,7 @@
 // Books: output format, ownership, files (upload + private serving), ratings.
 declare(strict_types=1);
 
-const CATEGORIES = ['fiction', 'selfhelp', 'health', 'business', 'kids', 'cooking', 'education', 'hobby'];
+const CATEGORIES = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'teen', 'selfhelp', 'health', 'business', 'cooking', 'education', 'hobby', 'biography', 'history', 'religion', 'parenting', 'science', 'computers', 'arts', 'comics', 'humor', 'travel', 'sports', 'languages', 'reference', 'politics', 'engineering', 'medical', 'law', 'lgbtq'];
 const LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'pl', 'ro', 'cs', 'sk', 'hu', 'bg', 'hr', 'sl', 'el', 'da', 'sv', 'no', 'fi', 'et', 'lv', 'lt', 'uk'];
 
 function book_out(array $b): array {

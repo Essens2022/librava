@@ -1,9 +1,9 @@
-import { CONFIG } from './config.js?v=20261020163923';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020163923';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020163923';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020163923';
-import { api } from './api.js?v=20261020163923';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020163923';
+import { CONFIG } from './config.js?v=20261020164958';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020164958';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020164958';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020164958';
+import { api } from './api.js?v=20261020164958';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020164958';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -32,7 +32,7 @@ export async function viewHome(el) {
     <section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2>
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
   const catTiles = CATS.map(c => {
-    const bs = all.filter(b => b.category === c).slice(0, 4);
+    const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';
     const n = Math.min(bs.length, window.innerWidth < 700 ? 2 : 3);
     const imgs = bs.slice(0, n).map(b => b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : '').join('');
@@ -108,7 +108,8 @@ export async function viewSearch(el, q) {
   el.innerHTML = `<div class="wrap page"><div class="search-layout">
     <aside class="filters panel" id="filters" aria-label="${esc(t('search.filters'))}">
       <h4>${esc(t('search.category'))}</h4>
-      ${radio('c', 'cat', '', t('search.any'))}${CATS.map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}
+      ${radio('c', 'cat', '', t('search.any'))}${CATS.slice(0, 10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}
+      <details class="more-cats" ${CATS.indexOf(q.get('cat')) >= 10 ? 'open' : ''}><summary>${esc(t('search.moreCats', { n: CATS.length - 10 }))}</summary>${CATS.slice(10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}</details>
       <h4>${esc(t('search.format'))}</h4>
       ${radio('f', 'format', '', t('search.any'))}${radio('f', 'format', 'pdf', t('book.format.pdf'))}${radio('f', 'format', 'epub', t('book.format.epub'))}
       <h4>${esc(t('search.price'))}</h4>
