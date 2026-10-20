@@ -1,5 +1,13 @@
 // Estonian interface strings for Librava
 export default {
+  "sugg.recent": "Hiljutised otsingud",
+  "sugg.author": "Autorites",
+  "sugg.series": "Sarjades",
+  "sugg.cat": "Kategooriates",
+  "sugg.remove": "Eemalda ajaloost",
+  "search.dym": "Kas mõtlesid:",
+  "search.loose": "Ükski raamat ei sisalda kõiki sõnu: raamatud, mis sisaldavad osa neist.",
+  "search.otherLangs": "Keeles {lang} tulemusi pole: raamatud teistes keeltes.",
   "promo.cta": "Avasta",
   "promo.ctaBook": "Vaata raamatut",
   "promo.label": "Esiletõstetud pakkumised",

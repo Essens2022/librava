@@ -1,5 +1,13 @@
 // Czech interface strings for Librava
 export default {
+  "sugg.recent": "Nedávná hledání",
+  "sugg.author": "v Autorech",
+  "sugg.series": "v Sériích",
+  "sugg.cat": "v Kategoriích",
+  "sugg.remove": "Odstranit z historie",
+  "search.dym": "Mysleli jste:",
+  "search.loose": "Žádná kniha neobsahuje všechna slova: knihy, které obsahují některá z nich.",
+  "search.otherLangs": "Žádné výsledky v jazyce {lang}: knihy v jiných jazycích.",
   "promo.cta": "Zjistit více",
   "promo.ctaBook": "Zobrazit knihu",
   "promo.label": "Doporučené nabídky",

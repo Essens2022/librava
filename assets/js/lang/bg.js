@@ -1,5 +1,13 @@
 // Bulgarian interface strings for Librava
 export default {
+  "sugg.recent": "Последни търсения",
+  "sugg.author": "в Автори",
+  "sugg.series": "в Поредици",
+  "sugg.cat": "в Категории",
+  "sugg.remove": "Премахни от историята",
+  "search.dym": "Имахте предвид:",
+  "search.loose": "Няма книга с всички думи: показваме книги с част от тях.",
+  "search.otherLangs": "Няма резултати на {lang}: книги на други езици.",
   "promo.cta": "Разгледай",
   "promo.ctaBook": "Виж книгата",
   "promo.label": "Препоръчани оферти",

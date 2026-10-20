@@ -1,8 +1,16 @@
-import { CONFIG } from './config.js?v=20261020201306';
-import { store } from './util.js?v=20261020201306';
+import { CONFIG } from './config.js?v=20261020202232';
+import { store } from './util.js?v=20261020202232';
 
 const D = {
   ro: {
+    'sugg.recent': 'Căutări recente',
+    'sugg.author': 'în Autori',
+    'sugg.series': 'în Serii',
+    'sugg.cat': 'în Categorii',
+    'sugg.remove': 'Șterge din istoric',
+    'search.dym': 'Ai vrut să spui:',
+    'search.loose': 'Nicio carte nu conține toate cuvintele: îți arătăm cărțile care conțin o parte din ele.',
+    'search.otherLangs': 'Niciun rezultat în {lang}: îți arătăm cărți în alte limbi.',
     'pr.editBtn': 'Modifică',
     'promo.cta': 'Descoperă',
     'promo.ctaBook': 'Vezi cartea',
@@ -827,6 +835,14 @@ const D = {
   },
 
   it: {
+    'sugg.recent': 'Ricerche recenti',
+    'sugg.author': 'in Autori',
+    'sugg.series': 'in Serie',
+    'sugg.cat': 'in Categorie',
+    'sugg.remove': 'Rimuovi dalla cronologia',
+    'search.dym': 'Forse cercavi:',
+    'search.loose': 'Nessun libro contiene tutte le parole: mostriamo i libri che ne contengono alcune.',
+    'search.otherLangs': 'Nessun risultato in {lang}: mostriamo libri in altre lingue.',
     'pr.editBtn': 'Modifica',
     'promo.cta': 'Scopri di più',
     'promo.ctaBook': 'Vedi il libro',
@@ -1651,6 +1667,14 @@ const D = {
   },
 
   en: {
+    'sugg.recent': 'Recent searches',
+    'sugg.author': 'in Authors',
+    'sugg.series': 'in Series',
+    'sugg.cat': 'in Categories',
+    'sugg.remove': 'Remove from history',
+    'search.dym': 'Did you mean:',
+    'search.loose': 'No book matches all the words: showing books that match some of them.',
+    'search.otherLangs': 'No results in {lang}: showing books in other languages.',
     'pr.editBtn': 'Edit',
     'promo.cta': 'Discover more',
     'promo.ctaBook': 'See the book',
@@ -2508,7 +2532,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020201306`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020202232`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

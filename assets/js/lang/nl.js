@@ -1,5 +1,13 @@
 // Dutch interface strings for Librava
 export default {
+  "sugg.recent": "Recente zoekopdrachten",
+  "sugg.author": "in Auteurs",
+  "sugg.series": "in Series",
+  "sugg.cat": "in Categorieën",
+  "sugg.remove": "Verwijderen uit geschiedenis",
+  "search.dym": "Bedoelde je:",
+  "search.loose": "Geen boek bevat alle woorden: boeken met een deel ervan.",
+  "search.otherLangs": "Geen resultaten in het {lang}: boeken in andere talen.",
   "promo.cta": "Ontdek meer",
   "promo.ctaBook": "Bekijk het boek",
   "promo.label": "Uitgelichte aanbiedingen",

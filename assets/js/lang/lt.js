@@ -1,5 +1,13 @@
 // Lithuanian interface strings for Librava
 export default {
+  "sugg.recent": "Naujausios paieškos",
+  "sugg.author": "Autoriuose",
+  "sugg.series": "Serijose",
+  "sugg.cat": "Kategorijose",
+  "sugg.remove": "Pašalinti iš istorijos",
+  "search.dym": "Gal turėjote omenyje:",
+  "search.loose": "Nė viena knyga neturi visų žodžių: knygos su kai kuriais iš jų.",
+  "search.otherLangs": "Nėra rezultatų kalba {lang}: knygos kitomis kalbomis.",
   "promo.cta": "Sužinoti daugiau",
   "promo.ctaBook": "Žiūrėti knygą",
   "promo.label": "Rekomenduojami pasiūlymai",

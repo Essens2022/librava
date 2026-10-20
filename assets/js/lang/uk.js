@@ -1,5 +1,13 @@
 // Ukrainian interface strings for Librava
 export default {
+  "sugg.recent": "Останні пошуки",
+  "sugg.author": "в Авторах",
+  "sugg.series": "у Серіях",
+  "sugg.cat": "у Категоріях",
+  "sugg.remove": "Видалити з історії",
+  "search.dym": "Можливо, ви мали на увазі:",
+  "search.loose": "Жодна книга не містить усіх слів: книги з частиною з них.",
+  "search.otherLangs": "Немає результатів мовою {lang}: книги іншими мовами.",
   "promo.cta": "Дізнатися більше",
   "promo.ctaBook": "Переглянути книгу",
   "promo.label": "Рекомендовані пропозиції",

@@ -1,5 +1,13 @@
 // Danish interface strings for Librava
 export default {
+  "sugg.recent": "Seneste søgninger",
+  "sugg.author": "i Forfattere",
+  "sugg.series": "i Serier",
+  "sugg.cat": "i Kategorier",
+  "sugg.remove": "Fjern fra historik",
+  "search.dym": "Mente du:",
+  "search.loose": "Ingen bog indeholder alle ordene: bøger med nogle af dem.",
+  "search.otherLangs": "Ingen resultater på {lang}: bøger på andre sprog.",
   "promo.cta": "Se mere",
   "promo.ctaBook": "Se bogen",
   "promo.label": "Udvalgte tilbud",

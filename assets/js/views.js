@@ -1,10 +1,11 @@
-import { CONFIG } from './config.js?v=20261020201306';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020201306';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020201306';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020201306';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020201306';
-import { api } from './api.js?v=20261020201306';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020201306';
+import { CONFIG } from './config.js?v=20261020202232';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020202232';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020202232';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020202232';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020202232';
+import { didYouMean } from './search.js?v=20261020202232';
+import { api } from './api.js?v=20261020202232';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020202232';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -98,7 +99,13 @@ export async function viewSearch(el, q) {
   const langParam = q.get('lang') || '';
   const bookLang = langParam === 'all' ? '' : (langParam || UI);
   opts.lang = bookLang;
-  const [books, everything] = await Promise.all([api.listBooks(opts), api.listBooks({})]);
+  let [books, everything] = await Promise.all([api.listBooks(opts), api.listBooks({})]);
+  // nothing in the visitor's language: show matches in other languages instead of an empty page
+  let otherLangHits = false;
+  if (opts.q && !books.length && bookLang && !langParam) { books = await api.listBooks({ ...opts, lang: '' }); otherLangHits = books.length > 0; }
+  const dym = opts.q && (!books.length || books.loose) ? didYouMean(opts.q, everything) : null;
+  // keep the words in the search box, like Amazon
+  setTimeout(() => document.querySelectorAll('[data-search] input[name=q]').forEach(i => { if (document.activeElement !== i) i.value = opts.q; }), 0);
   const otherLangs = [...new Set(everything.map(b => b.language).filter(l => l && l !== UI))]
     .sort((a, b) => langName(a).localeCompare(langName(b)));
   const mk = (patch) => {
@@ -137,7 +144,7 @@ export async function viewSearch(el, q) {
     </aside>
     <div style="min-width:0">
       <div class="results-bar">
-        <span style="display:flex;flex-direction:column;gap:6px">${head}${langNote}</span>
+        <span style="display:flex;flex-direction:column;gap:6px">${head}${dym ? `<span class="dym">${esc(t('search.dym'))} <a href="#/search?${new URLSearchParams({ q: dym })}"><b><i>${esc(dym)}</i></b></a></span>` : ''}${books.loose ? `<span class="muted" style="font-size:14px">${esc(t('search.loose'))}</span>` : ''}${otherLangHits ? `<span class="muted" style="font-size:14px">${esc(t('search.otherLangs', { lang: langName(bookLang, true) }))}</span>` : langNote}</span>
         <span style="display:flex;gap:8px;align-items:center">
           <button class="btn btn-ghost btn-sm filter-toggle" data-open-filters>${icon('filter')} ${esc(t('search.filters'))}</button>
           <label class="muted" for="sort-sel">${esc(t('search.sort'))}</label>

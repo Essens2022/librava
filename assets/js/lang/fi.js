@@ -1,5 +1,13 @@
 // Finnish interface strings for Librava
 export default {
+  "sugg.recent": "Viimeisimmät haut",
+  "sugg.author": "kirjailijoissa",
+  "sugg.series": "sarjoissa",
+  "sugg.cat": "luokissa",
+  "sugg.remove": "Poista historiasta",
+  "search.dym": "Tarkoititko:",
+  "search.loose": "Mikään kirja ei sisällä kaikkia sanoja: kirjat, joissa on osa niistä.",
+  "search.otherLangs": "Ei tuloksia kielellä {lang}: kirjat muilla kielillä.",
   "promo.cta": "Tutustu",
   "promo.ctaBook": "Katso kirja",
   "promo.label": "Suositellut tarjoukset",

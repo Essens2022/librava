@@ -1,5 +1,13 @@
 // Croatian interface strings for Librava
 export default {
+  "sugg.recent": "Nedavna pretraživanja",
+  "sugg.author": "u Autorima",
+  "sugg.series": "u Serijalima",
+  "sugg.cat": "u Kategorijama",
+  "sugg.remove": "Ukloni iz povijesti",
+  "search.dym": "Jeste li mislili:",
+  "search.loose": "Nijedna knjiga ne sadrži sve riječi: knjige koje sadrže neke od njih.",
+  "search.otherLangs": "Nema rezultata na jeziku {lang}: knjige na drugim jezicima.",
   "promo.cta": "Otkrij više",
   "promo.ctaBook": "Pogledaj knjigu",
   "promo.label": "Istaknute ponude",

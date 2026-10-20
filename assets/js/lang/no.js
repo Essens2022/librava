@@ -1,5 +1,13 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "sugg.recent": "Nylige søk",
+  "sugg.author": "i Forfattere",
+  "sugg.series": "i Serier",
+  "sugg.cat": "i Kategorier",
+  "sugg.remove": "Fjern fra historikken",
+  "search.dym": "Mente du:",
+  "search.loose": "Ingen bok inneholder alle ordene: bøker med noen av dem.",
+  "search.otherLangs": "Ingen resultater på {lang}: bøker på andre språk.",
   "promo.cta": "Se mer",
   "promo.ctaBook": "Se boken",
   "promo.label": "Utvalgte tilbud",

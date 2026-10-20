@@ -1,5 +1,13 @@
 // Greek interface strings for Librava
 export default {
+  "sugg.recent": "Πρόσφατες αναζητήσεις",
+  "sugg.author": "στους Συγγραφείς",
+  "sugg.series": "στις Σειρές",
+  "sugg.cat": "στις Κατηγορίες",
+  "sugg.remove": "Αφαίρεση από το ιστορικό",
+  "search.dym": "Μήπως εννοούσατε:",
+  "search.loose": "Κανένα βιβλίο δεν περιέχει όλες τις λέξεις: βιβλία με μερικές από αυτές.",
+  "search.otherLangs": "Κανένα αποτέλεσμα στα {lang}: βιβλία σε άλλες γλώσσες.",
   "promo.cta": "Ανακαλύψτε",
   "promo.ctaBook": "Δείτε το βιβλίο",
   "promo.label": "Προτεινόμενες προσφορές",

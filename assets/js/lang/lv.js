@@ -1,5 +1,13 @@
 // Latvian interface strings for Librava
 export default {
+  "sugg.recent": "Nesenie meklējumi",
+  "sugg.author": "Autoros",
+  "sugg.series": "Sērijās",
+  "sugg.cat": "Kategorijās",
+  "sugg.remove": "Noņemt no vēstures",
+  "search.dym": "Vai domājāt:",
+  "search.loose": "Neviena grāmata nesatur visus vārdus: grāmatas ar dažiem no tiem.",
+  "search.otherLangs": "Nav rezultātu valodā {lang}: grāmatas citās valodās.",
   "promo.cta": "Uzzināt vairāk",
   "promo.ctaBook": "Skatīt grāmatu",
   "promo.label": "Izceltie piedāvājumi",

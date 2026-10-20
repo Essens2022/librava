@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020201306';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020201306';
-import { esc, store, $, $$ } from './util.js?v=20261020201306';
+import { CONFIG } from './config.js?v=20261020202232';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020202232';
+import { esc, store, $, $$ } from './util.js?v=20261020202232';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,14 +12,17 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020201306';
-import { api } from './api.js?v=20261020201306';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020202232';
+import { suggest, highlight } from './search.js?v=20261020202232';
+import { api } from './api.js?v=20261020202232';
 
 // ---------------- icons ----------------
 const P = {
   search: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
   cart: '<path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   book: '<path d="M3 5.5C5 4.5 8 4.3 12 6c4-1.7 7-1.5 9-.5V19c-2-1-5-1.2-9 .5-4-1.7-7-1.5-9-.5Z"/><path d="M12 6v13.5"/>',
@@ -338,6 +341,7 @@ export function bindGlobal() {
     if (!f) return;
     e.preventDefault();
     const q = f.q.value.trim(), cat = f.cat.value;
+    rememberSearch(q);
     const p = new URLSearchParams(); if (q) p.set('q', q); if (cat) p.set('cat', cat);
     f.q.blur();
     go('/search?' + p.toString());
@@ -474,3 +478,70 @@ export function mountPromos(root) {
     view(slides[0]); play();
   });
 }
+
+// ---------------------------------------------------------------- search box suggestions (like Amazon)
+const RECENT = 'recentSearches';
+export function rememberSearch(q) { q = String(q || '').trim(); if (!q) return; const r = store.get(RECENT, []).filter(x => x.toLowerCase() !== q.toLowerCase()); r.unshift(q); store.set(RECENT, r.slice(0, 8)); }
+let suggBooks = null;
+async function suggCatalog() { if (!suggBooks) { suggBooks = await api.listBooks({}); setTimeout(() => { suggBooks = null; }, 60000); } return suggBooks; }
+function setupSuggest() {
+  let box = null, form = null, items = [], active = -1, timer = null, lastQ = null;
+  const close = () => { box?.remove(); box = null; items = []; active = -1; form?.q?.setAttribute('aria-expanded', 'false'); };
+  const pickUrl = it => it.type === 'book' ? '/book/' + encodeURIComponent(it.book.id) : it.type === 'cat' ? '/search?cat=' + it.cat : '/search?q=' + encodeURIComponent(it.label);
+  const choose = it => { const q = form.q.value.trim(); if (it.type === 'query' || it.type === 'recent') { rememberSearch(it.label); form.q.value = it.label; } else rememberSearch(q); close(); form.q.blur(); go(it.type === 'query' || it.type === 'recent' ? '/search?' + new URLSearchParams({ q: it.label, ...(form.cat?.value ? { cat: form.cat.value } : {}) }) : pickUrl(it)); };
+  const mark = i => { active = i; box?.querySelectorAll('[role=option]').forEach((o, k) => o.setAttribute('aria-selected', k === i ? 'true' : 'false')); const id = i >= 0 ? box?.querySelectorAll('[role=option]')[i]?.id : ''; form.q.setAttribute('aria-activedescendant', id || ''); };
+  const render = async () => {
+    const q = form.q.value, nq = q.trim(); lastQ = q;
+    const cat = form.cat?.value || '';
+    let list = [];
+    if (!nq) list = store.get(RECENT, []).slice(0, 6).map(label => ({ type: 'recent', label }));
+    else {
+      let books = await suggCatalog();
+      if (cat) books = books.filter(b => b.category === cat || (b.categories || []).includes(cat));
+      const L = getLang(), mine = books.filter(b => b.language === L);
+      list = suggest(q, mine, 8);
+      if (list.filter(x => x.type === 'book').length < 3) { const more = suggest(q, books, 8).filter(x => !list.some(y => y.type === x.type && y.label === x.label && y.book?.id === x.book?.id)); list = [...list, ...more].slice(0, 8); }
+      list.unshift({ type: 'query', label: nq });
+    }
+    if (form.q.value !== lastQ) return;
+    if (!list.length) return close();
+    items = list;
+    if (!box) { box = document.createElement('div'); box.className = 'sugg'; box.id = form.q.id + '-list'; box.setAttribute('role', 'listbox'); form.appendChild(box); form.q.setAttribute('aria-controls', box.id); }
+    form.q.setAttribute('aria-expanded', 'true');
+    const hl = s => highlight(s, nq, esc);
+    box.innerHTML = (nq ? '' : `<div class="sugg-head">${esc(t('sugg.recent'))}</div>`) + list.map((it, i) => {
+      const id = `${box.id}-${i}`;
+      if (it.type === 'book') { const b = it.book; return `<div role="option" id="${id}" class="sugg-item sugg-book" data-i="${i}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : `<span class="sugg-ph"></span>`}<span class="sugg-txt"><span class="sugg-title">${hl(b.title)}</span><span class="sugg-sub">${esc(t('book.by', { author: b.author }))}${b.language && b.language !== getLang() ? ' · ' + esc(b.language.toUpperCase()) : ''}</span></span><span class="sugg-price">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</span></div>`; }
+      const ic = { query: 'search', recent: 'clock', author: 'user', series: 'library', cat: 'grid' }[it.type] || 'search';
+      const hint = it.type === 'author' ? t('sugg.author') : it.type === 'series' ? t('sugg.series') : it.type === 'cat' ? t('sugg.cat') : '';
+      return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon(ic)}<span class="sugg-txt">${it.type === 'recent' ? esc(it.label) : hl(it.label)}${hint ? ` <span class="sugg-hint">${esc(hint)}</span>` : ''}</span>${it.type === 'recent' ? `<button type="button" class="sugg-x" data-x="${i}" aria-label="${esc(t('sugg.remove'))}">×</button>` : ''}</div>`;
+    }).join('');
+    mark(-1);
+  };
+  document.addEventListener('input', e => {
+    const f = e.target.closest?.('[data-search]'); if (!f || e.target.name !== 'q') return;
+    if (form !== f) { close(); form = f; }
+    clearTimeout(timer); timer = setTimeout(render, 90);
+  });
+  document.addEventListener('focusin', e => { const f = e.target.closest?.('[data-search]'); if (f && e.target.name === 'q') { if (form !== f) close(); form = f; render(); } });
+  document.addEventListener('keydown', e => {
+    if (!box || !form || e.target !== form.q) return;
+    const n = items.length;
+    if (e.key === 'ArrowDown') { e.preventDefault(); mark((active + 1) % n); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); mark(active <= 0 ? n - 1 : active - 1); }
+    else if (e.key === 'Escape') { close(); }
+    else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(items[active]); }
+  });
+  document.addEventListener('mousedown', e => {
+    if (!box) return;
+    const x = e.target.closest('.sugg-x');
+    if (x) { e.preventDefault(); const it = items[+x.dataset.x]; store.set(RECENT, store.get(RECENT, []).filter(r => r !== it.label)); render(); return; }
+    const o = e.target.closest('.sugg-item');
+    if (o && box.contains(o)) { e.preventDefault(); choose(items[+o.dataset.i]); return; }
+    if (!e.target.closest('[data-search]')) close();
+  });
+  document.addEventListener('mouseover', e => { const o = e.target.closest?.('.sugg-item'); if (o && box?.contains(o)) mark(+o.dataset.i); });
+  window.addEventListener('hashchange', close);
+  document.addEventListener('submit', e => { if (e.target.closest('[data-search]')) close(); }, true);
+}
+setupSuggest();

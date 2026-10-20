@@ -1,5 +1,13 @@
 // Swedish interface strings for Librava
 export default {
+  "sugg.recent": "Senaste sökningar",
+  "sugg.author": "i Författare",
+  "sugg.series": "i Serier",
+  "sugg.cat": "i Kategorier",
+  "sugg.remove": "Ta bort från historiken",
+  "search.dym": "Menade du:",
+  "search.loose": "Ingen bok innehåller alla ord: böcker med några av dem.",
+  "search.otherLangs": "Inga resultat på {lang}: böcker på andra språk.",
   "promo.cta": "Upptäck mer",
   "promo.ctaBook": "Se boken",
   "promo.label": "Utvalda erbjudanden",

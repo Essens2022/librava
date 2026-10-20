@@ -1,5 +1,13 @@
 // Polish interface strings for Librava
 export default {
+  "sugg.recent": "Ostatnie wyszukiwania",
+  "sugg.author": "w Autorach",
+  "sugg.series": "w Seriach",
+  "sugg.cat": "w Kategoriach",
+  "sugg.remove": "Usuń z historii",
+  "search.dym": "Czy chodziło o:",
+  "search.loose": "Żadna książka nie zawiera wszystkich słów: książki zawierające niektóre z nich.",
+  "search.otherLangs": "Brak wyników w języku: {lang}. Książki w innych językach.",
   "promo.cta": "Odkryj więcej",
   "promo.ctaBook": "Zobacz książkę",
   "promo.label": "Polecane oferty",

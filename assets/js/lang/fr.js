@@ -1,5 +1,13 @@
 // French interface strings for Librava
 export default {
+  "sugg.recent": "Recherches récentes",
+  "sugg.author": "dans Auteurs",
+  "sugg.series": "dans Séries",
+  "sugg.cat": "dans Catégories",
+  "sugg.remove": "Supprimer de l’historique",
+  "search.dym": "Vouliez-vous dire :",
+  "search.loose": "Aucun livre ne contient tous les mots : voici ceux qui en contiennent une partie.",
+  "search.otherLangs": "Aucun résultat en {lang} : livres dans d’autres langues.",
   "promo.cta": "Découvrir",
   "promo.ctaBook": "Voir le livre",
   "promo.label": "Offres à la une",

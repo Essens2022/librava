@@ -3,9 +3,10 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020201306';
-import { getLang } from './i18n.js?v=20261020201306';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020201306';
+import { CONFIG } from './config.js?v=20261020202232';
+import { scoreBook } from './search.js?v=20261020202232';
+import { getLang } from './i18n.js?v=20261020202232';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020202232';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -30,17 +31,13 @@ export function filterBooks(all, o = {}) {
   if (o.rating) list = list.filter(b => (b.rating_avg || 0) >= o.rating);
   let scores = null;
   if (o.q) {
-    const terms = norm(o.q).split(/\s+/).filter(Boolean);
     scores = new Map();
-    list = list.filter(b => {
-      const title = norm(b.title + ' ' + (b.subtitle || '')), author = norm(b.author);
-      const rest = norm((b.description || '') + ' ' + (b.keywords || []).join(' ') + ' ' + b.category);
-      let s = 0;
-      for (const t of terms) {
-        if (title.includes(t)) s += 5; else if (author.includes(t)) s += 4; else if (rest.includes(t)) s += 1; else return false;
-      }
-      scores.set(b.id, s); return true;
-    });
+    const strict = list.map(b => [b, scoreBook(b, o.q)]).filter(x => x[1] > 0);
+    // nothing matches every word: show books that match at least one (Amazon does the same)
+    const hits = strict.length ? strict : list.map(b => [b, scoreBook(b, o.q, { loose: true })]).filter(x => x[1] > 0);
+    hits.forEach(([b, s]) => scores.set(b.id, s));
+    list = hits.map(x => x[0]);
+    list.loose = !strict.length && hits.length > 0;
   }
   const sort = o.sort || (o.q ? 'relevance' : '');
   const by = {
@@ -52,7 +49,9 @@ export function filterBooks(all, o = {}) {
     bestsellers: (a, b) => (b.sales_count || 0) - (a.sales_count || 0),
   }[sort];
   if (by) list.sort(by);
+  const loose = list.loose;
   if (o.limit) list = list.slice(0, o.limit);
+  if (loose) list.loose = true;
   return list;
 }
 
@@ -75,7 +74,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020201306')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020202232')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {

@@ -1,5 +1,13 @@
 // Hungarian interface strings for Librava
 export default {
+  "sugg.recent": "Legutóbbi keresések",
+  "sugg.author": "a Szerzők között",
+  "sugg.series": "a Sorozatok között",
+  "sugg.cat": "a Kategóriák között",
+  "sugg.remove": "Törlés az előzményekből",
+  "search.dym": "Erre gondoltál:",
+  "search.loose": "Egyik könyv sem tartalmazza az összes szót: a részben egyező könyvek.",
+  "search.otherLangs": "Nincs találat ezen a nyelven: {lang}. Könyvek más nyelveken.",
   "promo.cta": "Fedezd fel",
   "promo.ctaBook": "Megnézem a könyvet",
   "promo.label": "Kiemelt ajánlatok",
