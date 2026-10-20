@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261020231013';
-import { store } from './util.js?v=20261020231013';
+import { CONFIG } from './config.js?v=20261020232055';
+import { store } from './util.js?v=20261020232055';
 
 const D = {
   ro: {
@@ -43,7 +43,7 @@ const D = {
     'of.none': 'Nu ai încă oferte. Creează prima ofertă.',
     'of.rulesTitle': 'Cum se combină ofertele',
     'of.rule1': 'Clientul primește automat cea mai bună ofertă care i se potrivește (una singură dintre cele care nu se combină).',
-    'of.rule2': 'Ofertele marcate „se combină” se adaugă peste aceasta (de ex. un cod de reducere peste „3 la preț de 2”).',
+    'of.rule2': 'Codurile de reducere se adaugă mereu peste celelalte oferte; ofertele marcate „se combină” se adaugă și ele.',
     'of.rule3': 'Prețurile și reducerile sunt recalculate pe server la plată, deci nu pot fi modificate de client.',
     'of.rule4': 'Totalul nu coboară sub 0,50 € (minimul pentru plata cu cardul); dacă reducerea acoperă tot, cartea se primește gratis.',
     'of.kind.bundle': 'Pachet de cărți',
@@ -981,7 +981,7 @@ const D = {
     'of.none': 'Ancora nessuna offerta. Crea la prima.',
     'of.rulesTitle': 'Come si combinano le offerte',
     'of.rule1': 'Il cliente riceve automaticamente l’offerta migliore per lui (una sola tra quelle non combinabili).',
-    'of.rule2': 'Le offerte segnate “combinabile” si aggiungono sopra (es. un codice sconto sopra “3 al prezzo di 2”).',
+    'of.rule2': 'I codici sconto si aggiungono sempre sopra le altre offerte; si aggiungono anche le offerte segnate “combinabile”.',
     'of.rule3': 'Prezzi e sconti sono ricalcolati sul server al pagamento: il cliente non può modificarli.',
     'of.rule4': 'Il totale non scende sotto 0,50 € (minimo per la carta); se lo sconto copre tutto, il libro è gratis.',
     'of.kind.bundle': 'Pacchetto di libri',
@@ -1919,7 +1919,7 @@ const D = {
     'of.none': 'No offers yet. Create the first one.',
     'of.rulesTitle': 'How offers combine',
     'of.rule1': 'The customer automatically gets the best offer for their cart (one of those that don’t combine).',
-    'of.rule2': 'Offers marked “combines” are added on top (e.g. a discount code on top of “3 for 2”).',
+    'of.rule2': 'Discount codes are always added on top of the other offers; offers marked “combines” are added too.',
     'of.rule3': 'Prices and discounts are recalculated on the server at payment, so customers can’t change them.',
     'of.rule4': 'The total never goes below €0.50 (the card minimum); if the discount covers everything, the book is free.',
     'of.kind.bundle': 'Book bundle',
@@ -2850,7 +2850,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020231013`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020232055`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

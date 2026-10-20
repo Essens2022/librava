@@ -9,6 +9,7 @@
 //   category { category, percent }                      every book of a category -percent (a sale)
 //   coupon   { code, percent | amount_cents, min_cents?, max_uses?, uses?, new_only? }  code typed in the cart
 // offer.stackable = can be added on top of the best non-stackable offer; offer.priority breaks ties.
+// Discount codes always come on top of the automatic offers (as on Amazon).
 
 export const OFFER_KINDS = ['bundle', 'qty', 'bxgy', 'category', 'coupon'];
 const MIN_CHARGE = 50; // Stripe needs at least 0,50 € per payment
@@ -65,10 +66,11 @@ export function applyOffers(items, offers, ctx = {}) {
   const subtotal = paid.reduce((s, i) => s + i.price_cents, 0);
   const applied = [];
   const take = (o, r) => { for (const id in r.per) { const v = Math.min(r.per[id], price[id]); price[id] -= v; } applied.push({ id: o.id, kind: o.kind, name: o.name || '', offer: o, detail: r.detail || {}, saving: Object.values(r.per).reduce((a, b) => a + b, 0) }); };
-  const solo = run.filter(o => !o.stackable).map(o => [o, offerSaving(o, paid, ctx)]).filter(([, r]) => r.saving > 0)
+  const stacks = o => o.stackable || o.kind === 'coupon';
+  const solo = run.filter(o => !stacks(o)).map(o => [o, offerSaving(o, paid, ctx)]).filter(([, r]) => r.saving > 0)
     .sort((a, b) => b[1].saving - a[1].saving || (b[0].priority || 0) - (a[0].priority || 0));
   if (solo[0]) take(solo[0][0], solo[0][1]);
-  for (const o of run.filter(o => o.stackable).sort((a, b) => (b.priority || 0) - (a.priority || 0))) {
+  for (const o of run.filter(stacks).sort((a, b) => ((a.kind === 'coupon') - (b.kind === 'coupon')) || (b.priority || 0) - (a.priority || 0))) {
     const r = offerSaving(o, paid.map(i => ({ ...i, price_cents: price[i.id] })), ctx);
     if (r.saving > 0) take(o, r);
   }

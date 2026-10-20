@@ -1,13 +1,13 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020231013';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020231013';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020231013';
-import { resetCompanyCache } from './views.js?v=20261020231013';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020231013';
-import { api } from './api.js?v=20261020231013';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020231013';
+import { CONFIG } from './config.js?v=20261020232055';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020232055';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020232055';
+import { resetCompanyCache } from './views.js?v=20261020232055';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020232055';
+import { api } from './api.js?v=20261020232055';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020232055';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1244,7 +1244,7 @@ async function offerForm(body, id) {
       <div class="kdp-fields">
         <label class="field"><span>${esc(t('of.name'))}</span><input id="of-name" maxlength="80" value="${esc(o.name || '')}" placeholder="${esc(t('of.namePh'))}"></label>
         <div class="two"><label class="field"><span>${esc(t('pr.start'))}</span><input type="datetime-local" id="of-start" value="${local(o.starts_at)}"></label><label class="field"><span>${esc(t('pr.end'))}</span><input type="datetime-local" id="of-end" value="${local(o.ends_at)}"></label></div>
-        <label class="check"><input type="checkbox" id="of-stack" ${o.stackable ? 'checked' : ''}> ${esc(t('of.stackable'))}</label>
+        <label class="check" data-for="bundle qty bxgy category"><input type="checkbox" id="of-stack" ${o.stackable ? 'checked' : ''}> ${esc(t('of.stackable'))}</label>
         <label class="check"><input type="checkbox" id="of-badge" ${o.show_badge !== false ? 'checked' : ''}> ${esc(t('of.badge'))}</label>
         <label class="check"><input type="checkbox" id="of-active" ${o.active !== false ? 'checked' : ''}> ${esc(t('of.active'))}</label></div></div>
     <div class="error" id="of-err" hidden></div>

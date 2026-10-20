@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020231013';
-import { applyOffers, offerRunning } from './offers.js?v=20261020231013';
-import { scoreBook } from './search.js?v=20261020231013';
-import { getLang } from './i18n.js?v=20261020231013';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020231013';
+import { CONFIG } from './config.js?v=20261020232055';
+import { applyOffers, offerRunning } from './offers.js?v=20261020232055';
+import { scoreBook } from './search.js?v=20261020232055';
+import { getLang } from './i18n.js?v=20261020232055';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020232055';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -75,7 +75,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020231013')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020232055')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -305,6 +305,8 @@ class DemoAPI {
   async promoHit(id, kind) { const all = store.get('demo:promos', []); const x = all.find(y => y.id === id); if (x) { x[kind === 'click' ? 'clicks' : 'views'] = (x[kind === 'click' ? 'clicks' : 'views'] || 0) + 1; store.set('demo:promos', all); } }
   async notifications() { return store.get('demo:notifications', []).filter(n => n.published !== false); }
   async adminNotifications() { return store.get('demo:notifications', []); }
+  async saveNotifications(rows) { const all = store.get('demo:notifications', []); for (const n of rows) all.unshift({ published: true, ...n, id: uid('n_'), created_at: new Date().toISOString() }); store.set('demo:notifications', all); }
+  async deleteNotificationBatch(batch) { store.set('demo:notifications', store.get('demo:notifications', []).filter(n => n.batch !== batch)); }
   async saveNotification(n) { const all = store.get('demo:notifications', []); if (n.id) { const i = all.findIndex(x => x.id === n.id); all[i] = { ...all[i], ...n }; } else all.unshift({ published: true, ...n, id: uid('n_'), created_at: new Date().toISOString() }); store.set('demo:notifications', all); }
   async deleteNotification(id) { store.set('demo:notifications', store.get('demo:notifications', []).filter(n => n.id !== id)); }
   async getMarketing() { return !!store.get('demo:marketing:' + this._user?.id, false); }
@@ -641,6 +643,8 @@ class SupabaseAPI {
   async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
   async notifications() { const { data } = await this.sb.from('notifications').select('*').eq('published', true).order('created_at', { ascending: false }).limit(30); return data || []; }
   async adminNotifications() { const { data, error } = await this.sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(200); this._err(error); return data; }
+  async saveNotifications(rows) { const { error } = await this.sb.from('notifications').insert(rows); this._err(error); }
+  async deleteNotificationBatch(batch) { const { error } = await this.sb.from('notifications').delete().eq('batch', batch); this._err(error); }
   async saveNotification(n) { const { error } = n.id ? await this.sb.from('notifications').update(n).eq('id', n.id) : await this.sb.from('notifications').insert(n); this._err(error); }
   async deleteNotification(id) { const { error } = await this.sb.from('notifications').delete().eq('id', id); this._err(error); }
   async getMarketing() { if (!this._user) return false; const { data } = await this.sb.from('profiles').select('marketing_opt_in').eq('id', this._user.id).maybeSingle(); return !!data?.marketing_opt_in; }
