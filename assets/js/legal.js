@@ -30,7 +30,7 @@ const RO = {
     ['7. Siguranță', 'Conexiunea este criptată (HTTPS), parolele sunt păstrate criptat, iar fiecare client are acces doar la datele și cărțile proprii.'],
   ],
   cookies: [
-    ['Ce folosim', 'Librava nu folosește cookie-uri de publicitate sau de urmărire și nu folosește instrumente de analiză a vizitatorilor. Folosim doar stocarea necesară în browserul tău (localStorage, IndexedDB și memoria cache a site-ului) pentru: a te ține conectat la cont, coșul de cumpărături, limba și tema alese, progresul de citire și cărțile salvate pentru citit offline.'],
+    ['Ce folosim', 'Librava nu folosește cookie-uri de publicitate sau de urmărire și nu folosește servicii externe de analiză (de ex. Google Analytics). Numărăm vizitele în mod anonim, pe serverul nostru (pagina vizitată, de unde vii, țara aproximativă după fusul orar, tipul de dispozitiv, căutările din site), fără nume, e-mail sau adresă IP; dacă browserul tău trimite semnalul „Do Not Track” sau „Global Privacy Control”, nu numărăm nimic. Folosim doar stocarea necesară în browserul tău (localStorage, IndexedDB și memoria cache a site-ului) pentru: a te ține conectat la cont, coșul de cumpărături, limba și tema alese, progresul de citire și cărțile salvate pentru citit offline.'],
     ['Furnizori', 'La plată ești dus pe pagina securizată Stripe, care folosește propriile cookie-uri necesare pentru siguranța plății și prevenirea fraudelor. Fonturile și toate fișierele site-ului sunt servite direct de noi.'],
     ['Cum le controlezi', 'Poți șterge oricând aceste date din setările browserului. Atunci vei fi deconectat, coșul se golește, iar cărțile salvate offline trebuie descărcate din nou.'],
   ],
@@ -47,7 +47,7 @@ const RO = {
     ['Plăți', 'Procesate de Stripe Payments Europe Ltd.'],
   ],
   consentTitle: 'Confidențialitatea ta',
-  consentText: 'Librava nu folosește reclame și nu te urmărește. Folosim doar stocarea necesară în browser pentru cont, coș, limbă și citirea offline. Continuând, accepți Termenii și condițiile și Politica de confidențialitate.',
+  consentText: 'Librava nu folosește reclame și nu te urmărește. Folosim doar stocarea necesară în browser pentru cont, coș, limbă și citirea offline, plus statistici anonime de vizită. Continuând, accepți Termenii și condițiile și Politica de confidențialitate.',
   consentOk: 'Accept și continui',
   consentMore: 'Citește detaliile',
 };
@@ -78,7 +78,7 @@ const IT = {
     ['7. Sicurezza', 'La connessione è cifrata (HTTPS), le password sono conservate cifrate e ogni cliente accede solo ai propri dati e libri.'],
   ],
   cookies: [
-    ['Cosa usiamo', 'Librava non usa cookie pubblicitari o di tracciamento né strumenti di analisi dei visitatori. Usiamo solo l\'archiviazione tecnica necessaria nel tuo browser (localStorage, IndexedDB e cache del sito) per: mantenere l\'accesso all\'account, il carrello, lingua e tema scelti, i progressi di lettura e i libri salvati per la lettura offline.'],
+    ['Cosa usiamo', 'Librava non usa cookie pubblicitari o di tracciamento né servizi di analisi esterni (es. Google Analytics). Contiamo le visite in forma anonima sul nostro server (pagina visitata, provenienza, paese approssimativo dal fuso orario, tipo di dispositivo, ricerche nel sito), senza nome, e-mail o indirizzo IP; se il tuo browser invia il segnale “Do Not Track” o “Global Privacy Control”, non contiamo nulla. Usiamo solo l\'archiviazione tecnica necessaria nel tuo browser (localStorage, IndexedDB e cache del sito) per: mantenere l\'accesso all\'account, il carrello, lingua e tema scelti, i progressi di lettura e i libri salvati per la lettura offline.'],
     ['Fornitori', 'Al pagamento vieni portato sulla pagina sicura di Stripe, che usa propri cookie tecnici per la sicurezza del pagamento e la prevenzione delle frodi. I caratteri e tutti i file del sito sono serviti direttamente da noi.'],
     ['Come gestirli', 'Puoi cancellare questi dati in qualsiasi momento dalle impostazioni del browser. Verrai disconnesso, il carrello si svuoterà e i libri salvati offline andranno scaricati di nuovo.'],
   ],
@@ -89,7 +89,7 @@ const IT = {
   ],
   imprint: [['Venditore', '{company}'], ['Indirizzo', '{address}, {country}'], ['P.IVA / Codice fiscale', '{vat}'], ['Contatto', '{email}'], ['Pagamenti', 'Gestiti da Stripe Payments Europe Ltd.']],
   consentTitle: 'La tua privacy',
-  consentText: 'Librava non usa pubblicità e non ti traccia. Usiamo solo l\'archiviazione tecnica necessaria nel browser per account, carrello, lingua e lettura offline. Continuando accetti i Termini e condizioni e l\'Informativa sulla privacy.',
+  consentText: 'Librava non usa pubblicità e non ti traccia. Usiamo solo l\'archiviazione tecnica necessaria nel browser per account, carrello, lingua e lettura offline, più statistiche di visita anonime. Continuando accetti i Termini e condizioni e l\'Informativa sulla privacy.',
   consentOk: 'Accetto e continuo',
   consentMore: 'Leggi i dettagli',
 };
@@ -120,7 +120,7 @@ const EN = {
     ['7. Security', 'The connection is encrypted (HTTPS), passwords are stored encrypted and each customer can only access their own data and books.'],
   ],
   cookies: [
-    ['What we use', 'Librava does not use advertising or tracking cookies and no visitor analytics. We only use the storage your browser needs (localStorage, IndexedDB and the site cache) to keep you signed in, keep your cart, your chosen language and theme, your reading progress and the books saved for offline reading.'],
+    ['What we use', 'Librava does not use advertising or tracking cookies, nor external analytics services (e.g. Google Analytics). We count visits anonymously on our own server (page visited, where you came from, approximate country from the time zone, device type, searches on the site), without names, e-mails or IP addresses; if your browser sends “Do Not Track” or “Global Privacy Control”, we count nothing. We only use the storage your browser needs (localStorage, IndexedDB and the site cache) to keep you signed in, keep your cart, your chosen language and theme, your reading progress and the books saved for offline reading.'],
     ['Providers', 'At checkout you are taken to Stripe\'s secure page, which uses its own necessary cookies for payment security and fraud prevention. Fonts and all site files are served by us directly.'],
     ['How to control it', 'You can clear this data at any time in your browser settings. You will then be signed out, your cart will be emptied and books saved offline will need to be saved again.'],
   ],
@@ -131,10 +131,10 @@ const EN = {
   ],
   imprint: [['Seller', '{company}'], ['Address', '{address}, {country}'], ['VAT / tax number', '{vat}'], ['Contact', '{email}'], ['Payments', 'Processed by Stripe Payments Europe Ltd.']],
   consentTitle: 'Your privacy',
-  consentText: 'Librava shows no ads and does not track you. We only use the browser storage needed for your account, cart, language and offline reading. By continuing you accept the Terms and conditions and the Privacy policy.',
+  consentText: 'Librava shows no ads and does not track you. We only use the browser storage needed for your account, cart, language and offline reading, plus anonymous visit statistics. By continuing you accept the Terms and conditions and the Privacy policy.',
   consentOk: 'Accept and continue',
   consentMore: 'Read the details',
 };
 
-export const LEGAL_VERSION = '2026-10-20';
+export const LEGAL_VERSION = '2026-10-21';
 export function legalText(lang) { return lang === 'ro' ? RO : lang === 'it' ? IT : EN; }
