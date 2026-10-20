@@ -1,5 +1,7 @@
 // Greek interface strings for Librava
 export default {
+  "of.a.qty": "Έκπτωση για {n} βιβλία (-{p}%)",
+  "of.a.coupon": "Κωδικός {code} ({v})",
   "fbt.title": "Αγοράζονται συχνά μαζί",
   "fbt.total": "Συνολική τιμή:",
   "fbt.save": "Εξοικονομείτε {amount}",

@@ -1,5 +1,7 @@
 // Czech interface strings for Librava
 export default {
+  "of.a.qty": "Sleva za {n} knihy (-{p} %)",
+  "of.a.coupon": "Kód {code} ({v})",
   "fbt.title": "Často kupováno společně",
   "fbt.total": "Celková cena:",
   "fbt.save": "Ušetříte {amount}",

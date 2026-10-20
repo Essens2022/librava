@@ -1,5 +1,7 @@
 // Ukrainian interface strings for Librava
 export default {
+  "of.a.qty": "Знижка за {n} книги (-{p}%)",
+  "of.a.coupon": "Код {code} ({v})",
   "fbt.title": "Часто купують разом",
   "fbt.total": "Загальна ціна:",
   "fbt.save": "Ви заощаджуєте {amount}",

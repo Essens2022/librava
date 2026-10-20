@@ -1,5 +1,7 @@
 // Slovak interface strings for Librava
 export default {
+  "of.a.qty": "Zľava za {n} knihy (-{p} %)",
+  "of.a.coupon": "Kód {code} ({v})",
   "fbt.title": "Často kupované spolu",
   "fbt.total": "Celková cena:",
   "fbt.save": "Ušetríte {amount}",

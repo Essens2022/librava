@@ -21,7 +21,7 @@ const pct = (cents, p) => Math.round(cents * Math.min(100, Math.max(0, +p || 0))
 
 // what one offer saves on the given items (each item: {id, price_cents, category, categories}); returns {saving, per:{id:cents}}
 export function offerSaving(o, items, ctx = {}) {
-  const c = o.config || {}, per = {};
+  const c = o.config || {}, per = {}; let detail = {};
   const add = (id, v) => { if (v > 0) per[id] = (per[id] || 0) + v; };
   const paid = items.filter(i => i.price_cents > 0);
   if (o.kind === 'bundle') {
@@ -30,11 +30,11 @@ export function offerSaving(o, items, ctx = {}) {
   } else if (o.kind === 'qty') {
     const elig = paid.filter(i => inCat(i, c.category) && (!c.book_ids?.length || c.book_ids.includes(i.id)));
     const tier = (c.tiers || []).filter(t => elig.length >= +t.min).sort((a, b) => b.percent - a.percent)[0];
-    if (tier) elig.forEach(i => add(i.id, pct(i.price_cents, tier.percent)));
+    if (tier) { elig.forEach(i => add(i.id, pct(i.price_cents, tier.percent))); detail = { n: elig.length, min: +tier.min, percent: +tier.percent }; }
   } else if (o.kind === 'bxgy') {
     const buy = Math.max(1, +c.buy || 2), get = Math.max(1, +c.get || 1);
     const elig = paid.filter(i => inCat(i, c.category)).sort((a, b) => b.price_cents - a.price_cents);
-    const groups = Math.floor(elig.length / (buy + get));
+    const groups = Math.floor(elig.length / (buy + get)); detail = { groups };
     // the cheapest books of the cart are the free ones (as in "3 for 2")
     elig.slice(elig.length - groups * get).forEach(i => add(i.id, pct(i.price_cents, c.percent ?? 100)));
   } else if (o.kind === 'category') {
@@ -53,7 +53,7 @@ export function offerSaving(o, items, ctx = {}) {
     }
   }
   const saving = Object.values(per).reduce((a, b) => a + b, 0);
-  return { saving, per };
+  return { saving, per, detail };
 }
 
 // best combination: the single best non-stackable offer + every stackable offer on what is left
@@ -64,7 +64,7 @@ export function applyOffers(items, offers, ctx = {}) {
   const price = Object.fromEntries(paid.map(i => [i.id, i.price_cents]));
   const subtotal = paid.reduce((s, i) => s + i.price_cents, 0);
   const applied = [];
-  const take = (o, r) => { for (const id in r.per) { const v = Math.min(r.per[id], price[id]); price[id] -= v; } applied.push({ id: o.id, kind: o.kind, name: o.name || '', offer: o, saving: Object.values(r.per).reduce((a, b) => a + b, 0) }); };
+  const take = (o, r) => { for (const id in r.per) { const v = Math.min(r.per[id], price[id]); price[id] -= v; } applied.push({ id: o.id, kind: o.kind, name: o.name || '', offer: o, detail: r.detail || {}, saving: Object.values(r.per).reduce((a, b) => a + b, 0) }); };
   const solo = run.filter(o => !o.stackable).map(o => [o, offerSaving(o, paid, ctx)]).filter(([, r]) => r.saving > 0)
     .sort((a, b) => b[1].saving - a[1].saving || (b[0].priority || 0) - (a[0].priority || 0));
   if (solo[0]) take(solo[0][0], solo[0][1]);
@@ -124,4 +124,14 @@ export function offersForBook(b, offers) {
     (o.kind === 'bundle' && (o.config?.book_ids || []).includes(b.id)) ||
     ((o.kind === 'qty') && inCat(b, o.config?.category) && (!o.config?.book_ids?.length || o.config.book_ids.includes(b.id))) ||
     ((o.kind === 'bxgy' || o.kind === 'category') && inCat(b, o.config?.category))));
+}
+
+// one line in the cart for an offer that was applied: exactly what the customer got ("2 books -10%", "Code X -10%")
+export function appliedLabel(a, t, catName = c => c) {
+  const o = a.offer || {}, c = o.config || {}, d = a.detail || {};
+  let txt;
+  if (a.kind === 'qty') txt = t('of.a.qty', { n: d.min || d.n, p: d.percent }) + (c.category ? ' · ' + catName(c.category) : '');
+  else if (a.kind === 'coupon') txt = t('of.a.coupon', { code: c.code, v: c.percent ? '-' + c.percent + '%' : '-' + ((c.amount_cents || 0) / 100).toFixed(2).replace('.', ',') + ' €' });
+  else txt = describeOffer(o, t, catName);
+  return o.name && a.kind !== 'coupon' ? `${o.name}: ${txt}` : txt;
 }

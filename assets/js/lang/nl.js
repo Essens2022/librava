@@ -1,5 +1,7 @@
 // Dutch interface strings for Librava
 export default {
+  "of.a.qty": "Korting voor {n} boeken (-{p}%)",
+  "of.a.coupon": "Code {code} ({v})",
   "fbt.title": "Vaak samen gekocht",
   "fbt.total": "Totaalprijs:",
   "fbt.save": "Je bespaart {amount}",

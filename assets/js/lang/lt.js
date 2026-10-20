@@ -1,5 +1,7 @@
 // Lithuanian interface strings for Librava
 export default {
+  "of.a.qty": "Nuolaida už {n} knygas (-{p}%)",
+  "of.a.coupon": "Kodas {code} ({v})",
   "fbt.title": "Dažnai perkama kartu",
   "fbt.total": "Bendra kaina:",
   "fbt.save": "Sutaupote {amount}",

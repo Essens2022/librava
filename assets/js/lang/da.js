@@ -1,5 +1,7 @@
 // Danish interface strings for Librava
 export default {
+  "of.a.qty": "Rabat for {n} bøger (-{p} %)",
+  "of.a.coupon": "Kode {code} ({v})",
   "fbt.title": "Købes ofte sammen",
   "fbt.total": "Samlet pris:",
   "fbt.save": "Du sparer {amount}",

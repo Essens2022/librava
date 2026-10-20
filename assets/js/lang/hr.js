@@ -1,5 +1,7 @@
 // Croatian interface strings for Librava
 export default {
+  "of.a.qty": "Popust za {n} knjige (-{p}%)",
+  "of.a.coupon": "Kod {code} ({v})",
   "fbt.title": "Često kupljeno zajedno",
   "fbt.total": "Ukupna cijena:",
   "fbt.save": "Uštedite {amount}",

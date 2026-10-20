@@ -1,5 +1,7 @@
 // German interface strings for Librava
 export default {
+  "of.a.qty": "Rabatt für {n} Bücher (-{p} %)",
+  "of.a.coupon": "Code {code} ({v})",
   "fbt.title": "Wird oft zusammen gekauft",
   "fbt.total": "Gesamtpreis:",
   "fbt.save": "Sie sparen {amount}",

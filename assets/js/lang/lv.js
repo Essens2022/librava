@@ -1,5 +1,7 @@
 // Latvian interface strings for Librava
 export default {
+  "of.a.qty": "Atlaide par {n} grāmatām (-{p}%)",
+  "of.a.coupon": "Kods {code} ({v})",
   "fbt.title": "Bieži pērk kopā",
   "fbt.total": "Kopējā cena:",
   "fbt.save": "Ietaupi {amount}",

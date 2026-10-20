@@ -1,5 +1,7 @@
 // Swedish interface strings for Librava
 export default {
+  "of.a.qty": "Rabatt för {n} böcker (-{p} %)",
+  "of.a.coupon": "Kod {code} ({v})",
   "fbt.title": "Köps ofta tillsammans",
   "fbt.total": "Totalpris:",
   "fbt.save": "Du sparar {amount}",

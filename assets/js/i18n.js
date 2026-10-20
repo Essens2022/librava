@@ -1,8 +1,10 @@
-import { CONFIG } from './config.js?v=20261020230257';
-import { store } from './util.js?v=20261020230257';
+import { CONFIG } from './config.js?v=20261020230611';
+import { store } from './util.js?v=20261020230611';
 
 const D = {
   ro: {
+    'of.a.qty': 'Reducere pentru {n} cărți (-{p}%)',
+    'of.a.coupon': 'Cod {code} ({v})',
     'fbt.title': 'Cumpărate frecvent împreună',
     'fbt.total': 'Preț total:',
     'fbt.save': 'Economisești {amount}',
@@ -939,6 +941,8 @@ const D = {
   },
 
   it: {
+    'of.a.qty': 'Sconto per {n} libri (-{p}%)',
+    'of.a.coupon': 'Codice {code} ({v})',
     'fbt.title': 'Spesso comprati insieme',
     'fbt.total': 'Prezzo totale:',
     'fbt.save': 'Risparmi {amount}',
@@ -1875,6 +1879,8 @@ const D = {
   },
 
   en: {
+    'of.a.qty': 'Discount for {n} books ({p}%)',
+    'of.a.coupon': 'Code {code} ({v})',
     'fbt.title': 'Frequently bought together',
     'fbt.total': 'Total price:',
     'fbt.save': 'You save {amount}',
@@ -2844,7 +2850,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020230257`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020230611`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

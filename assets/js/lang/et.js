@@ -1,5 +1,7 @@
 // Estonian interface strings for Librava
 export default {
+  "of.a.qty": "Allahindlus {n} raamatule (-{p}%)",
+  "of.a.coupon": "Kood {code} ({v})",
   "fbt.title": "Ostetakse sageli koos",
   "fbt.total": "Koguhind:",
   "fbt.save": "Säästad {amount}",

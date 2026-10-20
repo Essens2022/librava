@@ -1,5 +1,7 @@
 // Hungarian interface strings for Librava
 export default {
+  "of.a.qty": "Kedvezmény {n} könyvre (-{p}%)",
+  "of.a.coupon": "{code} kód ({v})",
   "fbt.title": "Gyakran vásárolják együtt",
   "fbt.total": "Teljes ár:",
   "fbt.save": "Megtakarítás: {amount}",

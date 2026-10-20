@@ -1,5 +1,7 @@
 // Finnish interface strings for Librava
 export default {
+  "of.a.qty": "Alennus {n} kirjasta (-{p} %)",
+  "of.a.coupon": "Koodi {code} ({v})",
   "fbt.title": "Ostetaan usein yhdessä",
   "fbt.total": "Kokonaishinta:",
   "fbt.save": "Säästät {amount}",

@@ -1,5 +1,7 @@
 // Bulgarian interface strings for Librava
 export default {
+  "of.a.qty": "Отстъпка за {n} книги (-{p}%)",
+  "of.a.coupon": "Код {code} ({v})",
   "fbt.title": "Често купувани заедно",
   "fbt.total": "Обща цена:",
   "fbt.save": "Спестявате {amount}",

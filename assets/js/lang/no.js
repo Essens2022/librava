@@ -1,5 +1,7 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "of.a.qty": "Rabatt for {n} bøker (-{p} %)",
+  "of.a.coupon": "Kode {code} ({v})",
   "fbt.title": "Kjøpes ofte sammen",
   "fbt.total": "Totalpris:",
   "fbt.save": "Du sparer {amount}",

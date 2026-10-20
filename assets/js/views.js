@@ -1,12 +1,12 @@
-import { CONFIG } from './config.js?v=20261020230257';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020230257';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020230257';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020230257';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020230257';
-import { applyOffers, describeOffer, offersForBook } from './offers.js?v=20261020230257';
-import { didYouMean } from './search.js?v=20261020230257';
-import { api } from './api.js?v=20261020230257';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020230257';
+import { CONFIG } from './config.js?v=20261020230611';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020230611';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020230611';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020230611';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020230611';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020230611';
+import { didYouMean } from './search.js?v=20261020230611';
+import { api } from './api.js?v=20261020230611';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020230611';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -471,7 +471,7 @@ export async function viewCart(el) {
     <aside class="panel cart-sum">
       <div class="sum-rows">
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
-        ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(a.kind === 'coupon' ? t('cart.coupon') + ' ' + (a.offer.config?.code || '') : desc(a.offer))}</span><span>−${money(a.saving)}</span></div>`).join('')}
+        ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}</span><span>−${money(a.saving)}</span></div>`).join('')}
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
         ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
       </div>
