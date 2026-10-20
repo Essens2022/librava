@@ -67,6 +67,7 @@ Deno.serve(async (req) => {
     const usedCoupon = calc.applied.find((a) => a.kind === 'coupon');
     const { data: order, error: oErr } = await admin.from('orders').insert({
       user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount, waiver_at: new Date().toISOString(),
+      livemode: /^(sk|rk)_live_/.test(STRIPE),
       subtotal_cents: calc.subtotal, discount_cents: calc.discount, coupon_code: usedCoupon ? code : null,
       offers: calc.applied.map((a) => ({ id: a.id, kind: a.kind, name: a.name, saving: a.saving })),
       items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: calc.final[b.id] ?? b.price_cents, list_cents: b.price_cents })),
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
     if (oErr) throw oErr;
     // everything is covered by the offers (e.g. a 100% coupon): add the books straight away, no card needed
     if (amount === 0) {
-      const rows = toBuy.map((b) => ({ user_id: user.id, book_id: b.id, order_id: order.id, price_cents: 0, currency, customer_email: user.email }));
+      const rows = toBuy.map((b) => ({ user_id: user.id, book_id: b.id, order_id: order.id, price_cents: 0, currency, customer_email: user.email, test: !/^(sk|rk)_live_/.test(STRIPE) }));
       const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
       if (pErr) throw pErr;
       await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', order.id);

@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020235546';
-import { applyOffers, offerRunning } from './offers.js?v=20261020235546';
-import { scoreBook } from './search.js?v=20261020235546';
-import { getLang } from './i18n.js?v=20261020235546';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020235546';
+import { CONFIG } from './config.js?v=20261021010930';
+import { applyOffers, offerRunning } from './offers.js?v=20261021010930';
+import { scoreBook } from './search.js?v=20261021010930';
+import { getLang } from './i18n.js?v=20261021010930';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261021010930';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -75,7 +75,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020235546')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261021010930')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -708,6 +708,24 @@ class SupabaseAPI {
       await Promise.all([sweep('covers', id), sweep('covers', id + '/aplus'), sweep('books', id), sweep('samples', id)]);
     } catch (e) { console.warn('cleanup', e); }
   }
+  // asks Stripe directly about card payments still waiting (backup of the webhook); returns the references now paid
+  async confirmPayments() {
+    if (!this._user) return { paid: [] };
+    try { const { data } = await this.sb.functions.invoke('confirm-payment', { body: {} }); if (data?.paid?.length) this._lib = null; return data || { paid: [] }; }
+    catch { return { paid: [] }; }
+  }
+  // calls cb (debounced) whenever a sale or an order changes — keeps the admin panel up to date without reloading
+  onSalesChange(cb) {
+    this._salesCbs = this._salesCbs || new Set(); this._salesCbs.add(cb);
+    if (!this._salesCh) {
+      let tm; const fire = () => { clearTimeout(tm); tm = setTimeout(() => this._salesCbs.forEach(f => { try { f(); } catch { } }), 600); };
+      this._salesCh = this.sb.channel('librava-sales')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases' }, fire)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fire)
+        .subscribe();
+    }
+    return () => this._salesCbs.delete(cb);
+  }
   // rebuild the /book/<id>/ pages so WhatsApp & co. show the cover right away (runs in the background)
   refreshShare() {
     clearTimeout(this._shareT);
@@ -718,7 +736,7 @@ class SupabaseAPI {
     this._err(error); this._catalog = null; this.refreshShare();
   }
   async salesStats() {
-    const { data, error } = await this.sb.from('purchases').select('*, book:books(id,title,author,cover_path,updated_at)').order('created_at', { ascending: false }).limit(1000);
+    const { data, error } = await this.sb.from('purchases').select('*, book:books(id,title,author,cover_path,updated_at)').eq('test', false).order('created_at', { ascending: false }).limit(1000);
     this._err(error);
     return data.map(p => ({ ...p, book: p.book ? { ...p.book, cover_url: this._coverUrl(p.book) } : null }));
   }
@@ -750,13 +768,13 @@ class SupabaseAPI {
     }
   }
   async adminBooks() {
-    const [books, P] = await Promise.all([this._loadCatalog(true), this._all('purchases', 'book_id,price_cents')]);
+    const [books, P] = await Promise.all([this._loadCatalog(true), this._all('purchases', 'book_id,price_cents', q => q.eq('test', false))]);
     const rev = {}; for (const p of P) rev[p.book_id] = (rev[p.book_id] || 0) + (p.price_cents || 0);
     return filterBooks(books, { includeDrafts: true, sort: 'newest' }).map(b => ({ ...b, revenue_cents: rev[b.id] || 0 }));
   }
   async adminOverview() {
     const [books, P, users, pend] = await Promise.all([
-      this._loadCatalog(true), this._all('purchases', 'book_id,price_cents,currency,created_at,customer_email', q => q.order('created_at', { ascending: false })),
+      this._loadCatalog(true), this._all('purchases', 'book_id,price_cents,currency,created_at,customer_email', q => q.eq('test', false).order('created_at', { ascending: false })),
       this._all('profiles', 'id,created_at'), this.sb.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'pending').eq('method', 'bank'),
     ]);
     const day = d => new Date(d).toISOString().slice(0, 10);
@@ -785,7 +803,7 @@ class SupabaseAPI {
   async confirmOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'paid' }); this._err(error); }
   async cancelOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'cancelled' }); this._err(error); }
   async adminCustomers(q = '') {
-    const [users, P] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at')]);
+    const [users, P] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at', q => q.eq('test', false))]);
     const n = norm(q);
     return users.filter(u => !n || norm((u.email || '') + ' ' + (u.full_name || '')).includes(n)).map(u => {
       const mine = P.filter(p => p.user_id === u.id);
@@ -820,7 +838,7 @@ class SupabaseAPI {
   async deleteReview(id) { const { error } = await this.sb.from('reviews').delete().eq('id', id); this._err(error); this._catalog = null; }
   async setBookStatus(id, status) { const { error } = await this.sb.from('books').update({ status, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); this._catalog = null; }
   async exportSales() {
-    const [P, books] = await Promise.all([this._all('purchases', '*', q => q.order('created_at', { ascending: false })), this._loadCatalog(true)]);
+    const [P, books] = await Promise.all([this._all('purchases', '*', q => q.eq('test', false).order('created_at', { ascending: false })), this._loadCatalog(true)]);
     const rows = [['date', 'customer_email', 'book', 'author', 'amount', 'currency', 'gift']];
     for (const p of P) { const b = books.find(x => x.id === p.book_id) || {}; rows.push([p.created_at, p.customer_email || '', b.title || '', b.author || '', ((p.price_cents || 0) / 100).toFixed(2).replace('.', ','), (p.currency || CONFIG.currency).toUpperCase(), p.gift ? 'yes' : '']); }
     const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\r\n');

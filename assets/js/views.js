@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261020235546';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020235546';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020235546';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020235546';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020235546';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020235546';
-import { track } from './track.js?v=20261020235546';
-import { didYouMean } from './search.js?v=20261020235546';
-import { api } from './api.js?v=20261020235546';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020235546';
+import { CONFIG } from './config.js?v=20261021010930';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021010930';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021010930';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021010930';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021010930';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021010930';
+import { track } from './track.js?v=20261021010930';
+import { didYouMean } from './search.js?v=20261021010930';
+import { api } from './api.js?v=20261021010930';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021010930';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -754,8 +754,15 @@ export async function viewLibrary(el, q) {
   if (q.get('welcome')) toast(t('acc.emailConfirmed'));
   if (q.get('paid')) {
     toast(t('pay.success'));
-    // the payment confirmation from Stripe can take a few seconds to arrive
-    setTimeout(() => { if (currentPath().startsWith('/library')) go('/library'); }, 4000);
+    // ask Stripe straight away (does not wait for the webhook); try a few times while the payment settles
+    (async () => {
+      for (let i = 0; i < 6; i++) {
+        const r = await api.confirmPayments?.() || {};
+        if (!currentPath().startsWith('/library')) return;
+        if (r.paid?.length || !r.checked) { go('/library'); return; }
+        await new Promise(res => setTimeout(res, 2500));
+      }
+    })();
   }
   let items, offlineMode = false;
   try { items = await api.library(); }

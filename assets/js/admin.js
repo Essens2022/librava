@@ -1,14 +1,14 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020235546';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020235546';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020235546';
-import { resetCompanyCache } from './views.js?v=20261020235546';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261020235546';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020235546';
-import { api } from './api.js?v=20261020235546';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261020235546';
+import { CONFIG } from './config.js?v=20261021010930';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021010930';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021010930';
+import { resetCompanyCache } from './views.js?v=20261021010930';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021010930';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021010930';
+import { api } from './api.js?v=20261021010930';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021010930';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -44,6 +44,7 @@ export async function viewAdmin(el, parts) {
     <div id="adm-body"></div>
   </div>`;
   const body = $('#adm-body', el);
+  liveAdmin(tab, parts, body);
   switch (tab) {
     case 'new': return bookForm(body, null);
     case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }
@@ -58,6 +59,29 @@ export async function viewAdmin(el, parts) {
     case 'settings': return settingsAdmin(body);
     default: return overview(body);
   }
+}
+
+// ---------------------------------------------------------------- live updates
+// A sale, a payment or a new order refreshes the open tab by itself (no reload needed).
+let stopLive = null, lastConfirm = 0;
+function liveAdmin(tab, parts, body) {
+  if (stopLive) { stopLive(); stopLive = null; }
+  // payments still waiting are checked directly with Stripe (backup of the webhook), at most once a minute
+  const confirm = () => { if (Date.now() - lastConfirm > 60000) { lastConfirm = Date.now(); api.confirmPayments?.(); } };
+  confirm();
+  const LIVE = { overview, books: booksList, stats: statsAdmin, orders: b => orders(b, parts[1] || 'pending'), customers: b => parts[1] ? customer(b, parts[1]) : customers(b) };
+  if (!LIVE[tab] || !api.onSalesChange) return;
+  const path = currentPath();
+  const refresh = () => {
+    if (!body.isConnected || currentPath() !== path || document.hidden) return;
+    // don't redraw under the admin's hands: a dialog is open or a field has focus
+    if (document.querySelector('.modal, dialog[open]') || body.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const y = scrollY; Promise.resolve(LIVE[tab](body)).then(() => scrollTo(0, y)).catch(() => { });
+  };
+  const off = api.onSalesChange(refresh);
+  const vis = () => { if (!document.hidden) { confirm(); refresh(); } };
+  document.addEventListener('visibilitychange', vis);
+  stopLive = () => { off(); document.removeEventListener('visibilitychange', vis); };
 }
 
 const cur = c => (c || CONFIG.currency).toUpperCase();
@@ -188,7 +212,7 @@ async function orders(body, status) {
         <td style="white-space:nowrap"><b>${esc(o.reference)}</b><div class="muted" style="font-size:12px">${esc(fmtDate(o.created_at))}</div></td>
         <td>${esc(o.email || '')}</td>
         <td style="min-width:180px;font-size:13px">${o.items.map(i => esc(i.title)).join('<br>')}</td>
-        <td style="white-space:nowrap">${esc(methodLabel(o.method))}<div><span class="status ${o.status === 'paid' ? 'live' : 'draft'}">${esc(t('admin.ord.' + o.status))}</span></div></td>
+        <td style="white-space:nowrap">${esc(methodLabel(o.method))}<div><span class="status ${o.status === 'paid' ? 'live' : 'draft'}">${esc(t('admin.ord.' + o.status))}</span>${o.livemode === false ? ' <span class="status draft" title="Stripe test">TEST</span>' : ''}</div></td>
         <td class="num"><b>${esc(money(o.amount_cents, cur(o.currency)))}</b></td>
         <td class="row-actions">${o.status === 'pending' ? `<button class="btn btn-cart btn-sm" data-paid="${o.id}" data-ref="${esc(o.reference)}" data-amount="${esc(money(o.amount_cents, cur(o.currency)))}">${esc(t('admin.confirmPaid'))}</button>
           <button class="btn btn-ghost btn-sm" data-cancel="${o.id}">${esc(t('admin.cancelOrder'))}</button>` : ''}</td></tr>`).join('')}</tbody></table></div>`
