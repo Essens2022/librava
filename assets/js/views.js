@@ -1,9 +1,9 @@
-import { CONFIG } from './config.js?v=20261020164958';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020164958';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020164958';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020164958';
-import { api } from './api.js?v=20261020164958';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020164958';
+import { CONFIG } from './config.js?v=20261020181637';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020181637';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020181637';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020181637';
+import { api } from './api.js?v=20261020181637';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020181637';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
