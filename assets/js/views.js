@@ -1,11 +1,11 @@
-import { CONFIG } from './config.js?v=20261020204801';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020204801';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020204801';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020204801';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020204801';
-import { didYouMean } from './search.js?v=20261020204801';
-import { api } from './api.js?v=20261020204801';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020204801';
+import { CONFIG } from './config.js?v=20261020205531';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020205531';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020205531';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020205531';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020205531';
+import { didYouMean } from './search.js?v=20261020205531';
+import { api } from './api.js?v=20261020205531';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020205531';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -15,6 +15,7 @@ const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>
 export async function viewHome(el) {
   // the store shows only books in the visitor's language
   const L = getLang();
+  const promosP = api.promos ? api.promos(L).catch(() => []) : Promise.resolve([]); // loads together with the books
   const [featured, newest, free, deals, all, everything] = await Promise.all([
     api.listBooks({ lang: L, featured: true, sort: 'bestsellers' }),
     api.listBooks({ lang: L, sort: 'newest', limit: 14 }),
@@ -24,7 +25,7 @@ export async function viewHome(el) {
     api.listBooks({ sort: 'bestsellers' }),
   ]);
   // banners chosen in Admin → Advertising, only those for this language (or for all languages)
-  const promos = api.promos ? await api.promos(L).catch(() => []) : [];
+  const promos = await promosP;
   const byId = Object.fromEntries(everything.map(b => [b.id, b]));
   const many = p => (p.book_ids || []).map(id => byId[id]).filter(Boolean);
   const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!byId[p.book_id];

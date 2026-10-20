@@ -1166,3 +1166,16 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
   .promo-books .pb { width: auto; max-width: 180px; }
   .promo-strip.promo-books .pb { max-width: 130px; }
 }
+/* touch screens: no "stuck" hover frame after tapping the logo or header buttons */
+@media (hover: none) { .logo:hover { outline: none; } .hdr-btn:hover, .subnav a:hover, .subnav button:hover { border-color: transparent; } }
+/* banners: the cover's space is reserved before the picture arrives, so nothing jumps; the picture fades in */
+.promo-hero .promo-cover img { height: 290px; max-height: none; width: auto; max-width: 100%; }
+.promo-strip .promo-cover img { height: 110px; max-height: none; width: auto; }
+.promo-cover img, .pb-cover img, .hero-fan img { opacity: 0; transition: opacity .35s ease; }
+.promo-cover img.ld, .pb-cover img.ld, .hero-fan img.ld { opacity: 1; }
+@media (max-width: 760px) {
+  .promo-hero .promo-cover img { height: 200px; }
+  .promo-strip .promo-cover img { height: 130px; max-width: 86px; object-fit: contain; }
+}
+.pr-live-frame.phone .promo-hero .promo-cover img { height: 200px; }
+.pr-live-frame.phone .promo-strip .promo-cover img { height: 130px; }

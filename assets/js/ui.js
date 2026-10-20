@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020204801';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020204801';
-import { esc, store, $, $$ } from './util.js?v=20261020204801';
+import { CONFIG } from './config.js?v=20261020205531';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020205531';
+import { esc, store, $, $$ } from './util.js?v=20261020205531';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020204801';
-import { suggest, highlight } from './search.js?v=20261020204801';
-import { api } from './api.js?v=20261020204801';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020205531';
+import { suggest, highlight } from './search.js?v=20261020205531';
+import { api } from './api.js?v=20261020205531';
 
 // ---------------- icons ----------------
 const P = {
@@ -437,7 +437,7 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
         ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b && placement === 'hero' ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}
         ${price}<span class="btn btn-buy promo-cta">${esc(cta)}</span></span>
-      ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}"></span>` : ''}
+      ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
     </span></a>`;
 }
 // several books in one banner (like Amazon's "Deals in…" cards): each cover opens its book
@@ -560,3 +560,7 @@ function setupSuggest() {
   document.addEventListener('submit', e => { if (e.target.closest('[data-search]')) close(); }, true);
 }
 setupSuggest();
+
+// pictures in banners fade in once loaded (no flash of half-drawn images)
+const fadeIn = img => { if (img.complete && img.naturalWidth) img.classList.add('ld'); else { img.addEventListener('load', () => img.classList.add('ld'), { once: true }); img.addEventListener('error', () => img.classList.add('ld'), { once: true }); } };
+new MutationObserver(() => document.querySelectorAll('.promo-cover img:not(.ld), .pb-cover img:not(.ld), .hero-fan img:not(.ld)').forEach(fadeIn)).observe(document.documentElement, { childList: true, subtree: true });
