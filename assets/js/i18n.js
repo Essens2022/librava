@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021012315';
-import { store } from './util.js?v=20261021012315';
+import { CONFIG } from './config.js?v=20261021012431';
+import { store } from './util.js?v=20261021012431';
 
 const D = {
   ro: {
@@ -438,6 +438,8 @@ const D = {
     'rev.outOf': '{avg} din 5',
     'rev.global': '{n} evaluări',
     'rev.write': 'Scrie o recenzie',
+    'rev.yours': 'Recenzia ta',
+    'rev.edit': 'Modifică recenzia',
     'rev.onlyOwners': 'Poți lăsa o recenzie după ce cumperi cartea.',
     'rev.yourRating': 'Nota ta',
     'rev.yourText': 'Ce ți-a plăcut sau nu?',
@@ -1463,6 +1465,8 @@ const D = {
     'rev.outOf': '{avg} su 5',
     'rev.global': '{n} valutazioni',
     'rev.write': 'Scrivi una recensione',
+    'rev.yours': 'La tua recensione',
+    'rev.edit': 'Modifica recensione',
     'rev.onlyOwners': 'Puoi lasciare una recensione dopo aver acquistato il libro.',
     'rev.yourRating': 'Il tuo voto',
     'rev.yourText': 'Cosa ti è piaciuto o no?',
@@ -2488,6 +2492,8 @@ const D = {
     'rev.outOf': '{avg} out of 5',
     'rev.global': '{n} ratings',
     'rev.write': 'Write a review',
+    'rev.yours': 'Your review',
+    'rev.edit': 'Edit review',
     'rev.onlyOwners': 'You can review this book after buying it.',
     'rev.yourRating': 'Your rating',
     'rev.yourText': 'What did you like or dislike?',
@@ -3114,7 +3120,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021012315`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021012431`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

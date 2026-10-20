@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} av 5",
   "rev.global": "{n} betyg",
   "rev.write": "Skriv en recension",
+  "rev.yours": "Din recension",
+  "rev.edit": "Redigera recension",
   "rev.onlyOwners": "Du kan recensera boken när du har köpt den.",
   "rev.yourRating": "Ditt betyg",
   "rev.yourText": "Vad gillade du eller gillade du inte?",

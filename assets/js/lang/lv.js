@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} no 5",
   "rev.global": "Vērtējumi: {n}",
   "rev.write": "Uzrakstīt atsauksmi",
+  "rev.yours": "Jūsu atsauksme",
+  "rev.edit": "Rediģēt atsauksmi",
   "rev.onlyOwners": "Šo grāmatu varēsi novērtēt pēc tās iegādes.",
   "rev.yourRating": "Tavs vērtējums",
   "rev.yourText": "Kas tev patika vai nepatika?",

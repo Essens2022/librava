@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} av 5",
   "rev.global": "{n} vurderinger",
   "rev.write": "Skriv en anmeldelse",
+  "rev.yours": "Din anmeldelse",
+  "rev.edit": "Rediger anmeldelse",
   "rev.onlyOwners": "Du kan anmelde boken etter at du har kjøpt den.",
   "rev.yourRating": "Din vurdering",
   "rev.yourText": "Hva likte du eller likte du ikke?",

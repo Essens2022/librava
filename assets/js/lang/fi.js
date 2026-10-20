@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} / 5",
   "rev.global": "Arvioita: {n}",
   "rev.write": "Kirjoita arvio",
+  "rev.yours": "Arvostelusi",
+  "rev.edit": "Muokkaa arvostelua",
   "rev.onlyOwners": "Voit arvioida kirjan, kun olet ostanut sen.",
   "rev.yourRating": "Arviosi",
   "rev.yourText": "Mistä pidit tai et pitänyt?",

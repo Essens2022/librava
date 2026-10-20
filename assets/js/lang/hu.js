@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} / 5",
   "rev.global": "{n} értékelés",
   "rev.write": "Vélemény írása",
+  "rev.yours": "Az értékelésed",
+  "rev.edit": "Értékelés szerkesztése",
   "rev.onlyOwners": "A könyvet a megvásárlása után értékelheted.",
   "rev.yourRating": "Értékelésed",
   "rev.yourText": "Mi tetszett és mi nem?",

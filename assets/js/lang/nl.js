@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} van 5",
   "rev.global": "{n} beoordelingen",
   "rev.write": "Schrijf een review",
+  "rev.yours": "Jouw recensie",
+  "rev.edit": "Recensie bewerken",
   "rev.onlyOwners": "Je kunt dit boek beoordelen nadat je het hebt gekocht.",
   "rev.yourRating": "Jouw beoordeling",
   "rev.yourText": "Wat vond je goed of minder goed?",

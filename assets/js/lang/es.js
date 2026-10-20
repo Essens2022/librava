@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} de 5",
   "rev.global": "{n} valoraciones",
   "rev.write": "Escribir una opinión",
+  "rev.yours": "Tu reseña",
+  "rev.edit": "Editar reseña",
   "rev.onlyOwners": "Podrás opinar sobre este libro después de comprarlo.",
   "rev.yourRating": "Tu valoración",
   "rev.yourText": "¿Qué te ha gustado o no te ha gustado?",

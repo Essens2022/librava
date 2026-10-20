@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} od 5",
   "rev.global": "Ocene: {n}",
   "rev.write": "Napišite mnenje",
+  "rev.yours": "Vaša ocena",
+  "rev.edit": "Uredi oceno",
   "rev.onlyOwners": "To knjigo lahko ocenite, ko jo kupite.",
   "rev.yourRating": "Vaša ocena",
   "rev.yourText": "Kaj vam je bilo všeč in kaj ne?",

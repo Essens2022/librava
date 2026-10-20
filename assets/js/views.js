@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021012315';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021012315';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021012315';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021012315';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021012315';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021012315';
-import { track } from './track.js?v=20261021012315';
-import { didYouMean } from './search.js?v=20261021012315';
-import { api } from './api.js?v=20261021012315';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021012315';
+import { CONFIG } from './config.js?v=20261021012431';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021012431';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021012431';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021012431';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021012431';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021012431';
+import { track } from './track.js?v=20261021012431';
+import { didYouMean } from './search.js?v=20261021012431';
+import { api } from './api.js?v=20261021012431';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021012431';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -267,11 +267,15 @@ export async function viewBook(el, id) {
         <div class="muted" style="font-size:14px;margin-top:4px">${esc(t('rev.global', { n: reviews.length }))}</div>
         <div class="histo">${counts.map((c, i) => `<div class="histo-row"><span>${5 - i} ★</span><div class="histo-bar"><i style="width:${reviews.length ? Math.round(c / reviews.length * 100) : 0}%"></i></div><span class="muted">${reviews.length ? Math.round(c / reviews.length * 100) : 0}%</span></div>`).join('')}</div>` : ''}
         <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-        <h3 style="font-size:16px;margin-bottom:8px">${esc(t('rev.write'))}</h3>
-        ${owned ? `<form id="rev-form" style="display:flex;flex-direction:column;gap:10px">
+        <h3 style="font-size:16px;margin-bottom:8px">${esc(t(myRev ? 'rev.yours' : 'rev.write'))}</h3>
+        ${owned && myRev ? `<div id="my-rev" class="review" style="border:0;padding:0">
+            <div class="rating-line">${stars(myRev.rating)} <span class="muted">${esc(fmtDate(myRev.updated_at || myRev.created_at))}</span></div>
+            ${myRev.body ? `<p style="margin:6px 0 0;white-space:pre-line">${esc(myRev.body)}</p>` : ''}
+            <button class="btn btn-sm" type="button" id="rev-edit" style="margin-top:10px">${esc(t('rev.edit'))}</button></div>` : ''}
+        ${owned ? `<form id="rev-form" style="display:flex;flex-direction:column;gap:10px" ${myRev ? 'hidden' : ''}>
             <div><span style="font-size:14px;font-weight:600">${esc(t('rev.yourRating'))}</span>
             <div class="star-input" id="star-input">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-v="${n}" aria-label="${n}"><svg viewBox="0 0 24 24" fill="currentColor">${starPath}</svg></button>`).join('')}</div></div>
-            <label class="field"><span class="sr">${esc(t('rev.yourText'))}</span><textarea id="rev-text" placeholder="${esc(t('rev.yourText'))}" maxlength="2000" style="min-height:90px">${esc(myRev?.body || '')}</textarea></label>
+            <label class="field"><span class="sr">${esc(t('rev.yourText'))}</span><textarea id="rev-text" placeholder="${esc(t('rev.yourText'))}" maxlength="2000" style="min-height:90px"></textarea></label>
             <button class="btn btn-dark" type="submit">${esc(t('rev.submit'))}</button>
           </form>` : `<p class="muted" style="font-size:14px">${esc(t('rev.onlyOwners'))}</p>`}
       </div>
@@ -318,11 +322,15 @@ export async function viewBook(el, id) {
     const paint = () => $$('#star-input button', el).forEach(btn => btn.classList.toggle('on', Number(btn.dataset.v) <= rating));
     paint();
     $$('#star-input button', el).forEach(btn => btn.onclick = () => { rating = Number(btn.dataset.v); paint(); });
+    // a review already written is shown as text; "Edit" opens the form with it
+    $('#rev-edit', el)?.addEventListener('click', () => { $('#my-rev', el).hidden = true; form.hidden = false; const ta = $('#rev-text', el); ta.value = myRev?.body || ''; ta.focus(); });
     form.onsubmit = async e => {
       e.preventDefault();
       if (!rating) { toast(t('rev.pickRating'), { error: true }); return; }
-      try { await api.addReview(b.id, rating, $('#rev-text', el).value.trim()); toast(t('rev.thanks')); viewBook(el, id); }
-      catch (err) { toast(errText(err), { error: true }); }
+      const ta = $('#rev-text', el), btn = form.querySelector('[type=submit]');
+      btn.disabled = true;
+      try { await api.addReview(b.id, rating, ta.value.trim()); ta.value = ''; toast(t('rev.thanks')); viewBook(el, id); }
+      catch (err) { btn.disabled = false; toast(errText(err), { error: true }); }
     };
   }
 }

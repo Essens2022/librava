@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} от 5",
   "rev.global": "{n} оценки",
   "rev.write": "Напишете отзив",
+  "rev.yours": "Вашето ревю",
+  "rev.edit": "Редактиране на ревюто",
   "rev.onlyOwners": "Можете да оцените книгата, след като я купите.",
   "rev.yourRating": "Вашата оценка",
   "rev.yourText": "Какво Ви хареса или не Ви хареса?",

@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} iš 5",
   "rev.global": "Įvertinimų: {n}",
   "rev.write": "Rašyti atsiliepimą",
+  "rev.yours": "Jūsų atsiliepimas",
+  "rev.edit": "Redaguoti atsiliepimą",
   "rev.onlyOwners": "Įvertinti šią knygą galėsite ją įsigiję.",
   "rev.yourRating": "Jūsų įvertinimas",
   "rev.yourText": "Kas jums patiko ar nepatiko?",

@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} / 5",
   "rev.global": "Hinnanguid: {n}",
   "rev.write": "Kirjuta arvustus",
+  "rev.yours": "Teie arvustus",
+  "rev.edit": "Muuda arvustust",
   "rev.onlyOwners": "Saad raamatut arvustada pärast selle ostmist.",
   "rev.yourRating": "Sinu hinnang",
   "rev.yourText": "Mis sulle meeldis või ei meeldinud?",

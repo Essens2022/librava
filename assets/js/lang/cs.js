@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} z 5",
   "rev.global": "Hodnocení: {n}",
   "rev.write": "Napsat recenzi",
+  "rev.yours": "Vaše recenze",
+  "rev.edit": "Upravit recenzi",
   "rev.onlyOwners": "Tuto knihu můžete ohodnotit po jejím zakoupení.",
   "rev.yourRating": "Vaše hodnocení",
   "rev.yourText": "Co se vám líbilo a co ne?",

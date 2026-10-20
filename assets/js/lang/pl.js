@@ -176,6 +176,8 @@ export default {
   "rev.outOf": "{avg} na 5",
   "rev.global": "Oceny: {n}",
   "rev.write": "Napisz opinię",
+  "rev.yours": "Twoja recenzja",
+  "rev.edit": "Edytuj recenzję",
   "rev.onlyOwners": "Możesz ocenić tę książkę po jej zakupie.",
   "rev.yourRating": "Twoja ocena",
   "rev.yourText": "Co Ci się podobało, a co nie?",
