@@ -1,5 +1,9 @@
 // Czech interface strings for Librava
 export default {
+  "ntf.title": "Oznámení",
+  "ntf.empty": "Zatím žádná oznámení.",
+  "ntf.open": "Zobrazit",
+  "ntf.now": "právě teď",
   "of.a.qty": "Sleva za {n} knihy (-{p} %)",
   "of.a.coupon": "Kód {code} ({v})",
   "fbt.title": "Často kupováno společně",

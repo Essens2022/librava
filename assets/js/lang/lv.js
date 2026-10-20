@@ -1,5 +1,9 @@
 // Latvian interface strings for Librava
 export default {
+  "ntf.title": "Paziņojumi",
+  "ntf.empty": "Paziņojumu vēl nav.",
+  "ntf.open": "Skatīt",
+  "ntf.now": "tikko",
   "of.a.qty": "Atlaide par {n} grāmatām (-{p}%)",
   "of.a.coupon": "Kods {code} ({v})",
   "fbt.title": "Bieži pērk kopā",

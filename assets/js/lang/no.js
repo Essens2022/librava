@@ -1,5 +1,9 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "ntf.title": "Varsler",
+  "ntf.empty": "Ingen varsler ennå.",
+  "ntf.open": "Se",
+  "ntf.now": "akkurat nå",
   "of.a.qty": "Rabatt for {n} bøker (-{p} %)",
   "of.a.coupon": "Kode {code} ({v})",
   "fbt.title": "Kjøpes ofte sammen",

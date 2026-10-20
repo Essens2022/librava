@@ -1,5 +1,9 @@
 // French interface strings for Librava
 export default {
+  "ntf.title": "Notifications",
+  "ntf.empty": "Aucune notification pour le moment.",
+  "ntf.open": "Voir",
+  "ntf.now": "à l'instant",
   "of.a.qty": "Remise pour {n} livres (-{p} %)",
   "of.a.coupon": "Code {code} ({v})",
   "fbt.title": "Souvent achetés ensemble",

@@ -1,5 +1,9 @@
 // Slovak interface strings for Librava
 export default {
+  "ntf.title": "Upozornenia",
+  "ntf.empty": "Zatiaľ žiadne upozornenia.",
+  "ntf.open": "Zobraziť",
+  "ntf.now": "práve teraz",
   "of.a.qty": "Zľava za {n} knihy (-{p} %)",
   "of.a.coupon": "Kód {code} ({v})",
   "fbt.title": "Často kupované spolu",

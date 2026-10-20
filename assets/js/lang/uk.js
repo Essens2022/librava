@@ -1,5 +1,9 @@
 // Ukrainian interface strings for Librava
 export default {
+  "ntf.title": "Сповіщення",
+  "ntf.empty": "Сповіщень ще немає.",
+  "ntf.open": "Переглянути",
+  "ntf.now": "щойно",
   "of.a.qty": "Знижка за {n} книги (-{p}%)",
   "of.a.coupon": "Код {code} ({v})",
   "fbt.title": "Часто купують разом",

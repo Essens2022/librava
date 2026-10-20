@@ -1,5 +1,9 @@
 // Finnish interface strings for Librava
 export default {
+  "ntf.title": "Ilmoitukset",
+  "ntf.empty": "Ei vielä ilmoituksia.",
+  "ntf.open": "Katso",
+  "ntf.now": "juuri nyt",
   "of.a.qty": "Alennus {n} kirjasta (-{p} %)",
   "of.a.coupon": "Koodi {code} ({v})",
   "fbt.title": "Ostetaan usein yhdessä",

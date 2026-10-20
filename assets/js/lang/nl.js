@@ -1,5 +1,9 @@
 // Dutch interface strings for Librava
 export default {
+  "ntf.title": "Meldingen",
+  "ntf.empty": "Nog geen meldingen.",
+  "ntf.open": "Bekijken",
+  "ntf.now": "zojuist",
   "of.a.qty": "Korting voor {n} boeken (-{p}%)",
   "of.a.coupon": "Code {code} ({v})",
   "fbt.title": "Vaak samen gekocht",

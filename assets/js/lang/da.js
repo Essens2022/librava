@@ -1,5 +1,9 @@
 // Danish interface strings for Librava
 export default {
+  "ntf.title": "Notifikationer",
+  "ntf.empty": "Ingen notifikationer endnu.",
+  "ntf.open": "Se",
+  "ntf.now": "lige nu",
   "of.a.qty": "Rabat for {n} bøger (-{p} %)",
   "of.a.coupon": "Kode {code} ({v})",
   "fbt.title": "Købes ofte sammen",

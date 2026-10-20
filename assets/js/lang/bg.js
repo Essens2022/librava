@@ -1,5 +1,9 @@
 // Bulgarian interface strings for Librava
 export default {
+  "ntf.title": "Известия",
+  "ntf.empty": "Все още няма известия.",
+  "ntf.open": "Виж",
+  "ntf.now": "току-що",
   "of.a.qty": "Отстъпка за {n} книги (-{p}%)",
   "of.a.coupon": "Код {code} ({v})",
   "fbt.title": "Често купувани заедно",

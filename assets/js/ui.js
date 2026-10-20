@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020232055';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020232055';
-import { esc, store, $, $$ } from './util.js?v=20261020232055';
+import { CONFIG } from './config.js?v=20261020232403';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020232403';
+import { esc, store, $, $$ } from './util.js?v=20261020232403';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020232055';
-import { suggest, highlight } from './search.js?v=20261020232055';
-import { api } from './api.js?v=20261020232055';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020232403';
+import { suggest, highlight } from './search.js?v=20261020232403';
+import { api } from './api.js?v=20261020232403';
 
 // ---------------- icons ----------------
 const P = {
@@ -408,13 +408,36 @@ export async function refreshBell(force) {
     return mine;
   } catch { return []; }
 }
+// one notification, Amazon-style: icon, time, title, text and the books it is about (cover, price, button)
+const NTF_ICON = { new_book: 'book', price_drop: 'tag', free_book: 'bolt', sale: 'tag', coupon: 'tag', series: 'library', picks: 'bookmark', new_week: 'bell' };
+function ago(d) {
+  const s = Math.max(1, (Date.now() - new Date(d)) / 1000), rtf = new Intl.RelativeTimeFormat(getLang(), { numeric: 'auto' });
+  return s < 3600 ? rtf.format(-Math.round(s / 60), 'minute') : s < 86400 ? rtf.format(-Math.round(s / 3600), 'hour') : s < 86400 * 30 ? rtf.format(-Math.round(s / 86400), 'day') : new Date(d).toLocaleDateString(getLang());
+}
+export function ntfCardHTML(n, books = [], { preview = false } = {}) {
+  const bs = books.filter(Boolean);
+  const link = safeLink(n.link) || (bs.length === 1 ? `#/book/${encodeURIComponent(bs[0].id)}` : '');
+  const priceOf = b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
+    return b.price_cents ? `<b>${money(b.price_cents)}</b>${d ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${d}%</span>` : ''}` : `<b>${esc(t('book.free'))}</b>`; };
+  const one = bs.length === 1 ? `<div class="ntf-book"><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${bs[0].cover_url ? `<img src="${esc(bs[0].cover_url)}" alt="">` : ''}</a>
+      <div><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close class="ntf-bt">${esc(bs[0].title)}</a><span class="muted">${esc(t('book.by', { author: bs[0].author }))}</span><span class="ntf-price">${priceOf(bs[0])}</span>
+      <a class="btn btn-buy btn-sm" href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${esc(t('promo.ctaBook'))}</a></div></div>` : '';
+  const many = bs.length > 1 ? `<div class="ntf-books">${bs.map(b => `<a href="#/book/${encodeURIComponent(b.id)}" data-close title="${esc(b.title)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : `<span class="ph">${esc(b.title)}</span>`}<span class="ntf-price">${priceOf(b)}</span></a>`).join('')}</div>` : '';
+  return `<article class="ntf2 ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
+    <div class="ntf-top"><b>Librava</b><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
+    <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${esc(n.body)}</p>` : ''}${one}${many}
+    ${link && bs.length !== 1 ? `<a class="ntf-more" href="${esc(link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div></article>`;
+}
 export async function openBell() {
   const list = await refreshBell(true);
+  const read = new Set(store.get('notif:read', []));
+  const ids = [...new Set(list.flatMap(n => n.book_ids || []))];
+  const books = Object.fromEntries((await Promise.all(ids.map(id => api.getBook(id).catch(() => null)))).filter(Boolean).map(b => [b.id, b]));
   store.set('notif:read', [...new Set([...store.get('notif:read', []), ...list.map(n => n.id)])].slice(-300));
   refreshBell();
   modal(`<div class="ntf-head"><h2 style="margin:0">${esc(t('ntf.title'))}</h2><button class="btn btn-ghost btn-sm" data-close>✕</button></div>
-    ${list.length ? `<div class="ntf-list">${list.map(n => `<div class="ntf"><small class="muted">${esc(new Date(n.created_at).toLocaleDateString(getLang()))}</small><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ''}${n.link ? `<a href="${esc(n.link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div>`).join('')}</div>`
-      : `<p class="muted">${esc(t('ntf.empty'))}</p>`}`);
+    ${list.length ? `<div class="ntf-list">${list.map(n => ntfCardHTML({ ...n, unread: !read.has(n.id) }, (n.book_ids || []).map(id => books[id]))).join('')}</div>`
+      : `<div class="ntf-empty">${icon('bell')}<p class="muted">${esc(t('ntf.empty'))}</p></div>`}`, { onMount: m => m.classList.add('ntf-modal') });
 }
 
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)

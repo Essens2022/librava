@@ -1,5 +1,9 @@
 // Lithuanian interface strings for Librava
 export default {
+  "ntf.title": "Pranešimai",
+  "ntf.empty": "Pranešimų dar nėra.",
+  "ntf.open": "Žiūrėti",
+  "ntf.now": "ką tik",
   "of.a.qty": "Nuolaida už {n} knygas (-{p}%)",
   "of.a.coupon": "Kodas {code} ({v})",
   "fbt.title": "Dažnai perkama kartu",

@@ -1,5 +1,9 @@
 // Slovenian interface strings for Librava
 export default {
+  "ntf.title": "Obvestila",
+  "ntf.empty": "Še ni obvestil.",
+  "ntf.open": "Poglej",
+  "ntf.now": "pravkar",
   "of.a.qty": "Popust za {n} knjige (-{p} %)",
   "of.a.coupon": "Koda {code} ({v})",
   "fbt.title": "Pogosto kupljeno skupaj",

@@ -1,5 +1,9 @@
 // Estonian interface strings for Librava
 export default {
+  "ntf.title": "Teavitused",
+  "ntf.empty": "Teavitusi veel pole.",
+  "ntf.open": "Vaata",
+  "ntf.now": "just praegu",
   "of.a.qty": "Allahindlus {n} raamatule (-{p}%)",
   "of.a.coupon": "Kood {code} ({v})",
   "fbt.title": "Ostetakse sageli koos",

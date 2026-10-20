@@ -1,5 +1,9 @@
 // Hungarian interface strings for Librava
 export default {
+  "ntf.title": "Értesítések",
+  "ntf.empty": "Még nincs értesítés.",
+  "ntf.open": "Megnézem",
+  "ntf.now": "épp most",
   "of.a.qty": "Kedvezmény {n} könyvre (-{p}%)",
   "of.a.coupon": "{code} kód ({v})",
   "fbt.title": "Gyakran vásárolják együtt",

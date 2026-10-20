@@ -1,8 +1,31 @@
-import { CONFIG } from './config.js?v=20261020232055';
-import { store } from './util.js?v=20261020232055';
+import { CONFIG } from './config.js?v=20261020232403';
+import { store } from './util.js?v=20261020232403';
 
 const D = {
   ro: {
+    'ntf.now': 'acum',
+    'ntf.tplTitle': 'Notificări gata făcute',
+    'ntf.tplHelp': 'Alege un model, apoi cartea sau cărțile. Textul se completează singur în fiecare limbă. Poți trimite tuturor (fiecare client îl primește în limba lui) sau doar unei limbi.',
+    'ntf.tpl.new_book': 'Carte nouă',
+    'ntf.tpl.price_drop': 'Preț redus',
+    'ntf.tpl.free_book': 'Carte gratuită',
+    'ntf.tpl.sale': 'Reduceri',
+    'ntf.tpl.coupon': 'Cod de reducere',
+    'ntf.tpl.series': 'Continuarea seriei',
+    'ntf.tpl.picks': 'Recomandări',
+    'ntf.tpl.new_week': 'Noutățile săptămânii',
+    'ntf.blank': 'De la zero',
+    'ntf.blankHelp': 'Scrii tu titlul și textul.',
+    'ntf.books': 'Cărți în notificare (opțional, max. 6)',
+    'ntf.booksHelp': 'Apar cu copertă, preț și buton, ca la Amazon.',
+    'ntf.linkAuto': 'Automat (pagina cărții sau oferta)',
+    'ntf.allLangsTpl': 'Fiecare client o primește tradusă în limba lui (24 de limbi). Ca să modifici textul, alege o singură limbă.',
+    'ntf.allLangsSame': 'Același text pentru toți clienții.',
+    'ntf.inLangs': 'în {n} limbi',
+    'ntf.nBooks': '{n} cărți',
+    'ntf.needBook': 'Alege cartea pentru această notificare.',
+    'ntf.needCode': 'Scrie codul de reducere.',
+    'ntf.needTitle': 'Scrie un titlu.',
     'of.a.qty': 'Reducere pentru {n} cărți (-{p}%)',
     'of.a.coupon': 'Cod {code} ({v})',
     'fbt.title': 'Cumpărate frecvent împreună',
@@ -941,6 +964,29 @@ const D = {
   },
 
   it: {
+    'ntf.now': 'adesso',
+    'ntf.tplTitle': 'Notifiche pronte',
+    'ntf.tplHelp': 'Scegli un modello, poi il libro o i libri. Il testo si compila da solo in ogni lingua. Puoi inviare a tutti (ognuno la riceve nella sua lingua) o a una sola lingua.',
+    'ntf.tpl.new_book': 'Nuovo libro',
+    'ntf.tpl.price_drop': 'Prezzo ribassato',
+    'ntf.tpl.free_book': 'Libro gratis',
+    'ntf.tpl.sale': 'Saldi',
+    'ntf.tpl.coupon': 'Codice sconto',
+    'ntf.tpl.series': 'Seguito della serie',
+    'ntf.tpl.picks': 'Consigliati',
+    'ntf.tpl.new_week': 'Novità della settimana',
+    'ntf.blank': 'Da zero',
+    'ntf.blankHelp': 'Scrivi tu titolo e testo.',
+    'ntf.books': 'Libri nella notifica (facoltativo, max 6)',
+    'ntf.booksHelp': 'Appaiono con copertina, prezzo e pulsante, come su Amazon.',
+    'ntf.linkAuto': 'Automatico (pagina del libro o offerta)',
+    'ntf.allLangsTpl': 'Ogni cliente la riceve tradotta nella sua lingua (24 lingue). Per modificare il testo scegli una sola lingua.',
+    'ntf.allLangsSame': 'Lo stesso testo per tutti i clienti.',
+    'ntf.inLangs': 'in {n} lingue',
+    'ntf.nBooks': '{n} libri',
+    'ntf.needBook': 'Scegli il libro per questa notifica.',
+    'ntf.needCode': 'Scrivi il codice sconto.',
+    'ntf.needTitle': 'Scrivi un titolo.',
     'of.a.qty': 'Sconto per {n} libri (-{p}%)',
     'of.a.coupon': 'Codice {code} ({v})',
     'fbt.title': 'Spesso comprati insieme',
@@ -1879,6 +1925,29 @@ const D = {
   },
 
   en: {
+    'ntf.now': 'now',
+    'ntf.tplTitle': 'Ready-made notifications',
+    'ntf.tplHelp': 'Pick a template, then the book or books. The text fills itself in every language. Send it to everyone (each customer gets it in their language) or to one language only.',
+    'ntf.tpl.new_book': 'New book',
+    'ntf.tpl.price_drop': 'Price drop',
+    'ntf.tpl.free_book': 'Free book',
+    'ntf.tpl.sale': 'Sale',
+    'ntf.tpl.coupon': 'Discount code',
+    'ntf.tpl.series': 'Series continues',
+    'ntf.tpl.picks': 'Recommendations',
+    'ntf.tpl.new_week': 'New this week',
+    'ntf.blank': 'From scratch',
+    'ntf.blankHelp': 'Write your own title and text.',
+    'ntf.books': 'Books in the notification (optional, max 6)',
+    'ntf.booksHelp': 'Shown with cover, price and button, like on Amazon.',
+    'ntf.linkAuto': 'Automatic (book page or offer)',
+    'ntf.allLangsTpl': 'Each customer gets it translated into their language (24 languages). To edit the text, choose one language.',
+    'ntf.allLangsSame': 'The same text for every customer.',
+    'ntf.inLangs': 'in {n} languages',
+    'ntf.nBooks': '{n} books',
+    'ntf.needBook': 'Choose the book for this notification.',
+    'ntf.needCode': 'Type the discount code.',
+    'ntf.needTitle': 'Write a title.',
     'of.a.qty': 'Discount for {n} books ({p}%)',
     'of.a.coupon': 'Code {code} ({v})',
     'fbt.title': 'Frequently bought together',
@@ -2850,7 +2919,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020232055`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020232403`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

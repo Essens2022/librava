@@ -1331,3 +1331,37 @@ html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background
   .promo-one .promo-act .promo-price s { font-size: 13px; }
   .promo-one .promo-act .promo-price .badge { font-size: 12px; padding: 2px 6px; }
 }
+/* ---------- notifications (bell + admin) ---------- */
+.ntf-modal { max-width: 520px; }
+.ntf-list { display: flex; flex-direction: column; gap: 10px; max-height: 70vh; overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+.ntf2 { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ntf2.unread { border-color: var(--pista-strong); box-shadow: inset 3px 0 0 var(--pista-strong); }
+.ntf-ico { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--pista-soft); color: var(--pista-strong); }
+.ntf-ico .ico { width: 20px; height: 20px; }
+.ntf-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ntf-top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.ntf-title { font-weight: 700; font-size: 16px; line-height: 1.3; }
+.ntf-main p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.ntf-book { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 10px; border-radius: 10px; background: var(--surface-2); margin-top: 4px; }
+.ntf-book img { width: 64px; height: auto; border-radius: 2px; box-shadow: 0 3px 8px rgba(0, 0, 0, .25); display: block; }
+.ntf-book > div { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; min-width: 0; font-size: 13px; }
+.ntf-bt { font-weight: 700; font-size: 14px; color: var(--fg); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ntf-price { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 14px; }
+.ntf-price s { color: var(--muted); font-size: 12px; } .ntf-price .badge { position: static; font-size: 11px; }
+.ntf-book .btn { margin-top: 4px; }
+.ntf-books { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 2px; }
+.ntf-books a { flex: none; width: 76px; display: flex; flex-direction: column; gap: 4px; color: var(--fg); }
+.ntf-books img { width: 76px; height: auto; border-radius: 2px; box-shadow: 0 3px 8px rgba(0, 0, 0, .25); }
+.ntf-books .ntf-price { font-size: 12px; }
+.ntf-more { font-size: 14px; font-weight: 600; }
+.ntf-empty { text-align: center; padding: 24px 8px; } .ntf-empty .ico { width: 36px; height: 36px; color: var(--muted); }
+.ntf-tpls { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.ntf-tpl { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; color: var(--fg); font: inherit; }
+.ntf-tpl:hover { border-color: var(--pista-strong); }
+.ntf-tpl.on { border-color: var(--pista-strong); background: var(--pista-soft); box-shadow: 0 0 0 1px var(--pista-strong); }
+.ntf-tpl .ico { width: 22px; height: 22px; color: var(--pista-strong); }
+.ntf-tpl small { color: var(--muted); line-height: 1.35; }
+.ntf-preview #n-prev { margin-top: 6px; max-width: 480px; }
+.ntf-adm { margin-top: 16px; }
+#n-vars[hidden], [data-v][hidden] { display: none !important; }
+input[readonly], textarea[readonly] { background: var(--surface-2); color: var(--muted); }

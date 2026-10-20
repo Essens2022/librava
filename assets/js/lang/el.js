@@ -1,5 +1,9 @@
 // Greek interface strings for Librava
 export default {
+  "ntf.title": "Ειδοποιήσεις",
+  "ntf.empty": "Δεν υπάρχουν ακόμη ειδοποιήσεις.",
+  "ntf.open": "Προβολή",
+  "ntf.now": "μόλις τώρα",
   "of.a.qty": "Έκπτωση για {n} βιβλία (-{p}%)",
   "of.a.coupon": "Κωδικός {code} ({v})",
   "fbt.title": "Αγοράζονται συχνά μαζί",

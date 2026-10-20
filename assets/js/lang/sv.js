@@ -1,5 +1,9 @@
 // Swedish interface strings for Librava
 export default {
+  "ntf.title": "Aviseringar",
+  "ntf.empty": "Inga aviseringar än.",
+  "ntf.open": "Visa",
+  "ntf.now": "just nu",
   "of.a.qty": "Rabatt för {n} böcker (-{p} %)",
   "of.a.coupon": "Kod {code} ({v})",
   "fbt.title": "Köps ofta tillsammans",

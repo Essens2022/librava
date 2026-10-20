@@ -1,13 +1,14 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020232055';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020232055';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020232055';
-import { resetCompanyCache } from './views.js?v=20261020232055';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020232055';
-import { api } from './api.js?v=20261020232055';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020232055';
+import { CONFIG } from './config.js?v=20261020232403';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020232403';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020232403';
+import { resetCompanyCache } from './views.js?v=20261020232403';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261020232403';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020232403';
+import { api } from './api.js?v=20261020232403';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink, ntfCardHTML } from './ui.js?v=20261020232403';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -976,33 +977,89 @@ async function bookForm(body, b, startStep = 1) {
 
 // ---------------------------------------------------------------- announcements shown under the bell
 async function notificationsAdmin(body) {
-  const list = await api.adminNotifications();
-  body.innerHTML = `<div class="adm-two">
+  const [list, books] = await Promise.all([api.adminNotifications(), api.adminBooks()]);
+  const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
+  const byId = Object.fromEntries(books.map(b => [b.id, b]));
+  const UI = getLang();
+  let tpl = null, chosen = [];
+  // sent notifications: copies of one send (one per language) are shown together
+  const groups = []; const seen = {};
+  for (const n of list) { const k = n.batch || n.id; if (!seen[k]) { seen[k] = { key: k, batch: n.batch, items: [] }; groups.push(seen[k]); } seen[k].items.push(n); }
+  body.innerHTML = `<div class="panel"><h2 class="section-title" style="font-size:19px;margin:0 0 4px">${esc(t('ntf.tplTitle'))}</h2><p class="muted" style="margin:0 0 12px">${esc(t('ntf.tplHelp'))}</p>
+      <div class="ntf-tpls">${NTF_TEMPLATES.map(x => { const f = fillTemplate(x.key, UI, { book: '…', author: '…', price: '…', code: 'CODE', percent: '20' }); return `<button type="button" class="ntf-tpl" data-tpl="${x.key}">${icon(x.icon)}<b>${esc(t('ntf.tpl.' + x.key))}</b><small>${esc(f.title)}</small></button>`; }).join('')}
+        <button type="button" class="ntf-tpl blank" data-tpl="">${icon('edit')}<b>${esc(t('ntf.blank'))}</b><small>${esc(t('ntf.blankHelp'))}</small></button></div></div>
+    <div class="adm-two ntf-adm">
     <form class="panel" id="ntf-form" style="display:flex;flex-direction:column;gap:12px">
-      <h2 class="section-title" style="font-size:19px;margin:0">${esc(t('ntf.new'))}</h2>
+      <h2 class="section-title" style="font-size:19px;margin:0" id="n-head">${esc(t('ntf.new'))}</h2>
+      <label class="field"><span>${esc(t('ntf.lang'))}</span><select id="n-lang"><option value="">${esc(t('ntf.allLangs'))}</option>${LANGS.map(([l, nm]) => `<option value="${l}">${esc(langName(l))} · ${esc(nm)}</option>`).join('')}</select><small class="muted" id="n-langhelp"></small></label>
+      <div id="n-books-box"><span class="field-l">${esc(t('ntf.books'))}</span><small class="muted" style="display:block">${esc(t('ntf.booksHelp'))}</small>
+        <input class="input" id="n-find" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}" style="margin-top:6px"><div class="pr-chosen" id="n-chosen" style="margin-top:6px"></div><div class="pr-pick" id="n-pick" style="max-height:220px;margin-top:6px"></div></div>
+      <div class="two" id="n-vars"><label class="field" data-v="code"><span>${esc(t('of.code'))}</span><input id="n-code" maxlength="30" style="text-transform:uppercase"></label><label class="field" data-v="percent"><span>${esc(t('of.percent'))}</span><input id="n-pct" type="number" min="1" max="90" value="20"></label></div>
       <label class="field"><span>${esc(t('ap.title'))} *</span><input id="n-title" maxlength="120" required></label>
-      <label class="field"><span>${esc(t('ap.text'))}</span><textarea id="n-body" maxlength="600" rows="4"></textarea></label>
-      <label class="field"><span>${esc(t('ntf.link'))}</span><input id="n-link" maxlength="300" placeholder="#/book/… · #/search?deals=1"></label>
-      <label class="field"><span>${esc(t('ntf.lang'))}</span><select id="n-lang"><option value="">${esc(t('ntf.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}">${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select></label>
-      <button class="btn btn-buy" type="submit">${esc(t('ntf.send'))}</button>
+      <label class="field"><span>${esc(t('ap.text'))}</span><textarea id="n-body" maxlength="600" rows="3"></textarea></label>
+      <label class="field"><span>${esc(t('ntf.link'))}</span><input id="n-link" maxlength="300" placeholder="${esc(t('ntf.linkAuto'))}"></label>
+      <div class="ntf-preview"><span class="field-l">${esc(t('pr.preview'))}</span><div id="n-prev"></div></div>
+      <button class="btn btn-buy" type="submit" id="n-send">${esc(t('ntf.send'))}</button>
       <small class="muted">${esc(t('ntf.help'))}</small>
     </form>
     <div class="panel"><h2 class="section-title" style="font-size:19px">${esc(t('ntf.sent'))}</h2>
-      ${list.length ? list.map(n => `<div class="adm-line" style="align-items:flex-start"><span><b>${esc(n.title)}</b><small class="muted" style="display:block">${esc(fmtDate(n.created_at))}${n.lang ? ' · ' + esc(n.lang.toUpperCase()) : ''}</small>${n.body ? `<small style="display:block">${esc(n.body)}</small>` : ''}</span>
-        <button class="btn btn-ghost btn-sm" data-del-ntf="${esc(n.id)}">${esc(t('admin.delete'))}</button></div>`).join('') : `<p class="muted">${esc(t('ntf.none'))}</p>`}
+      ${groups.length ? groups.map(g => { const n = g.items.find(x => x.lang === UI) || g.items[0]; const bs = (n.book_ids || []).map(id => byId[id]).filter(Boolean);
+        return `<div class="adm-line" style="align-items:flex-start;gap:10px"><span style="display:flex;gap:10px;min-width:0">${bs[0]?.cover_url ? `<img src="${esc(bs[0].cover_url)}" alt="" style="width:34px;height:52px;object-fit:contain;flex:none">` : ''}<span style="min-width:0"><b>${esc(n.title)}</b>
+          <small class="muted" style="display:block">${esc(fmtDate(n.created_at))} · ${g.items.length > 1 ? esc(t('ntf.inLangs', { n: g.items.length })) : n.lang ? esc(n.lang.toUpperCase()) : esc(t('ntf.allLangs'))}${bs.length ? ' · ' + esc(t('ntf.nBooks', { n: bs.length })) : ''}</small>${n.body ? `<small style="display:block">${esc(n.body)}</small>` : ''}</span></span>
+          <button class="btn btn-ghost btn-sm" data-del-ntf="${esc(g.batch || n.id)}" data-is-batch="${g.batch ? 1 : ''}">${esc(t('admin.delete'))}</button></div>`; }).join('') : `<p class="muted">${esc(t('ntf.none'))}</p>`}
     </div></div>`;
-  $('#ntf-form', body).onsubmit = async e => {
+  const f = $('#ntf-form', body), v = sel => ($(sel, f)?.value || '').trim();
+  let edited = false;
+  const meta = () => NTF_TEMPLATES.find(x => x.key === tpl);
+  const valsFor = l => { const b = byId[chosen[0]]; return { book: b?.title || '', author: b?.author || '', price: b ? (b.price_cents ? new Intl.NumberFormat(l === 'no' ? 'nb' : l, { style: 'currency', currency: (b.currency || CONFIG.currency || 'eur').toUpperCase() }).format(b.price_cents / 100) : t('book.free')) : '', code: v('#n-code').toUpperCase(), percent: v('#n-pct') }; };
+  const autoLink = () => { const m = meta(); if (v('#n-link')) return v('#n-link'); if (m?.link === 'book' || (!m && chosen.length === 1)) return chosen[0] ? '#/book/' + chosen[0] : null; return m?.link || null; };
+  const fill = () => { if (!tpl || edited) return; const l = v('#n-lang') || UI; const x = fillTemplate(tpl, l, valsFor(l)); $('#n-title', f).value = x.title; $('#n-body', f).value = x.body; };
+  const drawPick = () => {
+    const q = norm(v('#n-find')), L = v('#n-lang') || UI;
+    $('#n-chosen', f).innerHTML = chosen.map(id => { const b = byId[id]; return b ? `<span class="pr-chip">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span>${esc(b.title)}</span><button type="button" data-rm="${esc(id)}">×</button></span>` : ''; }).join('') || `<span class="muted" style="font-size:14px">${esc(t('pr.booksNone'))}</span>`;
+    $('#n-pick', f).innerHTML = pub.filter(b => !q || norm(b.title + ' ' + b.author).includes(q)).sort((a, b2) => (b2.language === L) - (a.language === L)).slice(0, 40).map(b => `<label class="pr-opt ${chosen.includes(b.id) ? 'on' : ''}"><input type="checkbox" value="${esc(b.id)}" ${chosen.includes(b.id) ? 'checked' : ''}>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span><b>${esc(b.title)}</b><small class="muted">${esc((b.language || '').toUpperCase())} · ${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</small></span></label>`).join('');
+  };
+  const draw = () => {
+    const m = meta(), all = !v('#n-lang');
+    $$('[data-v]', f).forEach(el => { el.hidden = !(m?.needs || []).includes(el.dataset.v); });
+    $('#n-vars', f).hidden = !(m?.needs || []).some(x => x === 'code' || x === 'percent');
+    $('#n-langhelp', f).textContent = tpl && all ? t('ntf.allLangsTpl') : all ? t('ntf.allLangsSame') : '';
+    $('#n-title', f).readOnly = $('#n-body', f).readOnly = !!(tpl && all);
+    $('#n-head', f).textContent = tpl ? t('ntf.tpl.' + tpl) : t('ntf.new');
+    $$('.ntf-tpl', body).forEach(x => x.classList.toggle('on', x.dataset.tpl === (tpl || '') && x.dataset.picked === '1'));
+    fill(); drawPick();
+    $('#n-prev', f).innerHTML = ntfCardHTML({ title: v('#n-title') || '…', body: v('#n-body'), link: autoLink(), kind: tpl }, chosen.map(id => byId[id]), { preview: true });
+    $('#n-prev', f).querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+  };
+  $$('.ntf-tpl', body).forEach(btn => btn.onclick = () => { $$('.ntf-tpl', body).forEach(x => x.dataset.picked = ''); btn.dataset.picked = '1'; tpl = btn.dataset.tpl || null; edited = false; if (!tpl) { $('#n-title', f).value = ''; $('#n-body', f).value = ''; } draw(); f.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  $('#n-title', f).addEventListener('input', () => { edited = true; }); $('#n-body', f).addEventListener('input', () => { edited = true; });
+  $('#n-lang', f).addEventListener('change', () => { edited = false; });
+  $('#n-pick', f).addEventListener('input', e => { e.stopPropagation(); const cb = e.target.closest('input[type=checkbox]'); if (!cb) return; chosen = cb.checked ? [...chosen, cb.value].slice(0, 6) : chosen.filter(x => x !== cb.value); edited = false; draw(); });
+  $('#n-pick', f).addEventListener('change', e => e.stopPropagation());
+  $('#n-chosen', f).addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { chosen = chosen.filter(x => x !== b.dataset.rm); edited = false; draw(); } });
+  $('#n-find', f).addEventListener('input', e => { e.stopPropagation(); drawPick(); });
+  f.addEventListener('input', draw); f.addEventListener('change', draw);
+  f.onsubmit = async e => {
     e.preventDefault();
-    const title = $('#n-title', body).value.trim(); if (!title) return;
-    try {
-      await api.saveNotification({ title, body: $('#n-body', body).value.trim(), link: $('#n-link', body).value.trim() || null, lang: $('#n-lang', body).value || null, published: true });
-      toast(t('ntf.sentOk')); notificationsAdmin(body); refreshBell(true);
-    } catch (x) { toast(errText(x), { error: true }); }
+    const m = meta();
+    if ((m?.needs || []).includes('book') && !chosen.length) return toast(t('ntf.needBook'), { error: true });
+    if ((m?.needs || []).includes('code') && !v('#n-code')) return toast(t('ntf.needCode'), { error: true });
+    if (!v('#n-title')) return toast(t('ntf.needTitle'), { error: true });
+    const link = autoLink();
+    if (link && !safeLink(link)) return toast(t('pr.badLink'), { error: true });
+    const batch = crypto.randomUUID(), base = { link, published: true, book_ids: chosen, kind: tpl, batch };
+    // a ready-made text for "all languages": each language gets its own translation
+    const rows = tpl && !v('#n-lang') ? LANGS.map(([l]) => ({ ...base, lang: l, ...fillTemplate(tpl, l, valsFor(l)) }))
+      : [{ ...base, lang: v('#n-lang') || null, title: v('#n-title'), body: v('#n-body') }];
+    const btn = $('#n-send', f); btn.disabled = true;
+    try { await (api.saveNotifications ? api.saveNotifications(rows) : Promise.all(rows.map(r => api.saveNotification(r)))); toast(t('ntf.sentOk')); notificationsAdmin(body); refreshBell(true); }
+    catch (x) { toast(errText(x), { error: true }); btn.disabled = false; }
   };
   $$('[data-del-ntf]', body).forEach(b => b.onclick = async () => {
     if (!await confirmBox(t('admin.delete') + '?', { danger: true })) return;
-    try { await api.deleteNotification(b.dataset.delNtf); notificationsAdmin(body); refreshBell(true); } catch (x) { toast(errText(x), { error: true }); }
+    try { if (b.dataset.isBatch) await api.deleteNotificationBatch(b.dataset.delNtf); else await api.deleteNotification(b.dataset.delNtf); notificationsAdmin(body); refreshBell(true); } catch (x) { toast(errText(x), { error: true }); }
   });
+  draw();
 }
 
 // ---------------------------------------------------------------- advertising: home page banners per language
