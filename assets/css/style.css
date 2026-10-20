@@ -1452,3 +1452,8 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 @media (max-width: 860px) { .st-grid { grid-template-columns: 1fr; } .st-step { grid-template-columns: 1fr 60px 50px; } .st-step .st-fbar { grid-column: 1 / -1; grid-row: 2; } }
 @media (max-width: 860px) { .st-grid { grid-template-columns: minmax(0, 1fr); } .st-head .seg { width: 100%; overflow-x: auto; } .st-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .st-kpi b { font-size: 21px; } }
 .st-grid .panel, .st-kpi { min-width: 0; }
+.ntf-top { align-items: center; }
+.ntf-brand { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); }
+.ntf-brand svg { width: 20px; height: 20px; }
+.ntf-brand .logo-word { font-family: var(--font-book); font-weight: 700; font-size: 17px; letter-spacing: -.3px; color: var(--fg); }
+.ntf-brand .logo-word i { font-style: normal; color: var(--pista-strong); }

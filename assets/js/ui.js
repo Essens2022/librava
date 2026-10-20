@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020235101';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020235101';
-import { esc, store, $, $$ } from './util.js?v=20261020235101';
+import { CONFIG } from './config.js?v=20261020235546';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020235546';
+import { esc, store, $, $$ } from './util.js?v=20261020235546';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,10 +12,10 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020235101';
-import { suggest, highlight } from './search.js?v=20261020235101';
-import { track } from './track.js?v=20261020235101';
-import { api } from './api.js?v=20261020235101';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020235546';
+import { suggest, highlight } from './search.js?v=20261020235546';
+import { track } from './track.js?v=20261020235546';
+import { api } from './api.js?v=20261020235546';
 
 // ---------------- icons ----------------
 const P = {
@@ -427,7 +427,7 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
       <a class="btn btn-buy btn-sm" href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${esc(t('promo.ctaBook'))}</a></div></div>` : '';
   const many = bs.length > 1 ? `<div class="ntf-books">${bs.map(b => `<a href="#/book/${encodeURIComponent(b.id)}" data-close title="${esc(b.title)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : `<span class="ph">${esc(b.title)}</span>`}<span class="ntf-price">${priceOf(b)}</span></a>`).join('')}</div>` : '';
   return `<article class="ntf2 ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
-    <div class="ntf-top"><b>Librava</b><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
+    <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
     <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${esc(n.body)}</p>` : ''}${one}${many}
     ${link && bs.length !== 1 ? `<a class="ntf-more" href="${esc(link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div></article>`;
 }

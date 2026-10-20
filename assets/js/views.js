@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261020235101';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020235101';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020235101';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020235101';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020235101';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020235101';
-import { track } from './track.js?v=20261020235101';
-import { didYouMean } from './search.js?v=20261020235101';
-import { api } from './api.js?v=20261020235101';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020235101';
+import { CONFIG } from './config.js?v=20261020235546';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020235546';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020235546';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020235546';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020235546';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261020235546';
+import { track } from './track.js?v=20261020235546';
+import { didYouMean } from './search.js?v=20261020235546';
+import { api } from './api.js?v=20261020235546';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020235546';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
