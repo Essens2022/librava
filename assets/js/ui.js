@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020220813';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020220813';
-import { esc, store, $, $$ } from './util.js?v=20261020220813';
+import { CONFIG } from './config.js?v=20261020222638';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020222638';
+import { esc, store, $, $$ } from './util.js?v=20261020222638';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020220813';
-import { suggest, highlight } from './search.js?v=20261020220813';
-import { api } from './api.js?v=20261020220813';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020222638';
+import { suggest, highlight } from './search.js?v=20261020222638';
+import { api } from './api.js?v=20261020222638';
 
 // ---------------- icons ----------------
 const P = {
@@ -449,9 +449,8 @@ function promoBooksHTML(p, list, placement) {
   return `<div class="promo promo-${placement} promo-books theme-${esc(theme)}" data-promo="${esc(p.id)}"><div class="wrap promo-in">
     <div class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${p.title ? `<span class="promo-title">${esc(p.title)}</span>` : ''}
       ${p.subtitle ? `<span class="promo-sub">${esc(p.subtitle)}</span>` : ''}<a class="btn btn-buy promo-cta" href="${esc(link)}"${ext}>${esc(p.cta || t('promo.ctaBooks'))}</a></div>
-    <div class="promo-shelf">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
-      return `<a class="pb" href="#/book/${encodeURIComponent(b.id)}" title="${esc(b.title)}"><span class="pb-cover">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy">` : `<span class="ph">${esc(b.title)}</span>`}</span>
-        <span class="pb-meta">${d ? `<span class="badge">-${d}%</span>` : ''}<b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b></span></a>`; }).join('')}</div>
+    <div class="promo-shelf n${books.length}">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
+      return `<a class="pb" href="#/book/${encodeURIComponent(b.id)}" title="${esc(b.title)} · ${esc(b.price_cents ? money(b.price_cents) : t('book.free'))}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`}${d ? `<span class="badge">-${d}%</span>` : ''}</a>`; }).join('')}</div>
   </div></div>`;
 }
 // several slides: fade carousel with arrows, dots, swipe and auto-play (paused on hover, focus or reduced motion)
@@ -564,3 +563,20 @@ setupSuggest();
 // pictures in banners fade in once loaded (no flash of half-drawn images)
 const fadeIn = img => { if (img.complete && img.naturalWidth) img.classList.add('ld'); else { img.addEventListener('load', () => img.classList.add('ld'), { once: true }); img.addEventListener('error', () => img.classList.add('ld'), { once: true }); } };
 new MutationObserver(() => document.querySelectorAll('.promo-cover img:not(.ld), .pb-cover img:not(.ld), .hero-fan img:not(.ld)').forEach(fadeIn)).observe(document.documentElement, { childList: true, subtree: true });
+
+// multi-book banners: covers get the largest height at which they all fit in one row (computer/tablet);
+// on phones they keep a fixed size and scroll sideways
+function fitShelves() {
+  document.querySelectorAll('.promo-books .promo-shelf').forEach(sh => {
+    if (innerWidth <= 760 || sh.closest('.pr-live-frame.phone')) { sh.style.removeProperty('--fit'); sh.classList.remove('fit'); return; }
+    const pbs = [...sh.querySelectorAll('.pb')]; if (!pbs.length) return;
+    const gap = parseFloat(getComputedStyle(sh).columnGap) || 16;
+    const max = parseFloat(getComputedStyle(sh).getPropertyValue('--h')) || 250;
+    const ratio = pbs.reduce((a, pb) => { const im = pb.querySelector('img'); return a + (im && im.naturalWidth ? im.naturalWidth / im.naturalHeight : 0.625); }, 0);
+    const room = sh.clientWidth - 12 - gap * (pbs.length - 1);
+    sh.style.setProperty('--fit', Math.max(110, Math.min(max, Math.floor(room / ratio))) + 'px'); sh.classList.add('fit');
+  });
+}
+addEventListener('resize', () => requestAnimationFrame(fitShelves));
+document.addEventListener('load', e => { if (e.target.closest?.('.promo-books')) fitShelves(); }, true);
+new MutationObserver(() => { if (document.querySelector('.promo-books .promo-shelf:not(.fit)')) requestAnimationFrame(fitShelves); }).observe(document.documentElement, { childList: true, subtree: true });
