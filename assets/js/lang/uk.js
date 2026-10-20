@@ -1,5 +1,6 @@
 // Ukrainian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Переглянути всі",
   "sugg.recent": "Останні пошуки",
   "sugg.author": "в Авторах",
   "sugg.series": "у Серіях",

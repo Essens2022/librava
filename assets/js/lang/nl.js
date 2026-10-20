@@ -1,5 +1,6 @@
 // Dutch interface strings for Librava
 export default {
+  "promo.ctaBooks": "Alles bekijken",
   "sugg.recent": "Recente zoekopdrachten",
   "sugg.author": "in Auteurs",
   "sugg.series": "in Series",

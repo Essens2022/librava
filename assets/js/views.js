@@ -1,11 +1,11 @@
-import { CONFIG } from './config.js?v=20261020202459';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020202459';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020202459';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020202459';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020202459';
-import { didYouMean } from './search.js?v=20261020202459';
-import { api } from './api.js?v=20261020202459';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020202459';
+import { CONFIG } from './config.js?v=20261020203730';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020203730';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020203730';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020203730';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020203730';
+import { didYouMean } from './search.js?v=20261020203730';
+import { api } from './api.js?v=20261020203730';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020203730';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -26,9 +26,10 @@ export async function viewHome(el) {
   // banners chosen in Admin → Advertising, only those for this language (or for all languages)
   const promos = api.promos ? await api.promos(L).catch(() => []) : [];
   const byId = Object.fromEntries(everything.map(b => [b.id, b]));
-  const ok = p => p.kind === 'image' ? !!p.image_url : !!byId[p.book_id];
-  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, byId[p.book_id], 'hero'));
-  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, byId[p.book_id], 'strip')}</div>`);
+  const many = p => (p.book_ids || []).map(id => byId[id]).filter(Boolean);
+  const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!byId[p.book_id];
+  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, byId[p.book_id], 'hero', many(p)));
+  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, byId[p.book_id], 'strip', many(p))}</div>`);
   const noBooks = !all.length;
   let cont = null;
   if (api.user()) {

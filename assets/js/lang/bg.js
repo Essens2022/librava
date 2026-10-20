@@ -1,5 +1,6 @@
 // Bulgarian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Виж всички",
   "sugg.recent": "Последни търсения",
   "sugg.author": "в Автори",
   "sugg.series": "в Поредици",

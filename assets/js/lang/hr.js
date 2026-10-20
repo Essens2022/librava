@@ -1,5 +1,6 @@
 // Croatian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Pogledaj sve",
   "sugg.recent": "Nedavna pretraživanja",
   "sugg.author": "u Autorima",
   "sugg.series": "u Serijalima",

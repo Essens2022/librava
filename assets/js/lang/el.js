@@ -1,5 +1,6 @@
 // Greek interface strings for Librava
 export default {
+  "promo.ctaBooks": "Δείτε όλα",
   "sugg.recent": "Πρόσφατες αναζητήσεις",
   "sugg.author": "στους Συγγραφείς",
   "sugg.series": "στις Σειρές",

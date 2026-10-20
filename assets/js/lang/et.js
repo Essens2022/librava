@@ -1,5 +1,6 @@
 // Estonian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Vaata kõiki",
   "sugg.recent": "Hiljutised otsingud",
   "sugg.author": "Autorites",
   "sugg.series": "Sarjades",

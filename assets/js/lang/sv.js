@@ -1,5 +1,6 @@
 // Swedish interface strings for Librava
 export default {
+  "promo.ctaBooks": "Visa alla",
   "sugg.recent": "Senaste sökningar",
   "sugg.author": "i Författare",
   "sugg.series": "i Serier",

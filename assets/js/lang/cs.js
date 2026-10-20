@@ -1,5 +1,6 @@
 // Czech interface strings for Librava
 export default {
+  "promo.ctaBooks": "Zobrazit vše",
   "sugg.recent": "Nedávná hledání",
   "sugg.author": "v Autorech",
   "sugg.series": "v Sériích",

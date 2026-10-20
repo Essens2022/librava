@@ -1,5 +1,6 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "promo.ctaBooks": "Se alle",
   "sugg.recent": "Nylige søk",
   "sugg.author": "i Forfattere",
   "sugg.series": "i Serier",

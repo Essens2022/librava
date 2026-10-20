@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020202459';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020202459';
-import { esc, store, $, $$ } from './util.js?v=20261020202459';
+import { CONFIG } from './config.js?v=20261020203730';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020203730';
+import { esc, store, $, $$ } from './util.js?v=20261020203730';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020202459';
-import { suggest, highlight } from './search.js?v=20261020202459';
-import { api } from './api.js?v=20261020202459';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020203730';
+import { suggest, highlight } from './search.js?v=20261020203730';
+import { api } from './api.js?v=20261020203730';
 
 // ---------------- icons ----------------
 const P = {
@@ -421,7 +421,8 @@ export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'san
 export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
 const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');
 // one slide; `b` is the book when the banner promotes a book
-export function promoHTML(p, b, placement = p.placement) {
+export function promoHTML(p, b, placement = p.placement, list = []) {
+  if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
   const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
@@ -438,6 +439,20 @@ export function promoHTML(p, b, placement = p.placement) {
         ${price}<span class="btn btn-buy promo-cta">${esc(cta)}</span></span>
       ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}"></span>` : ''}
     </span></a>`;
+}
+// several books in one banner (like Amazon's "Deals in…" cards): each cover opens its book
+function promoBooksHTML(p, list, placement) {
+  const books = list.filter(Boolean).slice(0, 8);
+  const anyDeal = books.some(b => b.list_price_cents > b.price_cents);
+  const link = safeLink(p.link) || (anyDeal ? '#/search?deals=1' : '#/search?sort=newest'), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const theme = PROMO_THEMES.includes(p.theme) ? p.theme : 'forest';
+  return `<div class="promo promo-${placement} promo-books theme-${esc(theme)}" data-promo="${esc(p.id)}"><div class="wrap promo-in">
+    <div class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${p.title ? `<span class="promo-title">${esc(p.title)}</span>` : ''}
+      ${p.subtitle ? `<span class="promo-sub">${esc(p.subtitle)}</span>` : ''}<a class="btn btn-buy promo-cta" href="${esc(link)}"${ext}>${esc(p.cta || t('promo.ctaBooks'))}</a></div>
+    <div class="promo-shelf">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
+      return `<a class="pb" href="#/book/${encodeURIComponent(b.id)}" title="${esc(b.title)}"><span class="pb-cover">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy">` : `<span class="ph">${esc(b.title)}</span>`}</span>
+        <span class="pb-meta">${d ? `<span class="badge">-${d}%</span>` : ''}<b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b></span></a>`; }).join('')}</div>
+  </div></div>`;
 }
 // several slides: fade carousel with arrows, dots, swipe and auto-play (paused on hover, focus or reduced motion)
 export function carouselHTML(slides, placement) {

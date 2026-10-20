@@ -1,5 +1,6 @@
 // Slovak interface strings for Librava
 export default {
+  "promo.ctaBooks": "Zobraziť všetko",
   "sugg.recent": "Nedávne hľadania",
   "sugg.author": "v Autoroch",
   "sugg.series": "v Sériách",

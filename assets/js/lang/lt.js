@@ -1,5 +1,6 @@
 // Lithuanian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Žiūrėti visas",
   "sugg.recent": "Naujausios paieškos",
   "sugg.author": "Autoriuose",
   "sugg.series": "Serijose",

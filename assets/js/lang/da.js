@@ -1,5 +1,6 @@
 // Danish interface strings for Librava
 export default {
+  "promo.ctaBooks": "Se alle",
   "sugg.recent": "Seneste søgninger",
   "sugg.author": "i Forfattere",
   "sugg.series": "i Serier",

@@ -3,10 +3,10 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020202459';
-import { scoreBook } from './search.js?v=20261020202459';
-import { getLang } from './i18n.js?v=20261020202459';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020202459';
+import { CONFIG } from './config.js?v=20261020203730';
+import { scoreBook } from './search.js?v=20261020203730';
+import { getLang } from './i18n.js?v=20261020203730';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020203730';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -74,7 +74,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020202459')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020203730')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -604,7 +604,7 @@ class SupabaseAPI {
     if (files.image) { const path = `promos/${id}/wide-${ts}.${fileExt(files.image.name) || 'webp'}`; await this._upload('covers', path, files.image); row.image_path = path; }
     if (files.mobile) { const path = `promos/${id}/mobile-${ts}.${fileExt(files.mobile.name) || 'webp'}`; await this._upload('covers', path, files.mobile); row.image_mobile_path = path; }
     if (files.removeMobile) row.image_mobile_path = null;
-    if (row.kind === 'book') { row.image_path = null; row.image_mobile_path = null; }
+    if (row.kind === 'book' || row.kind === 'books') { row.image_path = null; row.image_mobile_path = null; }
     const { error } = await this.sb.from('promos').upsert(row); this._err(error);
     // old pictures of this banner are removed so they do not take space
     const gone = [old?.image_path, old?.image_mobile_path].filter(x => x && x !== row.image_path && x !== row.image_mobile_path);

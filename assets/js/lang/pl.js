@@ -1,5 +1,6 @@
 // Polish interface strings for Librava
 export default {
+  "promo.ctaBooks": "Zobacz wszystkie",
   "sugg.recent": "Ostatnie wyszukiwania",
   "sugg.author": "w Autorach",
   "sugg.series": "w Seriach",

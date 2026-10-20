@@ -1,5 +1,6 @@
 // Finnish interface strings for Librava
 export default {
+  "promo.ctaBooks": "Näytä kaikki",
   "sugg.recent": "Viimeisimmät haut",
   "sugg.author": "kirjailijoissa",
   "sugg.series": "sarjoissa",

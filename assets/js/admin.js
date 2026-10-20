@@ -1,12 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020202459';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020202459';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020202459';
-import { resetCompanyCache } from './views.js?v=20261020202459';
-import { api } from './api.js?v=20261020202459';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020202459';
+import { CONFIG } from './config.js?v=20261020203730';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020203730';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020203730';
+import { resetCompanyCache } from './views.js?v=20261020203730';
+import { api } from './api.js?v=20261020203730';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020203730';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1011,8 +1011,8 @@ async function promosAdmin(body) {
     const st = promoStatus(p), ctr = p.views ? (p.clicks / p.views * 100).toFixed(1).replace('.', ',') + '%' : '—';
     const b = byId[p.book_id];
     return `<div class="pr-row">
-      <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement)}</div></div>
-      <div class="pr-info"><b>${esc(p.title || b?.title || t('pr.untitled'))}</b>
+      <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement, (p.book_ids || []).map(id => byId[id]))}</div></div>
+      <div class="pr-info"><b>${esc(p.title || b?.title || (p.kind === 'books' ? t('pr.booksN', { n: (p.book_ids || []).length }) : t('pr.untitled')))}</b>
         <span class="muted">${esc(t('pr.place.' + p.placement))} · ${esc(langLabel(p.lang))} · ${esc(t('pr.kind.' + p.kind))}</span>
         <span><span class="status ${st === 'live' ? 'live' : 'draft'}">${esc(t('pr.st.' + st))}</span>
           ${p.starts_at || p.ends_at ? `<span class="muted" style="font-size:13px">${esc(p.starts_at ? fmtDate(p.starts_at) : '…')} → ${esc(p.ends_at ? fmtDate(p.ends_at) : '…')}</span>` : ''}</span>
@@ -1053,6 +1053,7 @@ async function promoForm(body, id) {
   const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
   const p = all.find(x => x.id === id) || { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
   const files = {};
+  let chosen = (p.book_ids || []).filter(id => pub.some(b => b.id === id));
   const local = iso => { if (!iso) return ''; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
   body.innerHTML = `<form class="panel pr-form" id="pr-form" novalidate>
     <div class="pr-form-head"><h2 class="section-title" style="font-size:19px;margin:0">${esc(id === 'new' ? t('pr.new') : t('pr.edit'))}</h2><a class="btn btn-ghost btn-sm" href="#/admin/promos">← ${esc(t('pr.back'))}</a></div>
@@ -1064,9 +1065,14 @@ async function promoForm(body, id) {
         <label class="field"><span>${esc(t('pr.lang'))} *</span><select id="pr-l"><option value="">${esc(t('pr.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}" ${p.lang === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select><small>${esc(t('pr.langHelp'))}</small></label></div></div>
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
       <div class="kdp-fields">
-        <div class="radios">${['book', 'image'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
+        <div class="radios">${['book', 'books', 'image'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
         <div id="pr-bookbox"><label class="field"><span>${esc(t('pr.book'))} *</span><select id="pr-book"><option value="">—</option>${pub.map(b => `<option value="${esc(b.id)}" data-lang="${esc(b.language || '')}" ${p.book_id === b.id ? 'selected' : ''}>${esc(b.title)} · ${esc((b.language || '').toUpperCase())}</option>`).join('')}</select><small id="pr-booklang" class="muted"></small></label>
-          <span class="muted" style="font-size:14px">${esc(t('pr.theme'))}</span><div class="pr-themes">${PROMO_THEMES.map(th => `<label class="pr-theme theme-${th}" title="${th}"><input type="radio" name="th" value="${th}" ${p.theme === th ? 'checked' : ''}><span></span></label>`).join('')}</div></div>
+        </div>
+        <div id="pr-booksbox"><span class="field-l">${esc(t('pr.books'))} *</span><small class="muted">${esc(t('pr.booksHelp'))}</small>
+          <input class="input" id="pr-bfind" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}" autocomplete="off">
+          <div class="pr-chosen" id="pr-chosen"></div>
+          <div class="pr-pick" id="pr-pick"></div></div>
+        <div id="pr-themebox"><span class="muted" style="font-size:14px">${esc(t('pr.theme'))}</span><div class="pr-themes">${PROMO_THEMES.map(th => `<label class="pr-theme theme-${th}" title="${th}"><input type="radio" name="th" value="${th}" ${p.theme === th ? 'checked' : ''}><span></span></label>`).join('')}</div></div>
         <div id="pr-imgbox">
           <label class="drop" data-drop="image">${icon('image')}<span><span class="fname" id="n-image">${p.image_url ? '✓ ' + esc(t('pr.imgKept')) : esc(t('pr.imgWide'))}</span><br><small id="spec-wide"></small></span><input type="file" id="pr-image" accept="image/jpeg,image/png,image/webp"></label>
           <div class="kdp-warn" id="w-image" hidden></div>
@@ -1094,7 +1100,7 @@ async function promoForm(body, id) {
   if (p.link && known.includes(p.link)) pick.value = p.link; else if (p.link) { pick.value = 'custom'; $('#pr-linkbox', f).hidden = false; }
   pick.onchange = () => { $('#pr-linkbox', f).hidden = pick.value !== 'custom'; draw(); };
   const current = () => ({
-    ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null,
+    ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null, book_ids: rad('kd') === 'books' ? chosen.slice() : [],
     theme: rad('th') || 'forest', kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
     link: pick.value === 'custom' ? val('#pr-link') || null : pick.value || null,
     starts_at: val('#pr-start') ? new Date(val('#pr-start')).toISOString() : null, ends_at: val('#pr-end') ? new Date(val('#pr-end')).toISOString() : null,
@@ -1105,6 +1111,8 @@ async function promoForm(body, id) {
   const draw = () => {
     const c = current(), spec = PROMO_SPEC[c.placement] || PROMO_SPEC.hero;
     $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
+    $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image';
+    drawPick();
     $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
     $('#spec-mobile', f).textContent = t('pr.specMobile', { w: spec.mw, h: spec.mh });
     const b = pub.find(x => x.id === c.book_id);
@@ -1112,10 +1120,29 @@ async function promoForm(body, id) {
     const bl = $('#pr-booklang', f); bl.textContent = b && c.lang && b.language && b.language !== c.lang ? t('pr.bookOtherLang', { a: (b.language || '').toUpperCase(), b: c.lang.toUpperCase() }) : '';
     const live = $('#pr-live', f);
     live.className = 'pr-live-frame ' + dev;
-    const ok = c.kind === 'image' ? c.image_url : b;
-    live.innerHTML = ok ? (c.placement === 'hero' ? `<div class="hero hero-promos" style="padding-bottom:0">${promoHTML(c, b, 'hero')}</div>` : `<div class="promo-strip-wrap" style="padding:12px">${promoHTML(c, b, 'strip')}</div>`) : `<div class="pr-empty">${esc(t(c.kind === 'image' ? 'pr.needImage' : 'pr.needBook'))}</div>`;
+    const list = c.book_ids.map(id => pub.find(x => x.id === id)).filter(Boolean);
+    const ok = c.kind === 'image' ? c.image_url : c.kind === 'books' ? list.length >= 2 : b;
+    live.innerHTML = ok ? (c.placement === 'hero' ? `<div class="hero hero-promos" style="padding-bottom:0">${promoHTML(c, b, 'hero', list)}</div>` : `<div class="promo-strip-wrap" style="padding:12px">${promoHTML(c, b, 'strip', list)}</div>`) : `<div class="pr-empty">${esc(t(c.kind === 'image' ? 'pr.needImage' : c.kind === 'books' ? 'pr.needBooks' : 'pr.needBook'))}</div>`;
     live.querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
   };
+  // choosing several books: search, tick up to 8, order = order of choosing (× removes, ‹ › move)
+  function drawPick() {
+    const q = norm($('#pr-bfind', f).value || ''), L = val('#pr-l');
+    const opts = pub.filter(b => !q || norm(b.title + ' ' + b.author).includes(q)).sort((a, b2) => (b2.language === L) - (a.language === L));
+    $('#pr-chosen', f).innerHTML = chosen.map((id, i) => { const b = pub.find(x => x.id === id); return b ? `<span class="pr-chip">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span>${esc(b.title)}</span>
+      <button type="button" data-mv="${i}" data-d="-1" aria-label="${esc(t('pr.up'))}" ${i ? '' : 'disabled'}>‹</button><button type="button" data-mv="${i}" data-d="1" aria-label="${esc(t('pr.down'))}" ${i < chosen.length - 1 ? '' : 'disabled'}>›</button><button type="button" data-rm="${esc(id)}" aria-label="${esc(t('admin.delete'))}">×</button></span>` : ''; }).join('') || `<span class="muted" style="font-size:14px">${esc(t('pr.booksNone'))}</span>`;
+    $('#pr-pick', f).innerHTML = opts.slice(0, 60).map(b => `<label class="pr-opt ${chosen.includes(b.id) ? 'on' : ''}"><input type="checkbox" value="${esc(b.id)}" ${chosen.includes(b.id) ? 'checked' : ''} ${!chosen.includes(b.id) && chosen.length >= 8 ? 'disabled' : ''}>
+      ${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : '<span class="sugg-ph"></span>'}<span><b>${esc(b.title)}</b><small class="muted">${esc(b.author)} · ${esc((b.language || '').toUpperCase())} · ${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</small></span></label>`).join('');
+  }
+  $('#pr-pick', f).addEventListener('change', e => e.stopPropagation());
+  $('#pr-pick', f).addEventListener('input', e => { const cb = e.target.closest('input[type=checkbox]'); if (!cb) return; e.stopPropagation(); chosen = cb.checked ? [...chosen, cb.value].slice(0, 8) : chosen.filter(x => x !== cb.value); draw(); });
+  $('#pr-chosen', f).addEventListener('click', e => {
+    const rm = e.target.closest('[data-rm]'), mv = e.target.closest('[data-mv]');
+    if (rm) chosen = chosen.filter(x => x !== rm.dataset.rm);
+    if (mv) { const i = +mv.dataset.mv, j = i + +mv.dataset.d; [chosen[i], chosen[j]] = [chosen[j], chosen[i]]; }
+    if (rm || mv) draw();
+  });
+  $('#pr-bfind', f).addEventListener('input', e => { e.stopPropagation(); drawPick(); });
   f.addEventListener('input', draw); f.addEventListener('change', draw);
   $$('[data-pv]', f).forEach(b => b.onclick = () => { dev = b.dataset.pv; $$('[data-pv]', f).forEach(x => x.classList.toggle('on', x === b)); draw(); });
   $('#pr-rm-mobile', f)?.addEventListener('click', e => { files.removeMobile = true; files.mobile = null; e.target.remove(); $('#n-mobile', f).textContent = t('pr.imgMobile'); draw(); });
@@ -1142,9 +1169,10 @@ async function promoForm(body, id) {
     err.hidden = true;
     if (c.kind === 'book' && !c.book_id) return fail(t('pr.needBook'));
     if (c.kind === 'image' && !c.image_url) return fail(t('pr.needImage'));
+    if (c.kind === 'books' && c.book_ids.length < 2) return fail(t('pr.needBooks'));
     if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
     if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
-    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, theme: c.theme, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, sort: p.sort ?? all.length };
+    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.theme, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, sort: p.sort ?? all.length };
     if (!row.id) delete row.id;
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
     try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }

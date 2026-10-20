@@ -1,5 +1,6 @@
 // Hungarian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Összes megtekintése",
   "sugg.recent": "Legutóbbi keresések",
   "sugg.author": "a Szerzők között",
   "sugg.series": "a Sorozatok között",

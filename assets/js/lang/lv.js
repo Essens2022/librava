@@ -1,5 +1,6 @@
 // Latvian interface strings for Librava
 export default {
+  "promo.ctaBooks": "Skatīt visus",
   "sugg.recent": "Nesenie meklējumi",
   "sugg.author": "Autoros",
   "sugg.series": "Sērijās",
