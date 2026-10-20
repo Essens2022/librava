@@ -1250,3 +1250,23 @@ html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background
 .of-coupon { display: flex; flex-direction: column; gap: 10px; }
 [data-for][hidden] { display: none !important; }
 @media (max-width: 760px) { .of-row { grid-template-columns: 1fr; } }
+/* strip banner promoting one book (computer): cover on the left, text in the middle, price + button grouped on the right */
+.promo-act { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+@media (min-width: 761px) {
+  .promo-strip.promo-book .promo-in { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: center; max-width: 1240px; margin: 0 auto; padding: 18px 32px; min-height: 0; }
+  .promo-strip.promo-book .promo-cover { order: -1; }
+  .promo-strip.promo-book .promo-cover img { height: 150px; max-width: none; transform: rotate(-2deg); box-shadow: 0 12px 26px rgba(0, 0, 0, .45); }
+  .promo-strip.promo-book .promo-text { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 36px; row-gap: 6px; align-items: center; }
+  .promo-strip.promo-book .promo-text > :not(.promo-act) { grid-column: 1; }
+  .promo-strip.promo-book .promo-act { grid-column: 2; grid-row: 1 / span 4; align-items: center; text-align: center; }
+  .promo-strip.promo-book .promo-kicker { flex-basis: auto; }
+  .promo-strip.promo-book .promo-title { font-size: clamp(22px, 2vw, 30px); -webkit-line-clamp: 1; }
+  .promo-strip.promo-book .promo-sub { font-size: 15px; -webkit-line-clamp: 2; max-width: 70ch; }
+  .promo-strip.promo-book .promo-price { font-size: 26px; }
+}
+@media (min-width: 761px) {
+  .promo-strip.promo-book .promo-in { grid-template-columns: auto auto; justify-content: center; }
+  .promo-strip.promo-book .promo-text { grid-template-columns: minmax(0, 620px) auto; }
+  .promo-strip.promo-book .promo-title { max-width: none; -webkit-line-clamp: 2; }
+  .promo-hero.promo-book .promo-in { max-width: 1160px; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); }
+}
