@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020190122';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020190122';
-import { esc, store, $, $$ } from './util.js?v=20261020190122';
+import { CONFIG } from './config.js?v=20261020192315';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020192315';
+import { esc, store, $, $$ } from './util.js?v=20261020192315';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,8 +12,8 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020190122';
-import { api } from './api.js?v=20261020190122';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020192315';
+import { api } from './api.js?v=20261020192315';
 
 // ---------------- icons ----------------
 const P = {
@@ -250,7 +250,7 @@ export function cardHTML(b) {
     <div class="card-title">${esc(b.title)}</div>
     <div class="card-author">${esc(b.author)}</div>
     ${ratingHTML(b)}
-    <div class="card-meta"><span class="fmt">${esc(t('book.formatShort.' + b.format))}</span></div>
+    <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + b.format))}</span></div>
     <div>${priceHTML(b)}</div>
   </a>`;
 }
@@ -261,7 +261,7 @@ export function rcardHTML(b) {
       <div class="card-title">${esc(b.title)}</div>
       <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
       ${ratingHTML(b)}
-      <div class="card-meta"><span class="fmt">${esc(t('book.formatShort.' + b.format))}</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
+      <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + b.format))}</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
       <div>${priceHTML(b)}</div>
       <div class="muted" style="font-size:12px">${esc(t('cart.digital'))}</div>
     </div>

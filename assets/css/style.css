@@ -939,3 +939,19 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .card .cover:has(img), .lib-item .cover:has(img), .rcard .cover:has(img) { aspect-ratio: 1 / 1.6; box-shadow: none; overflow: visible; display: flex; align-items: flex-end; justify-content: center; }
 .card .cover img, .lib-item .cover img, .rcard .cover img { width: auto; max-width: 100%; max-height: 100%; border-radius: 3px; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
 .cover-box img, .cover-preview { object-fit: contain; }
+/* rows of books: every cover uses the full width (like Amazon); shorter covers are simply less tall */
+.card .cover img, .lib-item .cover img, .rcard .cover img { width: 100%; height: auto; max-height: 100%; object-fit: contain; object-position: bottom; }
+.cat-tile .thumbs { align-items: flex-end; }
+.cat-tile .thumbs img { aspect-ratio: auto; height: auto; max-height: 100%; width: auto; max-width: 46%; object-fit: contain; }
+/* book type guide in the upload wizard */
+.bt-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+.bt-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface-2); display: flex; flex-direction: column; gap: 6px; }
+.bt-card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.bt-card ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.6; }
+.bt-card small { color: var(--pista-strong); font-weight: 600; line-height: 1.45; }
+.bt-sizes { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.bt-sizes summary { cursor: pointer; font-weight: 600; }
+.bt-sizes table { width: 100%; border-collapse: collapse; margin: 10px 0 6px; font-size: 14px; }
+.bt-sizes td, .bt-sizes th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+@media (max-width: 640px) { .bt-cards { grid-template-columns: 1fr; } }
+.cat-tile .thumbs img { flex: 1 1 0; min-width: 0; max-width: 46%; height: auto; max-height: 100%; object-fit: contain; object-position: bottom; box-shadow: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .22)); }

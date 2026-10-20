@@ -297,3 +297,6 @@ create policy "buyers read book files" on storage.objects for select using (
 -- update public.profiles set is_admin = true where email = 'emailul-tau@exemplu.com';
 -- (nobody can make themselves admin from the site: is_admin is not writable by users)
 -- =====================================================================
+
+-- book interior: colour or black & white
+alter table public.books add column if not exists color text not null default 'color' check (color in ('color','bw'));

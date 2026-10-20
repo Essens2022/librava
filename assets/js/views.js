@@ -1,10 +1,10 @@
-import { CONFIG } from './config.js?v=20261020190122';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020190122';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020190122';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020190122';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020190122';
-import { api } from './api.js?v=20261020190122';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020190122';
+import { CONFIG } from './config.js?v=20261020192315';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020192315';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020192315';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020192315';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020192315';
+import { api } from './api.js?v=20261020192315';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020192315';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -79,7 +79,7 @@ export async function viewHome(el) {
 // =====================================================================
 export async function viewSearch(el, q) {
   const opts = {
-    q: q.get('q') || '', category: q.get('cat') || '', format: q.get('format') || '', price: q.get('price') || '',
+    q: q.get('q') || '', category: q.get('cat') || '', format: q.get('format') || '', color: q.get('color') || '', price: q.get('price') || '',
     rating: Number(q.get('rating')) || 0, sort: q.get('sort') || '', deals: q.get('deals') === '1',
   };
   // book language: the visitor's language unless they pick another one or "all languages"
@@ -113,6 +113,8 @@ export async function viewSearch(el, q) {
       <details class="more-cats" ${CATS.indexOf(q.get('cat')) >= 10 ? 'open' : ''}><summary>${esc(t('search.moreCats', { n: CATS.length - 10 }))}</summary>${CATS.slice(10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}</details>
       <h4>${esc(t('search.format'))}</h4>
       ${radio('f', 'format', '', t('search.any'))}${radio('f', 'format', 'pdf', t('book.format.pdf'))}${radio('f', 'format', 'epub', t('book.format.epub'))}
+      <h4>${esc(t('book.d.color'))}</h4>
+      ${radio('k', 'color', '', t('search.any'))}${radio('k', 'color', 'color', t('book.color.color'))}${radio('k', 'color', 'bw', t('book.color.bw'))}
       <h4>${esc(t('search.price'))}</h4>
       ${radio('p', 'price', '', t('search.any'))}${radio('p', 'price', 'free', t('search.p.free'))}${radio('p', 'price', 'u5', t('search.p.u5'))}${radio('p', 'price', '5to10', t('search.p.5to10'))}${radio('p', 'price', 'o10', t('search.p.o10'))}
       <h4>${esc(t('search.rating'))}</h4>
@@ -197,7 +199,7 @@ export async function viewBook(el, id) {
         <div class="rating-line" style="margin-top:8px">${b.rating_count ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
       </div>
       <div class="book-main book-body">
-        <div class="formats"><div class="format-chip"><span class="muted">${esc(t('book.formatShort.' + b.format))}</span><b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b></div></div>
+        <div class="formats"><div class="format-chip"><span class="muted">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + b.format))}</span><b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b></div></div>
         <hr>
         <h2 class="section-title" style="font-size:18px;margin-bottom:8px">${esc(t('book.description'))}</h2>
         <div class="desc clamped ${hasTags(b.description) ? 'rich' : ''}" id="desc">${safeHTML(b.description)}</div>
@@ -207,7 +209,9 @@ export async function viewBook(el, id) {
         <h2 class="section-title" style="font-size:18px">${esc(t('book.details'))}</h2>
         <div class="details">
           <div><small>${esc(t('book.d.format'))}</small><b>${esc(t('book.format.' + b.format))}</b></div>
+          <div><small>${esc(t('book.d.color'))}</small><b>${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))}</b></div>
           ${b.pages ? `<div><small>${esc(t('book.d.pages'))}</small><b>${b.pages}</b></div>` : ''}
+          ${bookSpecs(b)}
           <div><small>${esc(t('book.d.language'))}</small><b>${esc(langName(b.language))}</b></div>
           ${b.published_at ? `<div><small>${esc(t('book.d.published'))}</small><b>${esc(fmtDate(b.published_at))}</b></div>` : ''}
           <div><small>${esc(t('book.d.category'))}</small><b>${[...new Set([b.category, ...(b.categories || [])])].map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', ')}</b></div>
@@ -741,6 +745,20 @@ export async function companyInfo() {
   return companyCache;
 }
 export function resetCompanyCache() { companyCache = null; }
+// Kindle-style technical details: layout, text size, devices, page size, file size
+function bookSpecs(b) {
+  const m = b.file_check?.meta || {};
+  const reflow = b.format === 'epub' && !m.epub?.fixed;
+  const row = (k, v) => `<div><small>${esc(t(k))}</small><b>${esc(v)}</b></div>`;
+  const dev = reflow ? 'book.dev.all' : m.ereader === 'good' ? 'book.dev.pdfGood' : 'book.dev.pdf';
+  const cm = pt => (pt / 72 * 2.54).toFixed(1).replace('.', ',');
+  return row('book.d.layout', t(reflow ? 'book.layout.reflow' : 'book.layout.fixed'))
+    + row('book.d.textSize', t(reflow ? 'book.yes' : 'book.zoomOnly'))
+    + row('book.d.devices', t(dev))
+    + (!reflow && m.page ? row('book.d.pageSize', (m.trim ? m.trim + ' · ' : '') + `${cm(m.page.w)} × ${cm(m.page.h)} cm`) : '')
+    + (m.size ? row('book.d.fileSize', m.size > 1048576 ? (m.size / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(m.size / 1024) + ' KB') : '');
+}
+
 export async function viewLegal(el, page) {
   const L = legalText(getLang());
   if (!LEGAL_PAGES.includes(page)) page = 'terms';

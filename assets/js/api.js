@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020190122';
-import { getLang } from './i18n.js?v=20261020190122';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020190122';
+import { CONFIG } from './config.js?v=20261020192315';
+import { getLang } from './i18n.js?v=20261020192315';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020192315';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -17,6 +17,7 @@ export function filterBooks(all, o = {}) {
   if (!o.includeDrafts) list = list.filter(b => b.status === 'published');
   if (o.category) list = list.filter(b => b.category === o.category || (b.categories || []).includes(o.category));
   if (o.format) list = list.filter(b => b.format === o.format);
+  if (o.color) list = list.filter(b => (b.color || 'color') === o.color);
   if (o.lang) list = list.filter(b => b.language === o.lang);
   if (o.featured) list = list.filter(b => b.is_featured);
   if (o.free) list = list.filter(b => !b.price_cents);
@@ -71,7 +72,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020190122')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020192315')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -583,11 +584,11 @@ class SupabaseAPI {
     const { error } = await this.sb.from('books').update({ cover_path: p, updated_at: new Date().toISOString() }).eq('id', book.id);
     this._err(error);
     if (book.cover_path && book.cover_path !== p) await this.sb.storage.from('covers').remove([book.cover_path]).catch(() => { });
-    this._catalog = null; this.refreshShare();
+    this._catalog = null; this.refreshShare(); this._cleanFiles(book.id);
   }
   async updateAplus(bookId, aplus) {
     const { error } = await this.sb.from('books').update({ aplus, updated_at: new Date().toISOString() }).eq('id', bookId);
-    this._err(error); this._catalog = null;
+    this._err(error); this._catalog = null; this._cleanFiles(bookId);
   }
   async uploadAplusImage(bookId, file) {
     const ext = fileExt(file.name) || 'jpg';
@@ -600,7 +601,8 @@ class SupabaseAPI {
     const id = data.id || crypto.randomUUID();
     const row = { ...data, id, updated_at: new Date().toISOString() };
     delete row.cover_url; delete row.sales_count; delete row.rating_avg; delete row.rating_count;
-    if (files.cover) { const p = `${id}/cover.${fileExt(files.cover.name) || 'jpg'}`; await this._upload('covers', p, files.cover); row.cover_path = p; }
+    // new names every time, so phones and WhatsApp never keep showing the old picture; the old file is deleted below
+    if (files.cover) { const p = `${id}/cover-${Date.now()}.${fileExt(files.cover.name) || 'jpg'}`; await this._upload('covers', p, files.cover); row.cover_path = p; }
     if (files.file) {
       const ext = fileExt(files.file.name);
       const p = `${id}/book.${ext}`; await this._upload('books', p, files.file);
@@ -608,8 +610,23 @@ class SupabaseAPI {
     }
     if (files.sample) { const p = `${id}/sample.${fileExt(files.sample.name)}`; await this._upload('samples', p, files.sample); row.sample_path = p; }
     const { error } = await this.sb.from('books').upsert(row); this._err(error);
-    this._catalog = null; this.refreshShare();
+    this._catalog = null; this.refreshShare(); this._cleanFiles(id);
     return id;
+  }
+  // removes files of this book that are no longer used (old covers, replaced A+ pictures, an old PDF after an EPUB…)
+  async _cleanFiles(id) {
+    try {
+      const { data: b } = await this.sb.from('books').select('cover_path,file_path,sample_path,aplus').eq('id', id).maybeSingle();
+      if (!b) return;
+      const used = new Set([b.cover_path, b.file_path, b.sample_path].filter(Boolean));
+      const aplus = JSON.stringify(b.aplus || []);
+      const sweep = async (bucket, folder) => {
+        const { data } = await this.sb.storage.from(bucket).list(folder, { limit: 1000 });
+        const old = (data || []).filter(o => o.id && !used.has(`${folder}/${o.name}`) && !aplus.includes(`${folder}/${o.name}`)).map(o => `${folder}/${o.name}`);
+        if (old.length) await this.sb.storage.from(bucket).remove(old);
+      };
+      await Promise.all([sweep('covers', id), sweep('covers', id + '/aplus'), sweep('books', id), sweep('samples', id)]);
+    } catch (e) { console.warn('cleanup', e); }
   }
   // rebuild the /book/<id>/ pages so WhatsApp & co. show the cover right away (runs in the background)
   refreshShare() {

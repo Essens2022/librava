@@ -1,12 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020190122';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020190122';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020190122';
-import { resetCompanyCache } from './views.js?v=20261020190122';
-import { api } from './api.js?v=20261020190122';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020190122';
+import { CONFIG } from './config.js?v=20261020192315';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020192315';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020192315';
+import { resetCompanyCache } from './views.js?v=20261020192315';
+import { api } from './api.js?v=20261020192315';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020192315';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -302,6 +302,14 @@ async function analyzeManuscript(file, bookLang) {
     if (w / 72 * 2.54 > 30) add('warn', 'fc.hugePage', dims);
     else if (w / 72 * 2.54 < 8) add('warn', 'fc.tinyPage', dims);
     if (sizes.size > 1) add('warn', 'fc.mixed', { n: doc.numPages - main[1] });
+    // standard book sizes (like KDP) and how the pages will look on each kind of device
+    const inW = w / 72, inH = h / 72;
+    const STD = [['5 × 8 in', 5, 8], ['5,5 × 8,5 in', 5.5, 8.5], ['6 × 9 in', 6, 9], ['7 × 10 in', 7, 10], ['8 × 10 in', 8, 10], ['8,25 × 11 in', 8.25, 11], ['8,5 × 11 in', 8.5, 11], ['A5', 5.83, 8.27], ['A4', 8.27, 11.69]];
+    const std = STD.find(([, a, b]) => Math.abs(a - inW) < 0.08 && Math.abs(b - inH) < 0.08);
+    meta.trim = std ? std[0] : null;
+    if (std) add('ok', 'fc.trimStd', { s: std[0] }); else if (ratio >= 1 && ratio <= 1.85) add('warn', 'fc.trimOdd', dims);
+    meta.ereader = inW <= 6.6 ? 'good' : inW <= 8.6 ? 'zoom' : 'small';
+    add(meta.ereader === 'good' ? 'ok' : 'warn', 'fc.ereader.' + meta.ereader);
     // text or only pictures? and how sharp are the pictures?
     let textPages = 0, minDpi = null;
     const OPS = window.pdfjsLib.OPS;
@@ -354,7 +362,8 @@ async function analyzeManuscript(file, bookLang) {
       const lang = (opf.getElementsByTagName('dc:language')[0]?.textContent || '').trim().slice(0, 2).toLowerCase();
       meta.epub = { version, chapters: spine, images: images.length, fixed };
       add('ok', 'fc.epubOk', { v: version, n: spine });
-      if (fixed) add('warn', 'fc.epubFixed'); else add('ok', 'fc.epubReflow');
+      if (fixed) add('warn', 'fc.epubFixed'); else { add('ok', 'fc.epubReflow'); add('ok', 'fc.ereader.epub'); }
+      meta.ereader = fixed ? 'zoom' : 'epub';
       if (!hasToc) add('warn', 'fc.epubNoToc');
       if (!hasCover) add('warn', 'fc.epubNoCover');
       if (lang && bookLang && lang !== bookLang) add('warn', 'fc.epubLang', { a: lang.toUpperCase(), b: bookLang.toUpperCase() });
@@ -588,6 +597,7 @@ const ROLES = ['author', 'illustrator', 'translator', 'editor', 'foreword', 'pho
 function bookForm(body, b, startStep = 1) {
   const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
   let bookId = v.id || null;
+  const draftId = bookId || crypto.randomUUID(); // new books: images uploaded before the first save go in the book's own folder
   const hasAplus = !!api.uploadAplusImage;
   const STEPS = hasAplus ? [1, 2, 3, 4] : [1, 2, 4];
   const TABK = { 1: 'kdp.tab1', 2: 'kdp.tab2', 3: 'kdp.tabAplus', 4: 'kdp.tab3' };
@@ -647,6 +657,23 @@ function bookForm(body, b, startStep = 1) {
     </section>
 
     <section class="kdp-step" data-pane="2" hidden>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('bt.title'))}</h3><p>${esc(t('bt.help'))}</p></div>
+        <div class="kdp-fields">
+          <span class="muted" style="font-size:14px">${esc(t('bt.colorQ'))}</span>
+          <div class="radios"><label class="check"><input type="radio" name="bcolor" value="color" ${v.color !== 'bw' ? 'checked' : ''}> ${esc(t('book.color.color'))}</label><label class="check"><input type="radio" name="bcolor" value="bw" ${v.color === 'bw' ? 'checked' : ''}> ${esc(t('book.color.bw'))}</label></div>
+          <div class="bt-cards">
+            <div class="bt-card"><b>PDF · ${esc(t('book.layout.fixed'))}</b><p>${esc(t('bt.pdfFor'))}</p>
+              <ul><li>${esc(t('bt.pdf1'))}</li><li>${esc(t('bt.pdf2'))}</li><li>${esc(t('bt.pdf3'))}</li><li>${esc(t('bt.pdf4'))}</li></ul>
+              <small>${esc(t('bt.pdfDev'))}</small></div>
+            <div class="bt-card"><b>EPUB · ${esc(t('book.layout.reflow'))}</b><p>${esc(t('bt.epubFor'))}</p>
+              <ul><li>${esc(t('bt.epub1'))}</li><li>${esc(t('bt.epub2'))}</li><li>${esc(t('bt.epub3'))}</li><li>${esc(t('bt.epub4'))}</li></ul>
+              <small>${esc(t('bt.epubDev'))}</small></div>
+          </div>
+          <details class="bt-sizes"><summary>${esc(t('bt.sizesTitle'))}</summary>
+            <table><thead><tr><th>${esc(t('bt.sizeUse'))}</th><th>${esc(t('book.d.pageSize'))}</th></tr></thead><tbody>
+              ${[['bt.u.novel', '5 × 8 in · 12,7 × 20,3 cm'], ['bt.u.general', '6 × 9 in · 15,2 × 22,9 cm'], ['bt.u.a5', 'A5 · 14,8 × 21 cm'], ['bt.u.manual', '7 × 10 in · 17,8 × 25,4 cm'], ['bt.u.big', '8,5 × 11 in · 21,6 × 27,9 cm'], ['bt.u.a4', 'A4 · 21 × 29,7 cm']].map(([k, sz]) => `<tr><td>${esc(t(k))}</td><td>${sz}</td></tr>`).join('')}
+            </tbody></table><small class="muted">${esc(t('bt.sizesNote'))}</small></details>
+        </div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
         <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
           <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
@@ -794,6 +821,8 @@ function bookForm(body, b, startStep = 1) {
     if (kind !== 'cover' && !/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     if (kind === 'cover' && !/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     if (kind === 'cover') {
+      const dim = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([0, 0]); im.src = URL.createObjectURL(file); });
+      if (dim[0] < 625 || dim[1] < 1000) { toast(t('kdp.coverTooSmall', { w: dim[0], h: dim[1] }), { error: true }); return; }
       const original = file;
       file = await compressImage(original, { maxW: 1200, maxH: 1920, name: 'cover' });
       file._original = original;
@@ -810,8 +839,8 @@ function bookForm(body, b, startStep = 1) {
       const probe = new Image();
       probe.onload = () => {
         const w = probe.naturalWidth, h = probe.naturalHeight, warn = $('#cov-warn', body), msgs = [];
-        if (w < 625 || h < 1000) msgs.push(t('kdp.coverSmall', { w, h }));
-        const r = h / w; if (r < 1.4 || r > 1.75) msgs.push(t('kdp.coverRatio', { w, h }));
+        if (w < 1600 || h < 2560) msgs.push(t('kdp.coverSmall', { w, h }));
+        const r = h / w; if (r < 1.55 || r > 1.65) msgs.push(t('kdp.coverRatio', { w, h, r: r.toFixed(2).replace('.', ',') }));
         warn.innerHTML = msgs.map(esc).join('<br>'); warn.hidden = !msgs.length;
       };
       probe.src = URL.createObjectURL(file._original || file);
@@ -875,7 +904,7 @@ function bookForm(body, b, startStep = 1) {
     } catch (x) { toast(errText(x), { error: true }); }
     btn.disabled = false;
   };
-  const getAplus = hasAplus ? aplusEditor($('#aplus-root', body), aplusModules, () => bookId) : () => [];
+  const getAplus = hasAplus ? aplusEditor($('#aplus-root', body), aplusModules, () => bookId || draftId) : () => [];
   if (!hasAplus) $('[data-pane="3"]', body).remove();
 
   // ---- save (draft) or publish
@@ -891,6 +920,7 @@ function bookForm(body, b, startStep = 1) {
       rights: radio('rights') || 'own', adult: radio('adult') === 'yes',
       age_min: amin === '' ? null : +amin, age_max: amax === '' ? null : +amax,
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
+      color: radio('bcolor') === 'bw' ? 'bw' : 'color',
       pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
       allow_download: $('#f-dl', body).checked, stamp_downloads: $('#f-stamp', body).checked,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
@@ -908,7 +938,7 @@ function bookForm(body, b, startStep = 1) {
       if (missing.length) { show(missing[0].step); return fail(t('kdp.cannotPublish', { list: missing.map(m => m.label).join(', ') })); }
     }
     const data = collect(status);
-    if (bookId) data.id = bookId;
+    data.id = bookId || draftId;
     const old = btn.textContent; btn.disabled = true; btn.textContent = t('admin.saving');
     try {
       bookId = await api.saveBook(data, files);
