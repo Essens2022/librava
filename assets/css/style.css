@@ -1100,3 +1100,21 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .sugg-x:hover { color: var(--deal); }
 .dym { font-size: 16px; }
 .dym a { color: var(--deal); }
+/* strip banner on phones: the cover keeps a real size, next to the text */
+.promo-strip .promo-cover { flex: none; }
+.promo-strip .promo-cover img { width: auto; height: auto; max-height: 120px; max-width: 110px; }
+@media (max-width: 760px) {
+  .promo-strip.promo-book .promo-in { gap: 14px; align-items: center; }
+  .promo-strip .promo-cover { order: -1; }
+  .promo-strip .promo-cover img { max-height: 130px; max-width: 86px; }
+  .promo-strip .promo-sub { -webkit-line-clamp: 2; font-size: 14px; }
+  .promo-strip .promo-title { font-size: 19px; }
+  .promo-strip .promo-price { font-size: 18px; }
+  .promo-strip .promo-cta { padding: 8px 14px; font-size: 14px; }
+}
+.pr-live-frame.phone .promo-strip.promo-book .promo-in { gap: 14px; padding: 12px 14px; }
+.pr-live-frame.phone .promo-strip .promo-cover { order: -1; }
+.pr-live-frame.phone .promo-strip .promo-cover img { max-height: 130px; max-width: 86px; }
+.pr-live-frame.phone .promo-strip .promo-title { font-size: 19px; }
+.pr-live-frame.phone .promo-strip .promo-sub { font-size: 14px; }
+.pr-live-frame.phone .promo-strip .promo-price { font-size: 18px; }
