@@ -1270,3 +1270,48 @@ html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background
   .promo-strip.promo-book .promo-title { max-width: none; -webkit-line-clamp: 2; }
   .promo-hero.promo-book .promo-in { max-width: 1160px; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); }
 }
+/* ---------- single-book banner v3: fills the whole banner like Amazon (text · cover · price) ---------- */
+.promo-one { position: relative; overflow: hidden; isolation: isolate; }
+.promo-one .promo-bg { position: absolute; right: -6%; top: -30%; width: 55%; height: 160%; background-size: cover; background-position: center; filter: blur(38px) saturate(1.2); opacity: .35; z-index: -1; transform: rotate(-8deg); }
+.promo-book.promo-one .promo-in { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(220px, .55fr); grid-template-areas: "text cover act"; align-items: center; gap: clamp(20px, 3vw, 56px); max-width: 1500px; margin: 0 auto; }
+.promo-one .promo-text { grid-area: text; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.promo-one .promo-cover { grid-area: cover; order: 0; display: flex; justify-content: center; }
+.promo-one .promo-act { grid-area: act; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.promo-one .promo-title { line-height: 1.18; padding-bottom: .08em; max-width: 26ch; -webkit-line-clamp: 2; }
+.promo-one .promo-sub { -webkit-line-clamp: 2; line-height: 1.45; }
+.promo-one .promo-rating { display: flex; align-items: center; gap: 6px; font-size: 14px; opacity: .9; }
+.promo-one .promo-rating .stars { color: #FFC447; }
+.promo-one .promo-price { font-size: clamp(24px, 2.4vw, 34px); flex-wrap: wrap; }
+.promo-one .promo-price b { font-weight: 800; }
+.promo-one .promo-save { font-size: 14px; font-weight: 700; color: #C6F28B; }
+.theme-sand .promo-save { color: #2E7D32; }
+.promo-one .promo-cta { padding: 12px 28px; font-size: 16px; }
+.promo-one .promo-note { display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: .85; }
+.promo-one .promo-note .ico { width: 15px; height: 15px; }
+.promo-one .promo-cover img { box-shadow: 0 22px 44px rgba(0, 0, 0, .5), 0 3px 8px rgba(0, 0, 0, .3); border-radius: 3px 6px 6px 3px; transform: rotate(-3deg); }
+.promo-hero.promo-book.promo-one .promo-in { padding-block: 36px 40px; min-height: 340px; }
+.promo-hero.promo-one .promo-cover img { height: 300px; }
+.promo-strip.promo-book.promo-one .promo-in { padding: 18px clamp(20px, 3vw, 48px); min-height: 0; justify-content: stretch; }
+.promo-strip.promo-one .promo-cover img { height: 170px; max-width: none; margin: -6px 0; }
+.promo-strip.promo-one .promo-title { font-size: clamp(22px, 2.2vw, 32px); }
+.promo-strip.promo-one .promo-act { align-items: flex-start; }
+@media (max-width: 760px) {
+  .promo-book.promo-one .promo-in { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "cover text" "act act"; gap: 14px 16px; padding: 16px !important; }
+  .promo-one .promo-act { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+  .promo-one .promo-note { display: none; }
+  .promo-hero.promo-one .promo-cover img { height: 190px; }
+  .promo-strip.promo-one .promo-cover img { height: 140px; margin: 0; }
+  .promo-one .promo-title { font-size: 21px !important; }
+  .promo-one .promo-sub { font-size: 14px; }
+  .promo-one .promo-bg { width: 100%; right: 0; }
+}
+.pr-live-frame.phone .promo-book.promo-one .promo-in { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "cover text" "act act"; gap: 14px 16px; padding: 16px; }
+.pr-live-frame.phone .promo-one .promo-act { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.pr-live-frame.phone .promo-one .promo-note { display: none; }
+.pr-live-frame.phone .promo-one .promo-cover img { height: 150px; }
+.pr-live-frame.phone .promo-one .promo-title { font-size: 21px; }
+.promo-one .promo-act { grid-area: act !important; text-align: left; }
+.promo-strip.promo-book.promo-one .promo-text { display: flex; }
+.promo-strip.promo-book.promo-one .promo-act { align-items: flex-start; }
+.promo-one .promo-text, .promo-strip.promo-book.promo-one .promo-text { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; text-align: left; }
+.promo-strip.promo-one .promo-cover img { margin: 0; height: 160px; }

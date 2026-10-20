@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020224934';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020224934';
-import { esc, store, $, $$ } from './util.js?v=20261020224934';
+import { CONFIG } from './config.js?v=20261020230257';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020230257';
+import { esc, store, $, $$ } from './util.js?v=20261020230257';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020224934';
-import { suggest, highlight } from './search.js?v=20261020224934';
-import { api } from './api.js?v=20261020224934';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020230257';
+import { suggest, highlight } from './search.js?v=20261020230257';
+import { api } from './api.js?v=20261020230257';
 
 // ---------------- icons ----------------
 const P = {
@@ -434,11 +434,13 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   }
   const disc = b && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const price = b ? (b.price_cents ? `<span class="promo-price"><b>${money(b.price_cents)}</b>${disc ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${disc}%</span>` : ''}</span>` : `<span class="promo-price"><b>${esc(t('book.free'))}</b></span>`) : '';
-  return `<a ${attrs}><span class="wrap promo-in">
+  const save = b && disc ? `<span class="promo-save">${esc(t('book.save', { amount: money(b.list_price_cents - b.price_cents), pct: disc }))}</span>` : '';
+  const rating = b?.rating_count ? `<span class="promo-rating">${stars(b.rating_avg)} <span>${b.rating_count}</span></span>` : '';
+  return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('${esc(b.cover_url)}')"></span>` : ''}<span class="wrap promo-in">
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
-        ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b && placement === 'hero' ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}
-        <span class="promo-act">${price}<span class="btn btn-buy promo-cta">${esc(cta)}</span></span></span>
+        ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>
       ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
+      <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>
     </span></a>`;
 }
 // several books in one banner (like Amazon's "Deals in…" cards): each cover opens its book
