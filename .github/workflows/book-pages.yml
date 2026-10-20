@@ -1,8 +1,10 @@
 # Keeps /book/<id>/ share pages up to date (cover + title in WhatsApp/Facebook link previews).
+# Started right away by the store when a book is published or changed (share-refresh function),
+# and also on a schedule as a safety net (GitHub runs scheduled jobs only every few hours).
 name: Book share pages
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 permissions:
   contents: write
@@ -20,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: npm install --no-save --no-package-lock sharp@0.33.5
       - run: node tools/book-pages.mjs
       - name: Publish if something changed
         run: |

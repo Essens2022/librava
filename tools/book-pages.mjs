@@ -3,6 +3,7 @@
 // The page immediately opens the book inside the store. Runs on GitHub Actions (see .github/workflows).
 // Uses only the PUBLIC Supabase address and public key that are already in assets/js/config.js.
 import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync, existsSync } from 'node:fs';
+import sharp from 'sharp';
 
 const cfg = readFileSync('assets/js/config.js', 'utf8');
 const URL_ = /supabaseUrl:\s*'([^']+)'/.exec(cfg)?.[1];
@@ -21,7 +22,23 @@ const money = (c, cur = 'eur') => c ? (c / 100).toFixed(2).replace('.', ',') + '
 const keep = new Set();
 for (const b of books) {
   keep.add(b.id);
-  const cover = b.cover_path ? `${URL_}/storage/v1/object/public/covers/${b.cover_path.split('/').map(encodeURIComponent).join('/')}?v=${encodeURIComponent(b.updated_at || '')}` : `${SITE}/assets/img/og.png`;
+  // WhatsApp (especially on iPhone) does not show WebP previews: every cover gets a JPEG copy on librava.store itself
+  mkdirSync(`book/${b.id}`, { recursive: true });
+  const ver = String(Date.parse(b.updated_at || '') || 0);
+  let cover = `${SITE}/assets/img/og.png`, cw = 1200, ch = 630;
+  if (b.cover_path) {
+    const jpg = `book/${b.id}/cover.jpg`, stampFile = `book/${b.id}/.v`;
+    try {
+      if (!existsSync(jpg) || !existsSync(stampFile) || readFileSync(stampFile, 'utf8') !== ver) {
+        const r = await fetch(`${URL_}/storage/v1/object/public/covers/${b.cover_path.split('/').map(encodeURIComponent).join('/')}`);
+        if (!r.ok) throw new Error('cover ' + r.status);
+        await sharp(Buffer.from(await r.arrayBuffer())).flatten({ background: '#ffffff' }).resize({ width: 600, height: 960, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toFile(jpg);
+        writeFileSync(stampFile, ver);
+      }
+      const m = await sharp(jpg).metadata(); cw = m.width; ch = m.height;
+      cover = `${SITE}/book/${b.id}/cover.jpg?v=${ver}`;
+    } catch (e) { console.error('cover failed for', b.id, e.message); }
+  }
   const desc = plain(b.description).slice(0, 190) + (plain(b.description).length > 190 ? '…' : '');
   const price = b.price_cents ? money(b.price_cents, b.currency) : '';
   const title = `${b.title}${b.subtitle ? ' — ' + b.subtitle : ''}`;
@@ -37,16 +54,21 @@ for (const b of books) {
 <meta property="og:title" content="${esc(title)}${price ? ' · ' + esc(price) : ''}">
 <meta property="og:description" content="${esc(b.author ? b.author + ' · ' : '')}${esc(desc)}">
 <meta property="og:image" content="${esc(cover)}">
+<meta property="og:image:secure_url" content="${esc(cover)}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="${cw}">
+<meta property="og:image:height" content="${ch}">
 <meta property="og:image:alt" content="${esc(b.title)}">
 ${price ? `<meta property="product:price:amount" content="${(b.price_cents / 100).toFixed(2)}"><meta property="product:price:currency" content="${esc((b.currency || 'eur').toUpperCase())}">` : ''}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:image" content="${esc(cover)}">
 <meta name="theme-color" content="#1C2B2D">
 <script>location.replace('/#/book/${b.id}');</script>
 </head><body style="font-family:sans-serif;background:#EDF0E9;text-align:center;padding:40px 16px">
 <p><a href="/#/book/${b.id}">${esc(b.title)} — Librava</a></p>
 </body></html>
 `;
-  mkdirSync(`book/${b.id}`, { recursive: true });
   writeFileSync(`book/${b.id}/index.html`, html);
 }
 // books that were unpublished or deleted lose their page

@@ -1,12 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020184902';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020184902';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020184902';
-import { resetCompanyCache } from './views.js?v=20261020184902';
-import { api } from './api.js?v=20261020184902';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020184902';
+import { CONFIG } from './config.js?v=20261020190122';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020190122';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020190122';
+import { resetCompanyCache } from './views.js?v=20261020190122';
+import { api } from './api.js?v=20261020190122';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020190122';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],

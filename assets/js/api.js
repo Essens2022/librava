@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020184902';
-import { getLang } from './i18n.js?v=20261020184902';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020184902';
+import { CONFIG } from './config.js?v=20261020190122';
+import { getLang } from './i18n.js?v=20261020190122';
+import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020190122';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -71,7 +71,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020184902')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020190122')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -583,7 +583,7 @@ class SupabaseAPI {
     const { error } = await this.sb.from('books').update({ cover_path: p, updated_at: new Date().toISOString() }).eq('id', book.id);
     this._err(error);
     if (book.cover_path && book.cover_path !== p) await this.sb.storage.from('covers').remove([book.cover_path]).catch(() => { });
-    this._catalog = null;
+    this._catalog = null; this.refreshShare();
   }
   async updateAplus(bookId, aplus) {
     const { error } = await this.sb.from('books').update({ aplus, updated_at: new Date().toISOString() }).eq('id', bookId);
@@ -608,12 +608,17 @@ class SupabaseAPI {
     }
     if (files.sample) { const p = `${id}/sample.${fileExt(files.sample.name)}`; await this._upload('samples', p, files.sample); row.sample_path = p; }
     const { error } = await this.sb.from('books').upsert(row); this._err(error);
-    this._catalog = null;
+    this._catalog = null; this.refreshShare();
     return id;
+  }
+  // rebuild the /book/<id>/ pages so WhatsApp & co. show the cover right away (runs in the background)
+  refreshShare() {
+    clearTimeout(this._shareT);
+    this._shareT = setTimeout(() => this.sb.functions.invoke('share-refresh', { body: {} }).catch(() => { }), 1500);
   }
   async deleteBook(id) {
     const { error } = await this.sb.from('books').update({ status: 'draft', deleted_at: new Date().toISOString() }).eq('id', id);
-    this._err(error); this._catalog = null;
+    this._err(error); this._catalog = null; this.refreshShare();
   }
   async salesStats() {
     const { data, error } = await this.sb.from('purchases').select('*, book:books(id,title,author,cover_path,updated_at)').order('created_at', { ascending: false }).limit(1000);
