@@ -3,10 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020222638';
-import { scoreBook } from './search.js?v=20261020222638';
-import { getLang } from './i18n.js?v=20261020222638';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020222638';
+import { CONFIG } from './config.js?v=20261020223633';
+import { applyOffers, offerRunning } from './offers.js?v=20261020223633';
+import { scoreBook } from './search.js?v=20261020223633';
+import { getLang } from './i18n.js?v=20261020223633';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020223633';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -74,7 +75,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020222638')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020223633')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -203,12 +204,15 @@ class DemoAPI {
     this._addPurchases([bookId]);
   }
   // returns {mode:'demo', paid:[...], free:[...]} — UI shows the demo payment sheet
-  async checkout(bookIds) {
+  async checkout(bookIds, { coupon } = {}) {
     const books = (await Promise.all(bookIds.map(id => this.getBook(id)))).filter(Boolean);
     const free = books.filter(b => !b.price_cents).map(b => b.id);
     if (free.length) this._addPurchases(free);
     const paid = books.filter(b => b.price_cents > 0);
-    return { mode: paid.length ? 'demo' : 'done', paid: paid.map(b => b.id), total: paid.reduce((s, b) => s + b.price_cents, 0) };
+    const co = coupon ? await this.findCoupon(coupon) : null;
+    const r = applyOffers(paid, [...await this.offers(), ...(co ? [co] : [])], { coupon });
+    if (paid.length && !r.total) { this._addPurchases(paid.map(b => b.id)); return { mode: 'done' }; }
+    return { mode: paid.length ? 'demo' : 'done', paid: paid.map(b => b.id), total: r.total, discount: r.discount };
   }
   async confirmDemoPayment(bookIds) { this._addPurchases(bookIds); }
 
@@ -277,6 +281,13 @@ class DemoAPI {
   }
   async getSetting(key) { return store.get('demo:setting:' + key, null); }
   async saveSetting(key, value) { store.set('demo:setting:' + key, value); }
+  // ---- offers & discounts (Admin → Offers) ----
+  async offers() { return store.get('demo:offers', []).filter(o => o.kind !== 'coupon' && offerRunning(o)); }
+  async findCoupon(code) { const c = String(code || '').trim().toUpperCase(); return store.get('demo:offers', []).find(o => o.kind === 'coupon' && offerRunning(o) && String(o.config?.code || '').toUpperCase() === c) || null; }
+  async adminOffers() { return store.get('demo:offers', []).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))); }
+  async saveOffer(o) { const all = store.get('demo:offers', []); const id = o.id || uid('of_'); const i = all.findIndex(x => x.id === id); const row = { ...(i >= 0 ? all[i] : { created_at: new Date().toISOString(), uses: 0 }), ...o, id, updated_at: new Date().toISOString() }; if (i >= 0) all[i] = row; else all.push(row); store.set('demo:offers', all); return id; }
+  async deleteOffer(id) { store.set('demo:offers', store.get('demo:offers', []).filter(o => o.id !== id)); }
+  async boughtTogether() { return []; }
   // ---- promotions (home page banners chosen by the shop owner, per language) ----
   async promos(lang) { return store.get('demo:promos', []).filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort); }
   async adminPromos() { return store.get('demo:promos', []).sort(promoSort); }
@@ -525,18 +536,19 @@ class SupabaseAPI {
   async claimFree(bookId) {
     const { error } = await this.sb.rpc('claim_free_book', { p_book_id: bookId }); this._err(error); this._lib = null;
   }
-  async checkout(bookIds) {
+  async checkout(bookIds, { coupon } = {}) {
     const books = (await Promise.all(bookIds.map(id => this.getBook(id)))).filter(Boolean);
     const free = books.filter(b => !b.price_cents);
     for (const b of free) await this.claimFree(b.id);
     const paid = books.filter(b => b.price_cents > 0).map(b => b.id);
     if (!paid.length) return { mode: 'done' };
-    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, return_url: location.origin + location.pathname } });
+    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, coupon: coupon || null, return_url: location.origin + location.pathname } });
     if (error) {
       let msg = error.message;
       try { const j = await error.context.json(); msg = j.error || msg; } catch { }
       throw new Error(msg);
     }
+    if (data.mode === 'done') { this._lib = null; return { mode: 'done' }; }
     return { mode: 'redirect', url: data.url };
   }
 
@@ -585,6 +597,13 @@ class SupabaseAPI {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
   }
+  // ---- offers & discounts (Admin → Offers) ----
+  async offers() { try { const { data } = await this.sb.from('offers').select('*'); return (data || []).filter(o => o.kind !== 'coupon' && offerRunning(o)); } catch { return []; } }
+  async findCoupon(code) { if (!String(code || '').trim()) return null; const { data } = await this.sb.rpc('find_coupon', { c: String(code).trim() }); return (data || [])[0] || null; }
+  async adminOffers() { const { data, error } = await this.sb.from('offers').select('*').order('created_at', { ascending: false }); this._err(error); return data || []; }
+  async saveOffer(o) { const row = { ...o, updated_at: new Date().toISOString() }; delete row.uses; delete row.created_at; const { data, error } = await this.sb.from('offers').upsert(row).select('id').single(); this._err(error); return data.id; }
+  async deleteOffer(id) { const { error } = await this.sb.from('offers').delete().eq('id', id); this._err(error); }
+  async boughtTogether(id) { try { const { data } = await this.sb.rpc('bought_together', { b: id, n: 6 }); return (data || []).map(r => r.book_id); } catch { return []; } }
   // ---- promotions (home page banners chosen by the shop owner, per language) ----
   _promoUrl(path, v) { return path ? this.sb.storage.from('covers').getPublicUrl(path).data.publicUrl : null; }
   _promoRow(p) { return { ...p, image_url: this._promoUrl(p.image_path), image_mobile_url: this._promoUrl(p.image_mobile_path) }; }

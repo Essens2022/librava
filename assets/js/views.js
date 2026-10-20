@@ -1,11 +1,12 @@
-import { CONFIG } from './config.js?v=20261020222638';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020222638';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020222638';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020222638';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020222638';
-import { didYouMean } from './search.js?v=20261020222638';
-import { api } from './api.js?v=20261020222638';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020222638';
+import { CONFIG } from './config.js?v=20261020223633';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020223633';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020223633';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020223633';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020223633';
+import { applyOffers, describeOffer, offersForBook } from './offers.js?v=20261020223633';
+import { didYouMean } from './search.js?v=20261020223633';
+import { api } from './api.js?v=20261020223633';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020223633';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -184,6 +185,8 @@ export async function viewBook(el, id) {
     api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id).slice(0, 12)),
     api.myReview ? api.myReview(b.id) : null,
   ]);
+  const offers = api.offers ? await api.offers().catch(() => []) : [];
+  const badges = offersForBook(b, offers).filter(o => o.show_badge !== false);
   const canPreview = !owned && (b.sample_path || api.isDemo);
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? b.list_price_cents - b.price_cents : 0;
   const inCart = cart.has(b.id);
@@ -201,6 +204,7 @@ export async function viewBook(el, id) {
       <div class="bigprice">${money(b.price_cents)}</div>
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
+      ${badges.length ? `<div class="offer-badges">${badges.map(o => `<span class="offer-chip">${icon('tag')} ${esc(describeOffer(o, t, c => t('cat.' + c)))}</span>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`;
 
@@ -225,6 +229,7 @@ export async function viewBook(el, id) {
         <div class="desc clamped ${hasTags(b.description) ? 'rich' : ''}" id="desc">${safeHTML(b.description)}</div>
         <button class="linkbtn" id="desc-more" hidden>${esc(t('book.more'))}</button>
         <hr>
+        <div id="fbt"></div>
         ${(b.aplus || []).some(m => (m.imgs || []).some(Boolean) || m.title || m.text) ? `<h2 class="section-title" style="font-size:18px;margin-bottom:12px">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(b.aplus)}<hr>` : ''}
         <h2 class="section-title" style="font-size:18px">${esc(t('book.details'))}</h2>
         <div class="details">
@@ -283,6 +288,7 @@ export async function viewBook(el, id) {
   requestAnimationFrame(() => { if (desc.scrollHeight > desc.clientHeight + 4) more.hidden = false; });
   more.onclick = () => { const c = desc.classList.toggle('clamped'); more.textContent = t(c ? 'book.more' : 'book.less'); };
   // share: the /book/<id>/ address shows the cover, title and price in WhatsApp & co.
+  renderBoughtTogether($('#fbt', el), b, owned, offers);
   $('[data-share]', el)?.addEventListener('click', async () => {
     const url = location.origin + '/book/' + encodeURIComponent(b.id) + '/';
     try {
@@ -331,9 +337,9 @@ export async function startCheckout(ids) {
   }
   if (!await waiverConfirm()) return;
   try {
-    const res = await api.checkout(ids);
-    if (res.mode === 'done') { cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
-    if (res.mode === 'redirect') { toast(t('cart.redirecting')); location.href = res.url; return; }
+    const res = await api.checkout(ids, { coupon: sessionStorage.getItem(COUPON) || null });
+    if (res.mode === 'done') { sessionStorage.removeItem(COUPON); cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
+    if (res.mode === 'redirect') { sessionStorage.removeItem(COUPON); toast(t('cart.redirecting')); location.href = res.url; return; }
     if (res.mode === 'bank') { cart.set(cart.get().filter(id => !ids.includes(id))); showBankOrder(res); return; }
     // demo payment sheet
     const books = (await Promise.all(res.paid.map(id => api.getBook(id)))).filter(Boolean);
@@ -341,6 +347,7 @@ export async function startCheckout(ids) {
       <p class="muted" style="margin:0;font-size:14px">${esc(t('pay.demoText'))}</p>
       <div class="paycard">
         ${books.map(b => `<div class="row"><span>${esc(b.title)}</span><b>${money(b.price_cents)}</b></div>`).join('')}
+        ${res.discount ? `<div class="row"><span>${esc(t('cart.discount'))}</span><b>−${money(res.discount)}</b></div>` : ''}
         <div class="row" style="border-top:1px solid var(--line);padding-top:8px"><b>Total</b><b>${money(res.total)}</b></div>
       </div>
       <div class="actions"><button class="btn btn-ghost" data-close>${esc(t('pay.cancel'))}</button><button class="btn btn-buy" data-pay>${esc(t('pay.pay', { amount: money(res.total) }))}</button></div>`, {
@@ -385,17 +392,69 @@ function showBankOrder(res) {
 // =====================================================================
 //  CART
 // =====================================================================
+// ---------------------------------------------------------------- "Frequently bought together" (like Amazon)
+async function boughtTogetherFor(b) {
+  const all = await api.listBooks({});
+  const ok = x => x && x.id !== b.id && x.status !== 'draft' && x.price_cents > 0;
+  const byId = Object.fromEntries(all.map(x => [x.id, x]));
+  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id)) out.push(x); };
+  (b.recommend_ids || []).forEach(id => add(byId[id]));                       // chosen by the shop owner
+  if (out.length < 2) (await (api.boughtTogether?.(b.id) || [])).forEach(id => add(byId[id])); // bought by the same customers
+  const same = all.filter(x => x.language === b.language);
+  if (out.length < 2 && b.series_name) same.filter(x => x.series_name === b.series_name).forEach(add);
+  if (out.length < 2) same.filter(x => x.author === b.author).forEach(add);
+  if (out.length < 2) same.filter(x => x.category === b.category || (x.categories || []).includes(b.category)).sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0)).forEach(add);
+  const mine = await Promise.all(out.map(x => api.owns(x.id)));
+  return out.filter((_, i) => !mine[i]).slice(0, 2);
+}
+async function renderBoughtTogether(box, b, owned, offers) {
+  if (!box || !b.price_cents) return;
+  const others = await boughtTogetherFor(b).catch(() => []);
+  if (!others.length || !box.isConnected) return;
+  const list = owned ? others : [b, ...others];
+  if (list.length < 2) return;
+  const sel = new Set(list.map(x => x.id));
+  const draw = () => {
+    const chosen = list.filter(x => sel.has(x.id));
+    const r = applyOffers(chosen, offers);
+    box.innerHTML = `<section class="fbt"><h2 class="section-title" style="font-size:18px">${esc(t('fbt.title'))}</h2>
+      <div class="fbt-row">${list.map((x, i) => `${i ? '<span class="fbt-plus">+</span>' : ''}<a href="#/book/${encodeURIComponent(x.id)}" class="fbt-cover ${sel.has(x.id) ? '' : 'off'}">${coverHTML(x, { badge: false })}</a>`).join('')}
+        <div class="fbt-buy"><div>${esc(t('fbt.total'))} <b class="fbt-total">${money(r.total)}</b>${r.discount ? ` <s class="muted">${money(r.subtotal)}</s>` : ''}</div>
+          ${r.discount ? `<div class="save">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
+          <button class="btn btn-cart" data-fbt-add ${chosen.length ? '' : 'disabled'}>${esc(chosen.length === list.length ? t('fbt.addAll', { n: chosen.length }) : t('fbt.addSome', { n: chosen.length }))}</button></div></div>
+      <div class="fbt-list">${list.map(x => `<label class="check"><input type="checkbox" value="${esc(x.id)}" ${sel.has(x.id) ? 'checked' : ''}>
+        <span>${x.id === b.id ? `<b>${esc(t('fbt.thisItem'))}</b> ` : ''}<a href="#/book/${encodeURIComponent(x.id)}">${esc(x.title)}</a> <span class="muted">· ${esc(x.author)}</span> · <b>${money(x.price_cents)}</b>${r.final[x.id] != null && r.final[x.id] < x.price_cents && sel.has(x.id) ? ` <span class="save">→ ${money(r.final[x.id])}</span>` : ''}</span></label>`).join('')}</div>
+    </section><hr>`;
+    box.querySelectorAll('.fbt-list input').forEach(cb => cb.onchange = () => { cb.checked ? sel.add(cb.value) : sel.delete(cb.value); draw(); });
+    box.querySelector('[data-fbt-add]').onclick = () => { list.filter(x => sel.has(x.id)).forEach(x => cart.add(x.id)); toast(t('fbt.added', { n: sel.size })); go('/cart'); };
+  };
+  draw();
+}
+
+// ---------------------------------------------------------------- cart with offers, coupon and "add 1 more" hints
+const COUPON = 'librava:coupon';
 export async function viewCart(el) {
   const ids = cart.get();
   const books = (await Promise.all(ids.map(id => api.getBook(id)))).filter(Boolean);
   if (books.length !== ids.length) cart.set(books.map(b => b.id));
-  const total = books.reduce((s, b) => s + (b.price_cents || 0), 0);
   if (!books.length) {
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('cart')}<h1 style="font-size:22px;color:var(--fg)">${esc(t('cart.empty'))}</h1><p>${esc(t('cart.emptyHint'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
     return;
   }
+  const code = sessionStorage.getItem(COUPON) || '';
+  const [offers, coupon] = await Promise.all([api.offers ? api.offers().catch(() => []) : [], code && api.findCoupon ? api.findCoupon(code).catch(() => null) : null]);
+  const r = applyOffers(books, [...offers, ...(coupon ? [coupon] : [])], { coupon: code });
+  const desc = o => describeOffer(o, t, c => t('cat.' + c));
+  const line = b => { const f = r.final[b.id]; return f != null && f < b.price_cents ? `<span class="price">${f ? money(f) : esc(t('book.free'))}</span><span class="price-old">${money(b.price_cents)}</span>` : priceHTML(b); };
+  const nudge = n => {
+    const where = n.category ? '#/search?cat=' + n.category : '#/search?sort=bestsellers';
+    const txt = n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
+    return `<a class="nudge" href="${where}">${icon('tag')} <span>${esc(txt)}${n.category ? ' · ' + esc(t('cat.' + n.category)) : ''}</span> <b>→</b></a>`;
+  };
+  const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page"><div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
+      ${r.nudges.length ? `<div class="nudges">${r.nudges.map(nudge).join('')}</div>` : ''}
       ${books.map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
@@ -405,18 +464,29 @@ export async function viewCart(el) {
           <div class="muted" style="font-size:13px">${esc(t('book.format.' + b.format))}</div>
           <div><button class="linkbtn" data-rm="${esc(b.id)}" style="font-size:13px">${esc(t('cart.remove'))}</button></div>
         </div>
-        <div class="cprice">${priceHTML(b)}</div>
+        <div class="cprice">${line(b)}</div>
       </div>`).join('')}
-      <div style="text-align:right;margin-top:12px;font-size:18px">${esc(t('cart.subtotal', { n: books.length }))} <b>${money(total)}</b></div>
+      <div style="text-align:right;margin-top:12px;font-size:18px">${esc(t('cart.subtotal', { n: books.length }))} <b>${money(r.total)}</b></div>
     </section>
     <aside class="panel cart-sum">
-      <div class="tot">${esc(t('cart.subtotal', { n: books.length }))} <b>${money(total)}</b></div>
+      <div class="sum-rows">
+        <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
+        ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(a.kind === 'coupon' ? t('cart.coupon') + ' ' + (a.offer.config?.code || '') : desc(a.offer))}</span><span>−${money(a.saving)}</span></div>`).join('')}
+        <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
+        ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
+      </div>
       <button class="btn btn-buy btn-block" data-checkout>${esc(api.user() ? t('cart.checkout') : t('cart.loginToCheckout'))}</button>
+      <form class="coupon" id="coupon-form"><label for="cp">${esc(t('cart.haveCode'))}</label>
+        <div class="coupon-row"><input id="cp" class="input" maxlength="40" autocomplete="off" autocapitalize="characters" value="${esc(code)}" placeholder="${esc(t('cart.codePh'))}">
+        ${code ? `<button type="button" class="btn btn-ghost btn-sm" id="cp-rm">×</button>` : ''}<button class="btn btn-dark btn-sm" type="submit">${esc(t('cart.apply'))}</button></div>
+        ${code && cmsg ? `<small class="${r.couponState === 'ok' ? 'save' : 'muted'}">${esc(t(cmsg))}</small>` : ''}</form>
       <div class="note muted" style="font-size:13px;display:flex;gap:8px">${icon('shield', 'ico')} ${esc(t('home.trust2'))}</div>
     </aside>
   </div></div>`;
   $$('[data-rm]', el).forEach(btn => btn.onclick = () => { cart.remove(btn.dataset.rm); viewCart(el); });
   $('[data-checkout]', el).onclick = () => startCheckout(books.map(b => b.id));
+  $('#coupon-form', el).onsubmit = e => { e.preventDefault(); const v = $('#cp', el).value.trim().toUpperCase(); if (v) sessionStorage.setItem(COUPON, v); else sessionStorage.removeItem(COUPON); viewCart(el); };
+  $('#cp-rm', el)?.addEventListener('click', () => { sessionStorage.removeItem(COUPON); viewCart(el); });
 }
 
 // =====================================================================

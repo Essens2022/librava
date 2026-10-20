@@ -1206,3 +1206,47 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .promo-books .pb { min-width: calc(var(--h) / 1.6); background: rgba(255,255,255,.08); }
 .promo-books .promo-shelf.fit .pb { height: var(--fit); min-width: calc(var(--fit) / 1.6); }
 .promo-books .promo-shelf { justify-content: safe center; }
+/* ---------- offers: badges, bought together, cart ---------- */
+.offer-badges { display: flex; flex-direction: column; gap: 6px; }
+.offer-chip { display: inline-flex; align-items: center; gap: 6px; background: #FDF0DA; color: #7A4B00; border: 1px solid #F3D29C; border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600; }
+.offer-chip .ico { width: 15px; height: 15px; flex: none; }
+.fbt { display: flex; flex-direction: column; gap: 14px; }
+.fbt-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fbt-cover { width: 96px; transition: opacity .2s; } .fbt-cover.off { opacity: .35; }
+.fbt-plus { font-size: 26px; color: var(--muted); font-weight: 300; }
+.fbt-buy { margin-left: 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; font-size: 16px; }
+.fbt-total { font-size: 20px; color: var(--deal); }
+.fbt-list { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.fbt-list .check { align-items: flex-start; }
+.save { color: var(--ok, #2E7D32); font-weight: 600; }
+.nudges { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 4px; }
+.nudge { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #FDF0DA; color: #6B4300; font-weight: 600; font-size: 14px; border: 1px solid #F3D29C; }
+.nudge:hover { text-decoration: none; filter: brightness(.98); }
+.nudge span { flex: 1; } .nudge .ico { width: 16px; height: 16px; }
+.sum-rows { display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+.sum-rows > div { display: flex; justify-content: space-between; gap: 10px; }
+.sum-off { color: var(--ok, #2E7D32); } .sum-off .ico { width: 14px; height: 14px; vertical-align: -2px; }
+.sum-total { border-top: 1px solid var(--line); padding-top: 8px; font-size: 19px; }
+.coupon { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.coupon-row { display: flex; gap: 6px; } .coupon-row .input { flex: 1; min-width: 0; text-transform: uppercase; }
+html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background: #3A2E14; color: #F6D59A; border-color: #5A4520; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .offer-chip, html:not([data-theme="light"]) .nudge { background: #3A2E14; color: #F6D59A; border-color: #5A4520; } }
+@media (max-width: 640px) { .fbt-cover { width: 74px; } .fbt-buy { margin-left: 0; width: 100%; } .fbt-buy .btn { width: 100%; } }
+/* Admin → Offers */
+.of-rules ul { margin: 6px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.of-list { display: flex; flex-direction: column; gap: 10px; }
+.of-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.of-ico { width: 44px; height: 44px; border-radius: 10px; background: #FDF0DA; color: #7A4B00; display: grid; place-items: center; }
+.of-ico .ico { width: 22px; height: 22px; }
+.of-kinds { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.of-kind { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; position: relative; }
+.of-kind input { position: absolute; opacity: 0; }
+.of-kind:has(input:checked) { border-color: var(--pista-strong); background: var(--pista-soft); box-shadow: 0 0 0 1px var(--pista-strong); }
+.of-kind:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.of-kind small { color: var(--muted); line-height: 1.4; }
+.of-example { font-weight: 700; color: var(--fg) !important; background: #FDF0DA; border-radius: 8px; padding: 8px 10px; }
+.of-tier { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.of-tier input { width: 80px; }
+.of-coupon { display: flex; flex-direction: column; gap: 10px; }
+[data-for][hidden] { display: none !important; }
+@media (max-width: 760px) { .of-row { grid-template-columns: 1fr; } }

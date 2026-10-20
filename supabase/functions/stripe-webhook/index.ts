@@ -53,5 +53,11 @@ Deno.serve(async (req) => {
   if (pErr) { console.error(pErr); return new Response('db error', { status: 500 }); } // Stripe will retry
 
   await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString(), stripe_session_id: session.id, email: email || order.email }).eq('id', order.id).eq('status', 'pending');
+  // a coupon was used: count it (limits like "first 100 customers")
+  for (const a of (order.offers || []) as { id: string; kind: string }[]) {
+    if (a.kind !== 'coupon') continue;
+    const { data: o } = await admin.from('offers').select('uses,config').eq('id', a.id).maybeSingle();
+    if (o) await admin.from('offers').update({ uses: (o.uses || 0) + 1, config: { ...(o.config || {}), uses: ((o.config?.uses) || 0) + 1 } }).eq('id', a.id);
+  }
   return new Response('ok', { status: 200 });
 });

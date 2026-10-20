@@ -1,12 +1,13 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020222638';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020222638';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020222638';
-import { resetCompanyCache } from './views.js?v=20261020222638';
-import { api } from './api.js?v=20261020222638';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020222638';
+import { CONFIG } from './config.js?v=20261020223633';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020223633';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020223633';
+import { resetCompanyCache } from './views.js?v=20261020223633';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261020223633';
+import { api } from './api.js?v=20261020223633';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020223633';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -15,6 +16,7 @@ const TABS = [
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
   ['reviews', '/admin/reviews', 'eye', 'admin.tab.reviews'],
+  ['offers', '/admin/offers', 'tag', 'of.title'],
   ['promos', '/admin/promos', 'bolt', 'pr.title'],
   ['notifications', '/admin/notifications', 'bell', 'ntf.title'],
   ['settings', '/admin/settings', 'gear', 'set.title'],
@@ -47,6 +49,7 @@ export async function viewAdmin(el, parts) {
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'reviews': return reviews(body);
+    case 'offers': return parts[1] ? offerForm(body, parts[1]) : offersAdmin(body);
     case 'promos': return parts[1] ? promoForm(body, parts[1]) : promosAdmin(body);
     case 'notifications': return notificationsAdmin(body);
     case 'settings': return settingsAdmin(body);
@@ -596,7 +599,9 @@ function aplusEditor(root, modules, getBookId) {
 
 // ---------------------------------------------------------------- publish an eBook (3 steps, like KDP)
 const ROLES = ['author', 'illustrator', 'translator', 'editor', 'foreword', 'photographer'];
-function bookForm(body, b, startStep = 1) {
+async function bookForm(body, b, startStep = 1) {
+  const allBooks = (await api.adminBooks().catch(() => [])).filter(x => x.status === 'published' && !x.deleted_at && x.price_cents > 0 && x.id !== b?.id);
+  const recOpts = sel => allBooks.sort((x, y) => (y.language === (b?.language || getLang())) - (x.language === (b?.language || getLang()))).map(x => `<option value="${esc(x.id)}" ${sel === x.id ? 'selected' : ''}>${esc(x.title)} · ${esc((x.language || '').toUpperCase())}</option>`).join('');
   const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
   let bookId = v.id || null;
   const draftId = bookId || crypto.randomUUID(); // new books: images uploaded before the first save go in the book's own folder
@@ -713,6 +718,8 @@ function bookForm(body, b, startStep = 1) {
             <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="number" min="0" step="0.01" inputmode="decimal" value="${eur(v.list_price_cents)}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
             <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
             <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('fbt.adminTitle'))}</h3><p>${esc(t('fbt.adminHelp'))}</p></div>
+        <div class="kdp-fields two">${[0, 1].map(i => `<label class="field"><span>${esc(t('fbt.adminPick', { n: i + 1 }))}</span><select class="f-rec"><option value="">${esc(t('fbt.auto'))}</option>${recOpts((v.recommend_ids || [])[i])}</select></label>`).join('')}</div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.release'))}</h3><p>${esc(t('kdp.releaseHelp'))}</p></div>
         <div class="kdp-fields"><label class="field" style="max-width:220px"><span>${esc(t('admin.f.published'))}</span><input id="f-date" type="date" value="${esc(String(v.published_at || '').slice(0, 10))}"></label>
           <label class="check"><input type="checkbox" id="f-featured" ${v.is_featured ? 'checked' : ''}> ${esc(t('admin.f.featured'))}</label></div></div>
@@ -923,6 +930,7 @@ function bookForm(body, b, startStep = 1) {
       age_min: amin === '' ? null : +amin, age_max: amax === '' ? null : +amax,
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
       color: radio('bcolor') === 'bw' ? 'bw' : 'color',
+      recommend_ids: [...new Set($$('.f-rec', body).map(x => x.value).filter(Boolean))],
       pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
       allow_download: $('#f-dl', body).checked, stamp_downloads: $('#f-stamp', body).checked,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
@@ -1179,6 +1187,124 @@ async function promoForm(body, id) {
     catch (x) { fail(errText(x)); btn.disabled = false; }
   };
   draw();
+}
+
+// ---------------------------------------------------------------- offers: bundles, quantity discounts, 3-for-2, sales, coupons
+const offerStatus = o => !o.active ? 'off' : o.starts_at && new Date(o.starts_at) > new Date() ? 'soon' : o.ends_at && new Date(o.ends_at) <= new Date() ? 'ended' : 'live';
+const ofDesc = o => describeOffer(o, t, c => t('cat.' + c));
+async function offersAdmin(body) {
+  const list = await api.adminOffers();
+  body.innerHTML = `<div class="panel pr-head"><div><h2 class="section-title" style="font-size:19px;margin:0">${esc(t('of.title'))}</h2>
+      <p class="muted" style="margin:4px 0 0;max-width:75ch">${esc(t('of.help'))}</p></div>
+      <a class="btn btn-buy" href="#/admin/offers/new">${icon('plus')} ${esc(t('of.new'))}</a></div>
+    <div class="panel of-rules"><b>${esc(t('of.rulesTitle'))}</b><ul><li>${esc(t('of.rule1'))}</li><li>${esc(t('of.rule2'))}</li><li>${esc(t('of.rule3'))}</li><li>${esc(t('of.rule4'))}</li></ul></div>
+    <section class="panel">${list.length ? `<div class="of-list">${list.map(o => { const st = offerStatus(o); return `<div class="of-row">
+      <span class="of-ico">${icon(o.kind === 'coupon' ? 'tag' : o.kind === 'bundle' ? 'library' : o.kind === 'category' ? 'grid' : 'bolt')}</span>
+      <div class="pr-info"><b>${esc(o.name || t('of.kind.' + o.kind))}</b><span>${esc(ofDesc(o))}</span>
+        <span><span class="status ${st === 'live' ? 'live' : 'draft'}">${esc(t('pr.st.' + st))}</span><span class="muted" style="font-size:13px">${esc(t('of.kind.' + o.kind))}${o.stackable ? ' · ' + esc(t('of.stackShort')) : ''}${o.kind === 'coupon' ? ' · ' + esc(t('of.usesN', { n: o.config?.uses || o.uses || 0, max: o.config?.max_uses || '∞' })) : ''}</span>
+        ${o.starts_at || o.ends_at ? `<span class="muted" style="font-size:13px">${esc(o.starts_at ? fmtDate(o.starts_at) : '…')} → ${esc(o.ends_at ? fmtDate(o.ends_at) : '…')}</span>` : ''}</span></div>
+      <div class="pr-acts"><a class="btn btn-ghost btn-sm" href="#/admin/offers/${esc(o.id)}">${esc(t('pr.editBtn'))}</a>
+        <button class="btn btn-ghost btn-sm" data-tg="${esc(o.id)}">${esc(t(o.active ? 'pr.pause' : 'pr.activate'))}</button>
+        <button class="btn btn-ghost btn-sm" data-del="${esc(o.id)}" style="color:var(--deal)">${esc(t('admin.delete'))}</button></div></div>`; }).join('')}</div>` : `<p class="muted">${esc(t('of.none'))}</p>`}</section>`;
+  $$('[data-tg]', body).forEach(b => b.onclick = async () => { const o = list.find(x => x.id === b.dataset.tg); try { await api.saveOffer({ id: o.id, kind: o.kind, config: o.config, active: !o.active }); offersAdmin(body); } catch (x) { toast(errText(x), { error: true }); } });
+  $$('[data-del]', body).forEach(b => b.onclick = async () => { if (!await confirmBox(t('of.delAsk'), { danger: true })) return; try { await api.deleteOffer(b.dataset.del); toast(t('of.deleted')); offersAdmin(body); } catch (x) { toast(errText(x), { error: true }); } });
+}
+
+async function offerForm(body, id) {
+  const [all, books] = await Promise.all([api.adminOffers(), api.adminBooks()]);
+  const pub = books.filter(b => b.status === 'published' && !b.deleted_at && b.price_cents > 0);
+  const o = all.find(x => x.id === id) || { kind: 'qty', active: true, stackable: false, priority: 0, show_badge: true, config: { tiers: [{ min: 2, percent: 10 }, { min: 3, percent: 15 }] } };
+  const c = { ...(o.config || {}) };
+  let chosen = (c.book_ids || []).filter(x => pub.some(b => b.id === x));
+  let tiers = (c.tiers || [{ min: 2, percent: 10 }]).map(x => ({ ...x }));
+  const local = iso => { if (!iso) return ''; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  const catSel = (idv, v, any = true) => `<select id="${idv}">${any ? `<option value="">${esc(t('of.allBooks'))}</option>` : ''}${CATS.map(k => `<option value="${k}" ${v === k ? 'selected' : ''}>${esc(t('cat.' + k))}</option>`).join('')}</select>`;
+  body.innerHTML = `<form class="panel pr-form" id="of-form" novalidate>
+    <div class="pr-form-head"><h2 class="section-title" style="font-size:19px;margin:0">${esc(id === 'new' ? t('of.new') : t('of.edit'))}</h2><a class="btn btn-ghost btn-sm" href="#/admin/offers">← ${esc(t('of.back'))}</a></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('of.type'))}</h3><p>${esc(t('of.typeHelp'))}</p></div>
+      <div class="kdp-fields"><div class="of-kinds">${OFFER_KINDS.map(k => `<label class="of-kind"><input type="radio" name="ok" value="${k}" ${o.kind === k ? 'checked' : ''}><b>${esc(t('of.kind.' + k))}</b><small>${esc(t('of.kindHelp.' + k))}</small></label>`).join('')}</div></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('of.rule'))}</h3><p id="of-example" class="of-example"></p></div>
+      <div class="kdp-fields">
+        <div data-for="bundle"><span class="field-l">${esc(t('of.bundleBooks'))}</span><input class="input" id="of-find" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}"><div class="pr-chosen" id="of-chosen"></div><div class="pr-pick" id="of-pick"></div></div>
+        <div data-for="qty"><span class="field-l">${esc(t('of.tiers'))}</span><div id="of-tiers"></div><button type="button" class="btn btn-ghost btn-sm" id="of-addtier">+ ${esc(t('of.addTier'))}</button></div>
+        <div data-for="bxgy" class="two"><label class="field"><span>${esc(t('of.buy'))}</span><input id="of-buy" type="number" min="1" max="10" value="${esc(c.buy || 2)}"></label><label class="field"><span>${esc(t('of.get'))}</span><input id="of-get" type="number" min="1" max="5" value="${esc(c.get || 1)}"></label>
+          <label class="field" style="grid-column:1/-1"><span>${esc(t('of.getPct'))}</span><input id="of-getp" type="number" min="1" max="100" value="${esc(c.percent ?? 100)}"><small>${esc(t('of.getPctHelp'))}</small></label></div>
+        <div data-for="bundle category coupon" class="two"><label class="field" data-for="bundle category"><span>${esc(t('of.percent'))}</span><input id="of-pct" type="number" min="1" max="90" value="${esc(c.percent || 10)}"></label></div>
+        <div data-for="qty bxgy category"><label class="field"><span>${esc(t('of.category'))}</span>${catSel('of-cat', c.category)}</label></div>
+        <div data-for="coupon" class="of-coupon">
+          <label class="field"><span>${esc(t('of.code'))} *</span><div class="lid-row"><input id="of-code" class="input" maxlength="30" value="${esc(c.code || '')}" style="text-transform:uppercase" placeholder="BENVENUTO10"><button type="button" class="btn btn-ghost btn-sm" id="of-gen">${esc(t('of.genCode'))}</button></div></label>
+          <div class="radios"><label class="check"><input type="radio" name="ct" value="p" ${c.amount_cents ? '' : 'checked'}> ${esc(t('of.cPercent'))}</label><label class="check"><input type="radio" name="ct" value="a" ${c.amount_cents ? 'checked' : ''}> ${esc(t('of.cAmount'))}</label></div>
+          <div class="two"><label class="field" id="of-cp-box"><span>${esc(t('of.percent'))}</span><input id="of-cpct" type="number" min="1" max="90" value="${esc(c.percent || 10)}"></label>
+            <label class="field" id="of-ca-box"><span>${esc(t('of.amount'))}</span><input id="of-camt" type="number" min="0.5" step="0.01" value="${c.amount_cents ? (c.amount_cents / 100).toFixed(2) : '2.00'}"></label>
+            <label class="field"><span>${esc(t('of.minOrder'))}</span><input id="of-min" type="number" min="0" step="0.01" value="${c.min_cents ? (c.min_cents / 100).toFixed(2) : ''}" placeholder="0"></label>
+            <label class="field"><span>${esc(t('of.maxUses'))}</span><input id="of-max" type="number" min="1" value="${esc(c.max_uses || '')}" placeholder="∞"></label></div>
+          <label class="check"><input type="checkbox" id="of-new" ${c.new_only ? 'checked' : ''}> ${esc(t('of.newOnly'))}</label></div>
+      </div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('of.settings'))}</h3><p>${esc(t('of.settingsHelp'))}</p></div>
+      <div class="kdp-fields">
+        <label class="field"><span>${esc(t('of.name'))}</span><input id="of-name" maxlength="80" value="${esc(o.name || '')}" placeholder="${esc(t('of.namePh'))}"></label>
+        <div class="two"><label class="field"><span>${esc(t('pr.start'))}</span><input type="datetime-local" id="of-start" value="${local(o.starts_at)}"></label><label class="field"><span>${esc(t('pr.end'))}</span><input type="datetime-local" id="of-end" value="${local(o.ends_at)}"></label></div>
+        <label class="check"><input type="checkbox" id="of-stack" ${o.stackable ? 'checked' : ''}> ${esc(t('of.stackable'))}</label>
+        <label class="check"><input type="checkbox" id="of-badge" ${o.show_badge !== false ? 'checked' : ''}> ${esc(t('of.badge'))}</label>
+        <label class="check"><input type="checkbox" id="of-active" ${o.active !== false ? 'checked' : ''}> ${esc(t('of.active'))}</label></div></div>
+    <div class="error" id="of-err" hidden></div>
+    <div class="kdp-bar"><a class="btn btn-ghost" href="#/admin/offers">${esc(t('admin.cancel'))}</a><span class="spacer"></span><button class="btn btn-buy" type="submit">${esc(t('of.save'))}</button></div></form>`;
+  const f = $('#of-form', body), v = sel => ($(sel, f)?.value || '').trim(), kind = () => f.querySelector('input[name=ok]:checked').value;
+  const cents = x => Math.round(parseFloat(String(x).replace(',', '.')) * 100) || 0;
+  const cfg = () => {
+    const k = kind();
+    if (k === 'bundle') return { book_ids: chosen.slice(), percent: +v('#of-pct') };
+    if (k === 'qty') return { tiers: tiers.filter(x => x.min > 0 && x.percent > 0), category: v('#of-cat') || null };
+    if (k === 'bxgy') return { buy: +v('#of-buy') || 2, get: +v('#of-get') || 1, percent: +v('#of-getp') || 100, category: v('#of-cat') || null };
+    if (k === 'category') return { category: v('#of-cat') || CATS[0], percent: +v('#of-pct') };
+    const amount = f.querySelector('input[name=ct]:checked').value === 'a';
+    return { code: v('#of-code').toUpperCase().replace(/\s+/g, ''), percent: amount ? null : +v('#of-cpct'), amount_cents: amount ? cents(v('#of-camt')) : null, min_cents: cents(v('#of-min')) || null, max_uses: +v('#of-max') || null, uses: c.uses || 0, new_only: $('#of-new', f).checked };
+  };
+  const drawTiers = () => { $('#of-tiers', f).innerHTML = tiers.map((x, i) => `<div class="of-tier"><span>${esc(t('of.from'))}</span><input type="number" min="2" max="50" data-tmin="${i}" value="${x.min}"><span>${esc(t('of.booksPct'))}</span><input type="number" min="1" max="90" data-tpct="${i}" value="${x.percent}"><span>%</span>${tiers.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-trm="${i}">×</button>` : ''}</div>`).join(''); };
+  const drawPick = () => {
+    const q = norm(v('#of-find'));
+    $('#of-chosen', f).innerHTML = chosen.map(idv => { const b = pub.find(x => x.id === idv); return b ? `<span class="pr-chip">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span>${esc(b.title)}</span><button type="button" data-rm="${esc(idv)}">×</button></span>` : ''; }).join('') || `<span class="muted" style="font-size:14px">${esc(t('pr.booksNone'))}</span>`;
+    $('#of-pick', f).innerHTML = pub.filter(b => !q || norm(b.title + ' ' + b.author).includes(q)).slice(0, 60).map(b => `<label class="pr-opt ${chosen.includes(b.id) ? 'on' : ''}"><input type="checkbox" value="${esc(b.id)}" ${chosen.includes(b.id) ? 'checked' : ''}>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span><b>${esc(b.title)}</b><small class="muted">${esc((b.language || '').toUpperCase())} · ${money(b.price_cents)}</small></span></label>`).join('');
+  };
+  const draw = () => {
+    const k = kind();
+    $$('[data-for]', f).forEach(el => { el.hidden = !el.dataset.for.split(' ').includes(k); });
+    const amount = f.querySelector('input[name=ct]:checked')?.value === 'a';
+    $('#of-cp-box', f).hidden = amount; $('#of-ca-box', f).hidden = !amount;
+    $('#of-example', f).textContent = t('of.exampleLabel') + ' ' + ofDesc({ kind: k, config: cfg() });
+    if (k === 'bundle') drawPick();
+  };
+  $('#of-tiers', f).addEventListener('input', e => { const i = e.target.dataset.tmin ?? e.target.dataset.tpct; if (i == null) return; tiers[+i][e.target.dataset.tmin != null ? 'min' : 'percent'] = +e.target.value; e.stopPropagation(); draw(); });
+  $('#of-tiers', f).addEventListener('click', e => { const b = e.target.closest('[data-trm]'); if (b) { tiers.splice(+b.dataset.trm, 1); drawTiers(); draw(); } });
+  $('#of-addtier', f).onclick = () => { const last = tiers[tiers.length - 1] || { min: 1, percent: 5 }; tiers.push({ min: last.min + 1, percent: Math.min(90, last.percent + 5) }); drawTiers(); draw(); };
+  $('#of-pick', f).addEventListener('input', e => { e.stopPropagation(); const cb = e.target.closest('input[type=checkbox]'); if (!cb) return; chosen = cb.checked ? [...chosen, cb.value].slice(0, 6) : chosen.filter(x => x !== cb.value); draw(); });
+  $('#of-pick', f).addEventListener('change', e => e.stopPropagation());
+  $('#of-chosen', f).addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { chosen = chosen.filter(x => x !== b.dataset.rm); draw(); } });
+  $('#of-find', f).addEventListener('input', e => { e.stopPropagation(); drawPick(); });
+  $('#of-gen', f).onclick = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const r = crypto.getRandomValues(new Uint8Array(6)); $('#of-code', f).value = 'LIB' + [...r].map(x => A[x % A.length]).join(''); draw(); };
+  f.addEventListener('input', draw); f.addEventListener('change', draw);
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const err = $('#of-err', f), fail = m => { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: 'center' }); };
+    err.hidden = true;
+    const k = kind(), conf = cfg();
+    if (k === 'bundle' && conf.book_ids.length < 2) return fail(t('of.needBooks'));
+    if ((k === 'bundle' || k === 'category') && !(conf.percent > 0 && conf.percent <= 90)) return fail(t('of.badPct'));
+    if (k === 'qty' && !conf.tiers.length) return fail(t('of.needTier'));
+    if (k === 'coupon') {
+      if (!/^[A-Z0-9_-]{3,30}$/.test(conf.code)) return fail(t('of.badCode'));
+      if (all.some(x => x.kind === 'coupon' && x.id !== o.id && String(x.config?.code || '').toUpperCase() === conf.code)) return fail(t('of.dupCode'));
+      if (!conf.amount_cents && !(conf.percent > 0 && conf.percent <= 90)) return fail(t('of.badPct'));
+    }
+    const s0 = v('#of-start'), s1 = v('#of-end');
+    if (s0 && s1 && new Date(s1) <= new Date(s0)) return fail(t('pr.badDates'));
+    const row = { kind: k, name: v('#of-name') || null, config: conf, starts_at: s0 ? new Date(s0).toISOString() : null, ends_at: s1 ? new Date(s1).toISOString() : null,
+      stackable: $('#of-stack', f).checked, show_badge: $('#of-badge', f).checked, active: $('#of-active', f).checked, priority: o.priority || 0 };
+    if (o.id) row.id = o.id;
+    const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
+    try { await api.saveOffer(row); toast(t('of.saved')); go('/admin/offers'); } catch (x) { fail(errText(x)); btn.disabled = false; }
+  };
+  drawTiers(); draw();
 }
 
 // ---------------------------------------------------------------- company details (shown on the legal pages)

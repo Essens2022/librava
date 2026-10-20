@@ -2,6 +2,8 @@
 // Secret: STRIPE_SECRET_KEY (Supabase → Edge Functions → Secrets). SUPABASE_* are provided automatically.
 // SITE_URL is optional: the shop address is not a secret, https://librava.store is used by default.
 import { createClient } from 'npm:@supabase/supabase-js@2';
+// same offers engine as the shop (copied from assets/js/offers.js when deploying)
+import { applyOffers } from './offers.js';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +14,11 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function countCoupon(admin: any, id: string) {
+  const { data: o } = await admin.from('offers').select('uses,config').eq('id', id).maybeSingle();
+  if (o) await admin.from('offers').update({ uses: (o.uses || 0) + 1, config: { ...(o.config || {}), uses: ((o.config?.uses) || 0) + 1 } }).eq('id', id);
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -41,7 +48,7 @@ Deno.serve(async (req) => {
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
-      .select('id,title,author,price_cents,currency')
+      .select('id,title,author,price_cents,currency,category,categories')
       .in('id', ids).eq('status', 'published').is('deleted_at', null);
     if (error) throw error;
     const { data: owned } = await admin.from('purchases').select('book_id').eq('user_id', user.id).in('book_id', ids);
@@ -50,12 +57,30 @@ Deno.serve(async (req) => {
     if (!toBuy.length) return json({ error: 'cart.empty' }, 400);
 
     const currency = (toBuy[0].currency || 'eur').toLowerCase();
-    const amount = toBuy.reduce((s, b) => s + b.price_cents, 0);
+    // discounts are calculated here on the server, never trusted from the browser
+    const code = typeof body.coupon === 'string' ? body.coupon.trim().toUpperCase().slice(0, 40) : '';
+    const { data: offerRows } = await admin.from('offers').select('*').eq('active', true);
+    const offers = (offerRows || []).filter((o) => o.kind !== 'coupon' || (code && String(o.config?.code || '').toUpperCase() === code));
+    const { count: paidOrders } = await admin.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'paid');
+    const calc = applyOffers(toBuy, offers, { coupon: code, hasOrders: (paidOrders || 0) > 0 });
+    const amount = calc.total;
+    const usedCoupon = calc.applied.find((a) => a.kind === 'coupon');
     const { data: order, error: oErr } = await admin.from('orders').insert({
       user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount, waiver_at: new Date().toISOString(),
-      items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: b.price_cents })),
+      subtotal_cents: calc.subtotal, discount_cents: calc.discount, coupon_code: usedCoupon ? code : null,
+      offers: calc.applied.map((a) => ({ id: a.id, kind: a.kind, name: a.name, saving: a.saving })),
+      items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: calc.final[b.id] ?? b.price_cents, list_cents: b.price_cents })),
     }).select('id, reference').single();
     if (oErr) throw oErr;
+    // everything is covered by the offers (e.g. a 100% coupon): add the books straight away, no card needed
+    if (amount === 0) {
+      const rows = toBuy.map((b) => ({ user_id: user.id, book_id: b.id, order_id: order.id, price_cents: 0, currency, customer_email: user.email }));
+      const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
+      if (pErr) throw pErr;
+      await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', order.id);
+      if (usedCoupon) await countCoupon(admin, usedCoupon.id);
+      return json({ mode: 'done' });
+    }
 
     const base = SITE.endsWith('/') ? SITE : SITE + '/';
     const p = new URLSearchParams();
@@ -83,6 +108,15 @@ Deno.serve(async (req) => {
       p.set(`line_items[${i}][price_data][product_data][description]`, `eBook · ${b.author}`.slice(0, 250));
     });
 
+    // the discount appears on Stripe's payment page as one line, with the offer's name
+    if (calc.discount > 0) {
+      const label = ('Librava: ' + (calc.applied.map((a) => a.name || (a.kind === 'coupon' ? code : 'offer')).join(' + '))).slice(0, 40);
+      const cp = new URLSearchParams({ amount_off: String(calc.discount), currency, duration: 'once', max_redemptions: '1', name: label });
+      const cr = await fetch('https://api.stripe.com/v1/coupons', { method: 'POST', headers: { Authorization: `Bearer ${STRIPE}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: cp });
+      const cj = await cr.json();
+      if (!cr.ok) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); return json({ error: cj?.error?.message || 'Stripe error' }, 502); }
+      p.set('discounts[0][coupon]', cj.id);
+    }
     const send = () => fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${STRIPE}`, 'Content-Type': 'application/x-www-form-urlencoded' },

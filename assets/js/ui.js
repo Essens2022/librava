@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020222638';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020222638';
-import { esc, store, $, $$ } from './util.js?v=20261020222638';
+import { CONFIG } from './config.js?v=20261020223633';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020223633';
+import { esc, store, $, $$ } from './util.js?v=20261020223633';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,15 +12,16 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020222638';
-import { suggest, highlight } from './search.js?v=20261020222638';
-import { api } from './api.js?v=20261020222638';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020223633';
+import { suggest, highlight } from './search.js?v=20261020223633';
+import { api } from './api.js?v=20261020223633';
 
 // ---------------- icons ----------------
 const P = {
   search: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
   cart: '<path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  tag: '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.6"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
