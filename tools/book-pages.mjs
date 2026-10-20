@@ -25,7 +25,7 @@ for (const b of books) {
   // WhatsApp (especially on iPhone) does not show WebP previews: every cover gets a JPEG copy on librava.store itself
   mkdirSync(`book/${b.id}`, { recursive: true });
   const ver = String(Date.parse(b.updated_at || '') || 0);
-  let cover = `${SITE}/assets/img/og.png`, cw = 1200, ch = 630;
+  let cover = `${SITE}/assets/img/og-en.jpg`, cw = 1200, ch = 630;
   if (b.cover_path) {
     const jpg = `book/${b.id}/cover.jpg`, stampFile = `book/${b.id}/.v`;
     try {
