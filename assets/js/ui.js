@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020203730';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020203730';
-import { esc, store, $, $$ } from './util.js?v=20261020203730';
+import { CONFIG } from './config.js?v=20261020204011';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020204011';
+import { esc, store, $, $$ } from './util.js?v=20261020204011';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020203730';
-import { suggest, highlight } from './search.js?v=20261020203730';
-import { api } from './api.js?v=20261020203730';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020204011';
+import { suggest, highlight } from './search.js?v=20261020204011';
+import { api } from './api.js?v=20261020204011';
 
 // ---------------- icons ----------------
 const P = {
@@ -403,7 +403,7 @@ export async function refreshBell(force) {
     const mine = notifCache.filter(n => !n.lang || n.lang === lang);
     const unread = mine.filter(n => !read.has(n.id)).length;
     $$('.bell-count').forEach(b => { b.textContent = unread > 9 ? '9+' : unread; b.hidden = !unread; });
-    $$('[data-bell]').forEach(b => b.hidden = !mine.length && !api.user()?.isAdmin);
+    // the bell is always visible (also on phones); the red number shows only when there is something new
     return mine;
   } catch { return []; }
 }
