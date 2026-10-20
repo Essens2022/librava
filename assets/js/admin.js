@@ -1,12 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020182652';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020182652';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020182652';
-import { resetCompanyCache } from './views.js?v=20261020182652';
-import { api } from './api.js?v=20261020182652';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020182652';
+import { CONFIG } from './config.js?v=20261020183139';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020183139';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020183139';
+import { resetCompanyCache } from './views.js?v=20261020183139';
+import { api } from './api.js?v=20261020183139';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020183139';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -595,6 +595,7 @@ function bookForm(body, b, startStep = 1) {
   let fileCheck = v.file_check || null;
   const aplusModules = JSON.parse(JSON.stringify(v.aplus || [])).map((m, i) => ({ ...m, imgs: (m.imgs || []).map((im, k) => im && { ...im, url: (b?.aplus?.[i]?.imgs?.[k]?.url) || im.ref }) }));
   const files = { cover: null, file: null, sample: null };
+  let lastFile = null;
   const eur = c => c ? (c / 100).toFixed(2) : '';
   const [first0, ...rest0] = String(v.author || '').trim().split(/\s+/);
   const kws = [...(v.keywords || []), '', '', '', '', '', '', ''].slice(0, 7);
@@ -798,6 +799,7 @@ function bookForm(body, b, startStep = 1) {
       file._original = original;
     }
     files[kind] = file;
+    if (kind === 'file') lastFile = file; // kept for the preview even after the upload clears files.file
     $('#n-' + kind, body).textContent = file.optimized
       ? t('img.optimized', { from: kb(file.optimized.from), to: kb(file.optimized.to), w: file.optimized.w, h: file.optimized.h })
       : `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
@@ -847,8 +849,16 @@ function bookForm(body, b, startStep = 1) {
   $$('[data-open-preview]', body).forEach(btn => btn.onclick = async () => {
     btn.disabled = true;
     try {
-      if (files.file) await openPreviewer(files.file, /\.epub$/i.test(files.file.name) ? 'epub' : 'pdf');
-      else { const src = await api.getReadSource({ ...v, id: bookId }, {}); await openPreviewer(src.url, v.format === 'epub' ? 'epub' : 'pdf'); }
+      const local = files.file || lastFile;
+      if (local) await openPreviewer(local, /\.epub$/i.test(local.name) ? 'epub' : 'pdf');
+      else {
+        // book already saved: read where its file is stored straight from the database (the form may not know it yet)
+        let book = v.file_path ? v : null;
+        if (!book && bookId) { if (api._catalog) api._catalog = null; book = await api.getBook(bookId); }
+        if (!book?.file_path) throw new Error(t('kdp.ck.manuscript') + ' ✕');
+        const src = await api.getReadSource({ ...book, id: bookId }, {});
+        await openPreviewer(src.url, (book.format || src.kind) === 'epub' ? 'epub' : 'pdf');
+      }
     } catch (x) { toast(errText(x), { error: true }); }
     btn.disabled = false;
   });
