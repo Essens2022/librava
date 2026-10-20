@@ -932,3 +932,10 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .ap-header img { max-width: min(100%, 970px); }
 .ap-it-view img, .ap-three-view img { max-height: 520px; }
 .ap-img img { object-fit: contain; height: auto; max-height: 260px; width: auto; max-width: 100%; margin: 0 auto; }
+/* covers: always shown whole, at their own proportions (KDP 1:1.6, 2:3, square…), never cut */
+.cover:has(img) { aspect-ratio: auto; background: none; }
+.cover img { height: auto; display: block; object-fit: contain; }
+/* in rows of books the box keeps one height so titles line up; the cover sits at the bottom, whole */
+.card .cover:has(img), .lib-item .cover:has(img), .rcard .cover:has(img) { aspect-ratio: 1 / 1.6; box-shadow: none; overflow: visible; display: flex; align-items: flex-end; justify-content: center; }
+.card .cover img, .lib-item .cover img, .rcard .cover img { width: auto; max-width: 100%; max-height: 100%; border-radius: 3px; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
+.cover-box img, .cover-preview { object-fit: contain; }
