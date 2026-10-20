@@ -29,7 +29,7 @@ DARK_TEXT = {'cooking', 'health', 'kids', 'selfhelp'}
 def page(l):
   t = TXT[l]
   covers = ''.join(f'''<div class="cv c{i}" style="background:linear-gradient(160deg,{ART[k][0]},{ART[k][1]});color:{'#2B241A' if k in DARK_TEXT else '#fff'}">
-    <span class="tag">eBook</span><b style="font-size:{min(21, int(124 / (0.62 * max(len(w) for w in cat_name(l, k).split()))))}px">{cat_name(l, k)}</b><svg viewBox="0 0 150 150">{ART[k][2]}</svg></div>''' for i, k in enumerate(ORDER))
+    <span class="tag">{t['e']}</span><b style="font-size:{min(21, int(124 / (0.62 * max(len(w) for w in cat_name(l, k).split()))))}px">{cat_name(l, k)}</b><svg viewBox="0 0 150 150">{ART[k][2]}</svg></div>''' for i, k in enumerate(ORDER))
   return f'''<!doctype html><html lang="{l}"><head><meta charset="utf-8"><link rel="stylesheet" href="{(ROOT / 'assets/css/fonts.css').as_uri()}"><style>
   *{{box-sizing:border-box;margin:0}} body{{width:1200px;height:630px;overflow:hidden;font-family:Figtree,'DejaVu Sans',sans-serif;
   background:radial-gradient(900px 500px at 85% 20%,rgba(147,197,114,.35),transparent 60%),linear-gradient(115deg,#1C2B2D 0%,#24393B 45%,#3F6A3A 100%);color:#fff;position:relative}}
