@@ -925,3 +925,10 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .ntf { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
 .ntf p { margin: 0; font-size: 14px; line-height: 1.5; }
 .bell-count[hidden], .bell-btn[hidden] { display: none !important; }
+/* A+ images: shown whole, as uploaded (no cropping), never enlarged beyond their real size */
+.aplus img, .ap-banner img, .ap-header img, .ap-it-view img, .ap-three-view img {
+  width: auto; max-width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; margin: 0 auto;
+}
+.ap-header img { max-width: min(100%, 970px); }
+.ap-it-view img, .ap-three-view img { max-height: 520px; }
+.ap-img img { object-fit: contain; height: auto; max-height: 260px; width: auto; max-width: 100%; margin: 0 auto; }

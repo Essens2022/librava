@@ -2,8 +2,8 @@
 //  Books the reader keeps on this device: download a personal copy (PDF / EPUB)
 //  and/or save it inside the browser to read without internet.
 // =====================================================================
-import { blobs, store, loadScript } from './util.js?v=20261020183139';
-import { api } from './api.js?v=20261020183139';
+import { blobs, store, loadScript } from './util.js?v=20261020184123';
+import { api } from './api.js?v=20261020184123';
 
 const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
 const KEY = 'offline:books';
