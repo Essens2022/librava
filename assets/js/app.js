@@ -1,12 +1,12 @@
-import { CONFIG } from './config.js?v=20261020204011';
-import { t, getLang, setLang } from './i18n.js?v=20261020204011';
-import { esc, $, $$ } from './util.js?v=20261020204011';
-import { api, chooseBackend } from './api.js?v=20261020204011';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent } from './ui.js?v=20261020204011';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261020204011';
-import { offline } from './offline.js?v=20261020204011';
-import { viewReader } from './reader.js?v=20261020204011';
-import { viewAdmin } from './admin.js?v=20261020204011';
+import { CONFIG } from './config.js?v=20261020204801';
+import { t, getLang, setLang } from './i18n.js?v=20261020204801';
+import { esc, $, $$ } from './util.js?v=20261020204801';
+import { api, chooseBackend } from './api.js?v=20261020204801';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent } from './ui.js?v=20261020204801';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261020204801';
+import { offline } from './offline.js?v=20261020204801';
+import { viewReader } from './reader.js?v=20261020204801';
+import { viewAdmin } from './admin.js?v=20261020204801';
 
 let cleanup = null, seq = 0;
 
@@ -125,3 +125,24 @@ if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostna
     reg.active?.postMessage({ cache: files });
   }).catch(() => { });
 }
+
+// always run the newest version: if the site was updated since this page loaded (a phone may keep an old copy
+// for a few minutes), reload once — on start and whenever the visitor comes back to the tab
+(() => {
+  const mine = (new URL(import.meta.url).searchParams.get('v')) || '';
+  if (!mine || !/(^|\.)librava\.store$/.test(location.hostname)) return;
+  let last = 0;
+  const check = async () => {
+    if (Date.now() - last < 60000) return; last = Date.now();
+    try {
+      const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
+      const live = /assets\/js\/app\.js\?v=(\d+)/.exec(html)?.[1];
+      if (live && live !== mine && sessionStorage.getItem('librava:reloadedFor') !== live) {
+        sessionStorage.setItem('librava:reloadedFor', live);
+        location.reload();
+      }
+    } catch { }
+  };
+  check();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+})();
