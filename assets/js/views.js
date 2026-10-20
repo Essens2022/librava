@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021010930';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021010930';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021010930';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021010930';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021010930';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021010930';
-import { track } from './track.js?v=20261021010930';
-import { didYouMean } from './search.js?v=20261021010930';
-import { api } from './api.js?v=20261021010930';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021010930';
+import { CONFIG } from './config.js?v=20261021012315';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021012315';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021012315';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021012315';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021012315';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021012315';
+import { track } from './track.js?v=20261021012315';
+import { didYouMean } from './search.js?v=20261021012315';
+import { api } from './api.js?v=20261021012315';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021012315';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -441,7 +441,10 @@ async function renderBoughtTogether(box, b, owned, offers) {
 const COUPON = 'librava:coupon';
 export async function viewCart(el) {
   const ids = cart.get();
-  const books = (await Promise.all(ids.map(id => api.getBook(id)))).filter(Boolean);
+  const found = (await Promise.all(ids.map(id => api.getBook(id)))).filter(Boolean);
+  // books already bought (or no longer for sale) leave the cart by themselves
+  const mine = await Promise.all(found.map(b => api.owns(b.id).catch(() => null)));
+  const books = found.filter((b, i) => !mine[i]);
   if (books.length !== ids.length) cart.set(books.map(b => b.id));
   if (!books.length) {
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('cart')}<h1 style="font-size:22px;color:var(--fg)">${esc(t('cart.empty'))}</h1><p>${esc(t('cart.emptyHint'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
@@ -765,7 +768,12 @@ export async function viewLibrary(el, q) {
     })();
   }
   let items, offlineMode = false;
-  try { items = await api.library(); }
+  try {
+    items = await api.library();
+    // what is in the library is no longer in the cart
+    const have = new Set(items.map(x => x.book?.id));
+    const c = cart.get(); if (c.some(id => have.has(id))) cart.set(c.filter(id => !have.has(id)));
+  }
   catch (e) {
     // no internet: show the books saved on this device
     items = offline.all().map(o => ({ book: o.book, purchase: { created_at: o.saved_at }, progress: store.get('guestprog:' + o.book.id, null) }));
