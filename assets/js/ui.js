@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020232403';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020232403';
-import { esc, store, $, $$ } from './util.js?v=20261020232403';
+import { CONFIG } from './config.js?v=20261020233330';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020233330';
+import { esc, store, $, $$ } from './util.js?v=20261020233330';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,9 +12,9 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020232403';
-import { suggest, highlight } from './search.js?v=20261020232403';
-import { api } from './api.js?v=20261020232403';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020233330';
+import { suggest, highlight } from './search.js?v=20261020233330';
+import { api } from './api.js?v=20261020233330';
 
 // ---------------- icons ----------------
 const P = {
@@ -441,7 +441,25 @@ export async function openBell() {
 }
 
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
-export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand'];
+export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream'];
+// light backgrounds get dark text
+export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream'];
+// title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
+export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
+  ['oswald', "'Oswald', 'Arial Narrow', sans-serif"], ['bebas', "'Bebas Neue', 'Oswald', sans-serif"], ['playfair', "'Playfair Display', Georgia, serif"], ['merriweather', "'Merriweather', Georgia, serif"],
+  ['dmserif', "'DM Serif Display', Georgia, serif"], ['nunito', "'Nunito', system-ui, sans-serif"]];
+const hexOk = c => /^#[0-9a-f]{6}$/i.test(c || '');
+const lum = c => { const n = parseInt(c.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); };
+// class + inline style for a banner: a ready theme, or two colours chosen by the owner, plus the title font
+export function promoLook(p) {
+  const font = PROMO_FONTS.find(f => f[0] === p.font);
+  if (p.theme === 'custom' && hexOk(p.bg_from) && hexOk(p.bg_to)) {
+    const light = (lum(p.bg_from) + lum(p.bg_to)) / 2 > 0.45;
+    return { cls: `theme-custom ${light ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''}`, style: `--bg:linear-gradient(115deg,${p.bg_from},${p.bg_to});${font ? `--pfont:${font[1]};` : ''}` };
+  }
+  const th = PROMO_THEMES.includes(p.theme) ? p.theme : 'forest';
+  return { cls: `theme-${th} ${LIGHT_THEMES.includes(th) ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''}`, style: font ? `--pfont:${font[1]};` : '' };
+}
 export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
 const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');
 // one slide; `b` is the book when the banner promotes a book
@@ -450,7 +468,8 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
   const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
-  const attrs = `class="promo promo-${placement} promo-${p.kind} theme-${esc(PROMO_THEMES.includes(p.theme) ? p.theme : 'forest')}" data-promo="${esc(p.id)}" href="${esc(link)}"${ext}`;
+  const look = promoLook(p);
+  const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" href="${esc(link)}"${ext}`;
   if (p.kind === 'image' && p.image_url) {
     return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
       ${title || p.kicker ? `<span class="promo-over"><span class="wrap">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${title ? `<b>${esc(title)}</b>` : ''}${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${p.cta ? `<span class="btn btn-buy">${esc(p.cta)}</span>` : ''}</span></span>` : ''}</a>`;
@@ -471,8 +490,8 @@ function promoBooksHTML(p, list, placement) {
   const books = list.filter(Boolean).slice(0, 8);
   const anyDeal = books.some(b => b.list_price_cents > b.price_cents);
   const link = safeLink(p.link) || (anyDeal ? '#/search?deals=1' : '#/search?sort=newest'), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
-  const theme = PROMO_THEMES.includes(p.theme) ? p.theme : 'forest';
-  return `<div class="promo promo-${placement} promo-books theme-${esc(theme)}" data-promo="${esc(p.id)}"><div class="wrap promo-in">
+  const look = promoLook(p);
+  return `<div class="promo promo-${placement} promo-books ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}"><div class="wrap promo-in">
     <div class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${p.title ? `<span class="promo-title">${esc(p.title)}</span>` : ''}
       ${p.subtitle ? `<span class="promo-sub">${esc(p.subtitle)}</span>` : ''}<a class="btn btn-buy promo-cta" href="${esc(link)}"${ext}>${esc(p.cta || t('promo.ctaBooks'))}</a></div>
     <div class="promo-shelf n${books.length}">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;

@@ -1365,3 +1365,44 @@ html[data-theme="dark"] .offer-chip, html[data-theme="dark"] .nudge { background
 .ntf-adm { margin-top: 16px; }
 #n-vars[hidden], [data-v][hidden] { display: none !important; }
 input[readonly], textarea[readonly] { background: var(--surface-2); color: var(--muted); }
+/* ---------- banner looks: 20 ready backgrounds + your own two colours, and the title font ---------- */
+.theme-store { background: linear-gradient(115deg, #131921 0%, #232F3E 60%, #37475A 100%); }
+.theme-midnight { background: linear-gradient(115deg, #0B0B0F 0%, #1C1C24 60%, #2E2E3A 100%); }
+.theme-orange { background: linear-gradient(115deg, #B34700 0%, #E47911 55%, #FFA41C 100%); }
+.theme-coral { background: linear-gradient(115deg, #7A1F2B 0%, #D9485F 55%, #FF8A65 100%); }
+.theme-wine { background: linear-gradient(115deg, #2B0A12 0%, #5E1428 55%, #8E2441 100%); }
+.theme-gold { background: linear-gradient(115deg, #2E2410 0%, #6B5216 55%, #B38B2E 100%); }
+.theme-emerald { background: linear-gradient(115deg, #052E24 0%, #0B5E47 55%, #18936C 100%); }
+.theme-royal { background: linear-gradient(115deg, #0D1B4C 0%, #1F3A93 55%, #3E6BE0 100%); }
+.theme-slate { background: linear-gradient(115deg, #1F262E 0%, #3A4651 55%, #5C6B78 100%); }
+.theme-mint { background: linear-gradient(115deg, #E6F6EE 0%, #C6EBD8 100%); }
+.theme-sky { background: linear-gradient(115deg, #E7F2FD 0%, #C4DFF9 100%); }
+.theme-blush { background: linear-gradient(115deg, #FDEDEF 0%, #F8CFD6 100%); }
+.theme-lavender { background: linear-gradient(115deg, #F1ECFB 0%, #D9CCF5 100%); }
+.theme-cream { background: linear-gradient(115deg, #FFFBF2 0%, #F4E9D1 100%); }
+.theme-custom { background: var(--bg); }
+.theme-light { color: #1F2328; }
+.theme-light .promo-sub, .theme-light .promo-by, .theme-light .promo-note, .theme-light .promo-rating { color: #4A5057 !important; }
+.theme-light .promo-kicker { color: #8A4B00 !important; }
+.theme-light .promo-save { color: #1E7B34 !important; }
+.theme-light .promo-price s { color: #6B7178; }
+.theme-light .promo-bg { opacity: .22; }
+.theme-light.promo-books .pb-cover, .theme-light .pb { box-shadow: 0 12px 26px rgba(0, 0, 0, .22), 0 2px 4px rgba(0, 0, 0, .15); }
+.promo[class*="font-"] .promo-title, .promo[class*="font-"] .promo-over b { font-family: var(--pfont); }
+.font-bebas .promo-title, .font-oswald .promo-title { letter-spacing: .3px; text-transform: none; }
+.font-bebas .promo-title { font-weight: 400; font-size: clamp(30px, 4.6vw, 54px); line-height: 1.02; }
+.font-dmserif .promo-title { font-weight: 400; }
+.font-inter .promo-title, .font-montserrat .promo-title, .font-nunito .promo-title, .font-figtree .promo-title { letter-spacing: -.5px; }
+/* editor */
+.pr-themes { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 8px; }
+.pr-custom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.pr-custom input[type=color] { width: 44px; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--surface); cursor: pointer; }
+.pr-custom .pr-theme { width: 44px; }
+.pr-fonts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.pr-font { position: relative; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.pr-font input { position: absolute; opacity: 0; }
+.pr-font b { font-size: 22px; line-height: 1.1; font-weight: 700; }
+.pr-font small { color: var(--muted); font-size: 12px; }
+.pr-font:has(input:checked) { border-color: var(--pista-strong); background: var(--pista-soft); box-shadow: 0 0 0 1px var(--pista-strong); }
+.pr-font:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.promo-one .promo-bg { opacity: .22; } .theme-light .promo-bg { opacity: .18; }

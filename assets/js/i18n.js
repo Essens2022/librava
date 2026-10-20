@@ -1,8 +1,22 @@
-import { CONFIG } from './config.js?v=20261020232403';
-import { store } from './util.js?v=20261020232403';
+import { CONFIG } from './config.js?v=20261020233330';
+import { store } from './util.js?v=20261020233330';
 
 const D = {
   ro: {
+    'pr.custom': 'Culorile mele',
+    'pr.color1': 'Culoarea 1',
+    'pr.color2': 'Culoarea 2',
+    'pr.font': 'Fontul titlului',
+    'pr.f.default': 'Literata · stilul Librava',
+    'pr.f.figtree': 'Figtree · modern, ca Amazon',
+    'pr.f.inter': 'Inter · curat, ca Amazon',
+    'pr.f.montserrat': 'Montserrat · puternic',
+    'pr.f.oswald': 'Oswald · reduceri',
+    'pr.f.bebas': 'Bebas Neue · afiș',
+    'pr.f.playfair': 'Playfair · elegant',
+    'pr.f.merriweather': 'Merriweather · clasic',
+    'pr.f.dmserif': 'DM Serif · editorial',
+    'pr.f.nunito': 'Nunito · rotunjit, copii',
     'ntf.now': 'acum',
     'ntf.tplTitle': 'Notificări gata făcute',
     'ntf.tplHelp': 'Alege un model, apoi cartea sau cărțile. Textul se completează singur în fiecare limbă. Poți trimite tuturor (fiecare client îl primește în limba lui) sau doar unei limbi.',
@@ -964,6 +978,20 @@ const D = {
   },
 
   it: {
+    'pr.custom': 'I miei colori',
+    'pr.color1': 'Colore 1',
+    'pr.color2': 'Colore 2',
+    'pr.font': 'Font del titolo',
+    'pr.f.default': 'Literata · stile Librava',
+    'pr.f.figtree': 'Figtree · moderno, come Amazon',
+    'pr.f.inter': 'Inter · pulito, come Amazon',
+    'pr.f.montserrat': 'Montserrat · deciso',
+    'pr.f.oswald': 'Oswald · offerte',
+    'pr.f.bebas': 'Bebas Neue · poster',
+    'pr.f.playfair': 'Playfair · elegante',
+    'pr.f.merriweather': 'Merriweather · classico',
+    'pr.f.dmserif': 'DM Serif · editoriale',
+    'pr.f.nunito': 'Nunito · arrotondato, bambini',
     'ntf.now': 'adesso',
     'ntf.tplTitle': 'Notifiche pronte',
     'ntf.tplHelp': 'Scegli un modello, poi il libro o i libri. Il testo si compila da solo in ogni lingua. Puoi inviare a tutti (ognuno la riceve nella sua lingua) o a una sola lingua.',
@@ -1925,6 +1953,20 @@ const D = {
   },
 
   en: {
+    'pr.custom': 'My colours',
+    'pr.color1': 'Colour 1',
+    'pr.color2': 'Colour 2',
+    'pr.font': 'Title font',
+    'pr.f.default': 'Literata · Librava style',
+    'pr.f.figtree': 'Figtree · modern, Amazon-like',
+    'pr.f.inter': 'Inter · clean, Amazon-like',
+    'pr.f.montserrat': 'Montserrat · bold',
+    'pr.f.oswald': 'Oswald · deals',
+    'pr.f.bebas': 'Bebas Neue · poster',
+    'pr.f.playfair': 'Playfair · elegant',
+    'pr.f.merriweather': 'Merriweather · classic',
+    'pr.f.dmserif': 'DM Serif · editorial',
+    'pr.f.nunito': 'Nunito · rounded, kids',
     'ntf.now': 'now',
     'ntf.tplTitle': 'Ready-made notifications',
     'ntf.tplHelp': 'Pick a template, then the book or books. The text fills itself in every language. Send it to everyone (each customer gets it in their language) or to one language only.',
@@ -2919,7 +2961,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261020232403`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261020233330`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
