@@ -1,5 +1,11 @@
 // Swedish interface strings for Librava
 export default {
+  "promo.cta": "Upptäck mer",
+  "promo.ctaBook": "Se boken",
+  "promo.label": "Utvalda erbjudanden",
+  "promo.prev": "Föregående",
+  "promo.next": "Nästa",
+  "promo.go": "Gå till bild {n}",
   "book.color.color": "Färg",
   "book.color.bw": "Svartvit",
   "book.d.color": "Färg",

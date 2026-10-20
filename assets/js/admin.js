@@ -1,12 +1,12 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020192315';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020192315';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020192315';
-import { resetCompanyCache } from './views.js?v=20261020192315';
-import { api } from './api.js?v=20261020192315';
-import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell } from './ui.js?v=20261020192315';
+import { CONFIG } from './config.js?v=20261020201306';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020201306';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261020201306';
+import { resetCompanyCache } from './views.js?v=20261020201306';
+import { api } from './api.js?v=20261020201306';
+import { icon, go, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, safeLink } from './ui.js?v=20261020201306';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -15,6 +15,7 @@ const TABS = [
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
   ['reviews', '/admin/reviews', 'eye', 'admin.tab.reviews'],
+  ['promos', '/admin/promos', 'bolt', 'pr.title'],
   ['notifications', '/admin/notifications', 'bell', 'ntf.title'],
   ['settings', '/admin/settings', 'gear', 'set.title'],
 ];
@@ -30,7 +31,7 @@ export async function viewAdmin(el, parts) {
   let tab = parts[0] || 'overview';
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
-  el.innerHTML = `<div class="wrap page adm" style="max-width:1200px">
+  el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
     <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
     <nav class="tabs adm-tabs" aria-label="${esc(t('admin.title'))}">
@@ -46,6 +47,7 @@ export async function viewAdmin(el, parts) {
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'reviews': return reviews(body);
+    case 'promos': return parts[1] ? promoForm(body, parts[1]) : promosAdmin(body);
     case 'notifications': return notificationsAdmin(body);
     case 'settings': return settingsAdmin(body);
     default: return overview(body);
@@ -993,6 +995,162 @@ async function notificationsAdmin(body) {
     if (!await confirmBox(t('admin.delete') + '?', { danger: true })) return;
     try { await api.deleteNotification(b.dataset.delNtf); notificationsAdmin(body); refreshBell(true); } catch (x) { toast(errText(x), { error: true }); }
   });
+}
+
+// ---------------------------------------------------------------- advertising: home page banners per language
+const PROMO_SPEC = { hero: { w: 1500, h: 600, mw: 1200, mh: 900 }, strip: { w: 1500, h: 300, mw: 900, mh: 300 } };
+const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at) > new Date() ? 'soon' : p.ends_at && new Date(p.ends_at) <= new Date() ? 'ended' : 'live';
+const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
+async function promosAdmin(body) {
+  const filter = sessionStorage.getItem('librava:prLang') || '';
+  const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
+  const byId = Object.fromEntries(books.map(b => [b.id, b]));
+  const list = all.filter(p => !filter || p.lang === filter || (filter === '*' && !p.lang));
+  const used = [...new Set(all.map(p => p.lang).filter(Boolean))];
+  const row = p => {
+    const st = promoStatus(p), ctr = p.views ? (p.clicks / p.views * 100).toFixed(1).replace('.', ',') + '%' : '—';
+    const b = byId[p.book_id];
+    return `<div class="pr-row">
+      <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement)}</div></div>
+      <div class="pr-info"><b>${esc(p.title || b?.title || t('pr.untitled'))}</b>
+        <span class="muted">${esc(t('pr.place.' + p.placement))} · ${esc(langLabel(p.lang))} · ${esc(t('pr.kind.' + p.kind))}</span>
+        <span><span class="status ${st === 'live' ? 'live' : 'draft'}">${esc(t('pr.st.' + st))}</span>
+          ${p.starts_at || p.ends_at ? `<span class="muted" style="font-size:13px">${esc(p.starts_at ? fmtDate(p.starts_at) : '…')} → ${esc(p.ends_at ? fmtDate(p.ends_at) : '…')}</span>` : ''}</span>
+        <span class="pr-stats"><span>${esc(t('pr.views'))}: <b>${p.views || 0}</b></span><span>${esc(t('pr.clicks'))}: <b>${p.clicks || 0}</b></span><span>CTR: <b>${ctr}</b></span></span></div>
+      <div class="pr-acts">
+        <button type="button" class="btn btn-ghost btn-sm" data-up="${esc(p.id)}" aria-label="${esc(t('pr.up'))}" title="${esc(t('pr.up'))}">↑</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-down="${esc(p.id)}" aria-label="${esc(t('pr.down'))}" title="${esc(t('pr.down'))}">↓</button>
+        <a class="btn btn-ghost btn-sm" href="#/admin/promos/${esc(p.id)}">${esc(t('pr.editBtn'))}</a>
+        <button type="button" class="btn btn-ghost btn-sm" data-toggle="${esc(p.id)}">${esc(t(p.active ? 'pr.pause' : 'pr.activate'))}</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-del="${esc(p.id)}" style="color:var(--deal)">${esc(t('admin.delete'))}</button></div></div>`;
+  };
+  body.innerHTML = `<div class="panel pr-head">
+      <div><h2 class="section-title" style="font-size:19px;margin:0">${esc(t('pr.title'))}</h2><p class="muted" style="margin:4px 0 0;max-width:70ch">${esc(t('pr.help'))}</p></div>
+      <div class="pr-tools"><label class="field" style="margin:0"><span>${esc(t('pr.showLang'))}</span><select id="pr-lang">
+        <option value="">${esc(t('pr.everything'))}</option><option value="*" ${filter === '*' ? 'selected' : ''}>${esc(t('pr.allLangs'))}</option>
+        ${LANGS.map(([l, n]) => `<option value="${l}" ${filter === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}${used.includes(l) ? ' ●' : ''}</option>`).join('')}</select></label>
+        <a class="btn btn-buy" href="#/admin/promos/new">${icon('plus')} ${esc(t('pr.new'))}</a></div></div>
+    ${['hero', 'strip'].map(pl => { const items = list.filter(p => p.placement === pl); return `<section class="panel"><h3 style="margin:0 0 4px">${esc(t('pr.place.' + pl))}</h3><p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('pr.placeHelp.' + pl))}</p>
+      ${items.length ? `<div class="pr-list">${items.map(row).join('')}</div>` : `<p class="muted">${esc(t('pr.none'))}</p>`}</section>`; }).join('')}`;
+  $('#pr-lang', body).onchange = e => { sessionStorage.setItem('librava:prLang', e.target.value); promosAdmin(body); };
+  const move = async (id, dir) => {
+    const p = all.find(x => x.id === id); const group = all.filter(x => x.placement === p.placement);
+    const i = group.indexOf(p), j = i + dir; if (j < 0 || j >= group.length) return;
+    [group[i], group[j]] = [group[j], group[i]];
+    try { await Promise.all(group.map((x, k) => x.sort === k ? null : api.savePromo({ id: x.id, sort: k }))); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); }
+  };
+  $$('[data-up]', body).forEach(b => b.onclick = () => move(b.dataset.up, -1));
+  $$('[data-down]', body).forEach(b => b.onclick = () => move(b.dataset.down, 1));
+  $$('[data-toggle]', body).forEach(b => b.onclick = async () => { const p = all.find(x => x.id === b.dataset.toggle); try { await api.savePromo({ id: p.id, active: !p.active }); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); } });
+  $$('[data-del]', body).forEach(b => b.onclick = async () => {
+    if (!await confirmBox(t('pr.delAsk'), { danger: true })) return;
+    try { await api.deletePromo(all.find(x => x.id === b.dataset.del)); toast(t('pr.deleted')); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); }
+  });
+}
+
+async function promoForm(body, id) {
+  const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
+  const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
+  const p = all.find(x => x.id === id) || { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
+  const files = {};
+  const local = iso => { if (!iso) return ''; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  body.innerHTML = `<form class="panel pr-form" id="pr-form" novalidate>
+    <div class="pr-form-head"><h2 class="section-title" style="font-size:19px;margin:0">${esc(id === 'new' ? t('pr.new') : t('pr.edit'))}</h2><a class="btn btn-ghost btn-sm" href="#/admin/promos">← ${esc(t('pr.back'))}</a></div>
+    <div class="pr-live"><div class="pr-live-bar"><b>${esc(t('pr.preview'))}</b><div class="seg"><button type="button" data-pv="desk" class="on">${esc(t('pv.desktop'))}</button><button type="button" data-pv="phone">${esc(t('pv.phone'))}</button></div></div>
+      <div class="pr-live-stage"><div class="pr-live-frame" id="pr-live"></div></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.where'))}</h3><p>${esc(t('pr.whereHelp'))}</p></div>
+      <div class="kdp-fields">
+        <div class="radios">${['hero', 'strip'].map(v => `<label class="check"><input type="radio" name="pl" value="${v}" ${p.placement === v ? 'checked' : ''}> ${esc(t('pr.place.' + v))}</label>`).join('')}</div>
+        <label class="field"><span>${esc(t('pr.lang'))} *</span><select id="pr-l"><option value="">${esc(t('pr.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}" ${p.lang === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select><small>${esc(t('pr.langHelp'))}</small></label></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
+      <div class="kdp-fields">
+        <div class="radios">${['book', 'image'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
+        <div id="pr-bookbox"><label class="field"><span>${esc(t('pr.book'))} *</span><select id="pr-book"><option value="">—</option>${pub.map(b => `<option value="${esc(b.id)}" data-lang="${esc(b.language || '')}" ${p.book_id === b.id ? 'selected' : ''}>${esc(b.title)} · ${esc((b.language || '').toUpperCase())}</option>`).join('')}</select><small id="pr-booklang" class="muted"></small></label>
+          <span class="muted" style="font-size:14px">${esc(t('pr.theme'))}</span><div class="pr-themes">${PROMO_THEMES.map(th => `<label class="pr-theme theme-${th}" title="${th}"><input type="radio" name="th" value="${th}" ${p.theme === th ? 'checked' : ''}><span></span></label>`).join('')}</div></div>
+        <div id="pr-imgbox">
+          <label class="drop" data-drop="image">${icon('image')}<span><span class="fname" id="n-image">${p.image_url ? '✓ ' + esc(t('pr.imgKept')) : esc(t('pr.imgWide'))}</span><br><small id="spec-wide"></small></span><input type="file" id="pr-image" accept="image/jpeg,image/png,image/webp"></label>
+          <div class="kdp-warn" id="w-image" hidden></div>
+          <label class="drop" data-drop="mobile">${icon('devices')}<span><span class="fname" id="n-mobile">${p.image_mobile_url ? '✓ ' + esc(t('pr.imgKept')) : esc(t('pr.imgMobile'))}</span><br><small id="spec-mobile"></small></span><input type="file" id="pr-mobile" accept="image/jpeg,image/png,image/webp"></label>
+          <div class="kdp-warn" id="w-mobile" hidden></div>
+          ${p.image_mobile_url ? `<button type="button" class="btn btn-ghost btn-sm" id="pr-rm-mobile">${esc(t('pr.rmMobile'))}</button>` : ''}</div></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.texts'))}</h3><p>${esc(t('pr.textsHelp'))}</p></div>
+      <div class="kdp-fields">
+        <label class="field"><span>${esc(t('pr.kicker'))}</span><input id="pr-kicker" maxlength="40" value="${esc(p.kicker || '')}" placeholder="${esc(t('pr.kickerPh'))}"></label>
+        <label class="field"><span>${esc(t('pr.titleF'))}</span><input id="pr-title" maxlength="90" value="${esc(p.title || '')}"><small id="pr-title-ph" class="muted"></small></label>
+        <label class="field"><span>${esc(t('pr.sub'))}</span><input id="pr-sub" maxlength="160" value="${esc(p.subtitle || '')}"></label>
+        <div class="two"><label class="field"><span>${esc(t('pr.cta'))}</span><input id="pr-cta" maxlength="30" value="${esc(p.cta || '')}" placeholder="${esc(t('promo.ctaBook'))}"></label>
+          <label class="field"><span>${esc(t('pr.link'))}</span><select id="pr-linkpick"><option value="">${esc(t('pr.link.auto'))}</option><option value="#/search?sort=newest">${esc(t('home.new'))}</option><option value="#/search?deals=1">${esc(t('home.deals'))}</option><option value="#/search?price=free">${esc(t('home.free'))}</option><option value="#/search?sort=bestsellers">${esc(t('home.featured'))}</option>${CATS.map(c => `<option value="#/search?cat=${c}">${esc(t('cat.' + c))}</option>`).join('')}<option value="custom">${esc(t('pr.link.custom'))}</option></select></label></div>
+        <label class="field" id="pr-linkbox" hidden><span>${esc(t('pr.link.customF'))}</span><input id="pr-link" maxlength="300" placeholder="#/book/…  ·  https://…" value="${esc(p.link || '')}"><small>${esc(t('pr.link.help'))}</small></label></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.when'))}</h3><p>${esc(t('pr.whenHelp'))}</p></div>
+      <div class="kdp-fields"><div class="two"><label class="field"><span>${esc(t('pr.start'))}</span><input type="datetime-local" id="pr-start" value="${local(p.starts_at)}"></label>
+        <label class="field"><span>${esc(t('pr.end'))}</span><input type="datetime-local" id="pr-end" value="${local(p.ends_at)}"></label></div>
+        <label class="check"><input type="checkbox" id="pr-active" ${p.active !== false ? 'checked' : ''}> ${esc(t('pr.activeF'))}</label></div></div>
+    <div class="error" id="pr-err" hidden></div>
+    <div class="kdp-bar"><a class="btn btn-ghost" href="#/admin/promos">${esc(t('admin.cancel'))}</a><span class="spacer"></span><button class="btn btn-buy" type="submit">${esc(t('pr.save'))}</button></div>
+  </form>`;
+  const f = $('#pr-form', body), val = sel => ($(sel, f)?.value || '').trim(), rad = n => f.querySelector(`input[name="${n}"]:checked`)?.value;
+  // link: known destinations in a list, anything else as a custom link
+  const pick = $('#pr-linkpick', f), known = [...pick.options].map(o => o.value);
+  if (p.link && known.includes(p.link)) pick.value = p.link; else if (p.link) { pick.value = 'custom'; $('#pr-linkbox', f).hidden = false; }
+  pick.onchange = () => { $('#pr-linkbox', f).hidden = pick.value !== 'custom'; draw(); };
+  const current = () => ({
+    ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null,
+    theme: rad('th') || 'forest', kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
+    link: pick.value === 'custom' ? val('#pr-link') || null : pick.value || null,
+    starts_at: val('#pr-start') ? new Date(val('#pr-start')).toISOString() : null, ends_at: val('#pr-end') ? new Date(val('#pr-end')).toISOString() : null,
+    active: $('#pr-active', f).checked,
+    image_url: files.imageUrl || p.image_url, image_mobile_url: files.removeMobile ? null : files.mobileUrl || p.image_mobile_url,
+  });
+  let dev = 'desk';
+  const draw = () => {
+    const c = current(), spec = PROMO_SPEC[c.placement] || PROMO_SPEC.hero;
+    $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
+    $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
+    $('#spec-mobile', f).textContent = t('pr.specMobile', { w: spec.mw, h: spec.mh });
+    const b = pub.find(x => x.id === c.book_id);
+    $('#pr-title-ph', f).textContent = c.kind === 'book' ? t('pr.titleAuto') : '';
+    const bl = $('#pr-booklang', f); bl.textContent = b && c.lang && b.language && b.language !== c.lang ? t('pr.bookOtherLang', { a: (b.language || '').toUpperCase(), b: c.lang.toUpperCase() }) : '';
+    const live = $('#pr-live', f);
+    live.className = 'pr-live-frame ' + dev;
+    const ok = c.kind === 'image' ? c.image_url : b;
+    live.innerHTML = ok ? (c.placement === 'hero' ? `<div class="hero hero-promos" style="padding-bottom:0">${promoHTML(c, b, 'hero')}</div>` : `<div class="promo-strip-wrap" style="padding:12px">${promoHTML(c, b, 'strip')}</div>`) : `<div class="pr-empty">${esc(t(c.kind === 'image' ? 'pr.needImage' : 'pr.needBook'))}</div>`;
+    live.querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+  };
+  f.addEventListener('input', draw); f.addEventListener('change', draw);
+  $$('[data-pv]', f).forEach(b => b.onclick = () => { dev = b.dataset.pv; $$('[data-pv]', f).forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  $('#pr-rm-mobile', f)?.addEventListener('click', e => { files.removeMobile = true; files.mobile = null; e.target.remove(); $('#n-mobile', f).textContent = t('pr.imgMobile'); draw(); });
+  const take = async (kind, file) => {
+    if (!file) return;
+    if (!/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
+    const spec = PROMO_SPEC[rad('pl')] || PROMO_SPEC.hero, tw = kind === 'image' ? spec.w : spec.mw, th = kind === 'image' ? spec.h : spec.mh;
+    const dim = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([0, 0]); im.src = URL.createObjectURL(file); });
+    const warn = $('#w-' + kind, f), msgs = [];
+    if (dim[0] < tw * 0.66) msgs.push(t('pr.imgSmall', { w: dim[0], h: dim[1], tw, th }));
+    if (Math.abs(dim[0] / dim[1] - tw / th) / (tw / th) > 0.06) msgs.push(t('pr.imgRatio', { w: dim[0], h: dim[1], tw, th }));
+    warn.innerHTML = msgs.map(esc).join('<br>'); warn.hidden = !msgs.length;
+    const light = await compressImage(file, { maxW: tw, maxH: th * 2, name: kind === 'image' ? 'banner' : 'banner-mobile' });
+    files[kind] = light; files[kind + 'Url'] = URL.createObjectURL(light); if (kind === 'mobile') files.removeMobile = false;
+    $('#n-' + kind, f).textContent = light.optimized ? t('img.optimized', { from: kb(light.optimized.from), to: kb(light.optimized.to), w: light.optimized.w, h: light.optimized.h }) : file.name;
+    draw();
+  };
+  $('#pr-image', f).onchange = e => take('image', e.target.files[0]);
+  $('#pr-mobile', f).onchange = e => take('mobile', e.target.files[0]);
+  $$('.drop', f).forEach(d => { d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('over'); }); d.addEventListener('dragleave', () => d.classList.remove('over')); d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('over'); take(d.dataset.drop, e.dataTransfer.files[0]); }); });
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const c = current(), err = $('#pr-err', f), fail = m => { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: 'center' }); };
+    err.hidden = true;
+    if (c.kind === 'book' && !c.book_id) return fail(t('pr.needBook'));
+    if (c.kind === 'image' && !c.image_url) return fail(t('pr.needImage'));
+    if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
+    if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
+    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, theme: c.theme, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, sort: p.sort ?? all.length };
+    if (!row.id) delete row.id;
+    const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
+    try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }
+    catch (x) { fail(errText(x)); btn.disabled = false; }
+  };
+  draw();
 }
 
 // ---------------------------------------------------------------- company details (shown on the legal pages)

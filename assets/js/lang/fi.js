@@ -1,5 +1,11 @@
 // Finnish interface strings for Librava
 export default {
+  "promo.cta": "Tutustu",
+  "promo.ctaBook": "Katso kirja",
+  "promo.label": "Suositellut tarjoukset",
+  "promo.prev": "Edellinen",
+  "promo.next": "Seuraava",
+  "promo.go": "Siirry diaan {n}",
   "book.color.color": "Värillinen",
   "book.color.bw": "Mustavalkoinen",
   "book.d.color": "Värit",

@@ -1,10 +1,10 @@
-import { CONFIG } from './config.js?v=20261020192315';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020192315';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020192315';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020192315';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020192315';
-import { api } from './api.js?v=20261020192315';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML } from './ui.js?v=20261020192315';
+import { CONFIG } from './config.js?v=20261020201306';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261020201306';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261020201306';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261020201306';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261020201306';
+import { api } from './api.js?v=20261020201306';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261020201306';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -22,6 +22,12 @@ export async function viewHome(el) {
     api.listBooks({ lang: L }),
     api.listBooks({ sort: 'bestsellers' }),
   ]);
+  // banners chosen in Admin → Advertising, only those for this language (or for all languages)
+  const promos = api.promos ? await api.promos(L).catch(() => []) : [];
+  const byId = Object.fromEntries(everything.map(b => [b.id, b]));
+  const ok = p => p.kind === 'image' ? !!p.image_url : !!byId[p.book_id];
+  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, byId[p.book_id], 'hero'));
+  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, byId[p.book_id], 'strip')}</div>`);
   const noBooks = !all.length;
   let cont = null;
   if (api.user()) {
@@ -41,7 +47,7 @@ export async function viewHome(el) {
   }).join('');
 
   el.innerHTML = `
-  <section class="hero"><div class="wrap hero-inner">
+  ${heroSlides.length ? `<section class="hero hero-promos">${carouselHTML(heroSlides, 'hero')}<div class="hero-fade"></div></section>` : `<section class="hero"><div class="wrap hero-inner">
     <div>
       <div class="hero-kicker">${esc(t('home.heroKicker'))}</div>
       <h1>${esc(t('home.heroTitle'))}</h1>
@@ -49,7 +55,7 @@ export async function viewHome(el) {
       <div class="hero-actions"><a class="btn btn-buy" href="#/search?sort=bestsellers">${esc(t('home.heroCta'))}</a><a class="btn btn-light" href="#/search?price=free">${esc(t('home.heroCta2'))}</a></div>
     </div>
     <div class="hero-fan" aria-hidden="true">${fan.map(b => b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : '').join('')}</div>
-  </div><div class="hero-fade"></div></section>
+  </div><div class="hero-fade"></div></section>`}
   <div class="wrap lift home-stack" style="padding-bottom:40px">
     <div class="panel trust">
       <div>${icon('bolt')} ${esc(t('home.trust1'))}</div>
@@ -67,11 +73,16 @@ export async function viewHome(el) {
       </div></section>` : ''}
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
+    ${strips[0] || ''}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
+    ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
+    ${strips[2] || ''}
     ${shelf(t('home.deals'), deals, '#/search?deals=1')}
+    ${strips.slice(3).join('')}
     ${shelf(t('home.free'), free, '#/search?price=free')}
   </div>`;
+  mountPromos(el);
 }
 
 // =====================================================================

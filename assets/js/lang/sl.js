@@ -1,5 +1,11 @@
 // Slovenian interface strings for Librava
 export default {
+  "promo.cta": "Odkrij več",
+  "promo.ctaBook": "Oglej si knjigo",
+  "promo.label": "Izpostavljene ponudbe",
+  "promo.prev": "Prejšnji",
+  "promo.next": "Naslednji",
+  "promo.go": "Pojdi na diapozitiv {n}",
   "book.color.color": "Barvna",
   "book.color.bw": "Črno-bela",
   "book.d.color": "Barve",

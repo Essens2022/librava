@@ -1,5 +1,11 @@
 // Danish interface strings for Librava
 export default {
+  "promo.cta": "Se mere",
+  "promo.ctaBook": "Se bogen",
+  "promo.label": "Udvalgte tilbud",
+  "promo.prev": "Forrige",
+  "promo.next": "Næste",
+  "promo.go": "Gå til slide {n}",
   "book.color.color": "Farver",
   "book.color.bw": "Sort-hvid",
   "book.d.color": "Farver",

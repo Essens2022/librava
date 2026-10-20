@@ -1,5 +1,11 @@
 // Estonian interface strings for Librava
 export default {
+  "promo.cta": "Avasta",
+  "promo.ctaBook": "Vaata raamatut",
+  "promo.label": "Esiletõstetud pakkumised",
+  "promo.prev": "Eelmine",
+  "promo.next": "Järgmine",
+  "promo.go": "Mine slaidile {n}",
   "book.color.color": "Värviline",
   "book.color.bw": "Mustvalge",
   "book.d.color": "Värvid",

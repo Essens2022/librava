@@ -1,5 +1,11 @@
 // French interface strings for Librava
 export default {
+  "promo.cta": "Découvrir",
+  "promo.ctaBook": "Voir le livre",
+  "promo.label": "Offres à la une",
+  "promo.prev": "Précédent",
+  "promo.next": "Suivant",
+  "promo.go": "Aller à la diapositive {n}",
   "book.color.color": "Couleur",
   "book.color.bw": "Noir et blanc",
   "book.d.color": "Couleur",

@@ -300,3 +300,5 @@ create policy "buyers read book files" on storage.objects for select using (
 
 -- book interior: colour or black & white
 alter table public.books add column if not exists color text not null default 'color' check (color in ('color','bw'));
+
+-- promotions (Admin -> Advertising): see migration 'promos' (table public.promos + function promo_hit)

@@ -1,5 +1,11 @@
 // Slovak interface strings for Librava
 export default {
+  "promo.cta": "Zistiť viac",
+  "promo.ctaBook": "Zobraziť knihu",
+  "promo.label": "Odporúčané ponuky",
+  "promo.prev": "Predchádzajúci",
+  "promo.next": "Ďalší",
+  "promo.go": "Prejsť na snímku {n}",
   "book.color.color": "Farebná",
   "book.color.bw": "Čiernobiela",
   "book.d.color": "Farby",

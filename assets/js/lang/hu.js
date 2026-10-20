@@ -1,5 +1,11 @@
 // Hungarian interface strings for Librava
 export default {
+  "promo.cta": "Fedezd fel",
+  "promo.ctaBook": "Megnézem a könyvet",
+  "promo.label": "Kiemelt ajánlatok",
+  "promo.prev": "Előző",
+  "promo.next": "Következő",
+  "promo.go": "Ugrás a(z) {n}. diára",
   "book.color.color": "Színes",
   "book.color.bw": "Fekete-fehér",
   "book.d.color": "Színek",

@@ -1,5 +1,11 @@
 // Greek interface strings for Librava
 export default {
+  "promo.cta": "Ανακαλύψτε",
+  "promo.ctaBook": "Δείτε το βιβλίο",
+  "promo.label": "Προτεινόμενες προσφορές",
+  "promo.prev": "Προηγούμενο",
+  "promo.next": "Επόμενο",
+  "promo.go": "Μετάβαση στη διαφάνεια {n}",
   "book.color.color": "Έγχρωμο",
   "book.color.bw": "Ασπρόμαυρο",
   "book.d.color": "Χρώμα",

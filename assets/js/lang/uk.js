@@ -1,5 +1,11 @@
 // Ukrainian interface strings for Librava
 export default {
+  "promo.cta": "Дізнатися більше",
+  "promo.ctaBook": "Переглянути книгу",
+  "promo.label": "Рекомендовані пропозиції",
+  "promo.prev": "Назад",
+  "promo.next": "Далі",
+  "promo.go": "Перейти до слайда {n}",
   "book.color.color": "Кольорова",
   "book.color.bw": "Чорно-біла",
   "book.d.color": "Колір",

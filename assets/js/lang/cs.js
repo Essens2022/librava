@@ -1,5 +1,11 @@
 // Czech interface strings for Librava
 export default {
+  "promo.cta": "Zjistit více",
+  "promo.ctaBook": "Zobrazit knihu",
+  "promo.label": "Doporučené nabídky",
+  "promo.prev": "Předchozí",
+  "promo.next": "Další",
+  "promo.go": "Přejít na snímek {n}",
   "book.color.color": "Barevná",
   "book.color.bw": "Černobílá",
   "book.d.color": "Barvy",

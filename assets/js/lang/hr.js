@@ -1,5 +1,11 @@
 // Croatian interface strings for Librava
 export default {
+  "promo.cta": "Otkrij više",
+  "promo.ctaBook": "Pogledaj knjigu",
+  "promo.label": "Istaknute ponude",
+  "promo.prev": "Prethodno",
+  "promo.next": "Sljedeće",
+  "promo.go": "Idi na slajd {n}",
   "book.color.color": "U boji",
   "book.color.bw": "Crno-bijela",
   "book.d.color": "Boja",

@@ -1,5 +1,11 @@
 // Bulgarian interface strings for Librava
 export default {
+  "promo.cta": "Разгледай",
+  "promo.ctaBook": "Виж книгата",
+  "promo.label": "Препоръчани оферти",
+  "promo.prev": "Назад",
+  "promo.next": "Напред",
+  "promo.go": "Към слайд {n}",
   "book.color.color": "Цветна",
   "book.color.bw": "Черно-бяла",
   "book.d.color": "Цветове",

@@ -3,9 +3,9 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261020192315';
-import { getLang } from './i18n.js?v=20261020192315';
-import { store, uid, blobs, norm, loadScript } from './util.js?v=20261020192315';
+import { CONFIG } from './config.js?v=20261020201306';
+import { getLang } from './i18n.js?v=20261020201306';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261020201306';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -68,11 +68,14 @@ function fileExt(name) { return (String(name).split('.').pop() || '').toLowerCas
 // =====================================================================
 //  DEMO
 // =====================================================================
+const promoRunning = p => p.active !== false && (!p.starts_at || new Date(p.starts_at) <= new Date()) && (!p.ends_at || new Date(p.ends_at) > new Date());
+const promoSort = (a, b) => (a.sort || 0) - (b.sort || 0) || String(b.created_at).localeCompare(String(a.created_at));
+
 class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020192315')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261020201306')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -275,6 +278,21 @@ class DemoAPI {
   }
   async getSetting(key) { return store.get('demo:setting:' + key, null); }
   async saveSetting(key, value) { store.set('demo:setting:' + key, value); }
+  // ---- promotions (home page banners chosen by the shop owner, per language) ----
+  async promos(lang) { return store.get('demo:promos', []).filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort); }
+  async adminPromos() { return store.get('demo:promos', []).sort(promoSort); }
+  async savePromo(p, files = {}) {
+    const all = store.get('demo:promos', []);
+    const id = p.id || uid('pr_');
+    const row = { ...(all.find(x => x.id === id) || { created_at: new Date().toISOString(), views: 0, clicks: 0 }), ...p, id, updated_at: new Date().toISOString() };
+    if (files.image) row.image_url = await fileToDataURL(files.image);
+    if (files.mobile) row.image_mobile_url = await fileToDataURL(files.mobile);
+    if (files.removeMobile) row.image_mobile_url = null;
+    const i = all.findIndex(x => x.id === id); if (i >= 0) all[i] = row; else all.push(row);
+    store.set('demo:promos', all); return id;
+  }
+  async deletePromo(p) { store.set('demo:promos', store.get('demo:promos', []).filter(x => x.id !== p.id)); }
+  async promoHit(id, kind) { const all = store.get('demo:promos', []); const x = all.find(y => y.id === id); if (x) { x[kind === 'click' ? 'clicks' : 'views'] = (x[kind === 'click' ? 'clicks' : 'views'] || 0) + 1; store.set('demo:promos', all); } }
   async notifications() { return store.get('demo:notifications', []).filter(n => n.published !== false); }
   async adminNotifications() { return store.get('demo:notifications', []); }
   async saveNotification(n) { const all = store.get('demo:notifications', []); if (n.id) { const i = all.findIndex(x => x.id === n.id); all[i] = { ...all[i], ...n }; } else all.unshift({ published: true, ...n, id: uid('n_'), created_at: new Date().toISOString() }); store.set('demo:notifications', all); }
@@ -568,6 +586,38 @@ class SupabaseAPI {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
   }
+  // ---- promotions (home page banners chosen by the shop owner, per language) ----
+  _promoUrl(path, v) { return path ? this.sb.storage.from('covers').getPublicUrl(path).data.publicUrl : null; }
+  _promoRow(p) { return { ...p, image_url: this._promoUrl(p.image_path), image_mobile_url: this._promoUrl(p.image_mobile_path) }; }
+  async promos(lang) {
+    try {
+      const { data } = await this.sb.from('promos').select('*').eq('active', true).order('sort');
+      return (data || []).filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort).map(p => this._promoRow(p));
+    } catch { return []; }
+  }
+  async adminPromos() { const { data, error } = await this.sb.from('promos').select('*'); this._err(error); return (data || []).sort(promoSort).map(p => this._promoRow(p)); }
+  async savePromo(p, files = {}) {
+    const id = p.id || crypto.randomUUID();
+    const row = { ...p, id, updated_at: new Date().toISOString() };
+    for (const k of ['image_url', 'image_mobile_url', 'views', 'clicks', 'created_at']) delete row[k];
+    const { data: old } = await this.sb.from('promos').select('image_path,image_mobile_path').eq('id', id).maybeSingle();
+    const ts = Date.now();
+    if (files.image) { const path = `promos/${id}/wide-${ts}.${fileExt(files.image.name) || 'webp'}`; await this._upload('covers', path, files.image); row.image_path = path; }
+    if (files.mobile) { const path = `promos/${id}/mobile-${ts}.${fileExt(files.mobile.name) || 'webp'}`; await this._upload('covers', path, files.mobile); row.image_mobile_path = path; }
+    if (files.removeMobile) row.image_mobile_path = null;
+    if (row.kind === 'book') { row.image_path = null; row.image_mobile_path = null; }
+    const { error } = await this.sb.from('promos').upsert(row); this._err(error);
+    // old pictures of this banner are removed so they do not take space
+    const gone = [old?.image_path, old?.image_mobile_path].filter(x => x && x !== row.image_path && x !== row.image_mobile_path);
+    if (gone.length) await this.sb.storage.from('covers').remove(gone).catch(() => { });
+    return id;
+  }
+  async deletePromo(p) {
+    const { error } = await this.sb.from('promos').delete().eq('id', p.id); this._err(error);
+    const files = [p.image_path, p.image_mobile_path].filter(Boolean);
+    if (files.length) await this.sb.storage.from('covers').remove(files).catch(() => { });
+  }
+  async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
   // ---- shop settings (company details for the legal pages) and announcements ----
   async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
   async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }

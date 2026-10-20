@@ -1,5 +1,11 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "promo.cta": "Se mer",
+  "promo.ctaBook": "Se boken",
+  "promo.label": "Utvalgte tilbud",
+  "promo.prev": "Forrige",
+  "promo.next": "Neste",
+  "promo.go": "Gå til lysbilde {n}",
   "book.color.color": "Farger",
   "book.color.bw": "Svart-hvitt",
   "book.d.color": "Farger",

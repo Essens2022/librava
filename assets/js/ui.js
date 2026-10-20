@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261020192315';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020192315';
-import { esc, store, $, $$ } from './util.js?v=20261020192315';
+import { CONFIG } from './config.js?v=20261020201306';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261020201306';
+import { esc, store, $, $$ } from './util.js?v=20261020201306';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,8 +12,8 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261020192315';
-import { api } from './api.js?v=20261020192315';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261020201306';
+import { api } from './api.js?v=20261020201306';
 
 // ---------------- icons ----------------
 const P = {
@@ -410,4 +410,67 @@ export async function openBell() {
   modal(`<div class="ntf-head"><h2 style="margin:0">${esc(t('ntf.title'))}</h2><button class="btn btn-ghost btn-sm" data-close>✕</button></div>
     ${list.length ? `<div class="ntf-list">${list.map(n => `<div class="ntf"><small class="muted">${esc(new Date(n.created_at).toLocaleDateString(getLang()))}</small><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ''}${n.link ? `<a href="${esc(n.link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div>`).join('')}</div>`
       : `<p class="muted">${esc(t('ntf.empty'))}</p>`}`);
+}
+
+// ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
+export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand'];
+export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
+const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');
+// one slide; `b` is the book when the banner promotes a book
+export function promoHTML(p, b, placement = p.placement) {
+  const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
+  const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
+  const attrs = `class="promo promo-${placement} promo-${p.kind} theme-${esc(PROMO_THEMES.includes(p.theme) ? p.theme : 'forest')}" data-promo="${esc(p.id)}" href="${esc(link)}"${ext}`;
+  if (p.kind === 'image' && p.image_url) {
+    return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
+      ${title || p.kicker ? `<span class="promo-over"><span class="wrap">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${title ? `<b>${esc(title)}</b>` : ''}${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${p.cta ? `<span class="btn btn-buy">${esc(p.cta)}</span>` : ''}</span></span>` : ''}</a>`;
+  }
+  const disc = b && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
+  const price = b ? (b.price_cents ? `<span class="promo-price"><b>${money(b.price_cents)}</b>${disc ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${disc}%</span>` : ''}</span>` : `<span class="promo-price"><b>${esc(t('book.free'))}</b></span>`) : '';
+  return `<a ${attrs}><span class="wrap promo-in">
+      <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
+        ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b && placement === 'hero' ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}
+        ${price}<span class="btn btn-buy promo-cta">${esc(cta)}</span></span>
+      ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}"></span>` : ''}
+    </span></a>`;
+}
+// several slides: fade carousel with arrows, dots, swipe and auto-play (paused on hover, focus or reduced motion)
+export function carouselHTML(slides, placement) {
+  if (slides.length === 1) return `<div class="promo-carousel single ${placement}">${slides[0]}</div>`;
+  return `<div class="promo-carousel ${placement}" role="region" aria-roledescription="carousel" aria-label="${esc(t('promo.label'))}">
+    <div class="promo-track">${slides.map((s, i) => `<div class="promo-slide ${i ? '' : 'on'}" role="group" aria-roledescription="slide" aria-label="${i + 1} / ${slides.length}" ${i ? 'aria-hidden="true" inert' : ''}>${s}</div>`).join('')}</div>
+    <button type="button" class="promo-nav prev" aria-label="${esc(t('promo.prev'))}">‹</button><button type="button" class="promo-nav next" aria-label="${esc(t('promo.next'))}">›</button>
+    <div class="promo-dots">${slides.map((_, i) => `<button type="button" class="${i ? '' : 'on'}" aria-label="${esc(t('promo.go', { n: i + 1 }))}"></button>`).join('')}</div></div>`;
+}
+export function mountPromos(root) {
+  const seen = new Set(JSON.parse(sessionStorage.getItem('librava:promoSeen') || '[]'));
+  const view = el => { const id = el?.querySelector('[data-promo]')?.dataset.promo || el?.dataset?.promo; if (!id || seen.has(id)) return; seen.add(id); try { sessionStorage.setItem('librava:promoSeen', JSON.stringify([...seen])); } catch { } api.promoHit?.(id, 'view'); };
+  root.querySelectorAll('[data-promo]').forEach(a => a.addEventListener('click', () => api.promoHit?.(a.dataset.promo, 'click')));
+  root.querySelectorAll('.promo-carousel.single, .promo-strip-wrap').forEach(c => view(c.querySelector('[data-promo]')));
+  root.querySelectorAll('.promo-carousel:not(.single)').forEach(c => {
+    const slides = [...c.querySelectorAll('.promo-slide')], dots = [...c.querySelectorAll('.promo-dots button')];
+    let i = 0, timer = null, paused = false;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const go = n => {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => { s.classList.toggle('on', k === i); s.toggleAttribute('inert', k !== i); s.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      view(slides[i]);
+    };
+    const play = () => { clearInterval(timer); if (!reduce && !paused) timer = setInterval(() => { if (!c.isConnected) return clearInterval(timer); if (!document.hidden) go(i + 1); }, 7000); };
+    c.querySelector('.prev').onclick = () => { go(i - 1); play(); };
+    c.querySelector('.next').onclick = () => { go(i + 1); play(); };
+    dots.forEach((d, k) => d.onclick = () => { go(k); play(); });
+    c.addEventListener('mouseenter', () => { paused = true; clearInterval(timer); });
+    c.addEventListener('mouseleave', () => { paused = false; play(); });
+    c.addEventListener('focusin', () => { paused = true; clearInterval(timer); });
+    c.addEventListener('focusout', () => { paused = false; play(); });
+    let x0 = null, moved = false;
+    c.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; moved = false; }, { passive: true });
+    c.addEventListener('touchmove', e => { if (x0 != null && Math.abs(e.touches[0].clientX - x0) > 10) moved = true; }, { passive: true });
+    c.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 45) { go(i + (dx < 0 ? 1 : -1)); play(); } });
+    c.addEventListener('click', e => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    view(slides[0]); play();
+  });
 }

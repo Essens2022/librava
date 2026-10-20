@@ -1,5 +1,11 @@
 // Dutch interface strings for Librava
 export default {
+  "promo.cta": "Ontdek meer",
+  "promo.ctaBook": "Bekijk het boek",
+  "promo.label": "Uitgelichte aanbiedingen",
+  "promo.prev": "Vorige",
+  "promo.next": "Volgende",
+  "promo.go": "Ga naar dia {n}",
   "book.color.color": "Kleur",
   "book.color.bw": "Zwart-wit",
   "book.d.color": "Kleur",

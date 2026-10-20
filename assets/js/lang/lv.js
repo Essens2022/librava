@@ -1,5 +1,11 @@
 // Latvian interface strings for Librava
 export default {
+  "promo.cta": "Uzzināt vairāk",
+  "promo.ctaBook": "Skatīt grāmatu",
+  "promo.label": "Izceltie piedāvājumi",
+  "promo.prev": "Iepriekšējais",
+  "promo.next": "Nākamais",
+  "promo.go": "Pāriet uz slaidu {n}",
   "book.color.color": "Krāsaina",
   "book.color.bw": "Melnbalta",
   "book.d.color": "Krāsas",

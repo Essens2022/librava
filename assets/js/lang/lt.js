@@ -1,5 +1,11 @@
 // Lithuanian interface strings for Librava
 export default {
+  "promo.cta": "Sužinoti daugiau",
+  "promo.ctaBook": "Žiūrėti knygą",
+  "promo.label": "Rekomenduojami pasiūlymai",
+  "promo.prev": "Ankstesnis",
+  "promo.next": "Kitas",
+  "promo.go": "Eiti į skaidrę {n}",
   "book.color.color": "Spalvota",
   "book.color.bw": "Nespalvota",
   "book.d.color": "Spalvos",

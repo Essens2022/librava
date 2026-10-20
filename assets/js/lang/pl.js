@@ -1,5 +1,11 @@
 // Polish interface strings for Librava
 export default {
+  "promo.cta": "Odkryj więcej",
+  "promo.ctaBook": "Zobacz książkę",
+  "promo.label": "Polecane oferty",
+  "promo.prev": "Poprzedni",
+  "promo.next": "Następny",
+  "promo.go": "Przejdź do slajdu {n}",
   "book.color.color": "Kolor",
   "book.color.bw": "Czarno-biała",
   "book.d.color": "Kolor",
