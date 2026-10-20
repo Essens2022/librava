@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /server/
+Disallow: /demo/
+Disallow: /supabase/
+Disallow: /tools/
+
+Sitemap: https://librava.store/sitemap.xml
