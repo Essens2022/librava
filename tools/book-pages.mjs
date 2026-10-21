@@ -52,6 +52,7 @@ const SHELL = readFileSync('index.html', 'utf8');
 function page({ lang, head, body, boot, hash }) {
   const s = SHELL
     .replace(/<html lang="[^"]*">/, `<html lang="${lang}">`)
+    .replace(/<link rel="manifest" href="[^"]*">/, `<link rel="manifest" href="/assets/manifest/${lang}.webmanifest">`)
     .replace(/<!--seo-->[\s\S]*?<!--\/seo-->/, `<!--seo-->\n${head}\n<!--/seo-->`)
     .replace(/<main id="app"([^>]*)><\/main>/, `<main id="app"$1>${body}</main>`)
     .replace('<script type="module"', `<script>document.documentElement.classList.add('js');window.__LIBRAVA_LANG=${json(boot)};${hash ? `if(!location.hash||location.hash==='#')history.replaceState(null,'',location.pathname+location.search+${json(hash)});` : ''}</script>\n<script type="module"`);
