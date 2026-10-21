@@ -186,6 +186,7 @@ export default {
   "rev.none": "Все още няма отзиви. Бъдете първи.",
   "rev.pickRating": "Изберете оценка от 1 до 5 звезди.",
   "rev.verified": "Потвърдена покупка",
+  "rd.copyLimit": "Можете да копирате само кратки цитати (до 400 знака).",
   "rev.translate": "Преведи на {lang}",
   "rev.translating": "Превежда се…",
   "rev.original": "Виж оригинала",

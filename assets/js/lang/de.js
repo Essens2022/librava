@@ -186,6 +186,7 @@ export default {
   "rev.none": "Noch keine Rezensionen. Schreib die erste.",
   "rev.pickRating": "Wähle eine Bewertung von 1 bis 5 Sternen.",
   "rev.verified": "Verifizierter Kauf",
+  "rd.copyLimit": "Du kannst nur kurze Zitate kopieren (bis zu 400 Zeichen).",
   "rev.translate": "Auf {lang} übersetzen",
   "rev.translating": "Wird übersetzt…",
   "rev.original": "Original anzeigen",

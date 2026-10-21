@@ -186,6 +186,7 @@ export default {
   "rev.none": "Atsiliepimų dar nėra. Būkite pirmi!",
   "rev.pickRating": "Pasirinkite įvertinimą nuo 1 iki 5 žvaigždučių.",
   "rev.verified": "Patvirtintas pirkimas",
+  "rd.copyLimit": "Galite kopijuoti tik trumpas citatas (iki 400 simbolių).",
   "rev.translate": "Versti į: {lang}",
   "rev.translating": "Verčiama…",
   "rev.original": "Rodyti originalą",

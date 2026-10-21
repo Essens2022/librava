@@ -186,6 +186,7 @@ export default {
   "rev.none": "Arvustusi veel pole. Kirjuta esimene.",
   "rev.pickRating": "Vali hinnang 1 kuni 5 tärni.",
   "rev.verified": "Kinnitatud ost",
+  "rd.copyLimit": "Kopeerida saab ainult lühikesi tsitaate (kuni 400 tähemärki).",
   "rev.translate": "Tõlgi keelde: {lang}",
   "rev.translating": "Tõlgitakse…",
   "rev.original": "Vaata originaali",

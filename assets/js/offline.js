@@ -2,8 +2,8 @@
 //  Books the reader keeps on this device: download a personal copy (PDF / EPUB)
 //  and/or save it inside the browser to read without internet.
 // =====================================================================
-import { blobs, store, loadScript } from './util.js?v=20261021120425';
-import { api } from './api.js?v=20261021120425';
+import { blobs, store, loadScript } from './util.js?v=20261021125117';
+import { api } from './api.js?v=20261021125117';
 
 const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
 const KEY = 'offline:books';
@@ -56,13 +56,21 @@ export async function downloadBook(book, onProgress) {
       const doc = await PDFDocument.load(await blob.arrayBuffer(), { ignoreEncryption: true });
       const font = await doc.embedFont(StandardFonts.Helvetica);
       const ascii = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
-      const line = ascii(`Licensed to ${u.name || ''} <${u.email}> - librava.store - ${new Date().toISOString().slice(0, 10)}`);
-      const first = doc.getPage(0), { width } = first.getSize();
-      const size = Math.max(5, Math.min(7, width / 90));
-      first.drawText(line, { x: (width - font.widthOfTextAtSize(line, size)) / 2, y: 6, size, font, color: rgb(0.45, 0.45, 0.45), opacity: 0.8 });
+      const ref = (await api.owns?.(book.id).catch(() => null))?.order?.reference || '';
+      const line = ascii(`Licensed to ${u.name || ''} <${u.email}>${ref ? ' - order ' + ref : ''} - librava.store - ${new Date().toISOString().slice(0, 10)} - Copyright (c) ${book.author || ''}. Sharing or reselling this file is not permitted.`);
+      for (const pg of doc.getPages()) {
+        const { width } = pg.getSize();
+        let size = Math.max(4.5, Math.min(6.5, width / 95));
+        while (font.widthOfTextAtSize(line, size) > width - 20 && size > 3.5) size -= 0.25;
+        pg.drawText(line, { x: Math.max(10, (width - font.widthOfTextAtSize(line, size)) / 2), y: 5, size, font, color: rgb(0.5, 0.5, 0.5), opacity: 0.7 });
+      }
       doc.setSubject(line); doc.setProducer('Librava');
       blob = new Blob([await doc.save()], { type: 'application/pdf' });
     } catch (e) { console.warn('stamp skipped', e); }
+  }
+  // EPUB: a personal copy too — a licence page at the start, the buyer in the book's data and a hidden mark in every page
+  if (book.format === 'epub' && book.stamp_downloads !== false && u && blob.size < 200 * 1048576) {
+    try { blob = await stampEpub(blob, book, u); } catch (e) { console.warn('epub stamp skipped', e); }
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -70,3 +78,35 @@ export async function downloadBook(book, onProgress) {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
+
+export async function stampEpub(blob, book, u) {
+  await loadScript(VENDOR('jszip.min.js'));
+  const zip = await window.JSZip.loadAsync(blob);
+  const container = await zip.file('META-INF/container.xml')?.async('string');
+  const opfPath = (container || '').match(/full-path="([^"]+)"/)?.[1]; if (!opfPath) return blob;
+  const base = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+  let opf = await zip.file(opfPath).async('string');
+  const ref = (await api.owns?.(book.id).catch(() => null))?.order?.reference || '';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const who = `${u.name || ''} <${u.email}>`, date = new Date().toISOString().slice(0, 10);
+  const note = `Licensed to ${who}${ref ? ' · order ' + ref : ''} · librava.store · ${date}`;
+  // 1) a licence page right after the cover
+  const page = `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><meta charset="utf-8"/><title>Licence</title></head><body style="font-family:sans-serif;text-align:center;margin-top:30%"><p style="font-size:.85em;color:#555">This ebook is licensed for the personal use of</p><p style="font-weight:bold">${esc(who)}</p><p style="font-size:.8em;color:#555">${ref ? 'Order ' + esc(ref) + ' · ' : ''}${date} · librava.store</p><p style="font-size:.75em;color:#777;margin-top:2em">© ${esc(book.author || '')}. All rights reserved. Copying, sharing or reselling this file is not permitted.</p></body></html>`;
+  zip.file(base + 'librava-licence.xhtml', page);
+  opf = opf.replace(/<\/manifest>/, '<item id="librava-licence" href="librava-licence.xhtml" media-type="application/xhtml+xml"/></manifest>');
+  opf = opf.replace(/(<spine[^>]*>\s*(?:<itemref[^>]*\/>\s*)?)/, m => m.includes('itemref') ? m + '<itemref idref="librava-licence"/>' : m + '<itemref idref="librava-licence"/>');
+  // 2) the buyer in the book's data
+  opf = opf.replace(/<\/metadata>/, `<meta name="librava:licence" content="${esc(note)}"/></metadata>`);
+  zip.file(opfPath, opf);
+  // 3) an invisible mark in every page of the book
+  const pages = Object.keys(zip.files).filter(n => /\.x?html?$/i.test(n) && !n.endsWith('librava-licence.xhtml'));
+  for (const n of pages) {
+    const x = await zip.file(n).async('string');
+    zip.file(n, x.replace(/<\/body>/i, `<!-- ${note.replace(/--/g, '-')} --></body>`));
+  }
+  // mimetype must stay first and uncompressed
+  zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
+  const out = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' }, null);
+  return out;
+}
+

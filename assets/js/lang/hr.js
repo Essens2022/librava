@@ -186,6 +186,7 @@ export default {
   "rev.none": "Još nema recenzija. Budite prvi.",
   "rev.pickRating": "Odaberite ocjenu od 1 do 5 zvjezdica.",
   "rev.verified": "Provjerena kupnja",
+  "rd.copyLimit": "Možete kopirati samo kratke citate (do 400 znakova).",
   "rev.translate": "Prevedi na {lang}",
   "rev.translating": "Prevođenje…",
   "rev.original": "Prikaži izvornik",

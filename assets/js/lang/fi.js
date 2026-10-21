@@ -186,6 +186,7 @@ export default {
   "rev.none": "Ei vielä arvioita. Kirjoita ensimmäinen.",
   "rev.pickRating": "Valitse arvio 1–5 tähteä.",
   "rev.verified": "Vahvistettu ostos",
+  "rd.copyLimit": "Voit kopioida vain lyhyitä lainauksia (enintään 400 merkkiä).",
   "rev.translate": "Käännä kielelle {lang}",
   "rev.translating": "Käännetään…",
   "rev.original": "Näytä alkuperäinen",

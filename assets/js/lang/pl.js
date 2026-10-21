@@ -186,6 +186,7 @@ export default {
   "rev.none": "Brak opinii. Napisz pierwszą.",
   "rev.pickRating": "Wybierz ocenę od 1 do 5 gwiazdek.",
   "rev.verified": "Potwierdzony zakup",
+  "rd.copyLimit": "Możesz skopiować tylko krótkie cytaty (do 400 znaków).",
   "rev.translate": "Przetłumacz na: {lang}",
   "rev.translating": "Tłumaczenie…",
   "rev.original": "Pokaż oryginał",

@@ -186,6 +186,7 @@ export default {
   "rev.none": "Ingen anmeldelser endnu. Bliv den første til at skrive en.",
   "rev.pickRating": "Vælg en bedømmelse fra 1 til 5 stjerner.",
   "rev.verified": "Verificeret køb",
+  "rd.copyLimit": "Du kan kun kopiere korte citater (op til 400 tegn).",
   "rev.translate": "Oversæt til {lang}",
   "rev.translating": "Oversætter…",
   "rev.original": "Se original",

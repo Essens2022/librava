@@ -186,6 +186,7 @@ export default {
   "rev.none": "Vēl nav atsauksmju. Uzraksti pirmo!",
   "rev.pickRating": "Izvēlies vērtējumu no 1 līdz 5 zvaigznēm.",
   "rev.verified": "Apstiprināts pirkums",
+  "rd.copyLimit": "Var kopēt tikai īsus citātus (līdz 400 rakstzīmēm).",
   "rev.translate": "Tulkot: {lang}",
   "rev.translating": "Tulko…",
   "rev.original": "Skatīt oriģinālu",

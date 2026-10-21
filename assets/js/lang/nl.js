@@ -186,6 +186,7 @@ export default {
   "rev.none": "Nog geen reviews. Schrijf als eerste een review.",
   "rev.pickRating": "Kies een beoordeling van 1 tot 5 sterren.",
   "rev.verified": "Geverifieerde aankoop",
+  "rd.copyLimit": "Je kunt alleen korte citaten kopiëren (tot 400 tekens).",
   "rev.translate": "Vertalen naar het {lang}",
   "rev.translating": "Bezig met vertalen…",
   "rev.original": "Origineel bekijken",

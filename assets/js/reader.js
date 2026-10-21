@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021120425';
-import { t } from './i18n.js?v=20261021120425';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021120425';
-import { offline } from './offline.js?v=20261021120425';
-import { api } from './api.js?v=20261021120425';
-import { icon, go, toast, cart, errText } from './ui.js?v=20261021120425';
-import { startCheckout } from './views.js?v=20261021120425';
+import { CONFIG } from './config.js?v=20261021125117';
+import { t } from './i18n.js?v=20261021125117';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021125117';
+import { offline } from './offline.js?v=20261021125117';
+import { api } from './api.js?v=20261021125117';
+import { icon, go, toast, cart, errText } from './ui.js?v=20261021125117';
+import { startCheckout } from './views.js?v=20261021125117';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -19,6 +19,9 @@ export async function viewReader(el, id, q) {
   try { book = await api.getBook(id); } catch { }
   const saved = preview ? null : await offline.get(id, book);
   if (!book && saved) book = saved.book;
+  // for the copy note (title · author) and the copy limit
+  window.__libravaBook = book ? { title: book.title, author: book.author } : null;
+  if (!window.__libravaCopyHook) { window.__libravaCopyHook = true; window.addEventListener('librava:copylimit', () => toast(t('rd.copyLimit'))); }
   if (!book) { go('/'); return; }
   let src;
   if (saved) src = { url: URL.createObjectURL(saved.blob), kind: saved.book.format, limited: false, local: true };
@@ -393,6 +396,18 @@ class EpubEngine {
         'pre, code': { 'white-space': 'pre-wrap !important', 'word-break': 'break-word', 'max-width': '100% !important' } });
     }
     this.applySettings();
+    // copying: short quotes only (like Kindle), always with the book, author and shop added
+    this.rendition.hooks.content.register(contents => {
+      const doc = contents.document;
+      doc.addEventListener('copy', e => {
+        const sel = String(doc.getSelection() || '').trim(); if (!sel || !e.clipboardData) return;
+        const b = window.__libravaBook || {}, max = 400;
+        const part = sel.length > max ? sel.slice(0, max).replace(/\s+\S*$/, '') + '…' : sel;
+        e.clipboardData.setData('text/plain', `${part}\n\n— ${b.title || ''}${b.author ? ', ' + b.author : ''} · © ${b.author || 'Librava'} · librava.store`);
+        e.preventDefault();
+        if (sel.length > max) window.dispatchEvent(new CustomEvent('librava:copylimit'));
+      });
+    });
     this.rendition.on('relocated', loc => this.onRel(loc));
     const navP = this.book.loaded.navigation.then(n => { this.nav = n; }).catch(() => { });
     await this.rendition.display(this.cb.progress?.location || undefined);

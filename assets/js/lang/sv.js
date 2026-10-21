@@ -186,6 +186,7 @@ export default {
   "rev.none": "Inga recensioner än. Bli först med att skriva en.",
   "rev.pickRating": "Välj ett betyg från 1 till 5 stjärnor.",
   "rev.verified": "Verifierat köp",
+  "rd.copyLimit": "Du kan bara kopiera korta citat (upp till 400 tecken).",
   "rev.translate": "Översätt till {lang}",
   "rev.translating": "Översätter…",
   "rev.original": "Visa original",

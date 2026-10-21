@@ -186,6 +186,7 @@ export default {
   "rev.none": "Még nincs vélemény. Írd meg te az elsőt!",
   "rev.pickRating": "Válassz 1 és 5 csillag közötti értékelést.",
   "rev.verified": "Igazolt vásárlás",
+  "rd.copyLimit": "Csak rövid idézeteket másolhatsz (legfeljebb 400 karakter).",
   "rev.translate": "Fordítás ide: {lang}",
   "rev.translating": "Fordítás…",
   "rev.original": "Eredeti megjelenítése",

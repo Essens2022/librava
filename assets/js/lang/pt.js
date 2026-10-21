@@ -186,6 +186,7 @@ export default {
   "rev.none": "Ainda não há opiniões. Seja o primeiro a escrever uma.",
   "rev.pickRating": "Escolha uma classificação de 1 a 5 estrelas.",
   "rev.verified": "Compra verificada",
+  "rd.copyLimit": "Só pode copiar citações curtas (até 400 caracteres).",
   "rev.translate": "Traduzir para {lang}",
   "rev.translating": "A traduzir…",
   "rev.original": "Ver original",

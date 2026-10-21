@@ -186,6 +186,7 @@ export default {
   "rev.none": "Zatím žádné recenze. Napište první.",
   "rev.pickRating": "Vyberte hodnocení od 1 do 5 hvězdiček.",
   "rev.verified": "Ověřený nákup",
+  "rd.copyLimit": "Kopírovat lze jen krátké citace (do 400 znaků).",
   "rev.translate": "Přeložit do jazyka {lang}",
   "rev.translating": "Překládá se…",
   "rev.original": "Zobrazit originál",

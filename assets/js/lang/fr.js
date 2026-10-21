@@ -186,6 +186,7 @@ export default {
   "rev.none": "Aucun avis pour l'instant. Soyez le premier à en écrire un.",
   "rev.pickRating": "Choisissez une note de 1 à 5 étoiles.",
   "rev.verified": "Achat vérifié",
+  "rd.copyLimit": "Vous ne pouvez copier que de courtes citations (400 caractères maximum).",
   "rev.translate": "Traduire en {lang}",
   "rev.translating": "Traduction…",
   "rev.original": "Voir l’original",

@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021120425';
-import { store } from './util.js?v=20261021120425';
+import { CONFIG } from './config.js?v=20261021125117';
+import { store } from './util.js?v=20261021125117';
 
 const D = {
   ro: {
@@ -455,6 +455,7 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'rd.copyLimit': 'Poți copia doar citate scurte (până la 400 de caractere).',
     'rev.translate': 'Tradu în {lang}',
     'rev.translating': 'Se traduce…',
     'rev.original': 'Vezi originalul',
@@ -1548,6 +1549,7 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'rd.copyLimit': 'Puoi copiare solo brevi citazioni (fino a 400 caratteri).',
     'rev.translate': 'Traduci in {lang}',
     'rev.translating': 'Traduzione…',
     'rev.original': 'Mostra l’originale',
@@ -2641,6 +2643,7 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'rd.copyLimit': 'You can copy only short quotes (up to 400 characters).',
     'rev.translate': 'Translate to {lang}',
     'rev.translating': 'Translating…',
     'rev.original': 'See original',
@@ -3318,7 +3321,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021120425`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021125117`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
