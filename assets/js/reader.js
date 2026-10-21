@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021153607';
-import { t } from './i18n.js?v=20261021153607';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021153607';
-import { offline } from './offline.js?v=20261021153607';
-import { api } from './api.js?v=20261021153607';
-import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021153607';
-import { startCheckout, alsoReadFor } from './views.js?v=20261021153607';
+import { CONFIG } from './config.js?v=20261021154636';
+import { t } from './i18n.js?v=20261021154636';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021154636';
+import { offline } from './offline.js?v=20261021154636';
+import { api } from './api.js?v=20261021154636';
+import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021154636';
+import { startCheckout, alsoReadFor } from './views.js?v=20261021154636';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };

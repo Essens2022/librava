@@ -1607,3 +1607,44 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 }
 @media (max-width: 560px) and (max-height: 640px) { .end-cover { width: 74px; } .end-buy { grid-template-columns: 74px minmax(0, 1fr); } .end-row { grid-auto-columns: 60px; } .mini-cover { width: 60px; } }
 .mini-price .price-old { display: none; } .mini-price { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* end of preview v4 (phones): use the whole height — the book big in the middle, recommendations at the bottom */
+@media (max-width: 560px) {
+  .rd-end { place-items: stretch; padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .rd-msg .end-box { height: 100%; max-height: none; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+  .end-buy { grid-template-columns: minmax(0, 1fr); grid-template-areas: "cover" "info" "actions"; justify-items: center; text-align: center; gap: 10px; padding-bottom: 14px; margin: auto 0; }
+  .end-cover { width: clamp(110px, calc(30vh / 1.6), 175px); }
+  .end-info { align-items: center; }
+  .end-info h2 { font-size: 20px; }
+  .end-title b { font-size: 17px; }
+  .end-price .price { font-size: 24px; }
+  .end-actions { max-width: 420px; }
+  .end-more { flex: none; }
+  .end-row { grid-auto-columns: 82px; } .mini-cover { width: 82px; }
+}
+/* short phones: cover beside the title, so everything still fits without scrolling */
+@media (max-width: 560px) and (max-height: 720px) {
+  .end-buy { grid-template-columns: 92px minmax(0, 1fr); grid-template-areas: "cover info" "actions actions"; justify-items: stretch; text-align: left; margin: 0; }
+  .end-cover { width: 92px; }
+  .end-info { align-items: flex-start; }
+  .end-info h2 { font-size: 17px; } .end-title b { font-size: 15px; } .end-price .price { font-size: 20px; }
+  .end-actions { max-width: none; }
+  .end-row { grid-auto-columns: 70px; } .mini-cover { width: 70px; }
+}
+@media (max-width: 560px) and (max-height: 620px) { .end-cover { width: 74px; } .end-buy { grid-template-columns: 74px minmax(0, 1fr); } .end-row { grid-auto-columns: 60px; } .mini-cover { width: 60px; } }
+
+/* end of preview v5 (phones): no empty space — the cover grows or shrinks to fill exactly what is left */
+@media (max-width: 560px) {
+  .rd-msg .end-box { justify-content: flex-start; gap: 10px; }
+  .end-buy { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1 1 auto; min-height: 0; margin: 0; gap: 8px; padding-bottom: 12px; }
+  .end-cover { flex: 1 1 0; min-height: 90px; max-height: 360px; width: auto; height: auto; max-width: 100%; aspect-ratio: 1 / 1.6; object-fit: contain; }
+  .end-info { flex: none; align-items: center; gap: 3px; }
+  .end-info h2 { font-size: 20px; } .end-title b { font-size: 17px; } .end-price .price { font-size: 24px; }
+  .end-actions { flex: none; width: 100%; max-width: 440px; }
+  .end-row { grid-auto-columns: 82px; } .mini-cover { width: 82px; }
+}
+@media (max-width: 560px) and (max-height: 720px) {
+  .end-info h2 { font-size: 17px; } .end-title b { font-size: 15px; } .end-price .price { font-size: 20px; }
+  .end-row { grid-auto-columns: 70px; } .mini-cover { width: 70px; }
+}
+@media (max-width: 560px) and (max-height: 620px) { .end-info h2 { display: none; } .end-row { grid-auto-columns: 62px; } .mini-cover { width: 62px; } }
