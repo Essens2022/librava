@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021133529';
-import { t, getLang, setLang } from './i18n.js?v=20261021133529';
-import { esc, $, $$ } from './util.js?v=20261021133529';
-import { api, chooseBackend } from './api.js?v=20261021133529';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261021133529';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261021133529';
-import { trackPage } from './track.js?v=20261021133529';
-import { offline } from './offline.js?v=20261021133529';
-import { viewReader } from './reader.js?v=20261021133529';
-import { viewAdmin } from './admin.js?v=20261021133529';
+import { CONFIG } from './config.js?v=20261021134712';
+import { t, getLang, setLang } from './i18n.js?v=20261021134712';
+import { esc, $, $$ } from './util.js?v=20261021134712';
+import { api, chooseBackend } from './api.js?v=20261021134712';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261021134712';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261021134712';
+import { trackPage } from './track.js?v=20261021134712';
+import { offline } from './offline.js?v=20261021134712';
+import { viewReader } from './reader.js?v=20261021134712';
+import { viewAdmin } from './admin.js?v=20261021134712';
 
 let cleanup = null, seq = 0;
 
@@ -142,6 +142,9 @@ if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostna
     try {
       const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
       const live = /assets\/js\/app\.js\?v=(\d+)/.exec(html)?.[1];
+      const here = location.hash.slice(1) || location.pathname;
+      const busy = window.__libravaDirty || /^\/(admin\/(new|edit|offers\/|promos\/|notifications|settings)|read\/|cart)/.test(here) || document.activeElement?.matches?.('input, textarea, select');
+      if (live && live !== mine && busy) return;   // later, when the page is free — never lose what someone is typing
       if (live && live !== mine && sessionStorage.getItem('librava:reloadedFor') !== live) {
         sessionStorage.setItem('librava:reloadedFor', live);
         location.reload();

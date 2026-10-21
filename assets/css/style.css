@@ -1513,3 +1513,5 @@ select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC
 .desc.rich hr { border: 0; height: 2px; margin: 1.1em 0; background: linear-gradient(90deg, transparent, var(--d-pink), var(--d-blue), transparent); opacity: .6; }
 .desc.rich ul.d-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .desc.rich ul.d-tags li { margin: 0; padding: 4px 11px; border-radius: 999px; font-size: .86em; font-weight: 600; background: color-mix(in srgb, var(--d-pink) 12%, transparent); color: var(--d-pink); }
+.kdp-restored { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; border-color: #E8A33D; background: color-mix(in srgb, #E8A33D 10%, var(--surface, #fff)); font-weight: 600; }
+.kdp-restored span { flex: 1; min-width: 200px; }

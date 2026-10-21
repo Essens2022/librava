@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021133529';
-import { store } from './util.js?v=20261021133529';
+import { CONFIG } from './config.js?v=20261021134712';
+import { store } from './util.js?v=20261021134712';
 
 const D = {
   ro: {
@@ -698,6 +698,8 @@ const D = {
     'kdp.saveContinue': 'Salvează și continuă',
     'kdp.publish': 'Publică eBook-ul',
     'kdp.savedDraft': 'Salvat.',
+    'kdp.restored': 'Am păstrat modificările pe care nu le salvaseși. Verifică-le și apasă Salvează.',
+    'kdp.discard': 'Renunță la ele',
     'kdp.needTitleAuthor': 'Ca să salvezi, scrie cel puțin titlul și prenumele autorului.',
     'kdp.cannotPublish': 'Nu se poate publica încă. Lipsește: {list}.',
     'kdp.publishedTitle': 'eBook-ul tău e publicat!',
@@ -1793,6 +1795,8 @@ const D = {
     'kdp.saveContinue': 'Salva e continua',
     'kdp.publish': 'Pubblica il tuo eBook',
     'kdp.savedDraft': 'Salvato.',
+    'kdp.restored': 'Ho tenuto le modifiche che non avevi salvato. Controllale e premi Salva.',
+    'kdp.discard': 'Scartale',
     'kdp.needTitleAuthor': 'Per salvare, scrivi almeno il titolo e il nome dell\'autore.',
     'kdp.cannotPublish': 'Non si può ancora pubblicare. Manca: {list}.',
     'kdp.publishedTitle': 'Il tuo eBook è pubblicato!',
@@ -2888,6 +2892,8 @@ const D = {
     'kdp.saveContinue': 'Save and continue',
     'kdp.publish': 'Publish your eBook',
     'kdp.savedDraft': 'Saved.',
+    'kdp.restored': 'Your unsaved changes were kept. Check them and press Save.',
+    'kdp.discard': 'Discard them',
     'kdp.needTitleAuthor': 'To save, enter at least the title and the author\'s first name.',
     'kdp.cannotPublish': 'Can\'t publish yet. Missing: {list}.',
     'kdp.publishedTitle': 'Your eBook is live!',
@@ -3324,7 +3330,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021133529`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021134712`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

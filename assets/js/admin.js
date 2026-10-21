@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021133529';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021133529';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021133529';
-import { resetCompanyCache } from './views.js?v=20261021133529';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021133529';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021133529';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021133529';
-import { api } from './api.js?v=20261021133529';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021133529';
+import { CONFIG } from './config.js?v=20261021134712';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021134712';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021134712';
+import { resetCompanyCache } from './views.js?v=20261021134712';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021134712';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021134712';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021134712';
+import { api } from './api.js?v=20261021134712';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021134712';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -736,6 +736,15 @@ async function bookForm(body, b, startStep = 1) {
   const allBooks = (await api.adminBooks().catch(() => [])).filter(x => x.status === 'published' && !x.deleted_at && x.price_cents > 0 && x.id !== b?.id);
   const recOpts = sel => allBooks.sort((x, y) => (y.language === (b?.language || getLang())) - (x.language === (b?.language || getLang()))).map(x => `<option value="${esc(x.id)}" ${sel === x.id ? 'selected' : ''}>${esc(x.title)} · ${esc((x.language || '').toUpperCase())}</option>`).join('');
   const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
+  // unsaved changes kept on this device (survive a reload, a closed tab or a lost connection)
+  const DKEY = id => 'librava:bookdraft:' + (id || 'new');
+  let restored = false;
+  try {
+    const snap = JSON.parse(localStorage.getItem(DKEY(b?.id)) || 'null');
+    if (snap?.data && (!b || !b.updated_at || snap.at > Date.parse(b.updated_at))) {
+      const { status, id, ...rest } = snap.data; Object.assign(v, rest); restored = true;
+    }
+  } catch { }
   let bookId = v.id || null;
   const draftId = bookId || crypto.randomUUID(); // new books: images uploaded before the first save go in the book's own folder
   const hasAplus = !!api.uploadAplusImage;
@@ -847,8 +856,8 @@ async function bookForm(body, b, startStep = 1) {
     <section class="kdp-step" data-pane="4" hidden>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.pricing'))}</h3><p>${esc(t('kdp.pricingHelp'))}</p></div>
         <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
-          <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="number" min="0.49" step="0.01" inputmode="decimal" value="${eur(v.price_cents)}"></label>
-            <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="number" min="0" step="0.01" inputmode="decimal" value="${eur(v.list_price_cents)}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
+          <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99" value="${eur(v.price_cents).replace('.', ',')}"></label>
+            <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="text" inputmode="decimal" autocomplete="off" value="${eur(v.list_price_cents).replace('.', ',')}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
             <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
             <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('fbt.adminTitle'))}</h3><p>${esc(t('fbt.adminHelp'))}</p></div>
@@ -870,7 +879,7 @@ async function bookForm(body, b, startStep = 1) {
 
   const val = id => ($('#' + id, body)?.value || '').trim();
   const radio = n => body.querySelector(`input[name="${n}"]:checked`)?.value;
-  const cents = s => { const n = parseFloat(String(s).replace(',', '.')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
+  const cents = s => { const n = parseFloat(String(s).replace(/[^\d,.]/g, '').replace(',', '.')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
   const authorName = () => [val('f-first'), val('f-last')].filter(Boolean).join(' ');
   const has = { file: !!(v.file_path || v.file_name), cover: !!v.cover_url, sample: !!v.sample_path };
   let ownSample = false;
@@ -1072,6 +1081,19 @@ async function bookForm(body, b, startStep = 1) {
       ...(fileCheck ? { file_check: { items: fileCheck.items, meta: { ...fileCheck.meta, doc: undefined } } } : {}),
     };
   };
+  // every change is copied on this device at once; the copy is removed after a successful save
+  const keep = debounce(() => { try { localStorage.setItem(DKEY(bookId), JSON.stringify({ at: Date.now(), data: collect(v.status || 'draft') })); window.__libravaDirty = true; } catch { } }, 500);
+  // (the form can be drawn again in the same box: replace the previous listeners, don't add more)
+  if (body._keepOff) body._keepOff();
+  const onClickKeep = e => { if (e.target.closest('.ap-mod, [data-add], .contrib-row, [data-addkw]')) keep(); };
+  ['input', 'change'].forEach(ev => body.addEventListener(ev, keep)); body.addEventListener('click', onClickKeep);
+  body._keepOff = () => { ['input', 'change'].forEach(ev => body.removeEventListener(ev, keep)); body.removeEventListener('click', onClickKeep); };
+  if (restored) {
+    const bar = document.createElement('div'); bar.className = 'panel kdp-restored';
+    bar.innerHTML = `${icon('info', 'ico')}<span>${esc(t('kdp.restored'))}</span><button type="button" class="btn btn-ghost btn-sm">${esc(t('kdp.discard'))}</button>`;
+    body.prepend(bar);
+    bar.querySelector('button').onclick = () => { try { localStorage.removeItem(DKEY(b?.id)); } catch { } window.__libravaDirty = false; bookForm(body, b, step); };
+  }
   const save = async (status, btn) => {
     const err = $('#f-err', body); err.hidden = true;
     const fail = m => { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: 'center' }); };
@@ -1085,6 +1107,7 @@ async function bookForm(body, b, startStep = 1) {
     const old = btn.textContent; btn.disabled = true; btn.textContent = t('admin.saving');
     try {
       bookId = await api.saveBook(data, files);
+      try { localStorage.removeItem(DKEY(null)); localStorage.removeItem(DKEY(bookId)); } catch { } window.__libravaDirty = false;
       if (files.file) has.file = true; if (files.cover) has.cover = true;
       files.cover = files.file = files.sample = null;
       $('#kdp-status', body).className = 'status ' + (status === 'published' ? 'live' : 'draft');
