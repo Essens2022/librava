@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261021112517';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021112517';
-import { esc, store, $, $$ } from './util.js?v=20261021112517';
+import { CONFIG } from './config.js?v=20261021113201';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021113201';
+import { esc, store, $, $$ } from './util.js?v=20261021113201';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,10 +12,10 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261021112517';
-import { suggest, highlight } from './search.js?v=20261021112517';
-import { track } from './track.js?v=20261021112517';
-import { api } from './api.js?v=20261021112517';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261021113201';
+import { suggest, highlight } from './search.js?v=20261021113201';
+import { track } from './track.js?v=20261021113201';
+import { api } from './api.js?v=20261021113201';
 
 // ---------------- icons ----------------
 const P = {
@@ -333,13 +333,13 @@ export function setupDropZones() {
     return acc.some(a => a.startsWith('.') ? name.endsWith(a) : a.endsWith('/*') ? type.startsWith(a.slice(0, -1)) : type === a);
   };
   let lit = null;
-  const light = z => { if (lit && lit !== z) lit.classList.remove('drag-over'); lit = z; z?.classList.add('drag-over'); };
+  const light = z => { if (lit && lit !== z) lit.classList.remove('drag-over', 'over'); lit = z; z?.classList.add(z.classList.contains('drop') ? 'over' : 'drag-over'); };
   document.addEventListener('dragover', e => {
     if (!hasFiles(e)) return;
     e.preventDefault();                         // never let the browser open the file and leave the page
     const hit = zoneOf(e.target);
     e.dataTransfer.dropEffect = hit ? 'copy' : 'none';
-    light(hit && !hit.zone.classList.contains('drop') ? hit.zone : null);
+    light(hit && !hit.zone.dataset.drop ? hit.zone : null);
   });
   document.addEventListener('dragleave', e => { if (!e.relatedTarget) light(null); });
   document.addEventListener('drop', e => {

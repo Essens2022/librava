@@ -1483,3 +1483,16 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 /* any upload field: a file dragged over it lights the box */
 .drag-over { outline: 2px dashed var(--pista-strong, #4F7F33); outline-offset: 3px; border-radius: 10px; background: color-mix(in srgb, var(--pista-strong, #4F7F33) 8%, transparent); }
 input[type=file].input { cursor: pointer; }
+.ri-filebox { grid-column: 1 / -1; }
+.ri-filebox .drop { font-weight: 400; }
+.ri-chip { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.ri-chip > .ico, .ri-chip > svg { width: 26px; height: 26px; color: var(--pista-strong); flex: none; }
+.ri-chip-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; font-weight: 400; }
+.ri-chip-txt b { overflow-wrap: anywhere; }
+.ri-err { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #E5A3A3; background: #FDECEC; color: #B42318; font-size: 14px; font-weight: 600; }
+.ri-err .ico { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.ri-warn { color: #B42318; font-size: 13.5px; margin-top: 4px; }
+select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ri-err { background: #3A1715; border-color: #7A2E29; color: #FDA29B; } :root:not([data-theme="light"]) .ri-warn { color: #FDA29B; } }
+:root[data-theme="dark"] .ri-err { background: #3A1715; border-color: #7A2E29; color: #FDA29B; }
+:root[data-theme="dark"] .ri-warn { color: #FDA29B; }

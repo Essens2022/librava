@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021112517';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021112517';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021112517';
-import { resetCompanyCache } from './views.js?v=20261021112517';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021112517';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021112517';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021112517';
-import { api } from './api.js?v=20261021112517';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021112517';
+import { CONFIG } from './config.js?v=20261021113201';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021113201';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021113201';
+import { resetCompanyCache } from './views.js?v=20261021113201';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021113201';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021113201';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021113201';
+import { api } from './api.js?v=20261021113201';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021113201';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -290,9 +290,13 @@ async function reviews(body) {
       <div class="ri-top">
         <label class="field"><span>${esc(t('ri.book'))}</span><select class="input" id="ri-book"><option value="">${esc(t('ri.pickBook'))}</option>${books.filter(b => !b.deleted_at).map(b => `<option value="${esc(b.id)}">${esc(b.title)}${b.language ? ' · ' + esc(b.language.toUpperCase()) : ''}</option>`).join('')}</select></label>
         <label class="field"><span>${esc(t('ri.source'))}</span><input class="input" id="ri-source" list="ri-sources" maxlength="60" placeholder="${esc(t('ri.sourcePh'))}"><datalist id="ri-sources">${['Amazon', 'Amazon.it', 'Amazon.de', 'Amazon.com', 'Etsy', 'Payhip', 'Gumroad', 'Google Play Books', 'Kobo', 'Apple Books', 'Shopify', 'WooCommerce'].map(x => `<option value="${x}">`).join('')}</datalist></label>
-        <label class="field"><span>${esc(t('ri.file'))}</span><input class="input" type="file" id="ri-file" accept=".csv,.tsv,.txt,.xlsx,.xls,.ods,.json"></label>
+        <div class="field ri-filebox"><span>${esc(t('ri.file'))}</span>
+          <label class="drop" id="ri-drop">${icon('upload')}<span><span class="fname">${esc(t('ri.dropHere'))}</span><br><small class="muted">${esc(t('ri.formats'))}</small></span><input type="file" id="ri-file" accept=".csv,.tsv,.txt,.xlsx,.xls,.ods,.json"></label>
+          <div class="ri-chip" id="ri-chip" hidden>${icon('file')}<span class="ri-chip-txt"><b id="ri-fname"></b><small class="muted" id="ri-fmeta"></small></span><button type="button" class="btn btn-ghost btn-sm" id="ri-remove">✕ ${esc(t('ri.remove'))}</button></div>
+        </div>
       </div>
-      <p class="muted" style="font-size:13px;margin:8px 0 0">${esc(t('ri.formats'))} <button type="button" class="linkbtn" id="ri-template">${esc(t('ri.template'))}</button></p>
+      <p class="muted" style="font-size:13px;margin:8px 0 0"><button type="button" class="linkbtn" id="ri-template">${esc(t('ri.template'))}</button></p>
+      <div class="ri-err" id="ri-err" role="alert" hidden></div>
       <div id="ri-step"></div>
       <p class="ri-legal">${icon('info', 'ico')} ${esc(t('ri.legal'))}</p>
     </section>
@@ -316,7 +320,13 @@ async function reviews(body) {
 
 function importReviewsUI(body, books) {
   const step = $('#ri-step', body), fileIn = $('#ri-file', body), bookSel = $('#ri-book', body), srcIn = $('#ri-source', body);
+  const errBox = $('#ri-err', body), drop = $('#ri-drop', body), chip = $('#ri-chip', body);
   let data = null, map = {}, dayFirst = true, product = '';
+  // problems are written in red inside the box, not only in a message that disappears
+  const showErr = (msg, look = false) => { errBox.innerHTML = `${icon('info', 'ico')}<span>${esc(msg)}</span>`; errBox.hidden = false; if (look) errBox.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+  const clearErr = () => { errBox.hidden = true; errBox.textContent = ''; };
+  const removeFile = () => { data = null; map = {}; product = ''; fileIn.value = ''; chip.hidden = true; drop.hidden = false; step.innerHTML = ''; clearErr(); };
+  $('#ri-remove', body).onclick = removeFile;
   $('#ri-template', body).onclick = () => {
     const csv = '﻿name;rating;title;review;date;time;country\r\nMaria R.;5;Bellissimo;"Libro chiaro, esercizi facili da seguire.";12/03/2025;14:35;Italia\r\nJohn D.;4;Good book;Useful for beginners.;2025-02-01;09:10;USA\r\n';
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'librava-recenzii-model.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -329,27 +339,31 @@ function importReviewsUI(body, books) {
     step.innerHTML = `<div class="ri-map"><h3>${esc(t('ri.map'))}</h3><div class="ri-grid">${REVIEW_FIELDS.map(sel).join('')}
         <label class="field"><span>${esc(t('ri.dateOrder'))}</span><select class="input" id="ri-dmy"><option value="1" ${dayFirst ? 'selected' : ''}>${esc(t('ri.dmy'))}</option><option value="0" ${dayFirst ? '' : 'selected'}>${esc(t('ri.mdy'))}</option></select></label>
         ${products.length > 1 ? `<label class="field"><span>${esc(t('ri.product'))}</span><select class="input" id="ri-prod"><option value="">${esc(t('ri.allRows'))}</option>${products.map(p => `<option ${p === product ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select></label>` : ''}</div></div>
-      <div class="ri-sum"><b>${esc(t('ri.ready', { n: ok.length }))}</b>${skipped.length ? `<span class="muted"> · ${esc(t('ri.skipped', { n: skipped.length, lines: skipped.slice(0, 8).map(x => x.line).join(', ') + (skipped.length > 8 ? '…' : '') }))}</span>` : ''}</div>
+      <div class="ri-sum"><b>${esc(t('ri.ready', { n: ok.length }))}</b>${skipped.length ? `<div class="ri-warn">${esc(t('ri.skipped', { n: skipped.length, lines: skipped.slice(0, 8).map(x => x.line).join(', ') + (skipped.length > 8 ? '…' : '') }))}</div>` : ''}</div>
       ${ok.length ? `<div class="ri-preview">${ok.slice(0, 4).map(r => `<div class="review"><div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || t('rev.anon'))}</div>
         <div class="rating-line" style="margin-top:6px">${stars(r.rating)} ${r.title ? `<b>${esc(r.title)}</b>` : ''}</div>
         <div class="muted" style="font-size:13px">${r.created_at ? esc(new Date(r.created_at).toLocaleString(getLang(), { dateStyle: 'medium', timeStyle: 'short' })) : esc(t('ri.noDate'))}${r.country ? ' · ' + esc(r.country) : ''}</div>
         ${r.body ? `<p>${esc(r.body.length > 280 ? r.body.slice(0, 280) + '…' : r.body)}</p>` : ''}</div>`).join('')}</div>` : ''}
-      <button class="btn btn-buy" id="ri-go" ${ok.length ? '' : 'disabled'}>${icon('upload', 'ico')} ${esc(t('ri.import', { n: ok.length }))}</button>`;
+      <button class="btn btn-buy" id="ri-go" ${ok.length ? '' : 'disabled'}>${icon('upload', 'ico')} ${esc(t('ri.publish', { n: ok.length }))}</button>`;
+    if (!ok.length) showErr(t('ri.noneValid')); else if (!errBox.textContent.includes(t('ri.pubErr'))) clearErr();
     $$('[data-map]', step).forEach(x => x.onchange = () => { map[x.dataset.map] = x.value || undefined; if (x.dataset.map === 'product') product = ''; render(); });
     $('#ri-dmy', step).onchange = e => { dayFirst = e.target.value === '1'; render(); };
     const pr = $('#ri-prod', step); if (pr) pr.onchange = e => { product = e.target.value; render(); };
     $('#ri-go', step).onclick = async e => {
-      if (!bookSel.value) { toast(t('ri.pickBook'), { error: true }); bookSel.focus(); return; }
-      e.currentTarget.disabled = true;
+      if (!bookSel.value) { showErr(t('ri.pickBook'), true); bookSel.focus({ preventScroll: true }); bookSel.classList.add('invalid'); return; }
+      const btn = e.currentTarget; btn.disabled = true; clearErr();
       try {
         const r = await api.importReviews(bookSel.value, ok, srcIn.value.trim());
         toast(t('ri.done', { n: r.added }) + (r.dupes ? ' ' + t('ri.dupes', { n: r.dupes }) : ''));
         reviews(body);
-      } catch (x) { e.currentTarget.disabled = false; toast(errText(x), { error: true }); }
+      } catch (x) { btn.disabled = false; showErr(t('ri.pubErr') + ' ' + errText(x), true); }
     };
   };
   fileIn.onchange = async () => {
     const f = fileIn.files[0]; if (!f) return;
+    clearErr(); drop.hidden = true; chip.hidden = false;
+    const size = f.size < 1024 ? f.size + ' B' : kb(f.size);
+    $('#ri-fname', body).textContent = f.name; $('#ri-fmeta', body).textContent = size;
     step.innerHTML = `<div class="spinner" style="margin:16px auto"></div>`;
     try {
       data = await readReviewFile(f, async () => { await loadScript(VENDOR('xlsx.full.min.js')); return window.XLSX; });
@@ -362,10 +376,11 @@ function importReviewsUI(body, books) {
         const bt = books.find(b => b.id === bookSel.value)?.title;
         product = vals.length > 1 ? (vals.find(v => bt && norm(v).includes(norm(bt).slice(0, 20))) || '') : '';
       }
+      $('#ri-fmeta', body).textContent = size + ' · ' + t('ri.rows', { n: data.rows.length });
       render();
-    } catch (x) { data = null; step.innerHTML = `<p class="err" style="margin-top:10px">${esc(t('ri.readErr'))} ${esc(x.message || '')}</p>`; }
+    } catch (x) { data = null; step.innerHTML = ''; showErr(t('ri.readErr') + ' ' + (x.message || '')); }
   };
-  bookSel.onchange = () => { if (data && map.product && !product) { const bt = books.find(b => b.id === bookSel.value)?.title; const vals = [...new Set(data.rows.map(r => String(r[map.product] ?? '').trim()))]; product = vals.find(v => bt && norm(v).includes(norm(bt).slice(0, 20))) || ''; render(); } };
+  bookSel.onchange = () => { bookSel.classList.remove('invalid'); if (errBox.textContent === t('ri.pickBook')) clearErr(); if (data && map.product && !product) { const bt = books.find(b => b.id === bookSel.value)?.title; const vals = [...new Set(data.rows.map(r => String(r[map.product] ?? '').trim()))]; product = vals.find(v => bt && norm(v).includes(norm(bt).slice(0, 20))) || ''; render(); } };
 }
 
 // ---------------------------------------------------------------- manuscript check (sizes, readability on phone & tablet)

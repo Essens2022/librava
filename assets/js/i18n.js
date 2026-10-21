@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021112517';
-import { store } from './util.js?v=20261021112517';
+import { CONFIG } from './config.js?v=20261021113201';
+import { store } from './util.js?v=20261021113201';
 
 const D = {
   ro: {
@@ -458,6 +458,12 @@ const D = {
     'drop.wrongType': 'Acest tip de fișier nu merge aici.',
     'rev.from': 'Recenzie preluată de pe {s}',
     'ri.title': 'Importă recenzii din alt magazin',
+    'ri.dropHere': 'Trage fișierul aici sau apasă ca să-l alegi',
+    'ri.remove': 'Elimină fișierul',
+    'ri.publish': 'Publică {n} recenzii',
+    'ri.pubErr': 'Recenziile nu au fost publicate.',
+    'ri.noneValid': 'Nu am găsit nicio recenzie cu stele în fișier. Verifică mai sus ce coloană e aleasă la „Stele”.',
+    'ri.rows': '{n} rânduri',
     'ri.help': 'Încarcă fișierul cu recenziile pe care această carte le are deja în alt magazin (Amazon, Etsy, site-ul tău…). Stelele, titlul, textul, numele, data, ora și țara se adaugă automat la cartea aleasă.',
     'ri.book': 'Cartea',
     'ri.pickBook': 'Alege cartea',
@@ -1533,6 +1539,12 @@ const D = {
     'drop.wrongType': 'Questo tipo di file non va bene qui.',
     'rev.from': 'Recensione da {s}',
     'ri.title': 'Importa recensioni da un altro negozio',
+    'ri.dropHere': 'Trascina qui il file o tocca per sceglierlo',
+    'ri.remove': 'Rimuovi il file',
+    'ri.publish': 'Pubblica {n} recensioni',
+    'ri.pubErr': 'Le recensioni non sono state pubblicate.',
+    'ri.noneValid': "Nel file non c'è nessuna recensione con stelle. Controlla qui sopra quale colonna è scelta in «Stelle».",
+    'ri.rows': '{n} righe',
     'ri.help': 'Carica il file con le recensioni che questo libro ha già in un altro negozio (Amazon, Etsy, il tuo sito…). Stelle, titolo, testo, nome, data, ora e paese vengono aggiunti in automatico al libro scelto.',
     'ri.book': 'Libro',
     'ri.pickBook': 'Scegli il libro',
@@ -2608,6 +2620,12 @@ const D = {
     'drop.wrongType': 'This type of file can’t be used here.',
     'rev.from': 'Review from {s}',
     'ri.title': 'Import reviews from another shop',
+    'ri.dropHere': 'Drag the file here or tap to choose it',
+    'ri.remove': 'Remove file',
+    'ri.publish': 'Publish {n} reviews',
+    'ri.pubErr': 'The reviews were not published.',
+    'ri.noneValid': 'No review with stars was found in the file. Check above which column is chosen for “Stars”.',
+    'ri.rows': '{n} rows',
     'ri.help': 'Upload the file with the reviews this book already has in another shop (Amazon, Etsy, your own site…). Stars, title, text, name, date, time and country are added automatically to the chosen book.',
     'ri.book': 'Book',
     'ri.pickBook': 'Choose the book',
@@ -3264,7 +3282,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021112517`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021113201`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
