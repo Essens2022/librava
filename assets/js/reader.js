@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021160212';
-import { t } from './i18n.js?v=20261021160212';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021160212';
-import { offline } from './offline.js?v=20261021160212';
-import { api } from './api.js?v=20261021160212';
-import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021160212';
-import { startCheckout, alsoReadFor } from './views.js?v=20261021160212';
+import { CONFIG } from './config.js?v=20261021160626';
+import { t } from './i18n.js?v=20261021160626';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021160626';
+import { offline } from './offline.js?v=20261021160626';
+import { api } from './api.js?v=20261021160626';
+import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021160626';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261021160626';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -24,7 +24,8 @@ export async function viewReader(el, id, q) {
   // the end-of-preview screen is prepared while the sample is read: recommendations and pictures are ready
   // before it opens, so it appears complete at once (no jump when they arrive)
   let recList = null;
-  const recP = book ? alsoReadFor(book, 12).catch(() => []).then(l => { recList = l; [book.cover_url, ...l.map(x => x.cover_url)].filter(Boolean).forEach(u => { const im = new Image(); im.src = u; }); return l; }) : Promise.resolve([]);
+  if (book) warmCovers([book.cover_url]);
+  const recP = book ? alsoReadFor(book, 12).catch(() => []).then(l => { recList = l; return l; }) : Promise.resolve([]);
   if (!window.__libravaCopyHook) { window.__libravaCopyHook = true; window.addEventListener('librava:copylimit', () => toast(t('rd.copyLimit'))); }
   if (!book) { go('/'); return; }
   let src;

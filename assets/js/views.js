@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js?v=20261021160212';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021160212';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021160212';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021160212';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021160212';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021160212';
-import { track } from './track.js?v=20261021160212';
-import { guessLang } from './langdetect.js?v=20261021160212';
-import { didYouMean } from './search.js?v=20261021160212';
-import { api } from './api.js?v=20261021160212';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021160212';
+import { CONFIG } from './config.js?v=20261021160626';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021160626';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021160626';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021160626';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021160626';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021160626';
+import { track } from './track.js?v=20261021160626';
+import { guessLang } from './langdetect.js?v=20261021160626';
+import { didYouMean } from './search.js?v=20261021160626';
+import { api } from './api.js?v=20261021160626';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021160626';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -320,6 +320,8 @@ export async function viewBook(el, id) {
 
   $('[data-preview]', el)?.addEventListener('click', () => track('sample', { book_id: b.id }));
   $('[data-preview]', el)?.addEventListener('click', () => go('/read/' + encodeURIComponent(b.id) + '?preview=1'));
+  // get the end-of-preview recommendations ready while the visitor looks at this page
+  if ($('[data-preview]', el)) setTimeout(() => { warmCovers([b.cover_url]); alsoReadFor(b, 12).catch(() => { }); }, 600);
   $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); toast(t('cart.added')); });
   $('[data-buy]', el)?.addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
   $('[data-free]', el)?.addEventListener('click', async () => {
@@ -442,7 +444,21 @@ async function boughtTogetherFor(b) {
 }
 // "Customers who read this book also read" (end of the preview): the owner's picks, books bought by the same
 // customers, the same series / author / category — never the book itself or books the reader already has
-export async function alsoReadFor(b, n = 12) {
+// recommendations are worked out once per book and kept for a few minutes, and their covers are
+// downloaded in advance, so the end-of-preview screen can show them at once
+const _also = new Map(), _warm = [];
+export function warmCovers(urls) {
+  urls.filter(Boolean).forEach(u => { if (_warm.some(i => i.src === u || i._u === u)) return; const im = new Image(); im._u = u; im.decoding = 'async'; im.src = u; im.decode?.().catch(() => { }); _warm.push(im); if (_warm.length > 60) _warm.shift(); });
+}
+export function alsoReadFor(b, n = 12) {
+  const k = b.id + ':' + n, hit = _also.get(k);
+  if (hit && Date.now() - hit.at < 300000) return hit.p;
+  const p = _alsoReadFor(b, n).then(l => { warmCovers(l.map(x => x.cover_url)); return l; });
+  p.catch(() => _also.delete(k));
+  _also.set(k, { at: Date.now(), p });
+  return p;
+}
+async function _alsoReadFor(b, n = 12) {
   const all = await api.listBooks({});
   const ok = x => x && x.id !== b.id && x.status !== 'draft' && !x.deleted_at;
   const byId = Object.fromEntries(all.map(x => [x.id, x]));
