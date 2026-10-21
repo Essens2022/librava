@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021152840';
-import { t } from './i18n.js?v=20261021152840';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021152840';
-import { offline } from './offline.js?v=20261021152840';
-import { api } from './api.js?v=20261021152840';
-import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021152840';
-import { startCheckout, alsoReadFor } from './views.js?v=20261021152840';
+import { CONFIG } from './config.js?v=20261021153607';
+import { t } from './i18n.js?v=20261021153607';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021153607';
+import { offline } from './offline.js?v=20261021153607';
+import { api } from './api.js?v=20261021153607';
+import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021153607';
+import { startCheckout, alsoReadFor } from './views.js?v=20261021153607';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -93,17 +93,17 @@ export async function viewReader(el, id, q) {
     box.className = 'rd-msg rd-end';
     // like Amazon: buy the book right here, then "customers who read this book also read"
     box.innerHTML = `<div class="box end-box">
+      <button class="linkbtn end-back" data-end-back>‹ ${esc(t('reader.back'))}</button>
       <div class="end-buy">${book.cover_url ? `<img class="end-cover" src="${esc(book.cover_url)}" alt="">` : ''}
         <div class="end-info"><h2>${esc(t('reader.enjoy'))}</h2>
           <p class="end-title"><b>${esc(book.title)}</b><span>${esc(book.author || '')}</span></p>
           ${book.price_cents ? `<div class="end-price">${priceHTML(book)}</div>` : ''}
-          <p class="muted end-text">${esc(t('reader.previewText'))}</p>
-          <div class="end-actions">${book.price_cents
-            ? `<button class="btn btn-buy" data-end-buy>${esc(t('book.buyNow'))}</button><button class="btn btn-cart" data-end-cart>${esc(cart.has(book.id) ? t('book.inCart') : t('book.addToCart'))}</button>`
-            : `<button class="btn btn-buy" data-end-free>${esc(t('book.getFree'))}</button>`}
-            <button class="btn btn-ghost" data-end-store>${esc(t('reader.seeBook'))}</button></div></div></div>
-      <div class="end-more" hidden><h3>${esc(t('reader.alsoRead'))}</h3><div class="end-row"></div></div>
-      <button class="linkbtn end-back" data-end-back>‹ ${esc(t('reader.back'))}</button></div>`;
+          <p class="muted end-text">${esc(t('reader.previewText'))}</p></div>
+        <div class="end-actions">${book.price_cents
+          ? `<button class="btn btn-buy" data-end-buy>${esc(t('book.buyNow'))}</button><button class="btn btn-cart" data-end-cart>${esc(cart.has(book.id) ? t('book.inCart') : t('book.addToCart'))}</button>`
+          : `<button class="btn btn-buy" data-end-free>${esc(t('book.getFree'))}</button>`}
+          <button class="linkbtn end-store" data-end-store>${esc(t('reader.seeBook'))} ›</button></div></div>
+      <div class="end-more" hidden><h3>${esc(t('reader.alsoRead'))}</h3><div class="end-row"></div></div></div>`;
     stage.appendChild(box);
     box.querySelector('[data-end-back]').onclick = () => { box.remove(); engine?.prev(); };
     box.querySelector('[data-end-buy]')?.addEventListener('click', () => { cart.add(book.id); cleanup(); startCheckout([book.id]); });

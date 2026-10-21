@@ -1575,3 +1575,35 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
   .end-actions { width: 100%; } .end-actions .btn { flex: 1 1 100%; min-width: 0; }
   .end-row { grid-auto-columns: 84px; gap: 12px; } .mini-cover { width: 84px; }
 }
+
+/* end of preview v3: everything on one screen, no scrolling needed */
+.rd-end { padding: 14px 16px; place-items: center; }
+.rd-msg .end-box { gap: 14px; max-height: 100%; }
+.end-back { align-self: flex-start; font-size: 14px; }
+.end-buy { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "cover info" "cover actions"; gap: 10px 24px; align-items: start; justify-content: center; padding-bottom: 16px; }
+.end-cover { grid-area: cover; width: 160px; }
+.end-info { grid-area: info; }
+.end-actions { grid-area: actions; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 0; }
+.end-actions .btn { min-width: 150px; }
+.end-store { font-size: 14px; }
+@media (max-width: 560px) {
+  .rd-end { padding: 10px 14px; }
+  .rd-msg .end-box { gap: 10px; }
+  .end-buy { grid-template-columns: 92px minmax(0, 1fr); grid-template-areas: "cover info" "actions actions"; gap: 10px 14px; padding-bottom: 12px; text-align: left; align-items: center; }
+  .end-cover { width: 92px; }
+  .end-info { gap: 4px; }
+  .end-info h2 { font-size: 17px; }
+  .end-title b { font-size: 15px; } .end-title span { font-size: 13px; }
+  .end-price .price { font-size: 20px; }
+  .end-text { display: none; }
+  .end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; justify-content: stretch; }
+  .end-actions .btn { min-width: 0; width: 100%; padding: 11px 8px; font-size: 14.5px; }
+  .end-actions .btn:only-of-type { grid-column: 1 / -1; }
+  .end-store { grid-column: 1 / -1; justify-self: center; }
+  .end-more { padding: 10px 10px 6px; }
+  .end-more h3 { font-size: 13px; margin-bottom: 8px; }
+  .end-row { grid-auto-columns: 70px; gap: 10px; } .mini-cover { width: 70px; }
+  .mini { font-size: 11px; } .mini-price .price { font-size: 12px; } .mini-stars { display: none; }
+}
+@media (max-width: 560px) and (max-height: 640px) { .end-cover { width: 74px; } .end-buy { grid-template-columns: 74px minmax(0, 1fr); } .end-row { grid-auto-columns: 60px; } .mini-cover { width: 60px; } }
+.mini-price .price-old { display: none; } .mini-price { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
