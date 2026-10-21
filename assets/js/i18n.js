@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021120238';
-import { store } from './util.js?v=20261021120238';
+import { CONFIG } from './config.js?v=20261021120425';
+import { store } from './util.js?v=20261021120425';
 
 const D = {
   ro: {
@@ -464,6 +464,7 @@ const D = {
     'drop.wrongType': 'Acest tip de fișier nu merge aici.',
     'rev.from': 'Recenzie preluată de pe {s}',
     'ri.title': 'Importă recenzii din alt magazin',
+    'ri.verifiedHint': 'în coloana „verified” scrie yes la recenziile verificate și no la celelalte.',
     'ri.updated': '{n} recenzii existente au primit „Cumpărare verificată”.',
     'ri.f.verified': 'Cumpărare verificată',
     'ri.sourceNote': '(doar pentru tine, nu apare pe site)',
@@ -1556,6 +1557,7 @@ const D = {
     'drop.wrongType': 'Questo tipo di file non va bene qui.',
     'rev.from': 'Recensione da {s}',
     'ri.title': 'Importa recensioni da un altro negozio',
+    'ri.verifiedHint': 'nella colonna «verified» scrivi yes per le recensioni verificate e no per le altre.',
     'ri.updated': '{n} recensioni esistenti hanno ricevuto «Acquisto verificato».',
     'ri.f.verified': 'Acquisto verificato',
     'ri.sourceNote': '(solo per te, non appare sul sito)',
@@ -2648,6 +2650,7 @@ const D = {
     'drop.wrongType': 'This type of file can’t be used here.',
     'rev.from': 'Review from {s}',
     'ri.title': 'Import reviews from another shop',
+    'ri.verifiedHint': 'in the “verified” column write yes for verified reviews and no for the others.',
     'ri.updated': '{n} existing reviews were marked “Verified purchase”.',
     'ri.f.verified': 'Verified purchase',
     'ri.sourceNote': '(only for you, not shown on the site)',
@@ -3315,7 +3318,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021120238`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021120425`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

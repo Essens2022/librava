@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021120238';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021120238';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021120238';
-import { resetCompanyCache } from './views.js?v=20261021120238';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021120238';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021120238';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021120238';
-import { api } from './api.js?v=20261021120238';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021120238';
+import { CONFIG } from './config.js?v=20261021120425';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021120425';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021120425';
+import { resetCompanyCache } from './views.js?v=20261021120425';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021120425';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021120425';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021120425';
+import { api } from './api.js?v=20261021120425';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021120425';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -295,7 +295,7 @@ async function reviews(body) {
           <div class="ri-chip" id="ri-chip" hidden>${icon('file')}<span class="ri-chip-txt"><b id="ri-fname"></b><small class="muted" id="ri-fmeta"></small></span><button type="button" class="btn btn-ghost btn-sm" id="ri-remove">✕ ${esc(t('ri.remove'))}</button></div>
         </div>
       </div>
-      <p class="muted" style="font-size:13px;margin:8px 0 0"><button type="button" class="linkbtn" id="ri-template">${esc(t('ri.template'))}</button></p>
+      <p class="muted" style="font-size:13px;margin:8px 0 0"><button type="button" class="linkbtn" id="ri-template">${esc(t('ri.template'))}</button> · ${esc(t('ri.verifiedHint'))}</p>
       <div class="ri-err" id="ri-err" role="alert" hidden></div>
       <div id="ri-step"></div>
       <p class="ri-legal">${icon('info', 'ico')} ${esc(t('ri.legal'))}</p>
