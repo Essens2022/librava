@@ -16,7 +16,7 @@ const RO = {
     ['5. Livrarea', 'Cartea apare imediat după plată în Biblioteca mea. Dacă nu apare în câteva minute, scrie-ne la {email}.'],
     ['6. Dreptul de retragere', 'Pentru conținutul digital livrat imediat, la plată ți se cere acordul expres pentru livrarea imediată și confirmarea că îți pierzi astfel dreptul de retragere de 14 zile. Detalii în pagina Dreptul de retragere.'],
     ['7. Probleme cu o carte', 'Dacă o carte nu se deschide sau are un defect, scrie-ne la {email}: o reparăm, o înlocuim sau îți returnăm banii.'],
-    ['8. Utilizare corectă', 'Nu ai voie să încerci să ocolești protecțiile site-ului, să accesezi conturile altora, să folosești roboți pentru a copia conținut sau să publici recenzii false sau jignitoare. Putem șterge recenziile care încalcă aceste reguli și putem suspenda conturile folosite abuziv.'],
+    ['8. Utilizare corectă', 'Nu ai voie să încerci să ocolești protecțiile site-ului, să accesezi conturile altora, să folosești roboți pentru a copia conținut sau să publici recenzii false sau jignitoare. Putem șterge recenziile care încalcă aceste reguli și putem suspenda conturile folosite abuziv. Recenziile publicate provin de la clienți care au cumpărat cartea pe Librava sau pe celelalte canale de vânzare ale noastre. Eticheta „Cumpărare verificată” apare doar când achiziția a fost verificată, pe Librava sau pe canalul unde a fost făcută. Nu publicăm recenzii plătite sau inventate.'],
     ['9. Răspundere', 'Facem tot posibilul ca site-ul să funcționeze fără întrerupere, dar nu putem garanta acest lucru. Nu răspundem pentru daune indirecte, în limitele permise de lege. Drepturile tale legale de consumator rămân neatinse.'],
     ['10. Modificări și lege aplicabilă', 'Putem actualiza acești termeni; versiunea nouă se aplică cumpărăturilor făcute după publicare. Se aplică legea țării vânzătorului ({country}), fără a-ți restrânge protecția oferită de legea țării tale de reședință. Pentru orice nemulțumire scrie-ne la {email}; poți apela și la autoritatea pentru protecția consumatorilor din țara ta.'],
   ],
@@ -64,7 +64,7 @@ const IT = {
     ['5. Consegna', 'Il libro compare subito dopo il pagamento nella tua Libreria. Se non compare entro pochi minuti, scrivici a {email}.'],
     ['6. Diritto di recesso', 'Per i contenuti digitali forniti subito, al pagamento ti chiediamo il consenso espresso alla fornitura immediata e la conferma di sapere che così perdi il diritto di recesso di 14 giorni. Dettagli nella pagina Diritto di recesso.'],
     ['7. Problemi con un libro', 'Se un libro non si apre o è difettoso, scrivici a {email}: lo correggiamo, lo sostituiamo o ti rimborsiamo.'],
-    ['8. Uso corretto', 'Non puoi aggirare le protezioni del sito, accedere agli account altrui, usare robot per copiare contenuti o pubblicare recensioni false od offensive. Possiamo rimuovere le recensioni che violano queste regole e sospendere gli account usati in modo abusivo.'],
+    ['8. Uso corretto', 'Non puoi aggirare le protezioni del sito, accedere agli account altrui, usare robot per copiare contenuti o pubblicare recensioni false od offensive. Possiamo rimuovere le recensioni che violano queste regole e sospendere gli account usati in modo abusivo. Le recensioni pubblicate provengono da clienti che hanno acquistato il libro su Librava o sugli altri nostri canali di vendita. L\'etichetta «Acquisto verificato» compare solo quando l\'acquisto è stato verificato, su Librava o sul canale in cui è stato fatto. Non pubblichiamo recensioni pagate o inventate.'],
     ['9. Responsabilità', 'Facciamo il possibile perché il sito funzioni senza interruzioni, ma non possiamo garantirlo. Nei limiti di legge non rispondiamo di danni indiretti. I tuoi diritti di consumatore restano invariati.'],
     ['10. Modifiche e legge applicabile', 'Possiamo aggiornare questi termini; la nuova versione vale per gli acquisti successivi alla pubblicazione. Si applica la legge del paese del venditore ({country}), senza ridurre la protezione che ti offre la legge del tuo paese di residenza. Per qualsiasi reclamo scrivici a {email}; puoi rivolgerti anche alle autorità di tutela dei consumatori del tuo paese.'],
   ],
@@ -106,7 +106,7 @@ const EN = {
     ['5. Delivery', 'The book appears in My library right after payment. If it does not appear within a few minutes, write to {email}.'],
     ['6. Right of withdrawal', 'For digital content delivered immediately, at checkout we ask for your express consent to immediate delivery and your acknowledgement that you thereby lose the 14-day right of withdrawal. Details on the Right of withdrawal page.'],
     ['7. Problems with a book', 'If a book does not open or is faulty, write to {email}: we fix it, replace it or refund you.'],
-    ['8. Fair use', 'You may not try to get around the site\'s protections, access other people\'s accounts, use robots to copy content or post false or abusive reviews. We may remove reviews that break these rules and suspend accounts used abusively.'],
+    ['8. Fair use', 'You may not try to get around the site\'s protections, access other people\'s accounts, use robots to copy content or post false or abusive reviews. We may remove reviews that break these rules and suspend accounts used abusively. Published reviews come from customers who bought the book on Librava or through our other sales channels. The “Verified purchase” label appears only when the purchase was verified, on Librava or on the channel where it was made. We do not publish paid or invented reviews.'],
     ['9. Liability', 'We do our best to keep the site running without interruption but cannot guarantee it. To the extent permitted by law we are not liable for indirect damages. Your statutory consumer rights are not affected.'],
     ['10. Changes and governing law', 'We may update these terms; the new version applies to purchases made after publication. The law of the seller\'s country ({country}) applies, without reducing the protection you enjoy under the law of your country of residence. For any complaint write to {email}; you can also contact the consumer protection authority in your country.'],
   ],
@@ -136,5 +136,5 @@ const EN = {
   consentMore: 'Read the details',
 };
 
-export const LEGAL_VERSION = '2026-10-21';
+export const LEGAL_VERSION = '2026-10-21b';
 export function legalText(lang) { return lang === 'ro' ? RO : lang === 'it' ? IT : EN; }

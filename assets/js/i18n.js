@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021113201';
-import { store } from './util.js?v=20261021113201';
+import { CONFIG } from './config.js?v=20261021115150';
+import { store } from './util.js?v=20261021115150';
 
 const D = {
   ro: {
@@ -458,6 +458,10 @@ const D = {
     'drop.wrongType': 'Acest tip de fișier nu merge aici.',
     'rev.from': 'Recenzie preluată de pe {s}',
     'ri.title': 'Importă recenzii din alt magazin',
+    'ri.f.verified': 'Cumpărare verificată',
+    'ri.sourceNote': '(doar pentru tine, nu apare pe site)',
+    'ri.importedTag': 'Importată',
+    'ri.allVerified': 'Toate recenziile din fișier sunt cumpărări verificate pe site-ul de unde le-am exportat',
     'ri.dropHere': 'Trage fișierul aici sau apasă ca să-l alegi',
     'ri.remove': 'Elimină fișierul',
     'ri.publish': 'Publică {n} recenzii',
@@ -499,7 +503,7 @@ const D = {
     'ri.undone': 'Importul a fost șters.',
     'ri.empty': 'Fișierul nu are rânduri.',
     'ri.readErr': 'Nu am putut citi fișierul.',
-    'ri.legal': 'Importă doar recenzii reale ale acestei cărți, de pe magazine unde ai dreptul să le folosești. Pe site apar cu „Recenzie preluată de pe …”, nu ca „Cumpărare verificată”, așa cum cere legea UE.',
+    'ri.legal': 'Importă doar recenzii reale ale acestei cărți, de pe magazine unde ai dreptul să le folosești. „Cumpărare verificată” apare doar la recenziile verificate și pe site-ul original.',
     'rev.more': 'Vezi toate recenziile ({n})',
     'rev.anon': 'Client',
     'search.results': '{n} rezultate pentru „{q}”',
@@ -1539,6 +1543,10 @@ const D = {
     'drop.wrongType': 'Questo tipo di file non va bene qui.',
     'rev.from': 'Recensione da {s}',
     'ri.title': 'Importa recensioni da un altro negozio',
+    'ri.f.verified': 'Acquisto verificato',
+    'ri.sourceNote': '(solo per te, non appare sul sito)',
+    'ri.importedTag': 'Importata',
+    'ri.allVerified': 'Tutte le recensioni del file sono acquisti verificati sul sito da cui le ho esportate',
     'ri.dropHere': 'Trascina qui il file o tocca per sceglierlo',
     'ri.remove': 'Rimuovi il file',
     'ri.publish': 'Pubblica {n} recensioni',
@@ -1580,7 +1588,7 @@ const D = {
     'ri.undone': 'Importazione eliminata.',
     'ri.empty': 'Il file non ha righe.',
     'ri.readErr': 'Non sono riuscito a leggere il file.',
-    'ri.legal': 'Importa solo recensioni reali di questo libro, da negozi dove hai il diritto di usarle. Sul sito appaiono come «Recensione da …», non come «Acquisto verificato», come richiede la legge UE.',
+    'ri.legal': 'Importa solo recensioni reali di questo libro, da negozi dove hai il diritto di usarle. «Acquisto verificato» compare solo per le recensioni verificate anche sul sito originale.',
     'rev.more': 'Mostra tutte le recensioni ({n})',
     'rev.anon': 'Cliente',
     'search.results': '{n} risultati per «{q}»',
@@ -2620,6 +2628,10 @@ const D = {
     'drop.wrongType': 'This type of file can’t be used here.',
     'rev.from': 'Review from {s}',
     'ri.title': 'Import reviews from another shop',
+    'ri.f.verified': 'Verified purchase',
+    'ri.sourceNote': '(only for you, not shown on the site)',
+    'ri.importedTag': 'Imported',
+    'ri.allVerified': 'Every review in the file is a verified purchase on the site I exported it from',
     'ri.dropHere': 'Drag the file here or tap to choose it',
     'ri.remove': 'Remove file',
     'ri.publish': 'Publish {n} reviews',
@@ -2661,7 +2673,7 @@ const D = {
     'ri.undone': 'Import deleted.',
     'ri.empty': 'The file has no rows.',
     'ri.readErr': "Couldn't read the file.",
-    'ri.legal': 'Only import real reviews of this book, from shops where you have the right to use them. On the site they show as “Review from …”, not as “Verified purchase”, as EU law requires.',
+    'ri.legal': 'Only import real reviews of this book, from shops where you have the right to use them. “Verified purchase” appears only on reviews that were verified on the original site too.',
     'rev.more': 'See all reviews ({n})',
     'rev.anon': 'Customer',
     'search.results': '{n} results for "{q}"',
@@ -3282,7 +3294,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021113201`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021115150`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -2,7 +2,7 @@
 // Librava reviews: stars, title, text, name, date + time, country. Column names are recognised in
 // many languages; the admin can correct the choice before importing.
 
-export const REVIEW_FIELDS = ['rating', 'title', 'body', 'name', 'date', 'time', 'country', 'product'];
+export const REVIEW_FIELDS = ['rating', 'title', 'body', 'name', 'date', 'time', 'country', 'verified', 'product'];
 
 const strip = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 const HINTS = {
@@ -13,6 +13,7 @@ const HINTS = {
   date: ['date', 'data', 'created', 'created_at', 'created at', 'review date', 'review_date', 'datum', 'fecha', 'published', 'published_at', 'submitted', 'submitted_at', 'date_created', 'timestamp', 'data recensione'],
   time: ['time', 'ora', 'hour', 'heure', 'zeit', 'orario'],
   country: ['country', 'paese', 'tara', 'location', 'pays', 'land', 'nazione', 'pais', 'region'],
+  verified: ['verified', 'verified purchase', 'verified_purchase', 'is verified', 'is_verified', 'purchase verified', 'verified buyer', 'verified_buyer', 'acquisto verificato', 'verificato', 'cumparare verificata', 'verificat', 'verifiziert', 'verifizierter kauf', 'achat verifie', 'compra verificada', 'verificado', 'badge'],
   product: ['product', 'product title', 'product_title', 'book', 'item', 'listing', 'sku', 'asin', 'prodotto', 'produs', 'carte', 'libro', 'handle', 'product_handle', 'product name'],
 };
 
@@ -64,7 +65,7 @@ export function guessMapping(headers) {
   const score = (h, f) => { const s = strip(h).replace(/[_\-.]+/g, ' '); let best = 0;
     for (const k of HINTS[f]) { if (s === k) best = Math.max(best, 3); else if (s.endsWith(' ' + k) || s.startsWith(k + ' ')) best = Math.max(best, 2); else if (k.length > 3 && s.includes(k)) best = Math.max(best, 1); }
     return best; };
-  for (const f of ['rating', 'body', 'title', 'name', 'date', 'time', 'country', 'product']) {
+  for (const f of ['rating', 'body', 'title', 'name', 'date', 'time', 'country', 'verified', 'product']) {
     const c = headers.map(h => [h, score(h, f)]).filter(([h, s]) => s && !used.has(h)).sort((a, b) => b[1] - a[1])[0];
     if (c) { map[f] = c[0]; used.add(c[0]); }
   }
@@ -117,6 +118,13 @@ export function parseWhen(dateV, timeV, dayFirst = true) {
 // "Reviewed in Italy on 12 March 2025" → the date part is found by parseWhen; the country is kept separately
 export function countryFrom(s) { const m = String(s || '').match(/(?:reviewed in|recensito in|recenzat în|évalué en|bewertet in|revisado en)\s+(?:the\s+)?([^0-9]+?)\s+(?:on|il|pe|le|am|el)\s/i); return m ? m[1].trim() : ''; }
 
+// "Verified Purchase", "yes", "1", "✓", "Acquisto verificato"… → true; "no", "false", "0", empty → false
+export function parseVerified(v) {
+  const s = strip(v); if (!s) return false;
+  if (/^(0|false|no|n|nu|non|nein|falso|-)$/.test(s) || /\b(not|non|nicht|neverificat)\b/.test(s)) return false;
+  return /^(1|true|yes|y|da|si|ja|oui|x|✓|✔|ok)$/.test(s) || /verif/.test(s);
+}
+
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 
 // file rows + mapping → clean reviews (and the rows that had to be skipped, with why)
@@ -131,7 +139,7 @@ export function buildReviews(rows, map, { dayFirst = true, product = '' } = {}) 
     const when = parseWhen(g('date'), g('time'), dayFirst);
     const name = g('name').slice(0, 80);
     const country = (g('country') || countryFrom(g('date'))).slice(0, 60);
-    ok.push({ rating, title, body, author_name: name, created_at: when, country, line: i + 2,
+    ok.push({ rating, title, body, author_name: name, created_at: when, country, verified: parseVerified(g('verified')), line: i + 2,
       ext_key: hash([strip(name), (when || '').slice(0, 10), rating, strip(title), strip(body).slice(0, 300)].join('|')) });
   });
   return { ok, skipped };

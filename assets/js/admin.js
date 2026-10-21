@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021113201';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021113201';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021113201';
-import { resetCompanyCache } from './views.js?v=20261021113201';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021113201';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021113201';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021113201';
-import { api } from './api.js?v=20261021113201';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021113201';
+import { CONFIG } from './config.js?v=20261021115150';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115150';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021115150';
+import { resetCompanyCache } from './views.js?v=20261021115150';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021115150';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021115150';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021115150';
+import { api } from './api.js?v=20261021115150';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021115150';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -289,7 +289,7 @@ async function reviews(body) {
       <p class="muted" style="margin:0 0 12px;max-width:80ch">${esc(t('ri.help'))}</p>
       <div class="ri-top">
         <label class="field"><span>${esc(t('ri.book'))}</span><select class="input" id="ri-book"><option value="">${esc(t('ri.pickBook'))}</option>${books.filter(b => !b.deleted_at).map(b => `<option value="${esc(b.id)}">${esc(b.title)}${b.language ? ' · ' + esc(b.language.toUpperCase()) : ''}</option>`).join('')}</select></label>
-        <label class="field"><span>${esc(t('ri.source'))}</span><input class="input" id="ri-source" list="ri-sources" maxlength="60" placeholder="${esc(t('ri.sourcePh'))}"><datalist id="ri-sources">${['Amazon', 'Amazon.it', 'Amazon.de', 'Amazon.com', 'Etsy', 'Payhip', 'Gumroad', 'Google Play Books', 'Kobo', 'Apple Books', 'Shopify', 'WooCommerce'].map(x => `<option value="${x}">`).join('')}</datalist></label>
+        <label class="field"><span>${esc(t('ri.source'))} <small class="muted" style="font-weight:400">${esc(t('ri.sourceNote'))}</small></span><input class="input" id="ri-source" list="ri-sources" maxlength="60" placeholder="${esc(t('ri.sourcePh'))}"><datalist id="ri-sources">${['Amazon', 'Amazon.it', 'Amazon.de', 'Amazon.com', 'Etsy', 'Payhip', 'Gumroad', 'Google Play Books', 'Kobo', 'Apple Books', 'Shopify', 'WooCommerce'].map(x => `<option value="${x}">`).join('')}</datalist></label>
         <div class="field ri-filebox"><span>${esc(t('ri.file'))}</span>
           <label class="drop" id="ri-drop">${icon('upload')}<span><span class="fname">${esc(t('ri.dropHere'))}</span><br><small class="muted">${esc(t('ri.formats'))}</small></span><input type="file" id="ri-file" accept=".csv,.tsv,.txt,.xlsx,.xls,.ods,.json"></label>
           <div class="ri-chip" id="ri-chip" hidden>${icon('file')}<span class="ri-chip-txt"><b id="ri-fname"></b><small class="muted" id="ri-fmeta"></small></span><button type="button" class="btn btn-ghost btn-sm" id="ri-remove">✕ ${esc(t('ri.remove'))}</button></div>
@@ -302,10 +302,10 @@ async function reviews(body) {
     </section>
     ${Object.keys(batches).length ? `<section class="panel"><h3 style="margin:0 0 8px">${esc(t('ri.batches'))}</h3>${Object.entries(batches).map(([id, b]) => `<div class="adm-line"><span><b>${esc(b.book)}</b><small class="muted">${esc(b.source)} · ${esc(t('ri.count', { n: b.n }))}</small></span><button class="btn btn-ghost btn-sm" data-undo="${esc(id)}">${icon('trash', 'ico')} ${esc(t('ri.undo'))}</button></div>`).join('')}</section>` : ''}
     <div class="panel">${list.length ? list.map(r => `<div class="review adm-review">
-      <div class="who" style="justify-content:space-between;flex-wrap:wrap"><span style="display:flex;gap:10px;align-items:center"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span><span>${esc(r.author_name || t('rev.anon'))}<small class="muted" style="display:block;font-weight:400">${r.imported ? esc(t('rev.from', { s: r.source || '—' })) : esc(r.email || '')}</small></span></span>
+      <div class="who" style="justify-content:space-between;flex-wrap:wrap"><span style="display:flex;gap:10px;align-items:center"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span><span>${esc(r.author_name || t('rev.anon'))}<small class="muted" style="display:block;font-weight:400">${r.imported ? esc(t('ri.importedTag') + (r.source ? ' · ' + r.source : '')) : esc(r.email || '')}</small></span></span>
         <button class="btn btn-ghost btn-sm" data-delrev="${esc(r.id)}" data-name="${esc(r.author_name || '')}">${icon('trash', 'ico')} ${esc(t('admin.deleteReview'))}</button></div>
       <div class="rating-line" style="margin-top:6px">${stars(r.rating)} <a href="#/book/${encodeURIComponent(r.book_id)}">${esc(r.book_title)}</a> <span class="muted">· ${esc(fmtDate(r.created_at))}</span></div>
-      ${r.title ? `<b style="display:block;margin-top:6px">${esc(r.title)}</b>` : ''}${r.body ? `<p>${esc(r.body)}</p>` : ''}</div>`).join('') : `<p class="muted" style="margin:0">${esc(t('admin.noReviews'))}</p>`}</div>`;
+      ${(r.imported ? r.verified : true) ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}${r.title ? `<b style="display:block;margin-top:6px">${esc(r.title)}</b>` : ''}${r.body ? `<p>${esc(r.body)}</p>` : ''}</div>`).join('') : `<p class="muted" style="margin:0">${esc(t('admin.noReviews'))}</p>`}</div>`;
   $$('[data-delrev]', body).forEach(b => b.onclick = async () => {
     if (!await confirmBox(t('admin.confirmDeleteReview', { name: b.dataset.name }), { ok: t('admin.deleteReview'), danger: true })) return;
     try { await api.deleteReview(b.dataset.delrev); toast(t('admin.reviewDeleted')); reviews(body); } catch (e) { toast(errText(e), { error: true }); }
@@ -321,11 +321,11 @@ async function reviews(body) {
 function importReviewsUI(body, books) {
   const step = $('#ri-step', body), fileIn = $('#ri-file', body), bookSel = $('#ri-book', body), srcIn = $('#ri-source', body);
   const errBox = $('#ri-err', body), drop = $('#ri-drop', body), chip = $('#ri-chip', body);
-  let data = null, map = {}, dayFirst = true, product = '';
+  let data = null, map = {}, dayFirst = true, product = '', allVerified = false;
   // problems are written in red inside the box, not only in a message that disappears
   const showErr = (msg, look = false) => { errBox.innerHTML = `${icon('info', 'ico')}<span>${esc(msg)}</span>`; errBox.hidden = false; if (look) errBox.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
   const clearErr = () => { errBox.hidden = true; errBox.textContent = ''; };
-  const removeFile = () => { data = null; map = {}; product = ''; fileIn.value = ''; chip.hidden = true; drop.hidden = false; step.innerHTML = ''; clearErr(); };
+  const removeFile = () => { data = null; map = {}; product = ''; allVerified = false; fileIn.value = ''; chip.hidden = true; drop.hidden = false; step.innerHTML = ''; clearErr(); };
   $('#ri-remove', body).onclick = removeFile;
   $('#ri-template', body).onclick = () => {
     const csv = '﻿name;rating;title;review;date;time;country\r\nMaria R.;5;Bellissimo;"Libro chiaro, esercizi facili da seguire.";12/03/2025;14:35;Italia\r\nJohn D.;4;Good book;Useful for beginners.;2025-02-01;09:10;USA\r\n';
@@ -334,20 +334,23 @@ function importReviewsUI(body, books) {
   const render = () => {
     if (!data) { step.innerHTML = ''; return; }
     const { ok, skipped } = buildReviews(data.rows, map, { dayFirst, product });
+    if (!map.verified && allVerified) ok.forEach(r => r.verified = true);
     const products = map.product ? [...new Set(data.rows.map(r => String(r[map.product] ?? '').trim()).filter(Boolean))].slice(0, 200) : [];
     const sel = f => `<label class="field"><span>${esc(t('ri.f.' + f))}</span><select class="input" data-map="${f}"><option value="">—</option>${data.headers.map(h => `<option ${map[f] === h ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></label>`;
     step.innerHTML = `<div class="ri-map"><h3>${esc(t('ri.map'))}</h3><div class="ri-grid">${REVIEW_FIELDS.map(sel).join('')}
         <label class="field"><span>${esc(t('ri.dateOrder'))}</span><select class="input" id="ri-dmy"><option value="1" ${dayFirst ? 'selected' : ''}>${esc(t('ri.dmy'))}</option><option value="0" ${dayFirst ? '' : 'selected'}>${esc(t('ri.mdy'))}</option></select></label>
+        ${map.verified ? '' : `<label class="check ri-allver"><input type="checkbox" id="ri-allver" ${allVerified ? 'checked' : ''}> ${esc(t('ri.allVerified'))}</label>`}
         ${products.length > 1 ? `<label class="field"><span>${esc(t('ri.product'))}</span><select class="input" id="ri-prod"><option value="">${esc(t('ri.allRows'))}</option>${products.map(p => `<option ${p === product ? 'selected' : ''}>${esc(p)}</option>`).join('')}</select></label>` : ''}</div></div>
       <div class="ri-sum"><b>${esc(t('ri.ready', { n: ok.length }))}</b>${skipped.length ? `<div class="ri-warn">${esc(t('ri.skipped', { n: skipped.length, lines: skipped.slice(0, 8).map(x => x.line).join(', ') + (skipped.length > 8 ? '…' : '') }))}</div>` : ''}</div>
       ${ok.length ? `<div class="ri-preview">${ok.slice(0, 4).map(r => `<div class="review"><div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || t('rev.anon'))}</div>
         <div class="rating-line" style="margin-top:6px">${stars(r.rating)} ${r.title ? `<b>${esc(r.title)}</b>` : ''}</div>
-        <div class="muted" style="font-size:13px">${r.created_at ? esc(new Date(r.created_at).toLocaleString(getLang(), { dateStyle: 'medium', timeStyle: 'short' })) : esc(t('ri.noDate'))}${r.country ? ' · ' + esc(r.country) : ''}</div>
+        ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}<div class="muted" style="font-size:13px">${r.created_at ? esc(new Date(r.created_at).toLocaleString(getLang(), { dateStyle: 'medium', timeStyle: 'short' })) : esc(t('ri.noDate'))}${r.country ? ' · ' + esc(r.country) : ''}</div>
         ${r.body ? `<p>${esc(r.body.length > 280 ? r.body.slice(0, 280) + '…' : r.body)}</p>` : ''}</div>`).join('')}</div>` : ''}
       <button class="btn btn-buy" id="ri-go" ${ok.length ? '' : 'disabled'}>${icon('upload', 'ico')} ${esc(t('ri.publish', { n: ok.length }))}</button>`;
     if (!ok.length) showErr(t('ri.noneValid')); else if (!errBox.textContent.includes(t('ri.pubErr'))) clearErr();
     $$('[data-map]', step).forEach(x => x.onchange = () => { map[x.dataset.map] = x.value || undefined; if (x.dataset.map === 'product') product = ''; render(); });
     $('#ri-dmy', step).onchange = e => { dayFirst = e.target.value === '1'; render(); };
+    const av = $('#ri-allver', step); if (av) av.onchange = e => { allVerified = e.target.checked; render(); };
     const pr = $('#ri-prod', step); if (pr) pr.onchange = e => { product = e.target.value; render(); };
     $('#ri-go', step).onclick = async e => {
       if (!bookSel.value) { showErr(t('ri.pickBook'), true); bookSel.focus({ preventScroll: true }); bookSel.classList.add('invalid'); return; }

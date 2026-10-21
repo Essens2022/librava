@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021113201';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021113201';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021113201';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021113201';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021113201';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021113201';
-import { track } from './track.js?v=20261021113201';
-import { didYouMean } from './search.js?v=20261021113201';
-import { api } from './api.js?v=20261021113201';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021113201';
+import { CONFIG } from './config.js?v=20261021115150';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115150';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021115150';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021115150';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021115150';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021115150';
+import { track } from './track.js?v=20261021115150';
+import { didYouMean } from './search.js?v=20261021115150';
+import { api } from './api.js?v=20261021115150';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021115150';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -284,7 +284,7 @@ export async function viewBook(el, id) {
           <div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || t('rev.anon'))}</div>
           <div class="rating-line" style="margin-top:6px">${stars(r.rating)} ${r.title ? `<b class="rev-title">${esc(r.title)}</b>` : ''}</div>
           <div class="muted rev-meta">${esc(fmtDate(r.created_at))}${r.country ? ' · ' + esc(r.country) : ''}</div>
-          ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : r.imported ? `<div class="rev-source">${esc(t('rev.from', { s: r.source || '—' }))}</div>` : ''}
+          ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}
           ${r.body ? `<p style="white-space:pre-line">${esc(r.body)}</p>` : ''}
         </div>`).join('') + (reviews.length > 8 ? `<button class="btn btn-ghost" type="button" id="rev-more">${esc(t('rev.more', { n: reviews.length }))}</button>` : '') : `<p class="muted">${esc(t('rev.none'))}</p>`}
       </div>
