@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021014628';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021014628';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021014628';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021014628';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021014628';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021014628';
-import { track } from './track.js?v=20261021014628';
-import { didYouMean } from './search.js?v=20261021014628';
-import { api } from './api.js?v=20261021014628';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021014628';
+import { CONFIG } from './config.js?v=20261021110851';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021110851';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021110851';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021110851';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021110851';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021110851';
+import { track } from './track.js?v=20261021110851';
+import { didYouMean } from './search.js?v=20261021110851';
+import { api } from './api.js?v=20261021110851';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021110851';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -280,12 +280,13 @@ export async function viewBook(el, id) {
           </form>` : `<p class="muted" style="font-size:14px">${esc(t('rev.onlyOwners'))}</p>`}
       </div>
       <div>
-        ${reviews.length ? reviews.map(r => `<div class="review">
-          <div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || '')}</div>
-          <div class="rating-line" style="margin-top:6px">${stars(r.rating)} <span class="muted">${esc(fmtDate(r.created_at))}</span></div>
-          ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}
-          ${r.body ? `<p>${esc(r.body)}</p>` : ''}
-        </div>`).join('') : `<p class="muted">${esc(t('rev.none'))}</p>`}
+        ${reviews.length ? reviews.map((r, i) => `<div class="review"${i >= 8 ? ' hidden data-more-rev' : ''}>
+          <div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || t('rev.anon'))}</div>
+          <div class="rating-line" style="margin-top:6px">${stars(r.rating)} ${r.title ? `<b class="rev-title">${esc(r.title)}</b>` : ''}</div>
+          <div class="muted rev-meta">${esc(fmtDate(r.created_at))}${r.country ? ' · ' + esc(r.country) : ''}</div>
+          ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : r.imported ? `<div class="rev-source">${esc(t('rev.from', { s: r.source || '—' }))}</div>` : ''}
+          ${r.body ? `<p style="white-space:pre-line">${esc(r.body)}</p>` : ''}
+        </div>`).join('') + (reviews.length > 8 ? `<button class="btn btn-ghost" type="button" id="rev-more">${esc(t('rev.more', { n: reviews.length }))}</button>` : '') : `<p class="muted">${esc(t('rev.none'))}</p>`}
       </div>
     </div></section>
   </div>`;
@@ -316,6 +317,7 @@ export async function viewBook(el, id) {
     try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
   });
 
+  $('#rev-more', el)?.addEventListener('click', e => { $$('[data-more-rev]', el).forEach(x => x.hidden = false); e.currentTarget.remove(); });
   const form = $('#rev-form', el);
   if (form) {
     let rating = myRev?.rating || 0;

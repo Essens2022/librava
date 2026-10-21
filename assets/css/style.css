@@ -1465,3 +1465,17 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 .utm-link { display: flex; gap: 8px; align-items: center; }
 .utm-link code { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 8px; background: var(--card, #fff); border: 1px dashed var(--line); font-size: 13px; overflow-wrap: anywhere; user-select: all; }
 @media (max-width: 520px) { .utm-make { grid-template-columns: minmax(0, 1fr); } }
+
+/* review import (Admin → Reviews) */
+.ri { margin-bottom: 14px; }
+.ri-top, .ri-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.ri .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; min-width: 0; }
+.ri-map { margin-top: 16px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.ri-map h3 { font-size: 14px; margin: 0 0 10px; }
+.ri-sum { margin: 14px 0 8px; }
+.ri-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.ri-preview .review { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 0; }
+.ri-legal { display: flex; gap: 6px; align-items: flex-start; font-size: 12.5px; color: var(--muted); margin: 14px 0 0; }
+.rev-title { margin-left: 4px; }
+.rev-meta { font-size: 13px; margin-top: 2px; }
+.rev-source { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
