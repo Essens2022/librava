@@ -1516,3 +1516,13 @@ select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC
 .kdp-restored { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; border-color: #E8A33D; background: color-mix(in srgb, #E8A33D 10%, var(--surface, #fff)); font-weight: 600; }
 .kdp-restored span { flex: 1; min-width: 200px; }
 .copy-note { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.45; }
+
+/* product details, Amazon style */
+.pd { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px 40px; margin-top: 12px; }
+.pd-col h3 { font-size: 15px; margin: 0 0 6px; color: var(--fg); }
+.pd dl { margin: 0; }
+.pd-row { display: grid; grid-template-columns: minmax(110px, 190px) 1fr; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.4; }
+.pd-row:last-child { border-bottom: 0; }
+.pd-row dt { color: var(--muted); font-weight: 500; }
+.pd-row dd { margin: 0; font-weight: 600; color: var(--fg); overflow-wrap: anywhere; }
+.pd-row dd a { color: var(--link, var(--pista-strong)); }

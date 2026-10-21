@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js?v=20261021135701';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021135701';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021135701';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021135701';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021135701';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021135701';
-import { track } from './track.js?v=20261021135701';
-import { guessLang } from './langdetect.js?v=20261021135701';
-import { didYouMean } from './search.js?v=20261021135701';
-import { api } from './api.js?v=20261021135701';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021135701';
+import { CONFIG } from './config.js?v=20261021141813';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021141813';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021141813';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021141813';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021141813';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021141813';
+import { track } from './track.js?v=20261021141813';
+import { guessLang } from './langdetect.js?v=20261021141813';
+import { didYouMean } from './search.js?v=20261021141813';
+import { api } from './api.js?v=20261021141813';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021141813';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -236,20 +236,25 @@ export async function viewBook(el, id) {
         <div id="fbt"></div>
         ${(b.aplus || []).some(m => (m.imgs || []).some(Boolean) || m.title || m.text) ? `<h2 class="section-title" style="font-size:18px;margin-bottom:12px">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(b.aplus)}<hr>` : ''}
         <h2 class="section-title" style="font-size:18px">${esc(t('book.details'))}</h2>
-        <div class="details">
-          <div><small>${esc(t('book.d.format'))}</small><b>${esc(t('book.format.' + b.format))}</b></div>
-          <div><small>${esc(t('book.d.color'))}</small><b>${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))}</b></div>
-          ${b.pages ? `<div><small>${esc(t('book.d.pages'))}</small><b>${b.pages}</b></div>` : ''}
-          ${bookSpecs(b)}
-          <div><small>${esc(t('book.d.language'))}</small><b>${esc(langName(b.language))}</b></div>
-          ${b.published_at ? `<div><small>${esc(t('book.d.published'))}</small><b>${esc(fmtDate(b.published_at))}</b></div>` : ''}
-          <div><small>${esc(t('book.d.category'))}</small><b>${[...new Set([b.category, ...(b.categories || [])])].map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', ')}</b></div>
-          ${b.edition ? `<div><small>${esc(t('book.edition'))}</small><b>${b.edition}</b></div>` : ''}
-          ${b.age_min != null || b.age_max != null ? `<div><small>${esc(t('book.age'))}</small><b>${esc(b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 }))}</b></div>` : ''}
-          <div><small>${esc(t('book.d.publisher'))}</small><b>Librava</b></div>
-          <div><small>${esc(t('book.d.copyright'))}</small><b>${b.rights === 'public' ? esc(t('book.publicDomain')) : `© ${copyYear(b)} Librava`}</b></div>
-          ${b.isbn ? `<div><small>ISBN</small><b>${esc(b.isbn)}</b></div>` : ''}
-          ${b.librava_id ? `<div><small>${esc(t('kdp.lidShort'))}</small><b>${esc(b.librava_id)}</b></div>` : ''}
+        <div class="pd">
+          <div class="pd-col"><h3>${esc(t('book.d.groupBook'))}</h3><dl>
+            ${pdRow('book.d.publisher', 'Librava')}
+            ${b.published_at ? pdRow('book.d.published', esc(fmtDate(b.published_at)), true) : ''}
+            ${b.series_name ? pdRow('book.series', `<a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(b.series_name)}${b.series_number ? ' · ' + esc(t('book.bookN', { n: b.series_number })) : ''}</a>`, true) : ''}
+            ${b.edition ? pdRow('book.edition', String(b.edition)) : ''}
+            ${pdRow('book.d.language', langName(b.language))}
+            ${b.pages ? pdRow('book.d.pages', String(b.pages)) : ''}
+            ${pdRow('book.d.category', [...new Set([b.category, ...(b.categories || [])])].filter(Boolean).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', '), true)}
+            ${b.age_min != null || b.age_max != null ? pdRow('book.age', b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 })) : ''}
+            ${b.isbn ? pdRow('ISBN', b.isbn, false, true) : ''}
+            ${b.librava_id ? pdRow('kdp.lidShort', b.librava_id) : ''}
+            ${pdRow('book.d.copyright', b.rights === 'public' ? t('book.publicDomain') : `© ${copyYear(b)} Librava`)}
+          </dl></div>
+          <div class="pd-col"><h3>${esc(t('book.d.groupFile'))}</h3><dl>
+            ${pdRow('book.d.format', t('book.format.' + b.format))}
+            ${pdRow('book.d.color', t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))}
+            ${bookSpecs(b)}
+          </dl></div>
         </div>
         ${b.rights === 'public' ? '' : `<p class="copy-note">${esc(t('book.copyNote', { year: copyYear(b) }))}</p>`}
       </div>
@@ -924,11 +929,13 @@ export async function companyInfo() {
 export function resetCompanyCache() { companyCache = null; }
 // Kindle-style technical details: layout, text size, devices, page size, file size
 // copyright year of our own books: the year it was first published on Librava
+// one line of the product details, Amazon style: "Label : value"
+const pdRow = (k, v, html = false, raw = false) => `<div class="pd-row"><dt>${esc(raw ? k : t(k))}</dt><dd>${html ? v : esc(v)}</dd></div>`;
 export const copyYear = b => new Date(b.published_at || b.created_at || Date.now()).getFullYear();
 function bookSpecs(b) {
   const m = b.file_check?.meta || {};
   const reflow = b.format === 'epub' && !m.epub?.fixed;
-  const row = (k, v) => `<div><small>${esc(t(k))}</small><b>${esc(v)}</b></div>`;
+  const row = (k, v) => pdRow(k, v);
   const dev = reflow ? 'book.dev.all' : m.ereader === 'good' ? 'book.dev.pdfGood' : 'book.dev.pdf';
   const cm = pt => (pt / 72 * 2.54).toFixed(1).replace('.', ',');
   return row('book.d.layout', t(reflow ? 'book.layout.reflow' : 'book.layout.fixed'))
