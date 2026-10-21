@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021143339';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021143339';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021143339';
-import { resetCompanyCache } from './views.js?v=20261021143339';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021143339';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021143339';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021143339';
-import { api } from './api.js?v=20261021143339';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021143339';
+import { CONFIG } from './config.js?v=20261021144244';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021144244';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021144244';
+import { resetCompanyCache } from './views.js?v=20261021144244';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021144244';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021144244';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021144244';
+import { api } from './api.js?v=20261021144244';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021144244';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -631,18 +631,20 @@ async function openPreviewer(source, kind) {
 
 // ---------------------------------------------------------------- automatic free sample ("Look inside")
 const SAMPLE_PAGES = 6;
-async function makeSample(file) {
+// the free preview: the first N pages (PDF) — for EPUB the first N pages of real text (about 250 words a page,
+// like a printed book). Cover, title page, copyright and contents come along but don't count.
+export async function makeSample(file, pages = SAMPLE_PAGES) {
+  pages = Math.max(1, Math.min(200, Math.round(+pages || SAMPLE_PAGES)));
   if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
     await loadScript(VENDOR('pdf-lib.min.js'));
     const { PDFDocument } = window.PDFLib;
     const src = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
     const out = await PDFDocument.create();
-    const n = Math.min(SAMPLE_PAGES, src.getPageCount());
+    const n = Math.min(pages, src.getPageCount());
     (await out.copyPages(src, [...Array(n).keys()])).forEach(p => out.addPage(p));
     out.setTitle((src.getTitle() || '') + ' (sample)');
     return { file: new File([await out.save()], 'sample.pdf', { type: 'application/pdf' }), pages: n };
   }
-  // EPUB: keep the first chapters (about 10% of the book, at least 2), remove the rest
   await loadScript(VENDOR('jszip.min.js'));
   const zip = await window.JSZip.loadAsync(file);
   const cont = await zip.file('META-INF/container.xml').async('string');
@@ -651,16 +653,52 @@ async function makeSample(file) {
   const opf = new DOMParser().parseFromString(await zip.file(opfPath).async('string'), 'application/xml');
   const items = Object.fromEntries([...opf.getElementsByTagName('item')].map(i => [i.getAttribute('id'), i]));
   const refs = [...opf.getElementsByTagName('itemref')];
-  const keep = Math.min(refs.length, Math.max(2, Math.ceil(refs.length * 0.1)));
-  refs.slice(keep).forEach(r => {
-    const it = items[r.getAttribute('idref')];
-    if (it && !/\bnav\b/.test(it.getAttribute('properties') || '')) { zip.remove(base + decodeURIComponent(it.getAttribute('href'))); it.remove(); }
-    r.remove();
-  });
+  const target = pages * 250, count = s => (s.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
+  let words = 0, done = false, started = false; const removed = new Set();
+  for (const r of refs) {
+    const it = items[r.getAttribute('idref')]; if (!it) continue;
+    const path = base + decodeURIComponent(it.getAttribute('href'));
+    const isNav = /\bnav\b/.test(it.getAttribute('properties') || '');
+    if (done) { if (!isNav) { zip.remove(path); removed.add(path); it.remove(); } r.remove(); continue; }
+    if (isNav) continue;
+    const src = await zip.file(path)?.async('string'); if (!src) continue;
+    const doc = new DOMParser().parseFromString(src, 'application/xhtml+xml');
+    const bodyEl = doc.getElementsByTagName('body')[0]; if (!bodyEl) continue;
+    const w = count(bodyEl.textContent || '');
+    // short front pages (cover, title, copyright, dedication) before the story starts: kept, not counted
+    if (!started && w < 400) continue;
+    started = true;
+    if (words + w <= target) { words += w; continue; }
+    // this chapter goes over: keep it up to the paragraph where the preview ends
+    const blocks = [...bodyEl.querySelectorAll('p, li, blockquote, h1, h2, h3, h4, h5, h6')];
+    let cut = null;
+    for (const b of blocks) { words += count(b.textContent || ''); if (words >= target) { cut = b; break; } }
+    if (cut) {
+      const all = [...bodyEl.getElementsByTagName('*')]; const after = all.slice(all.indexOf(cut) + 1).filter(n => !n.contains(cut));
+      after.forEach(n => n.parentNode && n.parentNode.removeChild(n));
+      const end = doc.createElementNS('http://www.w3.org/1999/xhtml', 'p');
+      end.setAttribute('style', 'text-align:center;text-indent:0;margin-top:2em;letter-spacing:.4em'); end.textContent = '✦ ✦ ✦';
+      cut.parentNode.insertBefore(end, cut.nextSibling);
+      zip.file(path, new XMLSerializer().serializeToString(doc));
+    }
+    done = true;
+  }
+  // the contents (nav + old NCX) must not point to chapters that are not in the preview
+  const gone = href => { const f = decodeURIComponent(String(href || '').split('#')[0]); return [...removed].some(p => p.endsWith('/' + f) || p === f || p === base + f); };
+  for (const it of Object.values(items)) {
+    if (!it.parentNode) continue;
+    const isNav = /\bnav\b/.test(it.getAttribute('properties') || ''), isNcx = /ncx/.test(it.getAttribute('media-type') || '');
+    if (!isNav && !isNcx) continue;
+    const path = base + decodeURIComponent(it.getAttribute('href')), src = await zip.file(path)?.async('string'); if (!src) continue;
+    const doc = new DOMParser().parseFromString(src, 'application/xml');
+    if (isNav) [...doc.getElementsByTagName('a')].filter(a => gone(a.getAttribute('href'))).forEach(a => { const li = a.closest('li') || a; li.parentNode.removeChild(li); });
+    else [...doc.getElementsByTagName('navPoint')].filter(n => gone(n.getElementsByTagName('content')[0]?.getAttribute('src'))).forEach(n => n.parentNode.removeChild(n));
+    zip.file(path, new XMLSerializer().serializeToString(doc));
+  }
   zip.file(opfPath, new XMLSerializer().serializeToString(opf));
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
   const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
-  return { file: new File([blob], 'sample.epub', { type: 'application/epub+zip' }), chapters: keep };
+  return { file: new File([blob], 'sample.epub', { type: 'application/epub+zip' }), pages: Math.min(pages, Math.max(1, Math.round(words / 250))) };
 }
 
 // ---------------------------------------------------------------- A+ content editor
@@ -838,7 +876,9 @@ async function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.sample'))}</h3><p>${esc(t('admin.f.sampleHelp'))}</p></div>
         <div class="kdp-fields"><label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${v.sample_path ? '✓ ' + esc(t('kdp.sampleKept')) : 'EPUB / PDF'}</span><br><small>${esc(t('kdp.sampleTip'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
           <div class="kdp-ok" id="sample-ok" ${v.sample_path ? '' : 'hidden'}>✓ ${esc(t('kdp.sampleReady'))}</div>
-          <button type="button" class="btn btn-ghost btn-sm" id="b-mksample" ${(v.file_path || v.file_name) && !v.sample_path ? '' : 'hidden'}>${icon('eye')} ${esc(t('kdp.makeSample'))}</button></div></div>
+          <div class="sample-pages"><label class="field"><span>${esc(t('kdp.samplePages'))}</span><input id="f-samplepages" type="number" min="1" max="200" inputmode="numeric" value="${v.sample_pages || SAMPLE_PAGES}"></label>
+          <button type="button" class="btn btn-ghost btn-sm" id="b-mksample" ${(v.file_path || v.file_name) ? '' : 'hidden'}>${icon('eye')} ${esc(t('kdp.makeSample'))}</button></div>
+          <small class="muted">${esc(t('kdp.samplePagesHelp'))}</small></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.details'))}</h3><p>${esc(t('kdp.detailsHelp'))}</p></div>
         <div class="kdp-fields two"><label class="field"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
           <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label>
@@ -887,11 +927,11 @@ async function bookForm(body, b, startStep = 1) {
     const ok = $('#sample-ok', body), btn = $('#b-mksample', body);
     ok.hidden = false; ok.textContent = t('kdp.sampleMaking');
     try {
-      const r = await makeSample(src);
+      const r = await makeSample(src, parseInt(val('f-samplepages')) || SAMPLE_PAGES);
       files.sample = r.file; has.sample = true;
-      ok.textContent = '✓ ' + (r.pages ? t('kdp.sampleAutoPdf', { n: r.pages }) : t('kdp.sampleAutoEpub', { n: r.chapters }));
+      ok.textContent = '✓ ' + t('kdp.sampleAutoPdf', { n: r.pages });
       $('#n-sample', body).textContent = r.file.name + ' · ' + (r.file.size / 1048576).toFixed(1) + ' MB';
-      btn.hidden = true;
+      ownSample = false;
     } catch (e) { console.warn(e); ok.textContent = '⚠ ' + t('kdp.sampleFail'); }
     refresh();
   };
@@ -1046,15 +1086,24 @@ async function bookForm(body, b, startStep = 1) {
   const newLid = () => { const A = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'; const r = crypto.getRandomValues(new Uint8Array(7)); return 'LBV' + [...r].map(x => A[x % A.length]).join(''); };
   $('#b-lid', body).onclick = e => { $('#f-lid', body).value = newLid(); e.currentTarget.textContent = t('kdp.lidNew'); $('#b-lid-rm', body).hidden = false; };
   $('#b-lid-rm', body).onclick = e => { $('#f-lid', body).value = ''; e.currentTarget.hidden = true; $('#b-lid', body).textContent = t('kdp.lidMake'); };
+  const remakeSample = async () => {
+    const local = files.file || lastFile;
+    if (local) return autoSample(local);
+    const srcInfo = await api.getReadSource({ ...v, id: bookId }, {});
+    const blob = await (await fetch(srcInfo.url)).blob();
+    return autoSample(new File([blob], v.format === 'epub' ? 'book.epub' : 'book.pdf', { type: blob.type }));
+  };
+  // changing the number of preview pages makes the preview again (unless you uploaded your own)
+  $('#f-samplepages', body).addEventListener('change', debounce(async () => {
+    if (ownSample || !(files.file || lastFile || v.file_path)) return;
+    try { await remakeSample(); } catch (x) { toast(errText(x), { error: true }); }
+  }, 400));
   $('#b-mksample', body).onclick = async e => {
     const btn = e.currentTarget; btn.disabled = true;
-    try {
-      const srcInfo = await api.getReadSource({ ...v, id: bookId }, {});
-      const blob = await (await fetch(srcInfo.url)).blob();
-      await autoSample(new File([blob], v.format === 'epub' ? 'book.epub' : 'book.pdf', { type: blob.type }));
-    } catch (x) { toast(errText(x), { error: true }); }
+    try { await remakeSample(); } catch (x) { toast(errText(x), { error: true }); }
     btn.disabled = false;
   };
+  
   const getAplus = hasAplus ? aplusEditor($('#aplus-root', body), aplusModules, () => bookId || draftId) : () => [];
   if (!hasAplus) $('[data-pane="3"]', body).remove();
 
@@ -1073,7 +1122,7 @@ async function bookForm(body, b, startStep = 1) {
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
       color: radio('bcolor') === 'bw' ? 'bw' : 'color',
       recommend_ids: [...new Set($$('.f-rec', body).map(x => x.value).filter(Boolean))],
-      pages: parseInt(val('f-pages')) || null, isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
+      pages: parseInt(val('f-pages')) || null, sample_pages: Math.max(1, Math.min(200, parseInt(val('f-samplepages')) || SAMPLE_PAGES)), isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
       allow_download: $('#f-dl', body).checked, stamp_downloads: $('#f-stamp', body).checked,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
       published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,

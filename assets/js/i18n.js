@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021143339';
-import { store } from './util.js?v=20261021143339';
+import { CONFIG } from './config.js?v=20261021144244';
+import { store } from './util.js?v=20261021144244';
 
 const D = {
   ro: {
@@ -792,11 +792,13 @@ const D = {
     'kdp.descEmpty': 'Descrierea e goală.',
     'kdp.descTags': 'Poți lipi codul HTML de la Amazon KDP: <b>, <i>, <u>, <p>, <br>, <h4>–<h6>, <ul>, <ol>, <li>',
     'kdp.sampleReady': 'Extrasul pentru „Citește un extras” e gata.',
-    'kdp.makeSample': 'Creează extrasul automat din carte',
+    'kdp.makeSample': 'Refă previzualizarea din carte',
     'kdp.sampleOwn': 'Folosesc extrasul ales de tine.',
     'kdp.sampleMaking': 'Creez extrasul…',
     'kdp.sampleAutoPdf': 'Extras creat automat: primele {n} pagini. Se salvează când apeși Salvează.',
     'kdp.sampleAutoEpub': 'Extras creat automat: primele {n} capitole. Se salvează când apeși Salvează.',
+    'kdp.samplePages': 'Pagini în previzualizare',
+    'kdp.samplePagesHelp': 'Câte pagini poate citi oricine gratuit. Implicit 6. Când schimbi numărul, previzualizarea se face din nou singură.',
     'kdp.sampleFail': 'Nu am putut crea extrasul automat. Încarcă-l tu mai sus.',
     'kdp.ck.sample': 'Extras pentru „Citește un extras”',
     'pv.open': 'Previzualizează cartea (telefon, tabletă, calculator)',
@@ -1896,11 +1898,13 @@ const D = {
     'kdp.descEmpty': 'La descrizione è vuota.',
     'kdp.descTags': 'Puoi incollare il codice HTML di Amazon KDP: <b>, <i>, <u>, <p>, <br>, <h4>–<h6>, <ul>, <ol>, <li>',
     'kdp.sampleReady': 'L\'estratto per „Leggi un estratto” è pronto.',
-    'kdp.makeSample': 'Crea l\'estratto automaticamente dal libro',
+    'kdp.makeSample': 'Rifai l\'anteprima dal libro',
     'kdp.sampleOwn': 'Uso l\'estratto che hai scelto.',
     'kdp.sampleMaking': 'Creo l\'estratto…',
     'kdp.sampleAutoPdf': 'Estratto creato automaticamente: le prime {n} pagine. Si salva quando premi Salva.',
     'kdp.sampleAutoEpub': 'Estratto creato automaticamente: i primi {n} capitoli. Si salva quando premi Salva.',
+    'kdp.samplePages': "Pagine nell'anteprima",
+    'kdp.samplePagesHelp': "Quante pagine chiunque può leggere gratis. Di base 6. Se cambi il numero, l'anteprima si rifà da sola.",
     'kdp.sampleFail': 'Non sono riuscito a creare l\'estratto. Caricalo tu qui sopra.',
     'kdp.ck.sample': 'Estratto per „Leggi un estratto”',
     'pv.open': 'Anteprima del libro (telefono, tablet, computer)',
@@ -3000,11 +3004,13 @@ const D = {
     'kdp.descEmpty': 'The description is empty.',
     'kdp.descTags': 'You can paste the HTML from Amazon KDP: <b>, <i>, <u>, <p>, <br>, <h4>–<h6>, <ul>, <ol>, <li>',
     'kdp.sampleReady': 'The “Look inside” sample is ready.',
-    'kdp.makeSample': 'Create the sample from the book',
+    'kdp.makeSample': 'Make the preview again from the book',
     'kdp.sampleOwn': 'Using the sample you chose.',
     'kdp.sampleMaking': 'Creating the sample…',
     'kdp.sampleAutoPdf': 'Sample created automatically: the first {n} pages. It is stored when you save.',
     'kdp.sampleAutoEpub': 'Sample created automatically: the first {n} chapters. It is stored when you save.',
+    'kdp.samplePages': 'Pages in the preview',
+    'kdp.samplePagesHelp': 'How many pages anyone can read for free. 6 by default. Change the number and the preview is made again by itself.',
     'kdp.sampleFail': 'Couldn\'t create the sample automatically. Upload one above.',
     'kdp.ck.sample': 'Sample for “Look inside”',
     'pv.open': 'Preview the book (phone, tablet, computer)',
@@ -3351,7 +3357,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021143339`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021144244`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

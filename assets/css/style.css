@@ -158,7 +158,7 @@ main { flex: 1; width: 100%; }
 .hero-fan img:nth-child(4) { transform: translate(25%, -54%) rotate(9deg); z-index: 1; }
 .hero-fan:hover img:nth-child(1) { transform: translate(-140%, -50%) rotate(-15deg); }
 .hero-fan:hover img:nth-child(4) { transform: translate(40%, -54%) rotate(12deg); }
-.hero-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(to bottom, transparent, var(--bg)); }
+.hero-fade { pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(to bottom, transparent, var(--bg)); }
 @media (max-width: 760px) {
   .hero-inner { grid-template-columns: 1fr; padding-block: 24px 60px; }
   .hero-fan { height: 200px; order: -1; }
@@ -1526,3 +1526,5 @@ select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC
 .pd-row dt { color: var(--muted); font-weight: 500; }
 .pd-row dd { margin: 0; font-weight: 600; color: var(--fg); overflow-wrap: anywhere; }
 .pd-row dd a { color: var(--link, var(--pista-strong)); }
+.sample-pages { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-top: 8px; }
+.sample-pages .field { width: 190px; }
