@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021151351';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021151351';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021151351';
-import { resetCompanyCache } from './views.js?v=20261021151351';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021151351';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021151351';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021151351';
-import { api } from './api.js?v=20261021151351';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021151351';
+import { CONFIG } from './config.js?v=20261021151944';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021151944';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021151944';
+import { resetCompanyCache } from './views.js?v=20261021151944';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021151944';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021151944';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021151944';
+import { api } from './api.js?v=20261021151944';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021151944';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -683,17 +683,25 @@ export async function makeSample(file, pages = SAMPLE_PAGES) {
     }
     done = true;
   }
-  // the contents (nav + old NCX) must not point to chapters that are not in the preview
-  const gone = href => { const f = decodeURIComponent(String(href || '').split('#')[0]); return [...removed].some(p => p.endsWith('/' + f) || p === f || p === base + f); };
-  for (const it of Object.values(items)) {
-    if (!it.parentNode) continue;
-    const isNav = /\bnav\b/.test(it.getAttribute('properties') || ''), isNcx = /ncx/.test(it.getAttribute('media-type') || '');
-    if (!isNav && !isNcx) continue;
-    const path = base + decodeURIComponent(it.getAttribute('href')), src = await zip.file(path)?.async('string'); if (!src) continue;
-    const doc = new DOMParser().parseFromString(src, 'application/xml');
-    if (isNav) [...doc.getElementsByTagName('a')].filter(a => gone(a.getAttribute('href'))).forEach(a => { const li = a.closest('li') || a; li.parentNode.removeChild(li); });
-    else [...doc.getElementsByTagName('navPoint')].filter(n => gone(n.getElementsByTagName('content')[0]?.getAttribute('src'))).forEach(n => n.parentNode.removeChild(n));
-    zip.file(path, new XMLSerializer().serializeToString(doc));
+  // like Amazon: the contents keep every chapter; those not in the preview open a short "in the full book" page
+  if (removed.size) {
+    const morePath = base + 'librava-more.xhtml';
+    zip.file(morePath, `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><meta charset="utf-8"/><title>Full book</title></head><body style="text-align:center;margin-top:30%;font-family:Georgia,serif"><p style="letter-spacing:.4em">✦ ✦ ✦</p><p>This chapter is in the full book.</p></body></html>`);
+    const man = opf.getElementsByTagName('manifest')[0], spineEl = opf.getElementsByTagName('spine')[0];
+    const item = opf.createElementNS(man.namespaceURI, 'item'); item.setAttribute('id', 'librava-more'); item.setAttribute('href', 'librava-more.xhtml'); item.setAttribute('media-type', 'application/xhtml+xml'); man.appendChild(item);
+    const ir = opf.createElementNS(spineEl.namespaceURI, 'itemref'); ir.setAttribute('idref', 'librava-more'); spineEl.appendChild(ir);
+    const gone = href => { const f = decodeURIComponent(String(href || '').split('#')[0]); return !!f && [...removed].some(p => p === f || p.endsWith('/' + f)); };
+    const relTo = (fromPath, toPath) => { const a = fromPath.split('/').slice(0, -1), b = toPath.split('/'); while (a.length && b.length > 1 && a[0] === b[0]) { a.shift(); b.shift(); } return '../'.repeat(a.length) + b.join('/'); };
+    for (const it of Object.values(items)) {
+      if (!it.parentNode) continue;
+      const isNav = /\bnav\b/.test(it.getAttribute('properties') || ''), isNcx = /ncx/.test(it.getAttribute('media-type') || '');
+      if (!isNav && !isNcx) continue;
+      const path = base + decodeURIComponent(it.getAttribute('href')), src = await zip.file(path)?.async('string'); if (!src) continue;
+      const doc = new DOMParser().parseFromString(src, 'application/xml'), to = relTo(path, morePath);
+      if (isNav) [...doc.getElementsByTagName('a')].filter(a => gone(a.getAttribute('href'))).forEach(a => a.setAttribute('href', to));
+      else [...doc.getElementsByTagName('content')].filter(c => gone(c.getAttribute('src'))).forEach(c => c.setAttribute('src', to));
+      zip.file(path, new XMLSerializer().serializeToString(doc));
+    }
   }
   zip.file(opfPath, new XMLSerializer().serializeToString(opf));
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
