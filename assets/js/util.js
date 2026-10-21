@@ -84,9 +84,12 @@ export function loadScript(src) {
   });
 }
 
-// ---- book descriptions with simple formatting, like Amazon KDP (only safe tags, no attributes, no scripts)
-const DESC_TAGS = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'SUB', 'SUP']);
-export const hasTags = s => /<\/?(p|br|b|strong|i|em|u|h[4-6]|ul|ol|li|sub|sup)\b/i.test(String(s || ''));
+// ---- book descriptions with formatting, like Amazon KDP — only safe tags, and only Librava's own style classes
+// (no inline styles, no links, no scripts). Classes: d-hook (big italic hook line), d-pink / d-blue / d-gold /
+// d-purple / d-green (accent colours), d-quote (pull quote), d-tags (list shown as pills), d-center, d-small, d-caps.
+const DESC_TAGS = new Set(['P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'SUB', 'SUP', 'BLOCKQUOTE', 'HR', 'SPAN']);
+const DESC_CLASSES = new Set(['d-hook', 'd-pink', 'd-blue', 'd-gold', 'd-purple', 'd-green', 'd-quote', 'd-tags', 'd-center', 'd-small', 'd-caps']);
+export const hasTags = s => /<\/?(p|br|b|strong|i|em|u|h[4-6]|ul|ol|li|sub|sup|blockquote|hr|span)\b/i.test(String(s || ''));
 export function safeHTML(src) {
   const s = String(src || '');
   if (!hasTags(s)) return esc(s);
@@ -98,7 +101,9 @@ export function safeHTML(src) {
     const tag = n.tagName === 'H1' || n.tagName === 'H2' || n.tagName === 'H3' ? 'H4' : n.tagName;
     if (!DESC_TAGS.has(tag)) return walk(n);           // unknown tag: keep its text only
     const t = tag.toLowerCase();
-    return t === 'br' ? '<br>' : `<${t}>${walk(n)}</${t}>`;
+    const cls = [...n.classList].filter(c => DESC_CLASSES.has(c)).join(' ');
+    const a = cls ? ` class="${cls}"` : '';
+    return t === 'br' ? '<br>' : t === 'hr' ? `<hr${a}>` : `<${t}${a}>${walk(n)}</${t}>`;
   }).join('');
   return walk(doc.body.firstChild);
 }
