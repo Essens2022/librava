@@ -1496,3 +1496,7 @@ select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ri-err { background: #3A1715; border-color: #7A2E29; color: #FDA29B; } :root:not([data-theme="light"]) .ri-warn { color: #FDA29B; } }
 :root[data-theme="dark"] .ri-err { background: #3A1715; border-color: #7A2E29; color: #FDA29B; }
 :root[data-theme="dark"] .ri-warn { color: #FDA29B; }
+.rev-tr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; margin-top: 6px; font-size: 13.5px; }
+.rev-tr .linkbtn { display: inline-flex; gap: 5px; align-items: center; }
+.rev-tr .ico { width: 15px; height: 15px; }
+#rev-more { margin-top: 10px; }

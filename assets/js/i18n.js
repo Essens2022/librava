@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021115150';
-import { store } from './util.js?v=20261021115150';
+import { CONFIG } from './config.js?v=20261021115759';
+import { store } from './util.js?v=20261021115759';
 
 const D = {
   ro: {
@@ -455,9 +455,16 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'rev.translate': 'Tradu în {lang}',
+    'rev.translating': 'Se traduce…',
+    'rev.original': 'Vezi originalul',
+    'rev.translatedFrom': 'Tradus automat din {lang}',
+    'rev.trErr': 'Traducerea nu este disponibilă acum.',
+    'rev.moreN': 'Vezi încă {n} recenzii',
     'drop.wrongType': 'Acest tip de fișier nu merge aici.',
     'rev.from': 'Recenzie preluată de pe {s}',
     'ri.title': 'Importă recenzii din alt magazin',
+    'ri.updated': '{n} recenzii existente au primit „Cumpărare verificată”.',
     'ri.f.verified': 'Cumpărare verificată',
     'ri.sourceNote': '(doar pentru tine, nu apare pe site)',
     'ri.importedTag': 'Importată',
@@ -1540,9 +1547,16 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'rev.translate': 'Traduci in {lang}',
+    'rev.translating': 'Traduzione…',
+    'rev.original': 'Mostra l’originale',
+    'rev.translatedFrom': 'Tradotto automaticamente da {lang}',
+    'rev.trErr': 'La traduzione non è disponibile ora.',
+    'rev.moreN': 'Mostra altre {n} recensioni',
     'drop.wrongType': 'Questo tipo di file non va bene qui.',
     'rev.from': 'Recensione da {s}',
     'ri.title': 'Importa recensioni da un altro negozio',
+    'ri.updated': '{n} recensioni esistenti hanno ricevuto «Acquisto verificato».',
     'ri.f.verified': 'Acquisto verificato',
     'ri.sourceNote': '(solo per te, non appare sul sito)',
     'ri.importedTag': 'Importata',
@@ -2625,9 +2639,16 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'rev.translate': 'Translate to {lang}',
+    'rev.translating': 'Translating…',
+    'rev.original': 'See original',
+    'rev.translatedFrom': 'Automatically translated from {lang}',
+    'rev.trErr': 'Translation isn’t available right now.',
+    'rev.moreN': 'See {n} more reviews',
     'drop.wrongType': 'This type of file can’t be used here.',
     'rev.from': 'Review from {s}',
     'ri.title': 'Import reviews from another shop',
+    'ri.updated': '{n} existing reviews were marked “Verified purchase”.',
     'ri.f.verified': 'Verified purchase',
     'ri.sourceNote': '(only for you, not shown on the site)',
     'ri.importedTag': 'Imported',
@@ -3294,7 +3315,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021115150`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021115759`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021115150';
-import { applyOffers, offerRunning } from './offers.js?v=20261021115150';
-import { scoreBook } from './search.js?v=20261021115150';
-import { getLang } from './i18n.js?v=20261021115150';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261021115150';
+import { CONFIG } from './config.js?v=20261021115759';
+import { applyOffers, offerRunning } from './offers.js?v=20261021115759';
+import { scoreBook } from './search.js?v=20261021115759';
+import { getLang } from './i18n.js?v=20261021115759';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261021115759';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -75,7 +75,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261021115150')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261021115759')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -403,8 +403,10 @@ class DemoAPI {
   async importReviews(bookId, list, source) {
     const all = store.get('demo:reviews', []), have = new Set(all.filter(r => r.book_id === bookId).map(r => r.ext_key).filter(Boolean)), batch = uid('b_');
     const rows = list.filter(r => !have.has(r.ext_key) && have.add(r.ext_key)).map(r => ({ id: uid('r_'), book_id: bookId, user_id: null, imported: true, source, batch, ...r, verified: !!r.verified, created_at: r.created_at || new Date().toISOString() }));
+    const ver = new Set(list.filter(r => r.verified).map(r => r.ext_key)); let updated = 0;
+    all.forEach(r => { if (r.book_id === bookId && r.imported && !r.verified && ver.has(r.ext_key)) { r.verified = true; updated++; } });
     store.set('demo:reviews', all.concat(rows)); await this._loadCatalog();
-    return { added: rows.length, dupes: list.length - rows.length, batch };
+    return { added: rows.length, dupes: list.length - rows.length - updated, updated, batch };
   }
   async deleteReviewBatch(batch) { store.set('demo:reviews', store.get('demo:reviews', []).filter(r => r.batch !== batch)); await this._loadCatalog(); }
   async deleteReview(id) {
@@ -850,10 +852,19 @@ class SupabaseAPI {
     const rows = list.filter(r => !have.has(r.ext_key) && have.add(r.ext_key)).map(r => ({ book_id: bookId, user_id: null, imported: true, source: source || null, batch,
       rating: r.rating, title: r.title || null, body: r.body || null, author_name: r.author_name || null, country: r.country || null, verified: !!r.verified, ext_key: r.ext_key, ...(r.created_at ? { created_at: r.created_at } : {}) }));
     for (let i = 0; i < rows.length; i += 200) { const { error } = await this.sb.from('reviews').insert(rows.slice(i, i + 200)); this._err(error); }
+    // the same file uploaded again: reviews already here take the "verified purchase" mark from the file
+    const fresh = new Set(rows.map(r => r.ext_key));
+    const ver = [...new Set(list.filter(r => r.verified && !fresh.has(r.ext_key)).map(r => r.ext_key))];
+    let updated = 0;
+    for (let i = 0; i < ver.length; i += 100) {
+      const { data, error } = await this.sb.from('reviews').update({ verified: true }).eq('book_id', bookId).eq('imported', true).eq('verified', false).in('ext_key', ver.slice(i, i + 100)).select('id');
+      this._err(error); updated += (data || []).length;
+    }
     this._catalog = null;
-    return { added: rows.length, dupes: list.length - rows.length, batch };
+    return { added: rows.length, dupes: list.length - rows.length - updated, updated, batch };
   }
   async deleteReviewBatch(batch) { const { error } = await this.sb.from('reviews').delete().eq('batch', batch); this._err(error); this._catalog = null; }
+  async translateReview(id, lang) { const { data, error } = await this.sb.functions.invoke('translate-review', { body: { review_id: id, lang } }); if (error) return { error: 'server' }; return data; }
   async setBookStatus(id, status) { const { error } = await this.sb.from('books').update({ status, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); this._catalog = null; }
   async exportSales() {
     const [P, books] = await Promise.all([this._all('purchases', '*', q => q.eq('test', false).order('created_at', { ascending: false })), this._loadCatalog(true)]);

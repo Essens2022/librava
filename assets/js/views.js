@@ -1,13 +1,14 @@
-import { CONFIG } from './config.js?v=20261021115150';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115150';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021115150';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021115150';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021115150';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021115150';
-import { track } from './track.js?v=20261021115150';
-import { didYouMean } from './search.js?v=20261021115150';
-import { api } from './api.js?v=20261021115150';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021115150';
+import { CONFIG } from './config.js?v=20261021115759';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115759';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021115759';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021115759';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021115759';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021115759';
+import { track } from './track.js?v=20261021115759';
+import { guessLang } from './langdetect.js?v=20261021115759';
+import { didYouMean } from './search.js?v=20261021115759';
+import { api } from './api.js?v=20261021115759';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021115759';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -280,13 +281,14 @@ export async function viewBook(el, id) {
           </form>` : `<p class="muted" style="font-size:14px">${esc(t('rev.onlyOwners'))}</p>`}
       </div>
       <div>
-        ${reviews.length ? reviews.map((r, i) => `<div class="review"${i >= 8 ? ' hidden data-more-rev' : ''}>
+        ${reviews.length ? reviews.map((r, i) => `<div class="review" data-rid="${esc(r.id)}"${i >= 10 ? ' hidden data-more-rev' : ''}>
           <div class="who"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span>${esc(r.author_name || t('rev.anon'))}</div>
           <div class="rating-line" style="margin-top:6px">${stars(r.rating)} ${r.title ? `<b class="rev-title">${esc(r.title)}</b>` : ''}</div>
           <div class="muted rev-meta">${esc(fmtDate(r.created_at))}${r.country ? ' · ' + esc(r.country) : ''}</div>
           ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}
-          ${r.body ? `<p style="white-space:pre-line">${esc(r.body)}</p>` : ''}
-        </div>`).join('') + (reviews.length > 8 ? `<button class="btn btn-ghost" type="button" id="rev-more">${esc(t('rev.more', { n: reviews.length }))}</button>` : '') : `<p class="muted">${esc(t('rev.none'))}</p>`}
+          ${r.body ? `<p class="rev-body" style="white-space:pre-line">${esc(r.body)}</p>` : ''}
+          ${(r.body || r.title) && needsTr(r) ? `<div class="rev-tr"><button type="button" class="linkbtn" data-tr="${esc(r.id)}">${icon('globe', 'ico')} ${esc(t('rev.translate', { lang: trLangName() }))}</button><small class="muted" hidden></small></div>` : ''}
+        </div>`).join('') + (reviews.length > 10 ? `<button class="btn btn-ghost" type="button" id="rev-more">${esc(t('rev.moreN', { n: Math.min(10, reviews.length - 10) }))}</button>` : '') : `<p class="muted">${esc(t('rev.none'))}</p>`}
       </div>
     </div></section>
   </div>`;
@@ -317,7 +319,14 @@ export async function viewBook(el, id) {
     try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
   });
 
-  $('#rev-more', el)?.addEventListener('click', e => { $$('[data-more-rev]', el).forEach(x => x.hidden = false); e.currentTarget.remove(); });
+  // like Amazon: 10 more reviews at each click
+  $('#rev-more', el)?.addEventListener('click', e => {
+    const rest = $$('[data-more-rev][hidden]', el); rest.slice(0, 10).forEach(x => x.hidden = false);
+    const left = rest.length - 10;
+    if (left > 0) e.currentTarget.textContent = t('rev.moreN', { n: Math.min(10, left) }); else e.currentTarget.remove();
+  });
+  // translate a review into the language of the visitor's device (and back)
+  $$('[data-tr]', el).forEach(btn => btn.addEventListener('click', () => translateReviewEl(btn, reviews.find(r => r.id === btn.dataset.tr))));
   const form = $('#rev-form', el);
   if (form) {
     let rating = myRev?.rating || 0;
@@ -449,6 +458,49 @@ async function renderBoughtTogether(box, b, owned, offers) {
 
 // ---------------------------------------------------------------- cart with offers, coupon and "add 1 more" hints
 const COUPON = 'librava:coupon';
+// ---------------------------------------------------------------- review translation
+// the visitor's own language (phone / computer settings); the shop language if the device's isn't one of ours
+function trLang() {
+  const ours = LANGS.map(l => Array.isArray(l) ? l[0] : (l.code || l));
+  for (const l of (navigator.languages || [navigator.language || ''])) { const c = String(l).slice(0, 2).toLowerCase(); if (c === 'nb' || c === 'nn') return 'no'; if (ours.includes(c)) return c; }
+  return getLang();
+}
+function trLangName() { const c = trLang(); try { return new Intl.DisplayNames([getLang()], { type: 'language' }).of(c === 'no' ? 'nb' : c); } catch { return c.toUpperCase(); } }
+function needsTr(r) { const src = r.lang || guessLang(`${r.title || ''} ${r.body || ''}`); return src !== trLang(); }
+async function browserTranslate(texts, to) {
+  // Chrome's built-in translator (works on the device, no internet service needed)
+  if (!('Translator' in self)) return null;
+  try {
+    let from = null;
+    if ('LanguageDetector' in self) { const d = await self.LanguageDetector.create(); from = (await d.detect(texts.join(' ')))[0]?.detectedLanguage; }
+    from = from || guessLang(texts.join(' ')); if (!from || from === to) return null;
+    const tr = await self.Translator.create({ sourceLanguage: from, targetLanguage: to });
+    return { out: await Promise.all(texts.map(x => x ? tr.translate(x) : '')), src: from };
+  } catch { return null; }
+}
+async function translateReviewEl(btn, r) {
+  const box = btn.closest('.review'), body = $('.rev-body', box), title = $('.rev-title', box), note = btn.nextElementSibling;
+  if (box.dataset.shown === 'tr') {   // back to the original
+    if (body) body.textContent = r.body; if (title) title.textContent = r.title;
+    box.dataset.shown = ''; note.hidden = true; btn.lastChild.textContent = ' ' + t('rev.translate', { lang: trLangName() }); return;
+  }
+  const to = trLang(); btn.disabled = true; btn.lastChild.textContent = ' ' + t('rev.translating');
+  let res = null;
+  try { res = await api.translateReview?.(r.id, to); } catch { res = { error: 'server' }; }
+  if (res?.same) { btn.closest('.rev-tr').remove(); return; }
+  if (!res || res.error) {
+    const b = await browserTranslate([r.title || '', r.body || ''], to);
+    res = b ? { title: b.out[0], body: b.out[1], src: b.src } : null;
+  }
+  btn.disabled = false;
+  if (!res) { btn.lastChild.textContent = ' ' + t('rev.translate', { lang: trLangName() }); toast(t('rev.trErr'), { error: true }); return; }
+  if (body && res.body) body.textContent = res.body; if (title && res.title) title.textContent = res.title;
+  box.dataset.shown = 'tr';
+  let from = res.src; try { from = new Intl.DisplayNames([getLang()], { type: 'language' }).of(res.src); } catch { }
+  note.textContent = t('rev.translatedFrom', { lang: from || '' }); note.hidden = false;
+  btn.lastChild.textContent = ' ' + t('rev.original');
+}
+
 export async function viewCart(el) {
   const ids = cart.get();
   const found = (await Promise.all(ids.map(id => api.getBook(id)))).filter(Boolean);

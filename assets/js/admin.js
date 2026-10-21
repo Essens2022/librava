@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021115150';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115150';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021115150';
-import { resetCompanyCache } from './views.js?v=20261021115150';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021115150';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021115150';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021115150';
-import { api } from './api.js?v=20261021115150';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021115150';
+import { CONFIG } from './config.js?v=20261021115759';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021115759';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021115759';
+import { resetCompanyCache } from './views.js?v=20261021115759';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021115759';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021115759';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021115759';
+import { api } from './api.js?v=20261021115759';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021115759';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -357,7 +357,7 @@ function importReviewsUI(body, books) {
       const btn = e.currentTarget; btn.disabled = true; clearErr();
       try {
         const r = await api.importReviews(bookSel.value, ok, srcIn.value.trim());
-        toast(t('ri.done', { n: r.added }) + (r.dupes ? ' ' + t('ri.dupes', { n: r.dupes }) : ''));
+        toast(t('ri.done', { n: r.added }) + (r.updated ? ' ' + t('ri.updated', { n: r.updated }) : '') + (r.dupes ? ' ' + t('ri.dupes', { n: r.dupes }) : ''));
         reviews(body);
       } catch (x) { btn.disabled = false; showErr(t('ri.pubErr') + ' ' + errText(x), true); }
     };
