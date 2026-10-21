@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021154636';
-import { t } from './i18n.js?v=20261021154636';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021154636';
-import { offline } from './offline.js?v=20261021154636';
-import { api } from './api.js?v=20261021154636';
-import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021154636';
-import { startCheckout, alsoReadFor } from './views.js?v=20261021154636';
+import { CONFIG } from './config.js?v=20261021160212';
+import { t } from './i18n.js?v=20261021160212';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021160212';
+import { offline } from './offline.js?v=20261021160212';
+import { api } from './api.js?v=20261021160212';
+import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261021160212';
+import { startCheckout, alsoReadFor } from './views.js?v=20261021160212';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -21,6 +21,10 @@ export async function viewReader(el, id, q) {
   if (!book && saved) book = saved.book;
   // for the copy note (title · author) and the copy limit
   window.__libravaBook = book ? { title: book.title, author: book.author, year: new Date(book.published_at || Date.now()).getFullYear() } : null;
+  // the end-of-preview screen is prepared while the sample is read: recommendations and pictures are ready
+  // before it opens, so it appears complete at once (no jump when they arrive)
+  let recList = null;
+  const recP = book ? alsoReadFor(book, 12).catch(() => []).then(l => { recList = l; [book.cover_url, ...l.map(x => x.cover_url)].filter(Boolean).forEach(u => { const im = new Image(); im.src = u; }); return l; }) : Promise.resolve([]);
   if (!window.__libravaCopyHook) { window.__libravaCopyHook = true; window.addEventListener('librava:copylimit', () => toast(t('rd.copyLimit'))); }
   if (!book) { go('/'); return; }
   let src;
@@ -110,17 +114,25 @@ export async function viewReader(el, id, q) {
     box.querySelector('[data-end-cart]')?.addEventListener('click', e => { cart.add(book.id); e.currentTarget.textContent = t('book.inCart'); e.currentTarget.disabled = true; toast(t('cart.added')); });
     box.querySelector('[data-end-free]')?.addEventListener('click', () => { cleanup(); go('/book/' + encodeURIComponent(id)); });
     box.querySelector('[data-end-store]').onclick = () => { cleanup(); go('/book/' + encodeURIComponent(id)); };
-    alsoReadFor(book, 12).then(list => {
-      if (!list.length || !box.isConnected) return;
-      const more = box.querySelector('.end-more'); more.hidden = false;
+    const more = box.querySelector('.end-more'), row = more.querySelector('.end-row');
+    const fill = list => {
+      if (!box.isConnected) return;
+      if (!list.length) { more.hidden = true; return; }
       // small cards, like Amazon's "customers also read": cover, title, stars, price
-      more.querySelector('.end-row').innerHTML = list.map(x => `<a class="mini" href="#/book/${encodeURIComponent(x.id)}">
-          <span class="mini-cover">${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="" loading="lazy">` : `<span class="ph">${esc(x.title)}</span>`}</span>
+      row.innerHTML = list.map(x => `<a class="mini" href="#/book/${encodeURIComponent(x.id)}">
+          <span class="mini-cover">${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="">` : `<span class="ph">${esc(x.title)}</span>`}</span>
           <span class="mini-title">${esc(x.title)}</span>
           ${x.rating_count ? `<span class="mini-stars">${stars(x.rating_avg)}<small>${x.rating_count}</small></span>` : ''}
           <span class="mini-price">${x.price_cents ? priceHTML(x) : esc(t('book.free'))}</span></a>`).join('');
-      more.querySelectorAll('a.mini').forEach(a => a.addEventListener('click', () => cleanup()));
-    }).catch(() => { });
+      row.querySelectorAll('a.mini').forEach(a => a.addEventListener('click', () => cleanup()));
+    };
+    if (recList) { if (recList.length) { more.hidden = false; fill(recList); } }
+    else {
+      // not ready yet: keep their place with grey cards of the same size, so nothing moves when they arrive
+      more.hidden = false;
+      row.innerHTML = Array.from({ length: 6 }, () => '<span class="mini skel"><span class="mini-cover"></span><span class="mini-title">&nbsp;<br>&nbsp;</span><span class="mini-price">&nbsp;</span></span>').join('');
+      recP.then(fill);
+    }
   };
 
   const update = (info) => {
