@@ -186,6 +186,7 @@ export default {
   "rev.none": "Még nincs vélemény. Írd meg te az elsőt!",
   "rev.pickRating": "Válassz 1 és 5 csillag közötti értékelést.",
   "rev.verified": "Igazolt vásárlás",
+  "drop.wrongType": "Ez a fájltípus itt nem használható.",
   "rev.from": "Értékelés innen: {s}",
   "rev.more": "Összes értékelés ({n})",
   "rev.anon": "Vásárló",

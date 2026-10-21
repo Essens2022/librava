@@ -1479,3 +1479,7 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 .rev-title { margin-left: 4px; }
 .rev-meta { font-size: 13px; margin-top: 2px; }
 .rev-source { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+/* any upload field: a file dragged over it lights the box */
+.drag-over { outline: 2px dashed var(--pista-strong, #4F7F33); outline-offset: 3px; border-radius: 10px; background: color-mix(in srgb, var(--pista-strong, #4F7F33) 8%, transparent); }
+input[type=file].input { cursor: pointer; }

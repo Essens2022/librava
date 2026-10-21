@@ -186,6 +186,7 @@ export default {
   "rev.none": "Atsiliepimų dar nėra. Būkite pirmi!",
   "rev.pickRating": "Pasirinkite įvertinimą nuo 1 iki 5 žvaigždučių.",
   "rev.verified": "Patvirtintas pirkimas",
+  "drop.wrongType": "Šio tipo failo čia naudoti negalima.",
   "rev.from": "Atsiliepimas iš {s}",
   "rev.more": "Rodyti visus atsiliepimus ({n})",
   "rev.anon": "Klientas",

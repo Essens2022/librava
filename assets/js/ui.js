@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261021110851';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021110851';
-import { esc, store, $, $$ } from './util.js?v=20261021110851';
+import { CONFIG } from './config.js?v=20261021112517';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261021112517';
+import { esc, store, $, $$ } from './util.js?v=20261021112517';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,10 +12,10 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261021110851';
-import { suggest, highlight } from './search.js?v=20261021110851';
-import { track } from './track.js?v=20261021110851';
-import { api } from './api.js?v=20261021110851';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261021112517';
+import { suggest, highlight } from './search.js?v=20261021112517';
+import { track } from './track.js?v=20261021112517';
+import { api } from './api.js?v=20261021112517';
 
 // ---------------- icons ----------------
 const P = {
@@ -311,6 +311,50 @@ export function confirmBox(text, { ok = t('common.confirm'), danger = false } = 
 export function errText(e) {
   const m = e && e.message ? e.message : String(e);
   return /^[a-z]+\.[a-zA-Z.]+$/.test(m) ? t(m) : m;
+}
+
+// Drag & drop for every upload box on the site: drop a file (or photo) on any file field and it is
+// picked exactly as if chosen with the button. Boxes that already handle dropping keep their own way.
+let dropsReady = false;
+export function setupDropZones() {
+  if (dropsReady) return; dropsReady = true;
+  const hasFiles = e => [...(e.dataTransfer?.types || [])].includes('Files');
+  const zoneOf = el => {
+    if (!(el instanceof Element)) return null;
+    if (el.matches('input[type=file]')) return { zone: el.closest('label, .field') || el, input: el };
+    const z = el.closest('label, .drop, .field, [data-dropzone]');
+    const input = z && (z.querySelector('input[type=file]') || (z.htmlFor && document.getElementById(z.htmlFor)?.matches('input[type=file]') && document.getElementById(z.htmlFor)));
+    return input && !input.disabled ? { zone: z, input } : null;
+  };
+  const accepts = (input, f) => {
+    const acc = (input.accept || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+    if (!acc.length) return true;
+    const name = f.name.toLowerCase(), type = (f.type || '').toLowerCase();
+    return acc.some(a => a.startsWith('.') ? name.endsWith(a) : a.endsWith('/*') ? type.startsWith(a.slice(0, -1)) : type === a);
+  };
+  let lit = null;
+  const light = z => { if (lit && lit !== z) lit.classList.remove('drag-over'); lit = z; z?.classList.add('drag-over'); };
+  document.addEventListener('dragover', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();                         // never let the browser open the file and leave the page
+    const hit = zoneOf(e.target);
+    e.dataTransfer.dropEffect = hit ? 'copy' : 'none';
+    light(hit && !hit.zone.classList.contains('drop') ? hit.zone : null);
+  });
+  document.addEventListener('dragleave', e => { if (!e.relatedTarget) light(null); });
+  document.addEventListener('drop', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); light(null);
+    const hit = zoneOf(e.target); if (!hit) return;
+    // boxes with their own drop handling already took the file
+    if (hit.zone.classList.contains('drop') && hit.zone.dataset.drop) return;
+    const files = [...e.dataTransfer.files].filter(f => accepts(hit.input, f));
+    if (!files.length) { toast(t('drop.wrongType'), { error: true }); return; }
+    const dt = new DataTransfer(); (hit.input.multiple ? files : files.slice(0, 1)).forEach(f => dt.items.add(f));
+    hit.input.files = dt.files;
+    hit.input.dispatchEvent(new Event('input', { bubbles: true }));
+    hit.input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
 }
 
 export function bindGlobal() {

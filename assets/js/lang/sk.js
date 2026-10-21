@@ -186,6 +186,7 @@ export default {
   "rev.none": "Zatiaľ žiadne recenzie. Napíšte prvú.",
   "rev.pickRating": "Vyberte hodnotenie od 1 do 5 hviezdičiek.",
   "rev.verified": "Overený nákup",
+  "drop.wrongType": "Tento typ súboru tu nemožno použiť.",
   "rev.from": "Recenzia z {s}",
   "rev.more": "Zobraziť všetky recenzie ({n})",
   "rev.anon": "Zákazník",

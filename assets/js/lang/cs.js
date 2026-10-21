@@ -186,6 +186,7 @@ export default {
   "rev.none": "Zatím žádné recenze. Napište první.",
   "rev.pickRating": "Vyberte hodnocení od 1 do 5 hvězdiček.",
   "rev.verified": "Ověřený nákup",
+  "drop.wrongType": "Tento typ souboru zde nelze použít.",
   "rev.from": "Recenze z {s}",
   "rev.more": "Zobrazit všechny recenze ({n})",
   "rev.anon": "Zákazník",

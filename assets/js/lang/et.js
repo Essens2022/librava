@@ -186,6 +186,7 @@ export default {
   "rev.none": "Arvustusi veel pole. Kirjuta esimene.",
   "rev.pickRating": "Vali hinnang 1 kuni 5 tärni.",
   "rev.verified": "Kinnitatud ost",
+  "drop.wrongType": "Seda failitüüpi siin kasutada ei saa.",
   "rev.from": "Arvustus saidilt {s}",
   "rev.more": "Vaata kõiki arvustusi ({n})",
   "rev.anon": "Klient",

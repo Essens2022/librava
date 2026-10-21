@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021110851';
-import { store } from './util.js?v=20261021110851';
+import { CONFIG } from './config.js?v=20261021112517';
+import { store } from './util.js?v=20261021112517';
 
 const D = {
   ro: {
@@ -455,6 +455,7 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'drop.wrongType': 'Acest tip de fișier nu merge aici.',
     'rev.from': 'Recenzie preluată de pe {s}',
     'ri.title': 'Importă recenzii din alt magazin',
     'ri.help': 'Încarcă fișierul cu recenziile pe care această carte le are deja în alt magazin (Amazon, Etsy, site-ul tău…). Stelele, titlul, textul, numele, data, ora și țara se adaugă automat la cartea aleasă.',
@@ -1529,6 +1530,7 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'drop.wrongType': 'Questo tipo di file non va bene qui.',
     'rev.from': 'Recensione da {s}',
     'ri.title': 'Importa recensioni da un altro negozio',
     'ri.help': 'Carica il file con le recensioni che questo libro ha già in un altro negozio (Amazon, Etsy, il tuo sito…). Stelle, titolo, testo, nome, data, ora e paese vengono aggiunti in automatico al libro scelto.',
@@ -2603,6 +2605,7 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'drop.wrongType': 'This type of file can’t be used here.',
     'rev.from': 'Review from {s}',
     'ri.title': 'Import reviews from another shop',
     'ri.help': 'Upload the file with the reviews this book already has in another shop (Amazon, Etsy, your own site…). Stars, title, text, name, date, time and country are added automatically to the chosen book.',
@@ -3261,7 +3264,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021110851`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021112517`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

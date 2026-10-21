@@ -186,6 +186,7 @@ export default {
   "rev.none": "Še ni mnenj. Bodite prvi.",
   "rev.pickRating": "Izberite oceno od 1 do 5 zvezdic.",
   "rev.verified": "Preverjen nakup",
+  "drop.wrongType": "Te vrste datoteke tukaj ni mogoče uporabiti.",
   "rev.from": "Ocena s {s}",
   "rev.more": "Prikaži vse ocene ({n})",
   "rev.anon": "Stranka",

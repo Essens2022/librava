@@ -186,6 +186,7 @@ export default {
   "rev.none": "Aucun avis pour l'instant. Soyez le premier à en écrire un.",
   "rev.pickRating": "Choisissez une note de 1 à 5 étoiles.",
   "rev.verified": "Achat vérifié",
+  "drop.wrongType": "Ce type de fichier ne peut pas être utilisé ici.",
   "rev.from": "Avis provenant de {s}",
   "rev.more": "Voir tous les avis ({n})",
   "rev.anon": "Client",

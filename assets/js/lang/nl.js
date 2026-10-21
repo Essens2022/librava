@@ -186,6 +186,7 @@ export default {
   "rev.none": "Nog geen reviews. Schrijf als eerste een review.",
   "rev.pickRating": "Kies een beoordeling van 1 tot 5 sterren.",
   "rev.verified": "Geverifieerde aankoop",
+  "drop.wrongType": "Dit bestandstype kan hier niet worden gebruikt.",
   "rev.from": "Recensie van {s}",
   "rev.more": "Alle recensies bekijken ({n})",
   "rev.anon": "Klant",

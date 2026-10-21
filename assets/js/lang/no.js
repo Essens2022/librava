@@ -186,6 +186,7 @@ export default {
   "rev.none": "Ingen anmeldelser ennå. Bli den første til å skrive en.",
   "rev.pickRating": "Velg en vurdering fra 1 til 5 stjerner.",
   "rev.verified": "Bekreftet kjøp",
+  "drop.wrongType": "Denne filtypen kan ikke brukes her.",
   "rev.from": "Anmeldelse fra {s}",
   "rev.more": "Se alle anmeldelser ({n})",
   "rev.anon": "Kunde",

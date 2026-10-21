@@ -186,6 +186,7 @@ export default {
   "rev.none": "Ei vielä arvioita. Kirjoita ensimmäinen.",
   "rev.pickRating": "Valitse arvio 1–5 tähteä.",
   "rev.verified": "Vahvistettu ostos",
+  "drop.wrongType": "Tätä tiedostotyyppiä ei voi käyttää tässä.",
   "rev.from": "Arvostelu sivustolta {s}",
   "rev.more": "Näytä kaikki arvostelut ({n})",
   "rev.anon": "Asiakas",

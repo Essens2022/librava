@@ -186,6 +186,7 @@ export default {
   "rev.none": "Još nema recenzija. Budite prvi.",
   "rev.pickRating": "Odaberite ocjenu od 1 do 5 zvjezdica.",
   "rev.verified": "Provjerena kupnja",
+  "drop.wrongType": "Ova vrsta datoteke ne može se ovdje koristiti.",
   "rev.from": "Recenzija s {s}",
   "rev.more": "Prikaži sve recenzije ({n})",
   "rev.anon": "Kupac",

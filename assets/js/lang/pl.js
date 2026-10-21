@@ -186,6 +186,7 @@ export default {
   "rev.none": "Brak opinii. Napisz pierwszą.",
   "rev.pickRating": "Wybierz ocenę od 1 do 5 gwiazdek.",
   "rev.verified": "Potwierdzony zakup",
+  "drop.wrongType": "Tego typu pliku nie można tu użyć.",
   "rev.from": "Recenzja z {s}",
   "rev.more": "Zobacz wszystkie recenzje ({n})",
   "rev.anon": "Klient",

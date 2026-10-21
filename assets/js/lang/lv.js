@@ -186,6 +186,7 @@ export default {
   "rev.none": "Vēl nav atsauksmju. Uzraksti pirmo!",
   "rev.pickRating": "Izvēlies vērtējumu no 1 līdz 5 zvaigznēm.",
   "rev.verified": "Apstiprināts pirkums",
+  "drop.wrongType": "Šo faila veidu šeit nevar izmantot.",
   "rev.from": "Atsauksme no {s}",
   "rev.more": "Skatīt visas atsauksmes ({n})",
   "rev.anon": "Klients",
