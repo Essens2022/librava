@@ -2,8 +2,8 @@
 //  Books the reader keeps on this device: download a personal copy (PDF / EPUB)
 //  and/or save it inside the browser to read without internet.
 // =====================================================================
-import { blobs, store, loadScript } from './util.js?v=20261021134712';
-import { api } from './api.js?v=20261021134712';
+import { blobs, store, loadScript } from './util.js?v=20261021135701';
+import { api } from './api.js?v=20261021135701';
 
 const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
 const KEY = 'offline:books';
@@ -57,7 +57,7 @@ export async function downloadBook(book, onProgress) {
       const font = await doc.embedFont(StandardFonts.Helvetica);
       const ascii = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
       const ref = (await api.owns?.(book.id).catch(() => null))?.order?.reference || '';
-      const line = ascii(`Licensed to ${u.name || ''} <${u.email}>${ref ? ' - order ' + ref : ''} - librava.store - ${new Date().toISOString().slice(0, 10)} - Copyright (c) ${book.author || ''}. Sharing or reselling this file is not permitted.`);
+      const line = ascii(`Licensed to ${u.name || ''} <${u.email}>${ref ? ' - order ' + ref : ''} - librava.store - ${new Date().toISOString().slice(0, 10)} - (c) ${new Date(book.published_at || Date.now()).getFullYear()} Librava (librava.store). All rights reserved. Sharing or reselling this file is not permitted.`);
       for (const pg of doc.getPages()) {
         const { width } = pg.getSize();
         let size = Math.max(4.5, Math.min(6.5, width / 95));
@@ -91,7 +91,7 @@ export async function stampEpub(blob, book, u) {
   const who = `${u.name || ''} <${u.email}>`, date = new Date().toISOString().slice(0, 10);
   const note = `Licensed to ${who}${ref ? ' · order ' + ref : ''} · librava.store · ${date}`;
   // 1) a licence page right after the cover
-  const page = `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><meta charset="utf-8"/><title>Licence</title></head><body style="font-family:sans-serif;text-align:center;margin-top:30%"><p style="font-size:.85em;color:#555">This ebook is licensed for the personal use of</p><p style="font-weight:bold">${esc(who)}</p><p style="font-size:.8em;color:#555">${ref ? 'Order ' + esc(ref) + ' · ' : ''}${date} · librava.store</p><p style="font-size:.75em;color:#777;margin-top:2em">© ${esc(book.author || '')}. All rights reserved. Copying, sharing or reselling this file is not permitted.</p></body></html>`;
+  const page = `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><meta charset="utf-8"/><title>Licence</title></head><body style="font-family:sans-serif;text-align:center;margin-top:30%"><p style="font-size:.85em;color:#555">This ebook is licensed for the personal use of</p><p style="font-weight:bold">${esc(who)}</p><p style="font-size:.8em;color:#555">${ref ? 'Order ' + esc(ref) + ' · ' : ''}${date} · librava.store</p><p style="font-size:.75em;color:#777;margin-top:2em">${book.rights === 'public' ? 'Public domain text. Edition and cover © ' + new Date(book.published_at || Date.now()).getFullYear() + ' Librava.' : '© ' + new Date(book.published_at || Date.now()).getFullYear() + ' Librava (librava.store). All rights reserved.'} Copying, sharing or reselling this file is not permitted.</p></body></html>`;
   zip.file(base + 'librava-licence.xhtml', page);
   opf = opf.replace(/<\/manifest>/, '<item id="librava-licence" href="librava-licence.xhtml" media-type="application/xhtml+xml"/></manifest>');
   opf = opf.replace(/(<spine[^>]*>\s*(?:<itemref[^>]*\/>\s*)?)/, m => m.includes('itemref') ? m + '<itemref idref="librava-licence"/>' : m + '<itemref idref="librava-licence"/>');

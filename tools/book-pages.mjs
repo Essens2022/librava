@@ -37,7 +37,7 @@ const catSlug = (l, c) => { const s = slug(tr(l, 'cat.' + c)); return s.length >
 
 // ---------- data ----------
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
-const res = process.env.SEO_TEST_BOOKS ? { ok: true, json: async () => JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8')) } : await fetch(`${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color&status=eq.published&deleted_at=is.null&order=published_at.desc`, { headers: H });
+const res = process.env.SEO_TEST_BOOKS ? { ok: true, json: async () => JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8')) } : await fetch(`${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights&status=eq.published&deleted_at=is.null&order=published_at.desc`, { headers: H });
 if (!res.ok) { console.error('Supabase error', res.status, await res.text()); process.exit(1); }
 const books = await res.json();
 
@@ -147,7 +147,9 @@ for (const b of books) {
   const ld = { '@type': ['Book', 'Product'], '@id': url + '#book', name: b.title, alternativeName: b.subtitle || undefined, url, description: cut(descFull, 5000),
     image: cv ? [cv.url] : undefined, author: { '@type': 'Person', name: b.author }, inLanguage: b.language, bookFormat: 'https://schema.org/EBook',
     isbn: b.isbn || undefined, numberOfPages: b.pages || undefined, datePublished: b.published_at ? String(b.published_at).slice(0, 10) : undefined,
-    publisher: { '@id': SITE + '/#org' }, brand: { '@type': 'Brand', name: 'Librava' }, sku: b.librava_id || b.id, genre: cat ? tr(l, 'cat.' + cat) : undefined,
+    publisher: { '@id': SITE + '/#org' },
+    ...(b.rights === 'public' ? { copyrightNotice: 'Public domain text' } : { copyrightHolder: { '@id': SITE + '/#org' }, copyrightYear: new Date(b.published_at || Date.now()).getFullYear(), copyrightNotice: `© ${new Date(b.published_at || Date.now()).getFullYear()} Librava (librava.store). All rights reserved.` }),
+    brand: { '@type': 'Brand', name: 'Librava' }, sku: b.librava_id || b.id, genre: cat ? tr(l, 'cat.' + cat) : undefined,
     offers: { '@type': 'Offer', url, price: (b.price_cents / 100).toFixed(2), priceCurrency: (b.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' } },
     aggregateRating: b.rating_count ? { '@type': 'AggregateRating', ratingValue: (+b.rating_avg).toFixed(1), reviewCount: b.rating_count, bestRating: 5, worstRating: 1 } : undefined };
   const crumbs = { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Librava', item: `${SITE}/${l}/` },

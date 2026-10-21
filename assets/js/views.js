@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js?v=20261021134712';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021134712';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021134712';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021134712';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021134712';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021134712';
-import { track } from './track.js?v=20261021134712';
-import { guessLang } from './langdetect.js?v=20261021134712';
-import { didYouMean } from './search.js?v=20261021134712';
-import { api } from './api.js?v=20261021134712';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021134712';
+import { CONFIG } from './config.js?v=20261021135701';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021135701';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021135701';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021135701';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021135701';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021135701';
+import { track } from './track.js?v=20261021135701';
+import { guessLang } from './langdetect.js?v=20261021135701';
+import { didYouMean } from './search.js?v=20261021135701';
+import { api } from './api.js?v=20261021135701';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021135701';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -246,9 +246,12 @@ export async function viewBook(el, id) {
           <div><small>${esc(t('book.d.category'))}</small><b>${[...new Set([b.category, ...(b.categories || [])])].map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', ')}</b></div>
           ${b.edition ? `<div><small>${esc(t('book.edition'))}</small><b>${b.edition}</b></div>` : ''}
           ${b.age_min != null || b.age_max != null ? `<div><small>${esc(t('book.age'))}</small><b>${esc(b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 }))}</b></div>` : ''}
+          <div><small>${esc(t('book.d.publisher'))}</small><b>Librava</b></div>
+          <div><small>${esc(t('book.d.copyright'))}</small><b>${b.rights === 'public' ? esc(t('book.publicDomain')) : `© ${copyYear(b)} Librava`}</b></div>
           ${b.isbn ? `<div><small>ISBN</small><b>${esc(b.isbn)}</b></div>` : ''}
           ${b.librava_id ? `<div><small>${esc(t('kdp.lidShort'))}</small><b>${esc(b.librava_id)}</b></div>` : ''}
         </div>
+        ${b.rights === 'public' ? '' : `<p class="copy-note">${esc(t('book.copyNote', { year: copyYear(b) }))}</p>`}
       </div>
       <aside class="buybox">
         ${buy}
@@ -920,6 +923,8 @@ export async function companyInfo() {
 }
 export function resetCompanyCache() { companyCache = null; }
 // Kindle-style technical details: layout, text size, devices, page size, file size
+// copyright year of our own books: the year it was first published on Librava
+export const copyYear = b => new Date(b.published_at || b.created_at || Date.now()).getFullYear();
 function bookSpecs(b) {
   const m = b.file_check?.meta || {};
   const reflow = b.format === 'epub' && !m.epub?.fixed;
