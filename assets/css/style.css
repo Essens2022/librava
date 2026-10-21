@@ -1549,3 +1549,6 @@ select.invalid { border-color: #D92D20 !important; box-shadow: 0 0 0 2px #FDECEC
 .end-more { min-width: 0; max-width: 100%; }
 .end-row { grid-auto-columns: minmax(112px, 128px); gap: 18px; width: 100%; }
 .end-row .card-title { font-size: 13px; } .end-row .card-author, .end-row .card-meta { font-size: 12px; }
+
+/* no zoom on double tap (iPhone/Android); pinch with two fingers still zooms */
+html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch-action: manipulation; }

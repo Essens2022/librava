@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021151944';
-import { t } from './i18n.js?v=20261021151944';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021151944';
-import { offline } from './offline.js?v=20261021151944';
-import { api } from './api.js?v=20261021151944';
-import { icon, go, toast, cart, errText, cardHTML, priceHTML } from './ui.js?v=20261021151944';
-import { startCheckout, alsoReadFor } from './views.js?v=20261021151944';
+import { CONFIG } from './config.js?v=20261021152037';
+import { t } from './i18n.js?v=20261021152037';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021152037';
+import { offline } from './offline.js?v=20261021152037';
+import { api } from './api.js?v=20261021152037';
+import { icon, go, toast, cart, errText, cardHTML, priceHTML } from './ui.js?v=20261021152037';
+import { startCheckout, alsoReadFor } from './views.js?v=20261021152037';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -406,7 +406,7 @@ class EpubEngine {
     const holder = document.createElement('div'); holder.style.height = '100%'; this.box.appendChild(holder);
     this.rendition = this.book.renderTo(holder, { width: '100%', height: '100%', flow: 'paginated', spread: this.settings.spread ? 'auto' : 'none', minSpreadWidth: 900, allowScriptedContent: false });
     for (const [name, c] of Object.entries(EPUB_THEMES)) {
-      this.rendition.themes.register(name, { body: { color: c.color + ' !important', background: 'transparent !important', 'overflow-wrap': 'anywhere', 'word-wrap': 'break-word' }, 'p, li, span, div, h1, h2, h3, h4': { color: c.color + ' !important' }, a: { color: c.link + ' !important' }, img: { 'max-width': '100% !important' },
+      this.rendition.themes.register(name, { html: { 'touch-action': 'manipulation' }, body: { color: c.color + ' !important', background: 'transparent !important', 'overflow-wrap': 'anywhere', 'word-wrap': 'break-word', 'touch-action': 'manipulation' }, 'p, li, span, div, h1, h2, h3, h4': { color: c.color + ' !important' }, a: { color: c.link + ' !important' }, img: { 'max-width': '100% !important' },
         // nothing may stick out of the page: pictures, tables, code and very long words stay inside the margins
         'img, svg, video, canvas, image': { 'max-width': '100% !important', 'max-height': '92vh !important', height: 'auto !important', 'object-fit': 'contain', 'box-sizing': 'border-box' },
         'figure, div, section, p, blockquote, ul, ol': { 'max-width': '100% !important', 'box-sizing': 'border-box' },
