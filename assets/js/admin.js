@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021120221';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021120221';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021120221';
-import { resetCompanyCache } from './views.js?v=20261021120221';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021120221';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021120221';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021120221';
-import { api } from './api.js?v=20261021120221';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021120221';
+import { CONFIG } from './config.js?v=20261021120238';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021120238';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021120238';
+import { resetCompanyCache } from './views.js?v=20261021120238';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021120238';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021120238';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021120238';
+import { api } from './api.js?v=20261021120238';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021120238';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -328,7 +328,7 @@ function importReviewsUI(body, books) {
   const removeFile = () => { data = null; map = {}; product = ''; allVerified = false; fileIn.value = ''; chip.hidden = true; drop.hidden = false; step.innerHTML = ''; clearErr(); };
   $('#ri-remove', body).onclick = removeFile;
   $('#ri-template', body).onclick = () => {
-    const csv = '﻿name;rating;title;review;date;time;country\r\nMaria R.;5;Bellissimo;"Libro chiaro, esercizi facili da seguire.";12/03/2025;14:35;Italia\r\nJohn D.;4;Good book;Useful for beginners.;2025-02-01;09:10;USA\r\n';
+    const csv = '﻿name;rating;title;review;date;time;country;verified\r\nMaria R.;5;Bellissimo;"Libro chiaro, esercizi facili da seguire.";12/03/2025;14:35;Italia;yes\r\nJohn D.;4;Good book;Useful for beginners.;2025-02-01;09:10;USA;no\r\n';
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'librava-recenzii-model.csv'; document.body.appendChild(a); a.click(); a.remove();
   };
   const render = () => {
