@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021144244';
-import { t } from './i18n.js?v=20261021144244';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021144244';
-import { offline } from './offline.js?v=20261021144244';
-import { api } from './api.js?v=20261021144244';
-import { icon, go, toast, cart, errText } from './ui.js?v=20261021144244';
-import { startCheckout } from './views.js?v=20261021144244';
+import { CONFIG } from './config.js?v=20261021151351';
+import { t } from './i18n.js?v=20261021151351';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261021151351';
+import { offline } from './offline.js?v=20261021151351';
+import { api } from './api.js?v=20261021151351';
+import { icon, go, toast, cart, errText, cardHTML, priceHTML } from './ui.js?v=20261021151351';
+import { startCheckout, alsoReadFor } from './views.js?v=20261021151351';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -91,13 +91,32 @@ export async function viewReader(el, id, q) {
     if ($('.rd-end', stage)) return;
     const box = document.createElement('div');
     box.className = 'rd-msg rd-end';
-    box.innerHTML = `<div class="box"><h2>${esc(t('reader.previewEnd'))}</h2><p style="margin:0">${esc(t('reader.previewText'))}</p>
-      ${book.price_cents ? `<button class="btn btn-buy" data-end-buy>${esc(t('book.buyNow'))}</button>` : `<button class="btn btn-buy" data-end-free>${esc(t('book.getFree'))}</button>`}
-      <button class="btn btn-ghost" data-end-back>${esc(t('reader.back'))}</button></div>`;
+    // like Amazon: buy the book right here, then "customers who read this book also read"
+    box.innerHTML = `<div class="box end-box">
+      <div class="end-buy">${book.cover_url ? `<img class="end-cover" src="${esc(book.cover_url)}" alt="">` : ''}
+        <div class="end-info"><h2>${esc(t('reader.enjoy'))}</h2>
+          <p class="end-title"><b>${esc(book.title)}</b><span>${esc(book.author || '')}</span></p>
+          ${book.price_cents ? `<div class="end-price">${priceHTML(book)}</div>` : ''}
+          <p class="muted end-text">${esc(t('reader.previewText'))}</p>
+          <div class="end-actions">${book.price_cents
+            ? `<button class="btn btn-buy" data-end-buy>${esc(t('book.buyNow'))}</button><button class="btn btn-cart" data-end-cart>${esc(cart.has(book.id) ? t('book.inCart') : t('book.addToCart'))}</button>`
+            : `<button class="btn btn-buy" data-end-free>${esc(t('book.getFree'))}</button>`}
+            <button class="btn btn-ghost" data-end-store>${esc(t('reader.seeBook'))}</button></div></div></div>
+      <div class="end-more" hidden><h3>${esc(t('reader.alsoRead'))}</h3><div class="end-row"></div></div>
+      <button class="linkbtn end-back" data-end-back>‹ ${esc(t('reader.back'))}</button></div>`;
     stage.appendChild(box);
     box.querySelector('[data-end-back]').onclick = () => { box.remove(); engine?.prev(); };
     box.querySelector('[data-end-buy]')?.addEventListener('click', () => { cart.add(book.id); cleanup(); startCheckout([book.id]); });
+    box.querySelector('[data-end-cart]')?.addEventListener('click', e => { cart.add(book.id); e.currentTarget.textContent = t('book.inCart'); e.currentTarget.disabled = true; toast(t('cart.added')); });
     box.querySelector('[data-end-free]')?.addEventListener('click', () => { cleanup(); go('/book/' + encodeURIComponent(id)); });
+    box.querySelector('[data-end-store]').onclick = () => { cleanup(); go('/book/' + encodeURIComponent(id)); };
+    alsoReadFor(book, 12).then(list => {
+      if (!list.length || !box.isConnected) return;
+      const more = box.querySelector('.end-more'); more.hidden = false;
+      more.querySelector('.end-row').innerHTML = list.map(cardHTML).join('');
+      more.querySelectorAll('a.card').forEach(a => a.addEventListener('click', () => cleanup()));
+      more.querySelectorAll('[data-quick-add]').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); cart.add(btn.dataset.quickAdd); btn.textContent = '✓'; btn.classList.add('in'); toast(t('cart.added')); }));
+    }).catch(() => { });
   };
 
   const update = (info) => {

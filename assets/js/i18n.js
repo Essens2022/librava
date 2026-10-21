@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021144244';
-import { store } from './util.js?v=20261021144244';
+import { CONFIG } from './config.js?v=20261021151351';
+import { store } from './util.js?v=20261021151351';
 
 const D = {
   ro: {
@@ -455,6 +455,9 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'reader.enjoy': 'Îți place extrasul?',
+    'reader.seeBook': 'Vezi pagina cărții',
+    'reader.alsoRead': 'Cititorii acestei cărți au citit și',
     'book.d.groupBook': 'Despre carte',
     'book.d.groupFile': 'Format și dispozitive',
     'book.bookN': 'Cartea {n}',
@@ -1561,6 +1564,9 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'reader.enjoy': 'Ti piace l’estratto?',
+    'reader.seeBook': 'Vai alla pagina del libro',
+    'reader.alsoRead': 'Chi ha letto questo libro ha letto anche',
     'book.d.groupBook': 'Informazioni sul libro',
     'book.d.groupFile': 'Formato e dispositivi',
     'book.bookN': 'Libro {n}',
@@ -2667,6 +2673,9 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'reader.enjoy': 'Enjoying this sample?',
+    'reader.seeBook': 'See the book page',
+    'reader.alsoRead': 'Customers who read this book also read',
     'book.d.groupBook': 'About this book',
     'book.d.groupFile': 'Format & devices',
     'book.bookN': 'Book {n}',
@@ -3357,7 +3366,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021144244`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021151351`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

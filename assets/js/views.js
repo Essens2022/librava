@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js?v=20261021144244';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021144244';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021144244';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021144244';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021144244';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021144244';
-import { track } from './track.js?v=20261021144244';
-import { guessLang } from './langdetect.js?v=20261021144244';
-import { didYouMean } from './search.js?v=20261021144244';
-import { api } from './api.js?v=20261021144244';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021144244';
+import { CONFIG } from './config.js?v=20261021151351';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021151351';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021151351';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021151351';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021151351';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021151351';
+import { track } from './track.js?v=20261021151351';
+import { guessLang } from './langdetect.js?v=20261021151351';
+import { didYouMean } from './search.js?v=20261021151351';
+import { api } from './api.js?v=20261021151351';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021151351';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -439,6 +439,24 @@ async function boughtTogetherFor(b) {
   if (out.length < 2) same.filter(x => x.category === b.category || (x.categories || []).includes(b.category)).sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0)).forEach(add);
   const mine = await Promise.all(out.map(x => api.owns(x.id)));
   return out.filter((_, i) => !mine[i]).slice(0, 2);
+}
+// "Customers who read this book also read" (end of the preview): the owner's picks, books bought by the same
+// customers, the same series / author / category — never the book itself or books the reader already has
+export async function alsoReadFor(b, n = 12) {
+  const all = await api.listBooks({});
+  const ok = x => x && x.id !== b.id && x.status !== 'draft' && !x.deleted_at;
+  const byId = Object.fromEntries(all.map(x => [x.id, x]));
+  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id)) out.push(x); };
+  (b.recommend_ids || []).forEach(id => add(byId[id]));
+  (await (api.boughtTogether?.(b.id, 12).catch?.(() => []) || [])).forEach(id => add(byId[id]));
+  const sameLang = all.filter(x => x.language === b.language), best = l => l.slice().sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0));
+  if (b.series_name) sameLang.filter(x => x.series_name === b.series_name).forEach(add);
+  sameLang.filter(x => x.author === b.author).forEach(add);
+  best(sameLang.filter(x => x.category === b.category || (x.categories || []).includes(b.category))).forEach(add);
+  best(sameLang).forEach(add);
+  if (out.length < 6) best(all).forEach(add);
+  const mine = await Promise.all(out.map(x => api.owns(x.id).catch(() => null)));
+  return out.filter((_, i) => !mine[i]).slice(0, n);
 }
 async function renderBoughtTogether(box, b, owned, offers) {
   if (!box || !b.price_cents) return;
