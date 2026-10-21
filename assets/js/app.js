@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261021132351';
-import { t, getLang, setLang } from './i18n.js?v=20261021132351';
-import { esc, $, $$ } from './util.js?v=20261021132351';
-import { api, chooseBackend } from './api.js?v=20261021132351';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261021132351';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261021132351';
-import { trackPage } from './track.js?v=20261021132351';
-import { offline } from './offline.js?v=20261021132351';
-import { viewReader } from './reader.js?v=20261021132351';
-import { viewAdmin } from './admin.js?v=20261021132351';
+import { CONFIG } from './config.js?v=20261021133529';
+import { t, getLang, setLang } from './i18n.js?v=20261021133529';
+import { esc, $, $$ } from './util.js?v=20261021133529';
+import { api, chooseBackend } from './api.js?v=20261021133529';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261021133529';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261021133529';
+import { trackPage } from './track.js?v=20261021133529';
+import { offline } from './offline.js?v=20261021133529';
+import { viewReader } from './reader.js?v=20261021133529';
+import { viewAdmin } from './admin.js?v=20261021133529';
 
 let cleanup = null, seq = 0;
 

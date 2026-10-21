@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261021132351';
-import { store } from './util.js?v=20261021132351';
+import { CONFIG } from './config.js?v=20261021133529';
+import { store } from './util.js?v=20261021133529';
 
 const D = {
   ro: {
@@ -761,6 +761,7 @@ const D = {
     'fc.epubDrm': 'EPUB-ul are protecție DRM și nu poate fi citit. Încarcă versiunea fără DRM (cea exportată de tine).',
     'fc.epubBroken': 'EPUB-ul nu se poate deschide (structură greșită). Exportă-l din nou sau verifică-l cu EPUBCheck.',
     'fc.epubOk': 'EPUB versiunea {v}, {n} capitole/secțiuni.',
+    'fc.epubPages': 'Aproximativ {n} pagini ({w} cuvinte), la fel ca o carte tipărită. Le-am completat singur.',
     'fc.epubReflow': 'Text care se adaptează la orice ecran: ideal pentru telefon.',
     'fc.epubFixed': 'EPUB cu pagini fixe: pe telefon paginile se micșorează. Pentru cărți cu text e mai bun un EPUB reflowabil; pentru cărți ilustrate, un PDF.',
     'fc.epubNoToc': 'Lipsește cuprinsul: cititorii nu vor putea sări la capitole.',
@@ -1855,6 +1856,7 @@ const D = {
     'fc.epubDrm': 'L\'EPUB ha protezione DRM e non si può leggere. Carica la versione senza DRM.',
     'fc.epubBroken': 'L\'EPUB non si apre (struttura errata). Esportalo di nuovo o verificalo con EPUBCheck.',
     'fc.epubOk': 'EPUB versione {v}, {n} capitoli/sezioni.',
+    'fc.epubPages': 'Circa {n} pagine ({w} parole), come un libro stampato. Inserite in automatico.',
     'fc.epubReflow': 'Testo che si adatta a ogni schermo: ideale per il telefono.',
     'fc.epubFixed': 'EPUB a layout fisso: sul telefono le pagine si rimpiccioliscono. Per libri di testo meglio un EPUB reflowable; per libri illustrati, un PDF.',
     'fc.epubNoToc': 'Manca l\'indice: i lettori non potranno saltare ai capitoli.',
@@ -2949,6 +2951,7 @@ const D = {
     'fc.epubDrm': 'The EPUB has DRM and can\'t be read. Upload the DRM-free version you exported.',
     'fc.epubBroken': 'The EPUB can\'t be opened (bad structure). Export it again or check it with EPUBCheck.',
     'fc.epubOk': 'EPUB version {v}, {n} chapters/sections.',
+    'fc.epubPages': 'About {n} pages ({w} words), like a printed book. Filled in automatically.',
     'fc.epubReflow': 'Reflowable text that adapts to any screen: ideal for phones.',
     'fc.epubFixed': 'Fixed-layout EPUB: pages shrink on phones. For text books a reflowable EPUB is better; for picture books, a PDF.',
     'fc.epubNoToc': 'No table of contents: readers can\'t jump to chapters.',
@@ -3321,7 +3324,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261021132351`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261021133529`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261021132351';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021132351';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021132351';
-import { resetCompanyCache } from './views.js?v=20261021132351';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021132351';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021132351';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021132351';
-import { api } from './api.js?v=20261021132351';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021132351';
+import { CONFIG } from './config.js?v=20261021133529';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021133529';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261021133529';
+import { resetCompanyCache } from './views.js?v=20261021133529';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261021133529';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261021133529';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261021133529';
+import { api } from './api.js?v=20261021133529';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261021133529';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -488,6 +488,18 @@ async function analyzeManuscript(file, bookLang) {
       const lang = (opf.getElementsByTagName('dc:language')[0]?.textContent || '').trim().slice(0, 2).toLowerCase();
       meta.epub = { version, chapters: spine, images: images.length, fixed };
       add('ok', 'fc.epubOk', { v: version, n: spine });
+      // pages: counted from the words of the book, like a printed book (about 250 words a page)
+      if (!fixed) {
+        const base = opfPath.includes('/') ? opfPath.replace(/[^/]+$/, '') : '';
+        const byId = Object.fromEntries(manifest.map(i => [i.getAttribute('id'), i.getAttribute('href')]));
+        let words = 0;
+        for (const ref of [...opf.getElementsByTagName('itemref')]) {
+          const f = zip.file(base + decodeURIComponent(byId[ref.getAttribute('idref')] || '')); if (!f) continue;
+          const txt = (await f.async('string')).replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ');
+          words += (txt.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
+        }
+        if (words) { meta.pages = Math.max(1, Math.round(words / 250)); meta.words = words; add('ok', 'fc.epubPages', { n: meta.pages, w: words.toLocaleString(getLang()) }); }
+      } else meta.pages = spine;
       if (fixed) add('warn', 'fc.epubFixed'); else { add('ok', 'fc.epubReflow'); add('ok', 'fc.ereader.epub'); }
       meta.ereader = fixed ? 'zoom' : 'epub';
       if (!hasToc) add('warn', 'fc.epubNoToc');
