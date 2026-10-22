@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022174049';
-import { applyOffers, offerRunning } from './offers.js?v=20261022174049';
-import { scoreBook } from './search.js?v=20261022174049';
-import { getLang } from './i18n.js?v=20261022174049';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022174049';
+import { CONFIG } from './config.js?v=20261022174736';
+import { applyOffers, offerRunning } from './offers.js?v=20261022174736';
+import { scoreBook } from './search.js?v=20261022174736';
+import { getLang } from './i18n.js?v=20261022174736';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022174736';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022174049')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022174736')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -664,14 +664,16 @@ class SupabaseAPI {
 
   // ---- reading ----
   async getReadSource(book, { preview } = {}) {
+    // "Read a sample" always opens the small sample file (what every customer sees), also for the admin:
+    // the whole book can be tens of MB and a phone on mobile data would wait a long time for it
+    if (preview && book.sample_path) {
+      return { url: this.sb.storage.from('samples').getPublicUrl(book.sample_path).data.publicUrl + (book.updated_at ? '?v=' + encodeURIComponent(book.updated_at) : ''), kind: book.sample_path.endsWith('.epub') ? 'epub' : 'pdf', limited: true, sample: true };
+    }
     const owned = await this.owns(book.id);
     if (owned || this._user?.isAdmin) {
       const { data, error } = await this.sb.storage.from('books').createSignedUrl(book.file_path, 60 * 60 * 3);
       this._err(error);
       return { url: data.signedUrl, kind: book.format, limited: false };
-    }
-    if (preview && book.sample_path) {
-      return { url: this.sb.storage.from('samples').getPublicUrl(book.sample_path).data.publicUrl + (book.updated_at ? '?v=' + encodeURIComponent(book.updated_at) : ''), kind: book.sample_path.endsWith('.epub') ? 'epub' : 'pdf', limited: true, sample: true };
     }
     throw new Error('not-owned');
   }
