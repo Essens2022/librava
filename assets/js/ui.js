@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022171235';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022171235';
-import { esc, store, $, $$ } from './util.js?v=20261022171235';
+import { CONFIG } from './config.js?v=20261022171649';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022171649';
+import { esc, store, $, $$ } from './util.js?v=20261022171649';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022171235';
-import { suggest, highlight } from './search.js?v=20261022171235';
-import { track, trackPage } from './track.js?v=20261022171235';
-import { initGA, stopGA } from './ga.js?v=20261022171235';
-import { api } from './api.js?v=20261022171235';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022171649';
+import { suggest, highlight } from './search.js?v=20261022171649';
+import { track, trackPage } from './track.js?v=20261022171649';
+import { initGA, stopGA } from './ga.js?v=20261022171649';
+import { api } from './api.js?v=20261022171649';
 
 // ---------------- icons ----------------
 const P = {
@@ -121,6 +121,21 @@ export function go(path) {
 }
 export function link(path) { return pathMode ? path : '#' + path; }
 
+// "All books": a small menu with the books in the site's language or in every language
+function allBooksMenu(btn) {
+  const old = document.querySelector('.allbooks-menu'); if (old) { old.remove(); return; }
+  const r = btn.getBoundingClientRect();
+  const m = document.createElement('div');
+  m.className = 'allbooks-menu'; m.setAttribute('role', 'menu');
+  m.style.left = Math.max(8, Math.min(r.left, innerWidth - 248)) + 'px'; m.style.top = (r.bottom + 4) + 'px';
+  m.innerHTML = `<a role="menuitem" href="#/search">${icon('globe')} ${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))}</a>
+    <a role="menuitem" href="#/search?lang=all">${icon('book')} ${esc(t('nav.inAllLangs'))}</a>`;
+  m.addEventListener('click', () => setTimeout(() => m.remove(), 0));
+  document.body.appendChild(m);
+  const close = () => { m.remove(); removeEventListener('scroll', close); };
+  addEventListener('scroll', close, { once: true, passive: true });
+}
+
 // ---------------- the visitor's way through the site (for "Back" like Amazon) ----------------
 // every page visited in this tab, so "Back" returns to the page before instead of opening a new one
 const NAV_KEY = 'librava:nav';
@@ -165,7 +180,7 @@ export function renderChrome() {
   <div class="wrap hdr-mobile-search">${searchForm('s2')}</div></div>
   <div class="hdr-sub"><nav class="wrap subnav" aria-label="${esc(t('nav.browse'))}">
     <button class="menu-btn" data-drawer>${icon('menu')} ${esc(t('nav.all'))}</button>
-    <a href="#/search?lang=all" data-nav="all">${esc(t('nav.allBooks'))}</a>
+    <button type="button" class="allbooks-btn" data-allbooks aria-haspopup="true">${esc(t('nav.allBooks'))} ${icon('chevD', 'ico chev')}</button>
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
@@ -178,7 +193,9 @@ export function renderChrome() {
     <div class="drawer-head"><span class="drawer-hello">${icon('user')} ${hello}</span>${langBtn('drawer-lang')}</div>
     <div class="drawer-body">
       <h3>${esc(t('nav.browse'))}</h3>
-      <a href="#/search?lang=all" class="drawer-all"><b>${esc(t('nav.allBooks'))}</b> ${icon('chevR')}</a>
+      <div class="drawer-all-group"><b>${esc(t('nav.allBooks'))}</b>
+        <a href="#/search" class="drawer-sub">${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))} ${icon('chevR')}</a>
+        <a href="#/search?lang=all" class="drawer-sub">${esc(t('nav.inAllLangs'))} ${icon('chevR')}</a></div>
       ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
       <hr>
       <a href="#/search?sort=newest">${esc(t('nav.new'))}</a>
@@ -456,6 +473,9 @@ export function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-cookie-settings]')) { e.preventDefault(); showConsent(true); return; }
+    const ab = e.target.closest('[data-allbooks]');
+    if (ab) { e.preventDefault(); allBooksMenu(ab); return; }
+    if (!e.target.closest('.allbooks-menu')) document.querySelector('.allbooks-menu')?.remove();
     if (e.target.closest('[data-goback]')) { e.preventDefault(); goBack('/'); return; }
     if (e.target.closest('[data-top]')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-signout]')) { openDrawer(false); await api.signOut(); go('/'); }

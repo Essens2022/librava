@@ -1740,3 +1740,14 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .rd-float-back { position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); left: calc(8px + env(safe-area-inset-left, 0px)); z-index: 4; width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--rd-bar); color: inherit; display: none; align-items: center; justify-content: center; opacity: .85; box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer; }
 .reader.chrome-hidden .rd-float-back { display: inline-flex; }
 .rd-float-back svg { width: 20px; height: 20px; }
+
+/* "All books": choose the site's language or every language */
+.allbooks-btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: inherit; white-space: nowrap; }
+.allbooks-btn .chev { width: 14px; height: 14px; }
+.allbooks-menu { position: fixed; z-index: 120; min-width: 230px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px; display: flex; flex-direction: column; }
+.allbooks-menu a { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 8px; color: var(--fg); text-decoration: none; font-size: 15px; }
+.allbooks-menu a:hover { background: var(--bg); }
+.allbooks-menu .ico { width: 18px; height: 18px; color: var(--pista-strong); }
+.drawer-all-group { display: flex; flex-direction: column; margin-bottom: 6px; }
+.drawer-all-group > b { padding: 10px 0 4px; }
+.drawer-all-group .drawer-sub { padding-left: 14px; }
