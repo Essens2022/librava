@@ -1710,3 +1710,12 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .fmt-file .drop.locked { opacity: .55; pointer-events: none; }
 .fmt-file .kdp-ok a { margin-left: 4px; }
 .fmt-files-note { font-size: 13px; margin: 4px 0 0; }
+
+/* admin list: the formats of one book shown together */
+.adm-table .fp-chip { font-size: 11px; padding: 2px 6px; margin-right: 4px; vertical-align: 2px; }
+.fp-chip.fmt-epub { background: #3E6FA8; }
+.adm-table tr.ed-first td, .adm-table tr.ed-sub td { background: color-mix(in srgb, var(--pista-strong) 6%, transparent); }
+.adm-table tr.ed-first td:first-child, .adm-table tr.ed-sub td:first-child { box-shadow: inset 4px 0 0 var(--pista-strong); }
+.adm-table tr.ed-first td { border-bottom: 1px dashed var(--line); }
+.adm-table tr.ed-sub td { border-top: 0; }
+.adm-table tr.ed-sub:not(.ed-last) td { border-bottom: 1px dashed var(--line); }

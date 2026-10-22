@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022155817';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022155817';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022155817';
-import { resetCompanyCache } from './views.js?v=20261022155817';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022155817';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022155817';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022155817';
-import { api } from './api.js?v=20261022155817';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022155817';
+import { CONFIG } from './config.js?v=20261022161919';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022161919';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022161919';
+import { resetCompanyCache } from './views.js?v=20261022161919';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022161919';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022161919';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022161919';
+import { api } from './api.js?v=20261022161919';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022161919';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -164,8 +164,8 @@ async function booksList(body) {
     const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
     return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
   };
-  const rowHTML = b => `<tr>
-        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
+  const rowHTML = (b, pos = '') => `<tr class="${pos}">
+        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b><span class="fp-chip fmt-${esc(b.format)}">${esc(t('book.formatShort.' + b.format))}</span> ${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
           <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}${edLinks(b)}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
         <td class="num">${b.sales_count || 0}</td>
@@ -200,7 +200,14 @@ async function booksList(body) {
   const STEP = 100; let shown = STEP, list = books;
   const qOf = new Map(books.map(b => [b.id, norm(b.title + ' ' + (b.subtitle || '') + ' ' + b.author + ' ' + (b.isbn || '') + ' ' + (b.librava_id || ''))]));
   const draw = () => {
-    $('#adm-rows', body).innerHTML = list.slice(0, shown).map(rowHTML).join('');
+    // the formats of one book stay together, one under the other (PDF, then EPUB)
+    const order = [], seen = new Set();
+    for (const b of list) {
+      if (seen.has(b.id)) continue;
+      const group = b.work_id ? list.filter(x => x.work_id === b.work_id).sort((x, y) => (x.format === 'pdf' ? 0 : 1) - (y.format === 'pdf' ? 0 : 1)) : [b];
+      group.forEach((x, i) => { seen.add(x.id); order.push([x, group.length < 2 ? '' : i === 0 ? 'ed-first' : i === group.length - 1 ? 'ed-sub ed-last' : 'ed-sub']); });
+    }
+    $('#adm-rows', body).innerHTML = order.slice(0, shown).map(([x, pos]) => rowHTML(x, pos)).join('');
     $('#adm-count', body).textContent = t('admin.countShown', { n: Math.min(shown, list.length), total: list.length });
     const more = $('#adm-more', body); more.hidden = list.length <= shown; more.textContent = t('admin.showMore', { n: Math.min(STEP, list.length - shown) });
   };
@@ -906,7 +913,7 @@ async function bookForm(body, b, startStep = 1) {
         </div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
         <div class="kdp-fields"><div class="fmt-files">${['pdf', 'epub'].map(f => `<div class="fmt-file" data-slot="${f}">
-            <div class="fp-head"><span class="fp-chip">${esc(t('book.formatShort.' + f))}</span><b>${esc(t('upl.fileFor', { fmt: t('book.formatShort.' + f) }))}</b></div>
+            <div class="fp-head"><span class="fp-chip fmt-${f}">${esc(t('book.formatShort.' + f))}</span><b>${esc(t('upl.fileFor', { fmt: t('book.formatShort.' + f) }))}</b></div>
             <label class="drop" data-slot-drop="${f}">${icon('file')}<span><span class="fname" data-slot-name="${f}"></span><br><small>${esc(t('upl.only', { fmt: t('book.formatShort.' + f) }))} · max 500 MB</small></span><input type="file" data-slot-input="${f}" accept="${f === 'epub' ? '.epub,application/epub+zip' : '.pdf,application/pdf'}"></label>
             <div class="kdp-ok" data-slot-ok="${f}" hidden></div>
             <button type="button" class="btn btn-ghost btn-sm" data-slot-rm="${f}" hidden>${esc(t('ed2.remove'))}</button></div>`).join('')}</div>
@@ -1038,6 +1045,7 @@ async function bookForm(body, b, startStep = 1) {
     // always PDF on the left and EPUB on the right, like the upload boxes
     const boxes = $$('#price-box .fmt-price', body); if (boxes[0]) { boxes[0].style.order = f1 === 'epub' ? 2 : 1; boxes[1].style.order = f1 === 'epub' ? 1 : 2; }
     $('#fp1-fmt', body).textContent = f1 ? t('book.formatShort.' + f1) : 'eBook'; $('#fp1-fmt', body).hidden = !f1 && !two;
+    $('#fp1-fmt', body).className = 'fp-chip fmt-' + (f1 || ''); $('#fp2-fmt', body).className = 'fp-chip fmt-' + (f1 === 'epub' ? 'pdf' : 'epub');
     $('#fp1-title', body).textContent = two && f1 ? t('ed2.priceFor', { fmt: t('book.formatShort.' + f1) }) : t('kdp.pricing');
   };
   const show = n => {
