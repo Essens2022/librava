@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022152309';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022152309';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022152309';
-import { resetCompanyCache } from './views.js?v=20261022152309';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022152309';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022152309';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022152309';
-import { api } from './api.js?v=20261022152309';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022152309';
+import { CONFIG } from './config.js?v=20261022153956';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022153956';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022153956';
+import { resetCompanyCache } from './views.js?v=20261022153956';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022153956';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022153956';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022153956';
+import { api } from './api.js?v=20261022153956';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022153956';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -985,6 +985,10 @@ async function bookForm(body, b, startStep = 1) {
   };
 
   const fmtOf = f => t('book.formatShort.' + (/\.epub$/i.test(f.name) ? 'epub' : 'pdf'));
+  let sib = null;   // the other format of this book (EPUB ↔ PDF), once there is one
+  // what both formats of a book share (each keeps its own file, pages, preview, ISBN and price)
+  const SHARED = ['title', 'subtitle', 'author', 'contributors', 'description', 'language', 'category', 'categories', 'series_name', 'series_number', 'edition',
+    'rights', 'adult', 'age_min', 'age_max', 'keywords', 'color', 'published_at', 'is_featured', 'recommend_ids', 'allow_download', 'stamp_downloads'];
   const mainFmt = () => files.file ? (/\.epub$/i.test(files.file.name) ? 'epub' : 'pdf') : (v.file_path || v.file_name ? v.format : null);
   // ---- what each step still needs (shown on the tabs and in the final checklist)
   const checks = () => {
@@ -998,7 +1002,7 @@ async function bookForm(body, b, startStep = 1) {
       { step: 2, ok: !(fileCheck?.items || []).some(x => x.level === 'error'), label: t('kdp.ck.fileOk') },
       { step: 2, ok: has.sample || !!files.sample, label: t('kdp.ck.sample') },
       { step: 4, ok: free || price >= 49, label: t('kdp.ck.price') },
-      ...(files.file2 ? [{ step: 4, ok: free || cents(val('f-price2')) >= 49, label: t('ed2.ckPrice', { fmt: fmtOf(files.file2) }) }] : []),
+      ...(files.file2 || sib ? [{ step: 4, ok: free || cents(val('f-price2')) >= 49, label: t('ed2.ckPrice', { fmt: files.file2 ? fmtOf(files.file2) : t('book.formatShort.' + sib.format) }) }] : []),
     ];
   };
   const refresh = () => {
@@ -1119,11 +1123,24 @@ async function bookForm(body, b, startStep = 1) {
 
   // the second format chosen on "Content": shows its name here and its own price on "Pricing"
   function edition2UI() {
-    const f = files.file2, ok = $('#file2-ok', body); if (!ok) return;
-    ok.hidden = !f; $('#b-file2-rm', body).hidden = !f; $('#price2-box', body).hidden = !f;
-    $('#n-file2', body).textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : t('ed2.upload');
-    if (f) { ok.textContent = '✓ ' + t('ed2.ready', { fmt: fmtOf(f) }); $('#price2-label', body).textContent = t('ed2.price', { fmt: fmtOf(f) }) + ' *'; }
+    const f = files.file2, ok = $('#file2-ok', body);
+    if (ok) {
+      ok.hidden = !f; $('#b-file2-rm', body).hidden = !f;
+      $('#n-file2', body).textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : t('ed2.upload');
+      if (f) ok.textContent = '✓ ' + t('ed2.ready', { fmt: fmtOf(f) });
+    }
+    // the other format's own price, here on "Pricing" — for a file just chosen or a format already linked
+    const fmt = f ? fmtOf(f) : sib ? t('book.formatShort.' + sib.format) : null, box = $('#price2-box', body);
+    if (!box) return;
+    box.hidden = !fmt;
+    if (fmt) {
+      $('#price2-label', body).textContent = t('ed2.price', { fmt }) + ' *';
+      const inp = $('#f-price2', body);
+      if (sib && !inp.dataset.filled) { inp.dataset.filled = '1'; if (sib.price_cents) inp.value = eur(sib.price_cents).replace('.', ','); }
+    }
   }
+  // the other format of this book (EPUB ↔ PDF), if there is one: its price is set here and it is published together
+  if (v.work_id && v.id && api.editionsOf) api.editionsOf(v.work_id).then(l => { sib = l.find(x => x.id !== v.id) || null; edition2UI(); refresh(); }).catch(() => { });
   $('#b-file2-rm', body)?.addEventListener('click', () => { files.file2 = null; $('#f-file2', body).value = ''; edition2UI(); refresh(); });
 
   function drawCheck() {
@@ -1233,11 +1250,25 @@ async function bookForm(body, b, startStep = 1) {
         let sample = null, pages = null;
         try { sample = (await makeSample(f2, data.sample_pages)).file; } catch { }
         if (fmt2 === 'pdf') { try { pages = (await analyzeManuscript(f2, data.language))?.meta?.pages || null; } catch { } }
-        const free = radio('ptype') === 'free';
-        await api.newEdition(src, fmt2, { price_cents: free ? 0 : cents(val('f-price2')), list_price_cents: null, status, pages }, { file: f2, ...(sample ? { sample } : {}) });
+        const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
+        // published together with this one only once it has its price (otherwise it waits as a draft)
+        const st2 = status === 'published' && (free || p2 >= 49) ? 'published' : 'draft';
+        const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: null, status: st2, pages }, { file: f2, ...(sample ? { sample } : {}) });
         v.work_id = src.work_id || bookId; files.file2 = null;
-        $('#f2-block', body)?.remove(); $('#price2-box', body)?.remove();
+        sib = { id: id2, format: fmt2, price_cents: p2 || 0, status: st2, file_path: 'yes' };
+        $('#f2-block', body)?.remove(); edition2UI();
         toast(t('ed2.created', { fmt: t('book.formatShort.' + fmt2) }), { ms: 6000 });
+      } else if (sib && api.updateBook) {
+        // the linked format follows: same details, cover and A+ (each keeps its own file, pages and price)
+        const full = await api.getBook(bookId);
+        const patch = {};
+        for (const k of SHARED) if (k in data) patch[k] = data[k];
+        if (full) { patch.cover_path = full.cover_path; if (full.aplus !== undefined) patch.aplus = full.aplus; }
+        const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
+        if (free || p2 >= 49) patch.price_cents = p2;
+        if (status === 'published' && sib.file_path && (free || p2 >= 49)) patch.status = 'published';
+        await api.updateBook(sib.id, patch);
+        Object.assign(sib, { price_cents: patch.price_cents ?? sib.price_cents, status: patch.status || sib.status });
       }
       try { localStorage.removeItem(DKEY(null)); localStorage.removeItem(DKEY(bookId)); } catch { } window.__libravaDirty = false;
       if (files.file) has.file = true; if (files.cover) has.cover = true;

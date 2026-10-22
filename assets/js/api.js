@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022152309';
-import { applyOffers, offerRunning } from './offers.js?v=20261022152309';
-import { scoreBook } from './search.js?v=20261022152309';
-import { getLang } from './i18n.js?v=20261022152309';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022152309';
+import { CONFIG } from './config.js?v=20261022153956';
+import { applyOffers, offerRunning } from './offers.js?v=20261022153956';
+import { scoreBook } from './search.js?v=20261022153956';
+import { getLang } from './i18n.js?v=20261022153956';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022153956';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022152309')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022153956')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -292,6 +292,8 @@ class DemoAPI {
     return filterBooks(this._catalog.filter(b => !b.deleted_at), { includeDrafts: true, sort: 'newest' })
       .map(b => ({ ...b, revenue_cents: P.filter(p => p.book_id === b.id).reduce((s, p) => s + (p.price_cents || 0), 0) }));
   }
+  async editionsOf(workId) { await this._loadCatalog(); return this._catalog.filter(b => b.work_id === workId && !b.deleted_at).map(b => ({ ...b, file_path: b._file_path || b.file_path })); }
+  async updateBook(id, patch) { await this.saveBook({ id, ...patch }); }
   async newEdition(src, format, extra = {}, files = {}) {
     const work = src.work_id || src.id;
     if (!src.work_id) await this.saveBook({ id: src.id, work_id: work });
@@ -790,6 +792,16 @@ class SupabaseAPI {
     const { error } = await this.sb.from('books').upsert(row); this._err(error);
     this._catalog = null; this.refreshShare(); this._cleanFiles(id);
     return id;
+  }
+  // the formats of one book (EPUB, PDF), drafts included — for Admin
+  async editionsOf(workId) {
+    const { data, error } = await this.sb.from('books').select('id,format,price_cents,list_price_cents,status,file_path,sample_path').eq('work_id', workId).is('deleted_at', null);
+    this._err(error); return data || [];
+  }
+  async updateBook(id, patch) {
+    const row = { ...patch, updated_at: new Date().toISOString() };
+    const { error } = await this.sb.from('books').update(row).eq('id', id); this._err(error);
+    this._catalog = null; this.refreshShare();
   }
   // another format of the same book (Amazon: "create paperback" from the eBook): copies title, description, cover,
   // categories and A+ content into a new draft; the admin then uploads that format's file and sets its own price
