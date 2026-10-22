@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261022124319';
-import { t, getLang, setLang } from './i18n.js?v=20261022124319';
-import { esc, $, $$ } from './util.js?v=20261022124319';
-import { api, chooseBackend } from './api.js?v=20261022124319';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261022124319';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022124319';
-import { trackPage } from './track.js?v=20261022124319';
-import { offline } from './offline.js?v=20261022124319';
-import { viewReader } from './reader.js?v=20261022124319';
-import { viewAdmin } from './admin.js?v=20261022124319';
+import { CONFIG } from './config.js?v=20261022125332';
+import { t, getLang, setLang } from './i18n.js?v=20261022125332';
+import { esc, $, $$ } from './util.js?v=20261022125332';
+import { api, chooseBackend } from './api.js?v=20261022125332';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261022125332';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022125332';
+import { trackPage } from './track.js?v=20261022125332';
+import { offline } from './offline.js?v=20261022125332';
+import { viewReader } from './reader.js?v=20261022125332';
+import { viewAdmin } from './admin.js?v=20261022125332';
 
 let cleanup = null, seq = 0;
 
@@ -140,7 +140,8 @@ if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostna
   const check = async () => {
     if (Date.now() - last < 60000) return; last = Date.now();
     try {
-      const html = await (await fetch('/index.html', { cache: 'no-store' })).text();
+      // the page a reload would actually give (the /ro/, /it/… pages are rebuilt a minute after the main one)
+      const html = await (await fetch(location.pathname + (location.pathname.endsWith('/') ? 'index.html' : ''), { cache: 'no-store' })).text();
       const live = /assets\/js\/app\.js\?v=(\d+)/.exec(html)?.[1];
       const here = location.hash.slice(1) || location.pathname;
       const busy = window.__libravaDirty || /^\/(admin\/(new|edit|offers\/|promos\/|notifications|settings)|read\/|cart)/.test(here) || document.activeElement?.matches?.('input, textarea, select');
@@ -153,4 +154,5 @@ if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostna
   };
   check();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+  window.addEventListener('hashchange', () => check());   // moving around the site (e.g. between admin tabs)
 })();
