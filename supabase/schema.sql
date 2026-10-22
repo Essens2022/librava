@@ -311,3 +311,8 @@ alter table public.events add column if not exists bot boolean not null default 
 -- light store list: plain-text start of the description + index for paged reading (5000+ books)
 alter table public.books add column if not exists blurb text generated always as (left(regexp_replace(coalesce(description, ''), '<[^>]*>', ' ', 'g'), 200)) stored;
 create index if not exists books_list_idx on public.books (published_at desc, id) where deleted_at is null;
+
+-- 2026-10-22: full-size originals of books made light for screens (Admin keeps them; private bucket)
+-- insert into storage.buckets (id, name, public) values ('originals', 'originals', false);
+-- policies "librava admin originals read/insert/update/delete": bucket_id = 'originals' and is_admin()
+-- alter table public.books add column original_path text;

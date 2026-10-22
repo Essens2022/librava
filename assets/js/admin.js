@@ -1,21 +1,23 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022215741';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022215741';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022215741';
-import { resetCompanyCache } from './views.js?v=20261022215741';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022215741';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022215741';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022215741';
-import { api } from './api.js?v=20261022215741';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022215741';
+import { CONFIG } from './config.js?v=20261022223356';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022223356';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022223356';
+import { resetCompanyCache } from './views.js?v=20261022223356';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022223356';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022223356';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022223356';
+import { optimizeBook } from './optimize.js?v=20261022223356';
+import { api } from './api.js?v=20261022223356';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022223356';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
   ['new', '/admin/new', 'plus', 'admin.add'],
+  ['import', '/admin/import', 'upload', 'imp.tab'],
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
   ['reviews', '/admin/reviews', 'eye', 'admin.tab.reviews'],
@@ -37,7 +39,7 @@ export async function viewAdmin(el, parts) {
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
-    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a></div>
+    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns"><a class="btn btn-ghost btn-sm" href="#/admin/import">${icon('upload')} ${esc(t('imp.tab'))}</a><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a></span></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
     <nav class="tabs adm-tabs" aria-label="${esc(t('admin.title'))}">
       ${TABS.map(([k, href, ic, label]) => `<a class="${k === active ? 'on' : ''}" href="#${href}" ${k === active ? 'aria-current="page"' : ''}>${icon(ic, 'ico')} ${esc(tab === 'edit' && k === 'new' ? t('admin.edit') : t(label))}</a>`).join('')}
@@ -50,6 +52,7 @@ export async function viewAdmin(el, parts) {
     case 'new': return bookForm(body, null);
     case 'edit': { const book = await api.getBook(parts[1]).catch(() => null); return bookForm(body, book || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }  // the whole book, not the light list
     case 'books': return booksList(body);
+    case 'import': return importBooks(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'reviews': return reviews(body);
@@ -778,6 +781,23 @@ export async function makeSample(file, pages = SAMPLE_PAGES) {
       zip.file(path, new XMLSerializer().serializeToString(doc));
     }
   }
+  // pictures used only in the chapters left out are removed too (otherwise the free sample weighs as much as the book)
+  {
+    const texts = [];
+    for (const it of [...opf.getElementsByTagName('item')]) {
+      if (!/xhtml|html|css|ncx|svg/.test(it.getAttribute('media-type') || '')) continue;
+      const s = await zip.file(base + decodeURIComponent(it.getAttribute('href') || ''))?.async('string'); if (s) texts.push(s);
+    }
+    const all = texts.join('\n');
+    const coverId = [...opf.getElementsByTagName('meta')].find(m => m.getAttribute('name') === 'cover')?.getAttribute('content');
+    for (const it of [...opf.getElementsByTagName('item')]) {
+      if (!/^image\//.test(it.getAttribute('media-type') || '')) continue;
+      if (/cover-image/.test(it.getAttribute('properties') || '') || it.getAttribute('id') === coverId) continue;
+      const href = decodeURIComponent(it.getAttribute('href') || ''), name = href.split('/').pop();
+      if (all.includes(name)) continue;
+      zip.remove(base + href); it.parentNode.removeChild(it);
+    }
+  }
   zip.file(opfPath, new XMLSerializer().serializeToString(opf));
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
   const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
@@ -1198,6 +1218,20 @@ async function bookForm(body, b, startStep = 1) {
   // the two upload boxes: the first file becomes this book's file, the other format is added next to it
   // (its own file and price); a format that already exists as its own edition is shown as done, with a link to it
   const slotRole = f => (sib && sib.format === f) ? 'sib' : (!mainFmt() || mainFmt() === f) ? 'file' : api.newEdition ? 'file2' : 'none';
+  // a book over 7 MB is made light for phones before it is uploaded (pictures redrawn at screen size, quality kept);
+  // the full-size original is kept apart, private
+  async function lighten(file, f) {
+    const ok = $(`[data-slot-ok="${f}"]`, body), drop = $(`[data-slot-drop="${f}"]`, body);
+    if (file.size <= 7 * 1048576) return file;
+    ok.hidden = false; ok.innerHTML = `<span class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin:0"></span><span> ${esc(t('opt.start', { mb: (file.size / 1048576).toFixed(1).replace('.', ',') }))}</span>`;
+    drop.classList.add('locked');
+    try {
+      const light = await optimizeBook(file, p => { if (p.total) ok.lastChild.textContent = ' ' + t('opt.working', { n: p.n, total: p.total, step: p.level, steps: p.levels }); else if (p.saving) ok.lastChild.textContent = ' ' + t('opt.saving'); });
+      return light || file;
+    } catch (e) { console.warn('optimize', e); return file; }
+    finally { drop.classList.remove('locked'); }
+  }
+  const optNote = file => file?.optimizedBook ? ` <span class="opt-note">${esc(t(file.optimizedBook.reached ? 'opt.done' : 'opt.doneMore', { from: kb(file.optimizedBook.from), to: kb(file.optimizedBook.to) }))}</span>` : '';
   function drawSlots() {
     for (const f of ['pdf', 'epub']) {
       const role = slotRole(f), fmt = t('book.formatShort.' + f);
@@ -1209,8 +1243,8 @@ async function bookForm(body, b, startStep = 1) {
         const cur = files.file || lastFile;
         if (cur) label = `${cur.name} · ${(cur.size / 1048576).toFixed(1)} MB`;
         else if (v.file_path || v.file_name) label = t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() });
-        if (cur || v.file_path || v.file_name) okHTML = '✓ ' + esc(t('kdp.manuscriptOk'));
-      } else if (role === 'file2' && files.file2) { label = `${files.file2.name} · ${(files.file2.size / 1048576).toFixed(1)} MB`; okHTML = '✓ ' + esc(t('ed2.ready', { fmt })); canRemove = true; }
+        if (cur || v.file_path || v.file_name) okHTML = '✓ ' + esc(t('kdp.manuscriptOk')) + optNote(cur);
+      } else if (role === 'file2' && files.file2) { label = `${files.file2.name} · ${(files.file2.size / 1048576).toFixed(1)} MB`; okHTML = '✓ ' + esc(t('ed2.ready', { fmt })) + optNote(files.file2); canRemove = true; }
       name.textContent = label; ok.innerHTML = okHTML; ok.hidden = !okHTML; rm.hidden = !canRemove;
       drop.classList.toggle('locked', done); $(`[data-slot-input="${f}"]`, body).disabled = done;
       box.classList.toggle('has', !!okHTML);
@@ -1224,6 +1258,7 @@ async function bookForm(body, b, startStep = 1) {
       if (fmtFile(file) !== f || !/\.(epub|pdf)$/i.test(file.name)) { toast(t('upl.wrong', { fmt: t('book.formatShort.' + f) }), { error: true }); return; }
       const role = slotRole(f);
       if (role === 'sib' || role === 'none') return;
+      file = await lighten(file, f);
       await pick(role, file); drawSlots(); refresh();
     };
     input.onchange = e => { take(e.target.files[0]); e.target.value = ''; };
@@ -1390,6 +1425,203 @@ async function bookForm(body, b, startStep = 1) {
     }
   };
   show(startStep);
+}
+
+// ---------------------------------------------------------------- import a whole book from one .zip ("Librava book package")
+// The package holds everything a book needs; each thing goes to its place by itself:
+//   book.json      title, subtitle, author, description, language, categories, keywords, series, prices of each format, A+
+//   *.pdf / *.epub the book files (one per format)
+//   cover.*        the cover (jpg / png / webp)
+//   aplus/…        the A+ pictures named in book.json
+// book.json example:
+// { "title": "…", "subtitle": "…", "author": "Clara Bennett", "language": "en", "description": "<p>…</p>",
+//   "category": "cooking", "categories": ["cooking", "hobby"], "keywords": ["…"], "series": { "name": "…", "number": 4 },
+//   "color": "color", "sample_pages": 10, "published_at": "2026-10-22",
+//   "formats": { "pdf": { "file": "Book.pdf", "price": 6.97, "list_price": 21.37 }, "epub": { "file": "Book.epub", "price": 3.97, "list_price": 12.37 } },
+//   "aplus": [ { "type": "banner", "image": "aplus/01.jpg", "title": "…" },
+//              { "type": "three", "items": [ { "image": "…", "title": "…", "text": "…" }, … ] },
+//              { "type": "image_text", "side": "right", "image": "…", "title": "…", "text": "…" },
+//              { "type": "header", "image": "…", "title": "…", "text": "…" }, { "type": "text", "title": "…", "text": "…" } ] }
+const IMP_FMTS = ['pdf', 'epub'];
+const zipName = p => p.split('/').pop();
+async function readPackage(zipFile) {
+  await loadScript(VENDOR('jszip.min.js'));
+  const zip = await window.JSZip.loadAsync(zipFile);
+  // a zip made from a folder has everything inside that folder: work from the folder that holds book.json
+  const entries = Object.values(zip.files).filter(e => !e.dir && !/(^|\/)(__MACOSX|\.DS_Store)/.test(e.name));
+  const jsonEntry = entries.find(e => /(^|\/)book\.json$/i.test(e.name));
+  const root = jsonEntry ? jsonEntry.name.replace(/book\.json$/i, '') : '';
+  const inRoot = entries.filter(e => e.name.startsWith(root));
+  const byPath = p => p && inRoot.find(e => e.name === root + p.replace(/^\.?\//, '')) || null;
+  const asFile = async (e, type) => e ? new File([await e.async('blob')], zipName(e.name), { type: type || (/\.pdf$/i.test(e.name) ? 'application/pdf' : /\.epub$/i.test(e.name) ? 'application/epub+zip' : /\.png$/i.test(e.name) ? 'image/png' : /\.webp$/i.test(e.name) ? 'image/webp' : 'image/jpeg') }) : null;
+  const issues = [], err = (k, v) => issues.push({ level: 'error', text: t(k, v) }), warn = (k, v) => issues.push({ level: 'warn', text: t(k, v) });
+  let meta = {};
+  if (!jsonEntry) err('imp.noJson');
+  else { try { meta = JSON.parse(await jsonEntry.async('string')); } catch { err('imp.badJson'); } }
+  if (!meta.description) { const d = inRoot.find(e => /description\.html?$/i.test(e.name)); if (d) meta.description = await d.async('string'); }
+  const pkg = { name: zipFile.name, meta, files: {}, prices: {}, aplus: [], issues };
+  // the book files: as named in book.json, or the only PDF / EPUB of the package
+  for (const f of IMP_FMTS) {
+    const spec = meta.formats?.[f] || null;
+    const e = byPath(spec?.file) || (inRoot.filter(x => new RegExp('\\.' + f + '$', 'i').test(x.name) && !/\/(aplus|a-plus)\//i.test(x.name)).length === 1 ? inRoot.find(x => new RegExp('\\.' + f + '$', 'i').test(x.name) && !/\/(aplus|a-plus)\//i.test(x.name)) : null);
+    if (spec?.file && !e) err('imp.missingFile', { f: spec.file });
+    if (!e) continue;
+    pkg.files[f] = await asFile(e);
+    const num = v => v == null || v === '' ? null : Math.round(parseFloat(String(v).replace(',', '.')) * 100);
+    const price = num(spec?.price), list = num(spec?.list_price);
+    pkg.prices[f] = { price: Number.isFinite(price) ? price : null, list: Number.isFinite(list) && list > (price || 0) ? list : null };
+    if (pkg.prices[f].price == null) warn('imp.noPrice', { fmt: f.toUpperCase() });
+    else if (price > 0 && price < 50) err('imp.lowPrice', { fmt: f.toUpperCase() });
+  }
+  if (!Object.keys(pkg.files).length) err('imp.noBook');
+  const coverE = byPath(meta.cover) || inRoot.find(e => /(^|\/)cover[^/]*\.(jpe?g|png|webp)$/i.test(e.name) && !/\/(aplus|a-plus)\//i.test(e.name));
+  pkg.files.cover = await asFile(coverE);
+  if (!pkg.files.cover) err('imp.noCover');
+  for (const [k, key] of [['title', 'imp.f.title'], ['author', 'imp.f.author'], ['language', 'imp.f.language'], ['category', 'imp.f.category']]) if (!String(meta[k] || '').trim()) err('imp.needField', { f: t(key) });
+  if (meta.category && !CATS.includes(meta.category)) err('imp.badCat', { c: meta.category, list: CATS.join(', ') });
+  if (/&/.test(meta.title || '')) warn('imp.amp');
+  // A+ modules, with their pictures
+  for (const [i, m] of (Array.isArray(meta.aplus) ? meta.aplus : []).slice(0, 7).entries()) {
+    if (!APLUS[m?.type]) { warn('imp.badAplus', { n: i + 1 }); continue; }
+    const list = m.type === 'three' ? (m.items || []).slice(0, 3) : [m];
+    const imgs = [];
+    for (const it of list) {
+      if (!APLUS[m.type].imgs) break;
+      const e = byPath(it.image); if (it.image && !e) warn('imp.missingImg', { f: it.image });
+      imgs.push(await asFile(e));
+    }
+    pkg.aplus.push({ ...m, files: imgs, caps: m.type === 'three' ? (m.items || []).slice(0, 3).map(x => ({ title: x.title || '', text: x.text || '' })) : undefined });
+  }
+  return pkg;
+}
+
+async function importBooks(body) {
+  body.innerHTML = `<div class="panel imp">
+      <h2 class="section-title" style="margin-top:0">${esc(t('imp.title'))}</h2>
+      <p class="muted" style="margin-top:0">${esc(t('imp.help'))}</p>
+      <label class="drop imp-drop" id="imp-drop">${icon('upload')}<span><b>${esc(t('imp.drop'))}</b><br><small>${esc(t('imp.dropHint'))}</small></span><input type="file" id="imp-input" accept=".zip,application/zip" multiple></label>
+      <div id="imp-list"></div></div>`;
+  const list = $('#imp-list', body), drop = $('#imp-drop', body);
+  const all = await api.adminBooks().catch(() => []);
+  const add = async zipFile => {
+    const card = document.createElement('div'); card.className = 'imp-card'; list.prepend(card);
+    card.innerHTML = `<div class="imp-row"><span class="spinner" style="margin:0"></span><span>${esc(t('imp.reading', { name: zipFile.name }))}</span></div>`;
+    let pkg;
+    try { pkg = await readPackage(zipFile); } catch (e) { card.innerHTML = `<div class="kdp-err">${esc(t('imp.broken', { name: zipFile.name }))} — ${esc(errText(e))}</div>`; return; }
+    const m = pkg.meta, fmts = IMP_FMTS.filter(f => pkg.files[f]);
+    // the same book already in the store (same title, author and language): update it instead of making a copy
+    const same = all.filter(b => !b.deleted_at && norm(b.title) === norm(m.title || '') && norm(b.author) === norm(m.author || '') && b.language === m.language);
+    const bad = pkg.issues.some(x => x.level === 'error');
+    const cov = pkg.files.cover ? URL.createObjectURL(pkg.files.cover) : '';
+    card.innerHTML = `<div class="imp-sum">
+        ${cov ? `<img class="imp-cover" src="${cov}" alt="">` : '<div class="imp-cover"></div>'}
+        <div class="imp-info"><b class="imp-t">${esc(m.title || '—')}</b>${m.subtitle ? `<div class="muted imp-sub">${esc(m.subtitle)}</div>` : ''}
+          <div class="muted">${esc(m.author || '')} · ${esc(String(m.language || '').toUpperCase())} · ${esc(m.category ? t('cat.' + m.category) : '')}${m.series?.name ? ' · ' + esc(m.series.name) + (m.series.number ? ' #' + m.series.number : '') : ''}</div>
+          <div class="imp-fmts">${fmts.map(f => `<span class="imp-fmt"><span class="fp-chip fmt-${f}">${f.toUpperCase()}</span> ${(pkg.files[f].size / 1048576).toFixed(1).replace('.', ',')} MB · <b>${pkg.prices[f].price == null ? '—' : pkg.prices[f].price ? money(pkg.prices[f].price) : esc(t('book.free'))}</b>${pkg.prices[f].list ? ` <s>${money(pkg.prices[f].list)}</s>` : ''}</span>`).join('')}</div>
+          <div class="muted" style="font-size:13px">${esc(t('imp.aplusN', { n: pkg.aplus.length }))} · ${esc(t('imp.kwN', { n: (m.keywords || []).length }))}</div>
+          ${pkg.issues.length ? `<ul class="imp-issues">${pkg.issues.map(x => `<li class="${x.level}">${x.level === 'error' ? '✕' : '⚠'} ${esc(x.text)}</li>`).join('')}</ul>` : `<div class="ok" style="font-size:14px">✓ ${esc(t('imp.allOk'))}</div>`}
+          ${same.length && !bad ? `<div class="imp-same">${icon('info', 'ico')} ${esc(t('imp.exists'))}
+            <label class="check"><input type="radio" name="imp-mode-${card.dataset.k = Math.random().toString(36).slice(2)}" value="update" checked> ${esc(t('imp.update'))}</label>
+            <label class="check"><input type="radio" name="imp-mode-${card.dataset.k}" value="new"> ${esc(t('imp.asNew'))}</label></div>` : ''}
+          ${bad ? '' : `<div class="imp-btns"><button type="button" class="btn btn-buy" data-imp="published">${esc(t('imp.publish'))}</button><button type="button" class="btn btn-ghost" data-imp="draft">${esc(t('imp.draft'))}</button></div>`}
+          <div class="imp-log" hidden></div></div></div>`;
+    card.querySelectorAll('[data-imp]').forEach(btn => btn.onclick = async () => {
+      const mode = card.querySelector('input[type=radio]:checked')?.value || 'new';
+      card.querySelectorAll('[data-imp]').forEach(b => b.disabled = true);
+      const log = card.querySelector('.imp-log'); log.hidden = false;
+      const say = txt => { log.innerHTML = `<span class="spinner" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin:0"></span> ${esc(txt)}`; };
+      try {
+        const res = await runImport(pkg, { status: btn.dataset.imp, update: mode === 'update' ? same : [], say });
+        log.innerHTML = `<div class="ok">✓ ${esc(t(btn.dataset.imp === 'published' ? 'imp.donePub' : 'imp.doneDraft'))}</div>${res.notes.map(n => `<div class="opt-note">${esc(n)}</div>`).join('')}
+          <div class="imp-btns"><a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(res.id)}">${esc(t('kdp.viewInStore'))}</a><a class="btn btn-ghost btn-sm" href="#/admin/edit/${encodeURIComponent(res.id)}">${esc(t('admin.edit'))}</a></div>`;
+        card.querySelector('.imp-btns')?.remove();
+      } catch (e) {
+        log.innerHTML = `<div class="kdp-err">${esc(t('common.error', { msg: errText(e) }))}</div>`;
+        card.querySelectorAll('[data-imp]').forEach(b => b.disabled = false);
+      }
+    });
+  };
+  const take = files => [...files].filter(f => /\.zip$/i.test(f.name)).forEach(add);
+  $('#imp-input', body).onchange = e => { take(e.target.files); e.target.value = ''; };
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); take(e.dataTransfer.files); });
+}
+
+async function runImport(pkg, { status, update = [], say }) {
+  const m = pkg.meta, notes = [];
+  const fmts = IMP_FMTS.filter(f => pkg.files[f]);
+  const existing = Object.fromEntries(update.map(b => [b.format, b]));
+  const mainFmt = fmts.find(f => existing[f]) || fmts[0];
+  const id = existing[mainFmt]?.id || crypto.randomUUID();
+  // 1. the book files: made light for phones when they are heavy (originals kept apart), pages counted, free sample made
+  const ready = {};
+  for (const f of fmts) {
+    let file = pkg.files[f];
+    if (file.size > 7 * 1048576) {
+      say(t('opt.start', { mb: (file.size / 1048576).toFixed(1).replace('.', ',') }));
+      try { file = (await optimizeBook(file, p => { if (p.total) say(f.toUpperCase() + ' · ' + t('opt.working', { n: p.n, total: p.total, step: p.level, steps: p.levels })); else if (p.saving) say(t('opt.saving')); })) || file; } catch (e) { console.warn('optimize', e); }
+      if (file.optimizedBook) notes.push(f.toUpperCase() + ': ' + t(file.optimizedBook.reached ? 'opt.done' : 'opt.doneMore', { from: kb(file.optimizedBook.from), to: kb(file.optimizedBook.to) }));
+    }
+    say(t('imp.checking', { fmt: f.toUpperCase() }));
+    let pages = null, check = null;
+    try { const a = await analyzeManuscript(file, m.language); pages = a.meta.pages || null; check = { items: a.items, meta: { ...a.meta, doc: undefined } }; } catch { }
+    let sample = null;
+    try { sample = (await makeSample(file, m.sample_pages || SAMPLE_PAGES)).file; } catch { }
+    ready[f] = { file, pages, check, sample };
+  }
+  // 2. the cover, light like every cover
+  say(t('imp.cover'));
+  const cover = await compressImage(pkg.files.cover, { maxW: 1200, maxH: 1920, name: 'cover' });
+  // 3. A+ pictures (light), into the same modules the A+ editor makes
+  const aplus = [];
+  if (api.uploadAplusImage) {
+    for (const [i, mod] of pkg.aplus.entries()) {
+      say(t('imp.aplus', { n: i + 1, total: pkg.aplus.length }));
+      const spec = APLUS[mod.type], imgs = [];
+      for (const f of mod.files || []) {
+        if (!f) { imgs.push(null); continue; }
+        const { w, h } = await imgSize(f);
+        const light = await compressImage(f, { maxW: spec.rec[0] > 1000 ? 1600 : spec.rec[0], maxH: spec.rec[0] > 1000 ? 500 : spec.rec[1], name: 'aplus' });
+        const up = await api.uploadAplusImage(id, light);
+        imgs.push({ ref: up.ref, w, h });
+      }
+      aplus.push({ type: mod.type, title: mod.title || '', text: mod.text || '', side: mod.side === 'right' ? 'right' : 'left', imgs, ...(mod.type === 'three' ? { caps: mod.caps } : {}) });
+    }
+  }
+  // 4. the details shared by every format
+  const shared = {
+    title: String(m.title).trim(), subtitle: m.subtitle || null, author: String(m.author).trim(), description: m.description || '',
+    language: m.language, category: m.category, categories: [...new Set([m.category, ...(m.categories || [])].filter(c => CATS.includes(c)))].slice(0, 3),
+    series_name: m.series?.name || null, series_number: m.series?.number ? +m.series.number : null,
+    contributors: Array.isArray(m.contributors) ? m.contributors : [], keywords: (m.keywords || []).slice(0, 7), color: m.color === 'bw' ? 'bw' : 'color',
+    rights: 'own', adult: !!m.adult, allow_download: m.allow_download !== false, stamp_downloads: true,
+    sample_pages: Math.max(1, Math.min(200, +m.sample_pages || SAMPLE_PAGES)), published_at: m.published_at || new Date().toISOString().slice(0, 10),
+    ...(aplus.length ? { aplus } : {}),
+  };
+  // a format without a price waits as a draft (never published free by mistake)
+  const statusFor = f => status === 'published' && pkg.prices[f].price != null && (pkg.prices[f].price === 0 || pkg.prices[f].price >= 50) ? 'published' : 'draft';
+  const rowFor = f => ({ ...shared, format: f, price_cents: pkg.prices[f].price ?? 0, list_price_cents: pkg.prices[f].list, pages: ready[f].pages, file_check: ready[f].check, status: statusFor(f) });
+  // 5. the first format, then the other one linked to it (its own file, pages and price)
+  say(t('imp.saving', { fmt: mainFmt.toUpperCase() }));
+  const first = { ...rowFor(mainFmt), id };
+  if (!existing[mainFmt]) first.librava_id = 'LBV' + [...crypto.getRandomValues(new Uint8Array(7))].map(x => '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ'[x % 34]).join('');
+  await api.saveBook(first, { file: ready[mainFmt].file, cover, ...(ready[mainFmt].sample ? { sample: ready[mainFmt].sample } : {}) });
+  for (const f of fmts.filter(x => x !== mainFmt)) {
+    say(t('imp.saving', { fmt: f.toUpperCase() }));
+    const files = { file: ready[f].file, ...(ready[f].sample ? { sample: ready[f].sample } : {}) };
+    if (existing[f]) {
+      const src = await api.getBook(id);
+      await api.saveBook({ ...rowFor(f), id: existing[f].id, work_id: src.work_id || id, cover_path: src.cover_path }, files);
+      if (!src.work_id) await api.updateBook(id, { work_id: id });
+    } else {
+      const src = await api.getBook(id);
+      const r = rowFor(f);
+      await api.newEdition(src, f, { price_cents: r.price_cents, list_price_cents: r.list_price_cents, pages: r.pages, file_check: r.file_check, status: r.status }, files);
+    }
+  }
+  for (const f of fmts) if (status === 'published' && statusFor(f) !== 'published') notes.push(t('imp.leftDraft', { fmt: f.toUpperCase() }));
+  return { id, notes };
 }
 
 // ---------------------------------------------------------------- announcements shown under the bell

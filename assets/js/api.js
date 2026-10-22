@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022215741';
-import { applyOffers, offerRunning } from './offers.js?v=20261022215741';
-import { scoreBook } from './search.js?v=20261022215741';
-import { getLang } from './i18n.js?v=20261022215741';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022215741';
+import { CONFIG } from './config.js?v=20261022223356';
+import { applyOffers, offerRunning } from './offers.js?v=20261022223356';
+import { scoreBook } from './search.js?v=20261022223356';
+import { getLang } from './i18n.js?v=20261022223356';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022223356';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022215741')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022223356')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -791,6 +791,11 @@ class SupabaseAPI {
       const ext = fileExt(files.file.name);
       const p = `${id}/book.${ext}`; await this._upload('books', p, files.file);
       row.file_path = p; row.format = ext === 'epub' ? 'epub' : 'pdf'; row.file_name = files.file.name;
+      // a book made light for screens: its full-size original is kept apart, private (only the admin can get it)
+      if (files.file._original) {
+        try { const o = `${id}/original.${ext}`; await this._upload('originals', o, files.file._original); row.original_path = o; }
+        catch (e) { console.warn('original not kept', e); }
+      } else row.original_path = null;
     }
     if (files.sample) { const p = `${id}/sample.${fileExt(files.sample.name)}`; await this._upload('samples', p, files.sample); row.sample_path = p; }
     const { error } = await this.sb.from('books').upsert(row); this._err(error);
@@ -814,7 +819,7 @@ class SupabaseAPI {
     if (!src.work_id) { const { error } = await this.sb.from('books').update({ work_id: work }).eq('id', src.id); this._err(error); }
     const row = { ...src, work_id: work, format, status: 'draft' };
     for (const k of ['id', 'cover_url', 'sales_count', 'rating_avg', 'rating_count', 'created_at', 'updated_at', 'revenue_cents', '_fmts',
-      'file_path', 'file_name', 'sample_path', 'file_check', 'librava_id', 'isbn', 'pages', 'deleted_at']) delete row[k];
+      'file_path', 'file_name', 'sample_path', 'file_check', 'librava_id', 'isbn', 'pages', 'deleted_at', 'original_path', 'blurb']) delete row[k];
     Object.assign(row, extra);
     return this.saveBook(row, files);
   }

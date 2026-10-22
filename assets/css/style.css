@@ -1768,3 +1768,25 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .qp-form .input { padding: 6px 8px; font-size: 14px; width: 100%; }
 .qp-btns { display: flex; gap: 6px; }
 .qp-btns .btn { flex: 1; justify-content: center; padding: 6px 8px; }
+.opt-note { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.opt-note { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+/* Admin → Import book */
+.adm-head-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.imp-drop { min-height: 120px; }
+#imp-list { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.imp-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.imp-row { display: flex; align-items: center; gap: 10px; }
+.imp-sum { display: flex; gap: 16px; align-items: flex-start; }
+.imp-cover { width: 96px; aspect-ratio: 5 / 8; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.15); flex: none; background: var(--line); }
+.imp-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.imp-t { font-size: 17px; }
+.imp-sub { font-size: 14px; }
+.imp-fmts { display: flex; gap: 8px 16px; flex-wrap: wrap; font-size: 14px; }
+.imp-fmt s { color: var(--muted); font-size: 13px; }
+.imp-issues { margin: 4px 0; padding-left: 0; list-style: none; font-size: 14px; display: flex; flex-direction: column; gap: 3px; }
+.imp-issues .error { color: var(--deal); } .imp-issues .warn { color: #9A6A00; }
+.imp-same { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 14px; background: var(--bg-soft, rgba(0,0,0,.03)); border-radius: 8px; padding: 8px 10px; }
+.imp-same .ico { width: 16px; height: 16px; vertical-align: -3px; }
+.imp-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.imp-log { font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 560px) { .imp-cover { width: 70px; } }
