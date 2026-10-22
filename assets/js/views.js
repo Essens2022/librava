@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022142807';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022142807';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022142807';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022142807';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022142807';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022142807';
-import { track } from './track.js?v=20261022142807';
-import { gaEvent } from './ga.js?v=20261022142807';
-import { guessLang } from './langdetect.js?v=20261022142807';
-import { didYouMean } from './search.js?v=20261022142807';
-import { api, editionsOf } from './api.js?v=20261022142807';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022142807';
+import { CONFIG } from './config.js?v=20261022150153';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022150153';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022150153';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022150153';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022150153';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022150153';
+import { track } from './track.js?v=20261022150153';
+import { gaEvent } from './ga.js?v=20261022150153';
+import { guessLang } from './langdetect.js?v=20261022150153';
+import { didYouMean } from './search.js?v=20261022150153';
+import { api, editionsOf } from './api.js?v=20261022150153';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022150153';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
