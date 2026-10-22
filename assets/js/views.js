@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022130214';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022130214';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022130214';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022130214';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022130214';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022130214';
-import { track } from './track.js?v=20261022130214';
-import { gaEvent } from './ga.js?v=20261022130214';
-import { guessLang } from './langdetect.js?v=20261022130214';
-import { didYouMean } from './search.js?v=20261022130214';
-import { api, editionsOf } from './api.js?v=20261022130214';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022130214';
+import { CONFIG } from './config.js?v=20261022130935';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022130935';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022130935';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022130935';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022130935';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022130935';
+import { track } from './track.js?v=20261022130935';
+import { gaEvent } from './ga.js?v=20261022130935';
+import { guessLang } from './langdetect.js?v=20261022130935';
+import { didYouMean } from './search.js?v=20261022130935';
+import { api, editionsOf } from './api.js?v=20261022130935';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022130935';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -226,10 +226,9 @@ export async function viewBook(el, id) {
         ${canPreview ? `<button class="look-inside" data-preview>${icon('eye')} ${esc(t('book.lookInside'))}</button>` : ''}
       </div>
       <div class="book-main book-head">
-        <h1>${esc(b.title)}</h1>
-        ${b.subtitle ? `<div class="subtitle">${esc(b.subtitle)}</div>` : ''}
+        <h1 class="pt"><span class="pt-title">${esc(b.title)}</span>${b.subtitle ? `<span class="pt-sub">${/[:.?!—–-]$/.test(b.title.trim()) || /^[—–-]/.test(b.subtitle.trim()) ? ' ' : ': '}${esc(b.subtitle)}</span>` : ''} <span class="pt-ed">${esc(t('book.format.' + b.format))}</span></h1>
         ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
-        <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')} <span class="muted">· ${esc(t('book.format.' + b.format))}</span></div>
+        <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')}</div>
         <div class="rating-line" style="margin-top:8px">${reviews.length ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
       </div>
       <div class="book-main book-body">

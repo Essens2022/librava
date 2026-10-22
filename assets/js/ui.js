@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022130214';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022130214';
-import { esc, store, $, $$ } from './util.js?v=20261022130214';
+import { CONFIG } from './config.js?v=20261022130935';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022130935';
+import { esc, store, $, $$ } from './util.js?v=20261022130935';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022130214';
-import { suggest, highlight } from './search.js?v=20261022130214';
-import { track, trackPage } from './track.js?v=20261022130214';
-import { initGA, stopGA } from './ga.js?v=20261022130214';
-import { api } from './api.js?v=20261022130214';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022130935';
+import { suggest, highlight } from './search.js?v=20261022130935';
+import { track, trackPage } from './track.js?v=20261022130935';
+import { initGA, stopGA } from './ga.js?v=20261022130935';
+import { api } from './api.js?v=20261022130935';
 
 // ---------------- icons ----------------
 const P = {
@@ -252,10 +252,16 @@ export function ratingHTML(b) {
   return `<div class="rating-line">${stars(b.rating_avg)} <span class="muted">${b.rating_count}</span></div>`;
 }
 const quickAdd = b => `<button type="button" class="quick-add ${cart.has(b.id) ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t('book.addToCart'))}" title="${esc(t('book.addToCart'))}">${cart.has(b.id) ? '✓' : '+'}</button>`;
+// "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
+export function fullTitle(b) {
+  const tt = String(b.title || '').trim(), st = String(b.subtitle || '').trim();
+  if (!st) return tt;
+  return /[:.?!—–-]$/.test(tt) || /^[—–-]/.test(st) ? `${tt} ${st}` : `${tt}: ${st}`;
+}
 export function cardHTML(b) {
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
-    <div class="card-title">${esc(b.title)}</div>
+    <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
     <div class="card-author">${esc(b.author)}</div>
     ${ratingHTML(b)}
     <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}</span></div>
@@ -266,7 +272,7 @@ export function rcardHTML(b) {
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
     <div class="rinfo">
-      <div class="card-title">${esc(b.title)}</div>
+      <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
       <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
       ${ratingHTML(b)}
       <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
