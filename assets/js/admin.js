@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022174736';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022174736';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022174736';
-import { resetCompanyCache } from './views.js?v=20261022174736';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022174736';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022174736';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022174736';
-import { api } from './api.js?v=20261022174736';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022174736';
+import { CONFIG } from './config.js?v=20261022175724';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022175724';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022175724';
+import { resetCompanyCache } from './views.js?v=20261022175724';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022175724';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022175724';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022175724';
+import { api } from './api.js?v=20261022175724';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022175724';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -428,7 +428,8 @@ function importReviewsUI(body, books) {
 }
 
 // ---------------------------------------------------------------- manuscript check (sizes, readability on phone & tablet)
-const VENDOR = f => new URL('../vendor/' + f, import.meta.url).href;
+// the version in the address makes phones fetch a new library file instead of an old saved copy
+const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
 const kb = n => n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(n / 1024) + ' KB';
 async function pdfLib() {
   await loadScript(VENDOR('pdf.min.js'));
