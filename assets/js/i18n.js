@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022154422';
-import { store } from './util.js?v=20261022154422';
+import { CONFIG } from './config.js?v=20261022154713';
+import { store } from './util.js?v=20261022154713';
 
 const D = {
   ro: {
@@ -442,6 +442,7 @@ const D = {
     'ed2.same': 'Al doilea fișier trebuie să fie în celălalt format: unul EPUB, celălalt PDF.',
     'ed2.price': 'Preț format {fmt} (EUR)',
     'ed2.priceHelp': 'Fiecare format are prețul lui, ca pe Amazon.',
+    'ed2.priceFor': 'Prețul formatului {fmt}',
     'ed2.listPrice': 'Preț de listă format {fmt} (EUR, opțional)',
     'ed2.ckPrice': 'Preț pentru formatul {fmt}',
     'ed2.created': 'Formatul {fmt} a fost salvat și legat de această carte.',
@@ -1583,6 +1584,7 @@ const D = {
     'ed2.same': 'Il secondo file deve essere nell\'altro formato: uno EPUB, l\'altro PDF.',
     'ed2.price': 'Prezzo formato {fmt} (EUR)',
     'ed2.priceHelp': 'Ogni formato ha il suo prezzo, come su Amazon.',
+    'ed2.priceFor': 'Prezzo del formato {fmt}',
     'ed2.listPrice': 'Prezzo di listino formato {fmt} (EUR, facoltativo)',
     'ed2.ckPrice': 'Prezzo del formato {fmt}',
     'ed2.created': 'Formato {fmt} salvato e collegato a questo libro.',
@@ -2724,6 +2726,7 @@ const D = {
     'ed2.same': 'The second file must be in the other format: one EPUB, the other PDF.',
     'ed2.price': '{fmt} format price (EUR)',
     'ed2.priceHelp': 'Each format has its own price, as on Amazon.',
+    'ed2.priceFor': '{fmt} format price',
     'ed2.listPrice': '{fmt} format list price (EUR, optional)',
     'ed2.ckPrice': 'Price of the {fmt} format',
     'ed2.created': '{fmt} format saved and linked to this book.',
@@ -3462,7 +3465,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022154422`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022154713`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

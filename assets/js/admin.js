@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022154422';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022154422';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022154422';
-import { resetCompanyCache } from './views.js?v=20261022154422';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022154422';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022154422';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022154422';
-import { api } from './api.js?v=20261022154422';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022154422';
+import { CONFIG } from './config.js?v=20261022154713';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022154713';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022154713';
+import { resetCompanyCache } from './views.js?v=20261022154713';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022154713';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022154713';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022154713';
+import { api } from './api.js?v=20261022154713';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022154713';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -943,11 +943,16 @@ async function bookForm(body, b, startStep = 1) {
     <section class="kdp-step" data-pane="4" hidden>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.pricing'))}</h3><p>${esc(t('kdp.pricingHelp'))}</p></div>
         <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
-          <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99" value="${eur(v.price_cents).replace('.', ',')}"></label>
-            <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="text" inputmode="decimal" autocomplete="off" value="${eur(v.list_price_cents).replace('.', ',')}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
-            <div class="two" id="price2-box" hidden><label class="field"><span id="price2-label"></span><input id="f-price2" type="text" inputmode="decimal" autocomplete="off" placeholder="5,99"><small>${esc(t('ed2.priceHelp'))}</small></label>
-              <label class="field"><span id="list2-label"></span><input id="f-list2" type="text" inputmode="decimal" autocomplete="off"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
-            <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
+          <div class="price-table" id="price-box"><div class="fmt-prices">
+            <div class="fmt-price"><div class="fp-head"><span class="fp-chip" id="fp1-fmt"></span><b id="fp1-title"></b></div>
+              <div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99" value="${eur(v.price_cents).replace('.', ',')}"></label>
+              <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="text" inputmode="decimal" autocomplete="off" value="${eur(v.list_price_cents).replace('.', ',')}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
+              <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table></div>
+            <div class="fmt-price" id="price2-box" hidden><div class="fp-head"><span class="fp-chip" id="fp2-fmt"></span><b id="fp2-title"></b></div>
+              <div class="two"><label class="field"><span id="price2-label">${esc(t('kdp.listPriceEur'))} *</span><input id="f-price2" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99"></label>
+              <label class="field"><span id="list2-label">${esc(t('admin.f.listPrice'))}</span><input id="f-list2" type="text" inputmode="decimal" autocomplete="off"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
+              <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r2-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r2-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r2-net">—</td></tr></tbody></table></div>
+          </div>
             <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('fbt.adminTitle'))}</h3><p>${esc(t('fbt.adminHelp'))}</p></div>
         <div class="kdp-fields two">${[0, 1].map(i => `<label class="field"><span>${esc(t('fbt.adminPick', { n: i + 1 }))}</span><select class="f-rec"><option value="">${esc(t('fbt.auto'))}</option>${recOpts((v.recommend_ids || [])[i])}</select></label>`).join('')}</div></div>
@@ -1021,10 +1026,15 @@ async function bookForm(body, b, startStep = 1) {
     $('#kdp-title', body).textContent = val('f-title') || t('kdp.untitled');
     const free = radio('ptype') === 'free';
     $('#price-box', body).hidden = free;
-    const p = cents(val('f-price')), fee = p ? Math.round(p * 0.015 + 25) : 0;
-    $('#r-price', body).textContent = p ? money(p, CONFIG.currency) : '—';
-    $('#r-fee', body).textContent = p ? '− ' + money(fee, CONFIG.currency) : '—';
-    $('#r-net', body).textContent = p ? money(Math.max(p - fee, 0), CONFIG.currency) : '—';
+    // what the buyer pays, the Stripe fee and what is left — for each format
+    const royalty = (k, p) => { const fee = p ? Math.round(p * 0.015 + 25) : 0;
+      $(`#${k}-price`, body).textContent = p ? money(p, CONFIG.currency) : '—';
+      $(`#${k}-fee`, body).textContent = p ? '− ' + money(fee, CONFIG.currency) : '—';
+      $(`#${k}-net`, body).textContent = p ? money(Math.max(p - fee, 0), CONFIG.currency) : '—'; };
+    royalty('r', cents(val('f-price'))); royalty('r2', cents(val('f-price2')));
+    const f1 = mainFmt(), two = !$('#price2-box', body).hidden;
+    $('#fp1-fmt', body).textContent = f1 ? t('book.formatShort.' + f1) : 'eBook'; $('#fp1-fmt', body).hidden = !f1 && !two;
+    $('#fp1-title', body).textContent = two && f1 ? t('ed2.priceFor', { fmt: t('book.formatShort.' + f1) }) : t('kdp.pricing');
   };
   const show = n => {
     step = n;
@@ -1135,8 +1145,7 @@ async function bookForm(body, b, startStep = 1) {
     if (!box) return;
     box.hidden = !fmt;
     if (fmt) {
-      $('#price2-label', body).textContent = t('ed2.price', { fmt }) + ' *';
-      $('#list2-label', body).textContent = t('ed2.listPrice', { fmt });
+      $('#fp2-fmt', body).textContent = fmt; $('#fp2-title', body).textContent = t('ed2.priceFor', { fmt });
       const inp = $('#f-price2', body), lst = $('#f-list2', body);
       if (sib && !inp.dataset.filled) { inp.dataset.filled = '1'; if (sib.price_cents) inp.value = eur(sib.price_cents).replace('.', ','); if (sib.list_price_cents) lst.value = eur(sib.list_price_cents).replace('.', ','); }
     }

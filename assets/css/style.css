@@ -1691,3 +1691,14 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .series-n .ico { width: 13px; height: 13px; color: var(--pista-strong); }
 .series-item.here .card { outline: 2px solid var(--pista-strong); outline-offset: 4px; border-radius: 6px; }
 @media (max-width: 640px) { .series-buy { width: 100%; } .series-buy .btn { flex: 1; } }
+
+/* pricing: one box per format (PDF, EPUB), each with its own price, list price and what you receive */
+.fmt-prices { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.fmt-price { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fmt-price[hidden] { display: none; }
+.fmt-price .two { grid-template-columns: 1fr 1fr; }
+@media (max-width: 520px) { .fmt-price .two { grid-template-columns: 1fr; } }
+.fp-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.fp-chip { background: var(--pista-strong); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .5px; padding: 3px 8px; border-radius: 6px; }
+.fp-chip[hidden] { display: none; }
+.fmt-price .royalty { max-width: none; }
