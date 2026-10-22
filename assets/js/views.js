@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022150938';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022150938';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022150938';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022150938';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022150938';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022150938';
-import { track } from './track.js?v=20261022150938';
-import { gaEvent } from './ga.js?v=20261022150938';
-import { guessLang } from './langdetect.js?v=20261022150938';
-import { didYouMean } from './search.js?v=20261022150938';
-import { api, editionsOf } from './api.js?v=20261022150938';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022150938';
+import { CONFIG } from './config.js?v=20261022152309';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022152309';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261022152309';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022152309';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022152309';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022152309';
+import { track } from './track.js?v=20261022152309';
+import { gaEvent } from './ga.js?v=20261022152309';
+import { guessLang } from './langdetect.js?v=20261022152309';
+import { didYouMean } from './search.js?v=20261022152309';
+import { api, editionsOf } from './api.js?v=20261022152309';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022152309';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -282,6 +282,7 @@ export async function viewBook(el, id) {
       </aside>
     </div>
 
+    <div id="series-box"></div>
     ${related.length ? `<section class="panel" style="margin-top:26px"><h2 class="section-title">${esc(t('book.related'))}</h2><div class="shelf-track">${related.map(cardHTML).join('')}</div></section>` : ''}
 
     <section class="panel" id="reviews" style="margin-top:18px"><div class="reviews-layout">
@@ -322,6 +323,7 @@ export async function viewBook(el, id) {
   more.onclick = () => { const c = desc.classList.toggle('clamped'); more.textContent = t(c ? 'book.more' : 'book.less'); };
   // share: the /book/<id>/ address shows the cover, title and price in WhatsApp & co.
   renderBoughtTogether($('#fbt', el), b, owned, offers);
+  renderSeries($('#series-box', el), b, offers);
   $('[data-share]', el)?.addEventListener('click', async () => {
     track('share', { book_id: b.id });
     const url = location.origin + '/book/' + encodeURIComponent(b.id) + '/';
@@ -492,6 +494,34 @@ async function _alsoReadFor(b, n = 12) {
   if (out.length < 6) best(all).forEach(add);
   const mine = await Promise.all(out.map(x => api.owns(x.id).catch(() => null)));
   return out.filter((_, i) => !mine[i]).slice(0, n);
+}
+// ---------------------------------------------------------------- the whole series (like Amazon's "Book 2 of 4" and "Buy the series")
+// Books with the same "Series name" (Admin → Details) and language form a series, ordered by "Volume #".
+async function renderSeries(box, b, offers) {
+  if (!box || !b.series_name) return;
+  const key = norm(b.series_name.trim());
+  let list = (await api.listBooks({ lang: b.language }).catch(() => []))
+    .filter(x => x.series_name && norm(x.series_name.trim()) === key)
+    .map(x => b.work_id && x.work_id === b.work_id ? b : x);          // this book in the format being looked at
+  if (!list.some(x => x.id === b.id)) list.push(b);
+  if (list.length < 2 || !box.isConnected) return;
+  list.sort((a, c) => (a.series_number ?? 999) - (c.series_number ?? 999) || String(a.title).localeCompare(String(c.title)));
+  const owned = await Promise.all(list.map(x => api.owns(x.id).catch(() => null)));
+  if (!box.isConnected) return;
+  const toBuy = list.filter((x, i) => !owned[i] && x.price_cents > 0);
+  const r = applyOffers(toBuy, offers);
+  const pos = list.findIndex(x => x.id === b.id) + 1;
+  // "Book 2 of 4" next to the title
+  const line = $('.series-line a', document);
+  if (line) line.textContent = t('series.bookOf', { n: b.series_number || pos, total: list.length, name: b.series_name.trim() });
+  box.innerHTML = `<section class="panel series-panel" style="margin-top:26px">
+    <div class="series-head"><div><h2 class="section-title">${esc(t('series.title', { name: b.series_name.trim() }))}</h2><span class="muted">${esc(t('series.count', { n: list.length }))}</span></div>
+      <div class="series-buy">${toBuy.length ? `<div>${esc(t('series.total'))} <b>${money(r.total)}</b>${r.discount ? ` <s class="muted">${money(r.subtotal)}</s> <span class="save">${esc(t('fbt.save', { amount: money(r.discount) }))}</span>` : ''}</div>
+        <button type="button" class="btn btn-cart" data-series-add>${esc(toBuy.length === list.length ? t('series.addAll', { n: toBuy.length }) : t('series.addRest', { n: toBuy.length }))}</button>`
+        : `<span class="owned-box">${icon('check', 'ico')} ${esc(t('series.ownAll'))}</span>`}</div></div>
+    <div class="shelf-track">${list.map((x, i) => `<div class="series-item${x.id === b.id ? ' here' : ''}"><div class="series-n">${esc(t('series.book', { n: x.series_number || i + 1 }))}${owned[i] ? ` · ${icon('check', 'ico')}` : ''}</div>${cardHTML(x)}</div>`).join('')}</div>
+  </section>`;
+  box.querySelector('[data-series-add]')?.addEventListener('click', () => { toBuy.forEach(x => cart.add(x.id)); toast(t('series.added', { n: toBuy.length })); go('/cart'); });
 }
 async function renderBoughtTogether(box, b, owned, offers) {
   if (!box || !b.price_cents) return;

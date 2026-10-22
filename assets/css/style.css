@@ -1681,3 +1681,13 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .pager .off { opacity: .45; }
 .pager .pg-gap { padding: 0 2px; color: var(--muted); }
 .adm-count { font-size: 13px; margin: 0 0 8px; }
+
+/* the whole series on the book page */
+.series-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.series-head .section-title { margin: 0; }
+.series-buy { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.series-item { display: flex; flex-direction: column; gap: 4px; }
+.series-n { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; display: flex; align-items: center; gap: 4px; }
+.series-n .ico { width: 13px; height: 13px; color: var(--pista-strong); }
+.series-item.here .card { outline: 2px solid var(--pista-strong); outline-offset: 4px; border-radius: 6px; }
+@media (max-width: 640px) { .series-buy { width: 100%; } .series-buy .btn { flex: 1; } }
