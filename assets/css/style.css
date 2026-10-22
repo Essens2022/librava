@@ -287,6 +287,10 @@ main { flex: 1; width: 100%; }
 .formats { display: flex; gap: 10px; flex-wrap: wrap; }
 .format-chip { border: 2px solid var(--pista-strong); border-radius: 8px; padding: 8px 14px; background: var(--pista-soft); font-size: 13px; }
 .format-chip b { display: block; font-size: 15px; }
+a.format-chip { color: var(--fg); text-decoration: none; min-width: 110px; }
+.format-chip.alt { border-color: var(--line); background: transparent; }
+.format-chip.alt:hover { border-color: var(--pista-strong); }
+.owned-other { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
 .desc { font-size: 15.5px; line-height: 1.6; max-width: 70ch; white-space: pre-line; }
 .desc.clamped { max-height: 9.6em; overflow: hidden; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
 .desc.rich { white-space: normal; }
@@ -1658,3 +1662,6 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .end-cover { background: transparent; }
 .consent-btns { display: flex; gap: 8px; flex: none; }
 @media (max-width: 640px) { .consent-btns { flex-direction: column-reverse; } .consent-btns .btn { width: 100%; } }
+
+.ed-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--pista-strong); }
+.ed-tag .ico { width: 13px; height: 13px; }

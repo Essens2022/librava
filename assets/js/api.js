@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022121952';
-import { applyOffers, offerRunning } from './offers.js?v=20261022121952';
-import { scoreBook } from './search.js?v=20261022121952';
-import { getLang } from './i18n.js?v=20261022121952';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022121952';
+import { CONFIG } from './config.js?v=20261022123606';
+import { applyOffers, offerRunning } from './offers.js?v=20261022123606';
+import { scoreBook } from './search.js?v=20261022123606';
+import { getLang } from './i18n.js?v=20261022123606';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022123606';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -40,6 +40,8 @@ export function filterBooks(all, o = {}) {
     list = hits.map(x => x[0]);
     list.loose = !strict.length && hits.length > 0;
   }
+  // the same title in several formats (EPUB, PDF…) shows once in lists, like Amazon; the book page offers every format
+  if (!o.includeDrafts && !o.format && !o.allFormats) list = oneEditionPerWork(list, all);
   const sort = o.sort || (o.q ? 'relevance' : '');
   const by = {
     relevance: (a, b) => (scores ? scores.get(b.id) - scores.get(a.id) : 0) || (b.sales_count || 0) - (a.sales_count || 0),
@@ -54,6 +56,34 @@ export function filterBooks(all, o = {}) {
   if (o.limit) list = list.slice(0, o.limit);
   if (loose) list.loose = true;
   return list;
+}
+
+const FMT_ORDER = { epub: 0, pdf: 1 };
+// all published editions of a book (itself included), EPUB first
+export function editionsOf(all, b) {
+  if (!b?.work_id) return [b];
+  const list = all.filter(x => x.work_id === b.work_id && x.status === 'published' && !x.deleted_at);
+  if (!list.some(x => x.id === b.id)) list.push(b);
+  return list.sort((a, c) => (FMT_ORDER[a.format] ?? 9) - (FMT_ORDER[c.format] ?? 9) || a.price_cents - c.price_cents);
+}
+// keeps one card per title: the cheapest edition, with the list of formats it is sold in
+function oneEditionPerWork(list, all) {
+  const best = new Map();
+  for (const b of list) {
+    if (!b.work_id) continue;
+    const cur = best.get(b.work_id);
+    if (!cur || (b.price_cents || 0) < (cur.price_cents || 0) || ((b.price_cents || 0) === (cur.price_cents || 0) && (FMT_ORDER[b.format] ?? 9) < (FMT_ORDER[cur.format] ?? 9))) best.set(b.work_id, b);
+  }
+  if (!best.size) return list;
+  const out = [];
+  for (const b of list) {
+    if (!b.work_id) { out.push(b); continue; }
+    if (best.get(b.work_id) !== b) continue;
+    const fmts = [...new Set(editionsOf(all, b).map(x => x.format))];
+    out.push(fmts.length > 1 ? { ...b, _fmts: fmts } : b);
+  }
+  if (list.loose) out.loose = true;
+  return out;
 }
 
 async function sha(s) {
@@ -75,7 +105,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022121952')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022123606')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -702,13 +732,26 @@ class SupabaseAPI {
     this._catalog = null; this.refreshShare(); this._cleanFiles(id);
     return id;
   }
-  // removes files of this book that are no longer used (old covers, replaced A+ pictures, an old PDF after an EPUB…)
+  // another format of the same book (Amazon: "create paperback" from the eBook): copies title, description, cover,
+  // categories and A+ content into a new draft; the admin then uploads that format's file and sets its own price
+  async newEdition(src, format) {
+    const work = src.work_id || src.id;
+    if (!src.work_id) { const { error } = await this.sb.from('books').update({ work_id: work }).eq('id', src.id); this._err(error); }
+    const row = { ...src, work_id: work, format, status: 'draft' };
+    for (const k of ['id', 'cover_url', 'sales_count', 'rating_avg', 'rating_count', 'created_at', 'updated_at', 'revenue_cents', '_fmts',
+      'file_path', 'file_name', 'sample_path', 'file_check', 'librava_id', 'isbn', 'pages', 'deleted_at']) delete row[k];
+    return this.saveBook(row);
+  }
+  // removes files of this book that are no longer used (old covers, replaced A+ pictures, an old PDF after an EPUB…);
+  // files shared with its other editions (same cover, same A+ pictures) are kept
   async _cleanFiles(id) {
     try {
-      const { data: b } = await this.sb.from('books').select('cover_path,file_path,sample_path,aplus').eq('id', id).maybeSingle();
+      const { data: b } = await this.sb.from('books').select('cover_path,file_path,sample_path,aplus,work_id').eq('id', id).maybeSingle();
       if (!b) return;
-      const used = new Set([b.cover_path, b.file_path, b.sample_path].filter(Boolean));
-      const aplus = JSON.stringify(b.aplus || []);
+      let rows = [b];
+      if (b.work_id) { const { data: sib, error } = await this.sb.from('books').select('cover_path,file_path,sample_path,aplus').eq('work_id', b.work_id); if (error) return; rows = rows.concat(sib || []); }
+      const used = new Set(rows.flatMap(r => [r.cover_path, r.file_path, r.sample_path]).filter(Boolean));
+      const aplus = JSON.stringify(rows.map(r => r.aplus || []));
       const sweep = async (bucket, folder) => {
         const { data } = await this.sb.storage.from(bucket).list(folder, { limit: 1000 });
         const old = (data || []).filter(o => o.id && !used.has(`${folder}/${o.name}`) && !aplus.includes(`${folder}/${o.name}`)).map(o => `${folder}/${o.name}`);

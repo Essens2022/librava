@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022121952';
-import { store } from './util.js?v=20261022121952';
+import { CONFIG } from './config.js?v=20261022123606';
+import { store } from './util.js?v=20261022123606';
 
 const D = {
   ro: {
@@ -414,6 +414,12 @@ const D = {
     'book.format.epub': 'eBook (EPUB)',
     'book.formatShort.pdf': 'PDF',
     'book.formatShort.epub': 'EPUB',
+    'book.ownedOther': 'Ai deja ediția {fmt} a acestei cărți.',
+    'ed.linked': 'Aceeași carte în mai multe formate, fiecare cu prețul ei',
+    'ed.add': 'Ediție {fmt}',
+    'ed.confirm': 'Creez ediția {fmt} pentru „{title}”? Se copiază titlul, descrierea, coperta, categoriile și conținutul A+. Tu încarci fișierul {fmt} și pui prețul acestei ediții.',
+    'ed.created': 'Ediția {fmt} a fost creată ca ciornă. Încarcă fișierul și pune prețul.',
+    'ed.only': 'Doar fișier {fmt} (ediția {fmt})',
     'book.ratings': '{n} evaluări',
     'book.noRatings': 'Fără evaluări',
     'book.free': 'Gratuit',
@@ -1524,6 +1530,12 @@ const D = {
     'book.format.epub': 'eBook (EPUB)',
     'book.formatShort.pdf': 'PDF',
     'book.formatShort.epub': 'EPUB',
+    'book.ownedOther': 'Hai già l\'edizione {fmt} di questo libro.',
+    'ed.linked': 'Lo stesso libro in più formati, ognuno con il suo prezzo',
+    'ed.add': 'Edizione {fmt}',
+    'ed.confirm': 'Creo l\'edizione {fmt} di «{title}»? Vengono copiati titolo, descrizione, copertina, categorie e contenuti A+. Tu carichi il file {fmt} e imposti il prezzo di questa edizione.',
+    'ed.created': 'Edizione {fmt} creata come bozza. Carica il file e imposta il prezzo.',
+    'ed.only': 'Solo file {fmt} (edizione {fmt})',
     'book.ratings': '{n} valutazioni',
     'book.noRatings': 'Nessuna valutazione',
     'book.free': 'Gratis',
@@ -2634,6 +2646,12 @@ const D = {
     'book.format.epub': 'eBook (EPUB)',
     'book.formatShort.pdf': 'PDF',
     'book.formatShort.epub': 'EPUB',
+    'book.ownedOther': 'You already own the {fmt} edition of this book.',
+    'ed.linked': 'The same book in several formats, each with its own price',
+    'ed.add': '{fmt} edition',
+    'ed.confirm': 'Create the {fmt} edition of “{title}”? Title, description, cover, categories and A+ content are copied. You upload the {fmt} file and set this edition\'s price.',
+    'ed.created': '{fmt} edition created as a draft. Upload the file and set the price.',
+    'ed.only': '{fmt} file only ({fmt} edition)',
     'book.ratings': '{n} ratings',
     'book.noRatings': 'No ratings yet',
     'book.free': 'Free',
@@ -3369,7 +3387,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022121952`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022123606`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

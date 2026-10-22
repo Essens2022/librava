@@ -302,3 +302,9 @@ create policy "buyers read book files" on storage.objects for select using (
 alter table public.books add column if not exists color text not null default 'color' check (color in ('color','bw'));
 
 -- promotions (Admin -> Advertising): see migration 'promos' (table public.promos + function promo_hit)
+
+-- editions: the same book in several formats (EPUB, PDF), each row with its own file and price, linked by work_id
+alter table public.books add column if not exists work_id uuid;
+create index if not exists books_work_idx on public.books (work_id) where work_id is not null;
+-- statistics: visits by search-engine robots are kept but not counted
+alter table public.events add column if not exists bot boolean not null default false;

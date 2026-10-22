@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022121952';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022121952';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022121952';
-import { resetCompanyCache } from './views.js?v=20261022121952';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022121952';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022121952';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022121952';
-import { api } from './api.js?v=20261022121952';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022121952';
+import { CONFIG } from './config.js?v=20261022123606';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022123606';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022123606';
+import { resetCompanyCache } from './views.js?v=20261022123606';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022123606';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022123606';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022123606';
+import { api } from './api.js?v=20261022123606';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022123606';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -156,6 +156,13 @@ async function booksList(body) {
     return;
   }
   const langs = [...new Set(books.map(b => b.language))];
+  // editions: the same book in EPUB and PDF, each with its own file and price (linked like Kindle / paperback on Amazon)
+  const sibs = b => b.work_id ? books.filter(x => x.work_id === b.work_id) : [b];
+  const edLinks = b => {
+    const have = new Set(sibs(b).map(x => x.format));
+    const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
+    return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<a href="#" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</a>`).join('') : '');
+  };
   body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
     <div class="adm-filters">
       <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
@@ -167,7 +174,7 @@ async function booksList(body) {
       <thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('admin.colPrice'))}</th><th class="num">${esc(t('admin.colSales'))}</th><th class="num">${esc(t('admin.colRevenue'))}</th><th>${esc(t('admin.colRating'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
       <tbody>${books.map(b => `<tr data-row data-q="${esc(norm(b.title + ' ' + b.author))}" data-st="${b.status}" data-lang="${b.language}" data-cat="${b.category}">
         <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
-          <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}</div></div></div></td>
+          <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}${edLinks(b)}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
         <td class="num">${b.sales_count || 0}</td>
         <td class="num">${money(b.revenue_cents || 0)}</td>
@@ -194,6 +201,13 @@ async function booksList(body) {
     if (!api.setBookStatus) return;
     try { await api.setBookStatus(btn.dataset.toggle, btn.dataset.next); toast(t(btn.dataset.next === 'published' ? 'admin.nowPublished' : 'admin.nowHidden')); booksList(body); }
     catch (e) { toast(errText(e), { error: true }); }
+  });
+  $$('[data-edition]', body).forEach(a => a.onclick = async e => {
+    e.preventDefault();
+    const b = books.find(x => x.id === a.dataset.edition), fmt = t('book.formatShort.' + a.dataset.fmt);
+    if (!await confirmBox(t('ed.confirm', { title: b.title, fmt }), { ok: t('ed.add', { fmt }) })) return;
+    try { const id = await api.newEdition(b, a.dataset.fmt); toast(t('ed.created', { fmt })); go('/admin/edit/' + encodeURIComponent(id) + '/2'); }
+    catch (err) { toast(errText(err), { error: true }); }
   });
   $$('[data-del]', body).forEach(btn => btn.onclick = async () => {
     const b = books.find(x => x.id === btn.dataset.del);
@@ -870,7 +884,7 @@ async function bookForm(body, b, startStep = 1) {
             </tbody></table><small class="muted">${esc(t('bt.sizesNote'))}</small></details>
         </div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
-        <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
+        <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>${v.work_id ? esc(t('ed.only', { fmt: t('book.formatShort.' + v.format) })) : 'EPUB / PDF'} · max 500 MB</small></span><input type="file" id="f-file" accept="${v.work_id ? (v.format === 'epub' ? '.epub,application/epub+zip' : '.pdf,application/pdf') : '.epub,.pdf,application/epub+zip,application/pdf'}"></label>
           <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
           <div class="fcheck" id="fcheck" ${fileCheck ? '' : 'hidden'}></div><div id="devprev"></div>
           <button type="button" class="btn btn-dark" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button>
@@ -1018,6 +1032,8 @@ async function bookForm(body, b, startStep = 1) {
   const pick = async (kind, file) => {
     if (!file) return;
     if (kind !== 'cover' && !/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
+    // a linked edition only takes its own format (drag & drop skips the file picker's filter)
+    if (kind === 'file' && v.work_id && !new RegExp('\\.' + v.format + '$', 'i').test(file.name)) { toast(t('ed.only', { fmt: t('book.formatShort.' + v.format) }), { error: true }); return; }
     if (kind === 'cover' && !/\.(jpe?g|png|webp)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     if (kind === 'cover') {
       const dim = await new Promise(res => { const im = new Image(); im.onload = () => res([im.naturalWidth, im.naturalHeight]); im.onerror = () => res([0, 0]); im.src = URL.createObjectURL(file); });

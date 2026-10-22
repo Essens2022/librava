@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022121952';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022121952';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022121952';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022121952';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022121952';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022121952';
-import { track } from './track.js?v=20261022121952';
-import { gaEvent } from './ga.js?v=20261022121952';
-import { guessLang } from './langdetect.js?v=20261022121952';
-import { didYouMean } from './search.js?v=20261022121952';
-import { api } from './api.js?v=20261022121952';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022121952';
+import { CONFIG } from './config.js?v=20261022123606';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022123606';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022123606';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022123606';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022123606';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022123606';
+import { track } from './track.js?v=20261022123606';
+import { gaEvent } from './ga.js?v=20261022123606';
+import { guessLang } from './langdetect.js?v=20261022123606';
+import { didYouMean } from './search.js?v=20261022123606';
+import { api, editionsOf } from './api.js?v=20261022123606';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022123606';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -185,10 +185,15 @@ export async function viewBook(el, id) {
   }
   document.title = `${b.title} — ${CONFIG.siteName}`;
   track('book_view', { book_id: b.id });
-  const [owned, reviews, related, myRev] = await Promise.all([
-    api.owns(b.id), api.listReviews(b.id),
-    api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id).slice(0, 12)),
+  // the other formats of this book (EPUB, PDF…), each with its own price — shown like Amazon's format tiles
+  const eds = b.work_id ? editionsOf(await api.listBooks({ allFormats: true }), b) : [b];
+  const [owned, reviews, related, myRev, ownedEds] = await Promise.all([
+    api.owns(b.id),
+    // reviews are shared by all formats of the same book, as on Amazon
+    Promise.all(eds.map(x => api.listReviews(x.id).catch(() => []))).then(l => l.flat().sort((a, c) => String(c.created_at).localeCompare(String(a.created_at)))),
+    api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id)).slice(0, 12)),
     api.myReview ? api.myReview(b.id) : null,
+    eds.length > 1 ? Promise.all(eds.filter(x => x.id !== b.id).map(x => api.owns(x.id).then(o => o ? x : null).catch(() => null))).then(l => l.filter(Boolean)) : [],
   ]);
   const offers = api.offers ? await api.offers().catch(() => []) : [];
   const badges = offersForBook(b, offers).filter(o => o.show_badge !== false);
@@ -202,7 +207,7 @@ export async function viewBook(el, id) {
       <div class="owned-box">${icon('check', 'ico')} ${esc(t('book.owned', { date: fmtDate(owned.created_at) }))}</div>
       <a class="btn btn-buy btn-block" href="#/read/${encodeURIComponent(b.id)}">${icon('book')} ${esc(t('book.readNow'))}</a>
       <a class="btn btn-ghost btn-block" href="#/library">${esc(t('nav.library'))}</a>`
-    : !b.price_cents ? `
+    : (ownedEds.length ? `<div class="owned-box owned-other">${icon('check', 'ico')} <span>${esc(t('book.ownedOther', { fmt: ownedEds.map(x => t('book.formatShort.' + x.format)).join(', ') }))} <a href="#/read/${encodeURIComponent(ownedEds[0].id)}">${esc(t('book.readNow'))}</a></span></div>` : '') + (!b.price_cents ? `
       <div class="bigprice price-free">${esc(t('book.free'))}</div>
       <button class="btn btn-buy btn-block" data-free>${esc(t('book.getFree'))}</button>`
     : `
@@ -211,7 +216,7 @@ export async function viewBook(el, id) {
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
       ${badges.length ? `<div class="offer-badges">${badges.map(o => `<span class="offer-chip">${icon('tag')} ${esc(describeOffer(o, t, c => t('cat.' + c)))}</span>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
-      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`;
+      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`);
 
   el.innerHTML = `<div class="wrap page">
     <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › <a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a></nav>
@@ -225,10 +230,10 @@ export async function viewBook(el, id) {
         ${b.subtitle ? `<div class="subtitle">${esc(b.subtitle)}</div>` : ''}
         ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
         <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')} <span class="muted">· ${esc(t('book.format.' + b.format))}</span></div>
-        <div class="rating-line" style="margin-top:8px">${b.rating_count ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
+        <div class="rating-line" style="margin-top:8px">${reviews.length ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
       </div>
       <div class="book-main book-body">
-        <div class="formats"><div class="format-chip"><span class="muted">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + b.format))}</span><b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b></div></div>
+        <div class="formats" role="list" aria-label="${esc(t('book.d.format'))}">${eds.map(x => `<a role="listitem" class="format-chip${x.id === b.id ? '' : ' alt'}" href="#/book/${encodeURIComponent(x.id)}"${x.id === b.id ? ' aria-current="true"' : ''}><span class="muted">${esc(t('book.color.' + (x.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + x.format))}</span><b>${x.price_cents ? money(x.price_cents) : esc(t('book.free'))}</b></a>`).join('')}</div>
         <hr>
         <h2 class="section-title" style="font-size:18px;margin-bottom:8px">${esc(t('book.description'))}</h2>
         <div class="desc clamped ${hasTags(b.description) ? 'rich' : ''}" id="desc">${safeHTML(b.description)}</div>
@@ -435,9 +440,9 @@ function showBankOrder(res) {
 // ---------------------------------------------------------------- "Frequently bought together" (like Amazon)
 async function boughtTogetherFor(b) {
   const all = await api.listBooks({});
-  const ok = x => x && x.id !== b.id && x.status !== 'draft' && x.price_cents > 0;
-  const byId = Object.fromEntries(all.map(x => [x.id, x]));
-  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id)) out.push(x); };
+  const ok = x => x && x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && x.status !== 'draft' && x.price_cents > 0;
+  const byId = Object.fromEntries((await api.listBooks({ allFormats: true })).map(x => [x.id, x]));
+  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id || (x.work_id && y.work_id === x.work_id))) out.push(x); };
   (b.recommend_ids || []).forEach(id => add(byId[id]));                       // chosen by the shop owner
   if (out.length < 2) (await (api.boughtTogether?.(b.id) || [])).forEach(id => add(byId[id])); // bought by the same customers
   const same = all.filter(x => x.language === b.language);
@@ -465,9 +470,9 @@ export function alsoReadFor(b, n = 12) {
 }
 async function _alsoReadFor(b, n = 12) {
   const all = await api.listBooks({});
-  const ok = x => x && x.id !== b.id && x.status !== 'draft' && !x.deleted_at;
-  const byId = Object.fromEntries(all.map(x => [x.id, x]));
-  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id)) out.push(x); };
+  const ok = x => x && x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && x.status !== 'draft' && !x.deleted_at;
+  const byId = Object.fromEntries((await api.listBooks({ allFormats: true })).map(x => [x.id, x]));
+  const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id || (x.work_id && y.work_id === x.work_id))) out.push(x); };
   (b.recommend_ids || []).forEach(id => add(byId[id]));
   (await (api.boughtTogether?.(b.id, 12).catch?.(() => []) || [])).forEach(id => add(byId[id]));
   const sameLang = all.filter(x => x.language === b.language), best = l => l.slice().sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0));
