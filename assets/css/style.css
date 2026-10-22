@@ -1702,3 +1702,11 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .fp-chip { background: var(--pista-strong); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .5px; padding: 3px 8px; border-radius: 6px; }
 .fp-chip[hidden] { display: none; }
 .fmt-price .royalty { max-width: none; }
+
+/* manuscript: one box per format, like the price boxes */
+.fmt-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.fmt-file { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fmt-file.has { border-color: var(--pista-strong); }
+.fmt-file .drop.locked { opacity: .55; pointer-events: none; }
+.fmt-file .kdp-ok a { margin-left: 4px; }
+.fmt-files-note { font-size: 13px; margin: 4px 0 0; }

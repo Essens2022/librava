@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022154713';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022154713';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022154713';
-import { resetCompanyCache } from './views.js?v=20261022154713';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022154713';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022154713';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022154713';
-import { api } from './api.js?v=20261022154713';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022154713';
+import { CONFIG } from './config.js?v=20261022155817';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022155817';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022155817';
+import { resetCompanyCache } from './views.js?v=20261022155817';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022155817';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022155817';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022155817';
+import { api } from './api.js?v=20261022155817';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022155817';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -905,17 +905,18 @@ async function bookForm(body, b, startStep = 1) {
             </tbody></table><small class="muted">${esc(t('bt.sizesNote'))}</small></details>
         </div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.manuscript'))}</h3><p>${esc(t('admin.f.fileHelp'))}</p></div>
-        <div class="kdp-fields"><label class="drop" data-drop="file">${icon('file')}<span><span class="fname" id="n-file">${v.file_name || v.file_path ? esc(t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() })) : esc(t('kdp.uploadManuscript'))}</span><br><small>${v.work_id ? esc(t('ed.only', { fmt: t('book.formatShort.' + v.format) })) : 'EPUB / PDF'} · max 500 MB</small></span><input type="file" id="f-file" accept="${v.work_id ? (v.format === 'epub' ? '.epub,application/epub+zip' : '.pdf,application/pdf') : '.epub,.pdf,application/epub+zip,application/pdf'}"></label>
-          <div class="kdp-ok" id="file-ok" ${v.file_path || v.file_name ? '' : 'hidden'}>✓ ${esc(t('kdp.manuscriptOk'))}</div>
+        <div class="kdp-fields"><div class="fmt-files">${['pdf', 'epub'].map(f => `<div class="fmt-file" data-slot="${f}">
+            <div class="fp-head"><span class="fp-chip">${esc(t('book.formatShort.' + f))}</span><b>${esc(t('upl.fileFor', { fmt: t('book.formatShort.' + f) }))}</b></div>
+            <label class="drop" data-slot-drop="${f}">${icon('file')}<span><span class="fname" data-slot-name="${f}"></span><br><small>${esc(t('upl.only', { fmt: t('book.formatShort.' + f) }))} · max 500 MB</small></span><input type="file" data-slot-input="${f}" accept="${f === 'epub' ? '.epub,application/epub+zip' : '.pdf,application/pdf'}"></label>
+            <div class="kdp-ok" data-slot-ok="${f}" hidden></div>
+            <button type="button" class="btn btn-ghost btn-sm" data-slot-rm="${f}" hidden>${esc(t('ed2.remove'))}</button></div>`).join('')}</div>
+          <p class="muted fmt-files-note">${esc(t('upl.note'))}</p>
+          <div hidden><span id="n-file"></span><div id="file-ok"></div><input type="file" id="f-file"></div>
           <div class="fcheck" id="fcheck" ${fileCheck ? '' : 'hidden'}></div><div id="devprev"></div>
           <button type="button" class="btn btn-dark" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button>
           <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p>
           <label class="check"><input type="checkbox" id="f-dl" ${v.allow_download !== false ? 'checked' : ''}> ${esc(t('kdp.allowDownload'))}</label>
           <label class="check" style="margin-left:26px"><input type="checkbox" id="f-stamp" ${v.stamp_downloads !== false ? 'checked' : ''}> ${esc(t('kdp.stampDownload'))}</label></div></div>
-      ${!v.work_id && api.newEdition ? `<div class="kdp-block" id="f2-block"><div class="kdp-label"><h3>${esc(t('ed2.title'))}</h3><p>${esc(t('ed2.help'))}</p></div>
-        <div class="kdp-fields"><label class="drop" data-drop="file2">${icon('file')}<span><span class="fname" id="n-file2">${esc(t('ed2.upload'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file2" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
-          <div class="kdp-ok" id="file2-ok" hidden></div>
-          <button type="button" class="btn btn-ghost btn-sm" id="b-file2-rm" hidden>${esc(t('ed2.remove'))}</button></div></div>` : ''}
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
         <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
           <div style="flex:1;min-width:220px"><label class="drop" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('kdp.uploadCover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
@@ -995,7 +996,8 @@ async function bookForm(body, b, startStep = 1) {
   // what both formats of a book share (each keeps its own file, pages, preview, ISBN and price)
   const SHARED = ['title', 'subtitle', 'author', 'contributors', 'description', 'language', 'category', 'categories', 'series_name', 'series_number', 'edition',
     'rights', 'adult', 'age_min', 'age_max', 'keywords', 'color', 'published_at', 'is_featured', 'recommend_ids', 'allow_download', 'stamp_downloads'];
-  const mainFmt = () => files.file ? (/\.epub$/i.test(files.file.name) ? 'epub' : 'pdf') : (v.file_path || v.file_name ? v.format : null);
+  const fmtFile = f => /\.epub$/i.test(f.name) ? 'epub' : 'pdf';
+  const mainFmt = () => files.file ? fmtFile(files.file) : lastFile ? fmtFile(lastFile) : (v.file_path || v.file_name ? v.format : null);
   // ---- what each step still needs (shown on the tabs and in the final checklist)
   const checks = () => {
     const free = radio('ptype') === 'free', price = cents(val('f-price'));
@@ -1033,6 +1035,8 @@ async function bookForm(body, b, startStep = 1) {
       $(`#${k}-net`, body).textContent = p ? money(Math.max(p - fee, 0), CONFIG.currency) : '—'; };
     royalty('r', cents(val('f-price'))); royalty('r2', cents(val('f-price2')));
     const f1 = mainFmt(), two = !$('#price2-box', body).hidden;
+    // always PDF on the left and EPUB on the right, like the upload boxes
+    const boxes = $$('#price-box .fmt-price', body); if (boxes[0]) { boxes[0].style.order = f1 === 'epub' ? 2 : 1; boxes[1].style.order = f1 === 'epub' ? 1 : 2; }
     $('#fp1-fmt', body).textContent = f1 ? t('book.formatShort.' + f1) : 'eBook'; $('#fp1-fmt', body).hidden = !f1 && !two;
     $('#fp1-title', body).textContent = two && f1 ? t('ed2.priceFor', { fmt: t('book.formatShort.' + f1) }) : t('kdp.pricing');
   };
@@ -1123,7 +1127,7 @@ async function bookForm(body, b, startStep = 1) {
     if (kind === 'sample') { ownSample = true; has.sample = true; $('#sample-ok', body).hidden = false; $('#sample-ok', body).textContent = '✓ ' + t('kdp.sampleOwn'); $('#b-mksample', body).hidden = true; }
     refresh();
   };
-  for (const kind of ['cover', 'file', 'sample', 'file2']) {
+  for (const kind of ['cover', 'sample']) {   // the book files have their own PDF / EPUB boxes (below)
     if (!$('#f-' + kind, body)) continue;
     $('#f-' + kind, body).onchange = e => pick(kind, e.target.files[0]);
     const d = $(`[data-drop="${kind}"]`, body);
@@ -1150,8 +1154,46 @@ async function bookForm(body, b, startStep = 1) {
       if (sib && !inp.dataset.filled) { inp.dataset.filled = '1'; if (sib.price_cents) inp.value = eur(sib.price_cents).replace('.', ','); if (sib.list_price_cents) lst.value = eur(sib.list_price_cents).replace('.', ','); }
     }
   }
+  // the two upload boxes: the first file becomes this book's file, the other format is added next to it
+  // (its own file and price); a format that already exists as its own edition is shown as done, with a link to it
+  const slotRole = f => (sib && sib.format === f) ? 'sib' : (!mainFmt() || mainFmt() === f) ? 'file' : api.newEdition ? 'file2' : 'none';
+  function drawSlots() {
+    for (const f of ['pdf', 'epub']) {
+      const role = slotRole(f), fmt = t('book.formatShort.' + f);
+      const name = $(`[data-slot-name="${f}"]`, body), ok = $(`[data-slot-ok="${f}"]`, body), rm = $(`[data-slot-rm="${f}"]`, body), drop = $(`[data-slot-drop="${f}"]`, body), box = $(`[data-slot="${f}"]`, body);
+      if (!name) continue;
+      let label = t('upl.choose', { fmt }), okHTML = '', canRemove = false, done = false;
+      if (role === 'sib') { label = t('upl.sibDone', { fmt }); okHTML = `✓ ${esc(t('upl.sibOk', { fmt }))} <a href="#/admin/edit/${encodeURIComponent(sib.id)}/2">${esc(t('upl.sibEdit'))}</a>`; done = true; }
+      else if (role === 'file') {
+        const cur = files.file || lastFile;
+        if (cur) label = `${cur.name} · ${(cur.size / 1048576).toFixed(1)} MB`;
+        else if (v.file_path || v.file_name) label = t('admin.f.fileKeep', { name: v.file_name || String(v.file_path).split('/').pop() });
+        if (cur || v.file_path || v.file_name) okHTML = '✓ ' + esc(t('kdp.manuscriptOk'));
+      } else if (role === 'file2' && files.file2) { label = `${files.file2.name} · ${(files.file2.size / 1048576).toFixed(1)} MB`; okHTML = '✓ ' + esc(t('ed2.ready', { fmt })); canRemove = true; }
+      name.textContent = label; ok.innerHTML = okHTML; ok.hidden = !okHTML; rm.hidden = !canRemove;
+      drop.classList.toggle('locked', done); $(`[data-slot-input="${f}"]`, body).disabled = done;
+      box.classList.toggle('has', !!okHTML);
+    }
+  }
+  for (const f of ['pdf', 'epub']) {
+    const input = $(`[data-slot-input="${f}"]`, body), drop = $(`[data-slot-drop="${f}"]`, body);
+    if (!input) continue;
+    const take = async file => {
+      if (!file) return;
+      if (fmtFile(file) !== f || !/\.(epub|pdf)$/i.test(file.name)) { toast(t('upl.wrong', { fmt: t('book.formatShort.' + f) }), { error: true }); return; }
+      const role = slotRole(f);
+      if (role === 'sib' || role === 'none') return;
+      await pick(role, file); drawSlots(); refresh();
+    };
+    input.onchange = e => { take(e.target.files[0]); e.target.value = ''; };
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); take(e.dataTransfer.files[0]); });
+    $(`[data-slot-rm="${f}"]`, body).onclick = () => { if (slotRole(f) === 'file2') { files.file2 = null; edition2UI(); drawSlots(); refresh(); } };
+  }
+  drawSlots();
   // the other format of this book (EPUB ↔ PDF), if there is one: its price is set here and it is published together
-  if (v.work_id && v.id && api.editionsOf) api.editionsOf(v.work_id).then(l => { sib = l.find(x => x.id !== v.id) || null; edition2UI(); refresh(); }).catch(() => { });
+  if (v.work_id && v.id && api.editionsOf) api.editionsOf(v.work_id).then(l => { sib = l.find(x => x.id !== v.id) || null; edition2UI(); drawSlots(); refresh(); }).catch(() => { });
   $('#b-file2-rm', body)?.addEventListener('click', () => { files.file2 = null; $('#f-file2', body).value = ''; edition2UI(); refresh(); });
 
   function drawCheck() {
@@ -1267,7 +1309,7 @@ async function bookForm(body, b, startStep = 1) {
         const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: free ? null : (cents(val('f-list2')) || null), status: st2, pages }, { file: f2, ...(sample ? { sample } : {}) });
         v.work_id = src.work_id || bookId; files.file2 = null;
         sib = { id: id2, format: fmt2, price_cents: p2 || 0, status: st2, file_path: 'yes' };
-        $('#f2-block', body)?.remove(); edition2UI();
+        edition2UI(); drawSlots();
         toast(t('ed2.created', { fmt: t('book.formatShort.' + fmt2) }), { ms: 6000 });
       } else if (sib && api.updateBook) {
         // the linked format follows: same details, cover and A+ (each keeps its own file, pages and price)
@@ -1282,6 +1324,8 @@ async function bookForm(body, b, startStep = 1) {
         Object.assign(sib, { price_cents: patch.price_cents ?? sib.price_cents, status: patch.status || sib.status });
       }
       try { localStorage.removeItem(DKEY(null)); localStorage.removeItem(DKEY(bookId)); } catch { } window.__libravaDirty = false;
+      // the safety copy is written half a second after typing: make sure a late one does not come back after saving
+      { const id = bookId; setTimeout(() => { try { localStorage.removeItem(DKEY(null)); localStorage.removeItem(DKEY(id)); } catch { } window.__libravaDirty = false; }, 800); }
       if (files.file) has.file = true; if (files.cover) has.cover = true;
       files.cover = files.file = files.sample = null;
       $('#kdp-status', body).className = 'status ' + (status === 'published' ? 'live' : 'draft');

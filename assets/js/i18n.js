@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022154713';
-import { store } from './util.js?v=20261022154713';
+import { CONFIG } from './config.js?v=20261022155817';
+import { store } from './util.js?v=20261022155817';
 
 const D = {
   ro: {
@@ -434,6 +434,14 @@ const D = {
     'series.addRest': 'Adaugă cărțile care îți lipsesc ({n})',
     'series.ownAll': 'Ai deja toată seria',
     'series.added': 'Am pus {n} cărți în coș',
+    'upl.fileFor': 'Fișierul {fmt}',
+    'upl.only': 'Doar fișier {fmt}',
+    'upl.choose': 'Încarcă fișierul {fmt}',
+    'upl.wrong': 'Aici merge doar fișierul {fmt}.',
+    'upl.note': 'Încarcă PDF-ul, EPUB-ul sau pe amândouă. Fiecare format are prețul lui la pasul Preț și se publică împreună.',
+    'upl.sibDone': 'Formatul {fmt} e deja încărcat',
+    'upl.sibOk': 'Formatul {fmt} are fișierul lui.',
+    'upl.sibEdit': 'Schimbă fișierul →',
     'ed2.title': 'Al doilea format (opțional)',
     'ed2.help': 'Ai cartea și în celălalt format? Încarcă și al doilea fișier aici: la salvare se leagă automat de această carte, cu prețul lui. Pe pagina cărții apar ambele formate.',
     'ed2.upload': 'Încarcă al doilea fișier (EPUB sau PDF)',
@@ -1576,6 +1584,14 @@ const D = {
     'series.addRest': 'Aggiungi i libri che ti mancano ({n})',
     'series.ownAll': 'Hai già tutta la serie',
     'series.added': '{n} libri aggiunti al carrello',
+    'upl.fileFor': 'File {fmt}',
+    'upl.only': 'Solo file {fmt}',
+    'upl.choose': 'Carica il file {fmt}',
+    'upl.wrong': 'Qui va solo il file {fmt}.',
+    'upl.note': 'Carica il PDF, l\'EPUB o entrambi. Ogni formato ha il suo prezzo al passo Prezzo e viene pubblicato insieme.',
+    'upl.sibDone': 'Il formato {fmt} è già caricato',
+    'upl.sibOk': 'Il formato {fmt} ha il suo file.',
+    'upl.sibEdit': 'Cambia il file →',
     'ed2.title': 'Secondo formato (facoltativo)',
     'ed2.help': 'Hai il libro anche nell\'altro formato? Carica anche il secondo file: al salvataggio viene creata automaticamente la seconda edizione, collegata a questa, con il suo prezzo. Nella pagina del libro compaiono entrambi i formati.',
     'ed2.upload': 'Carica il secondo file (EPUB o PDF)',
@@ -2718,6 +2734,14 @@ const D = {
     'series.addRest': 'Add the books you are missing ({n})',
     'series.ownAll': 'You own the whole series',
     'series.added': '{n} books added to the cart',
+    'upl.fileFor': '{fmt} file',
+    'upl.only': '{fmt} file only',
+    'upl.choose': 'Upload the {fmt} file',
+    'upl.wrong': 'Only the {fmt} file goes here.',
+    'upl.note': 'Upload the PDF, the EPUB or both. Each format gets its own price in the Pricing step and they are published together.',
+    'upl.sibDone': 'The {fmt} format is already uploaded',
+    'upl.sibOk': 'The {fmt} format has its own file.',
+    'upl.sibEdit': 'Change the file →',
     'ed2.title': 'Second format (optional)',
     'ed2.help': 'Do you have the book in the other format too? Upload the second file here: when you save it is linked to this book automatically, with its own price. The book page shows both formats.',
     'ed2.upload': 'Upload the second file (EPUB or PDF)',
@@ -3465,7 +3489,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022154713`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022155817`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
