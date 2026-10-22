@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022120322';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022120322';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022120322';
-import { resetCompanyCache } from './views.js?v=20261022120322';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022120322';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022120322';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022120322';
-import { api } from './api.js?v=20261022120322';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022120322';
+import { CONFIG } from './config.js?v=20261022121952';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022121952';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022121952';
+import { resetCompanyCache } from './views.js?v=20261022121952';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022121952';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022121952';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022121952';
+import { api } from './api.js?v=20261022121952';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022121952';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1612,7 +1612,7 @@ async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays'
   body.innerHTML = `<div class="panel st-head"><div><h2 class="section-title" style="font-size:19px;margin:0">${esc(t('st.title'))}</h2><p class="muted" style="margin:4px 0 0;max-width:80ch">${esc(t('st.help'))}</p></div>
       <div class="seg" role="group">${[1, 7, 30, 90, 365].map(x => `<button type="button" data-days="${x}" class="${x === days ? 'on' : ''}">${esc(x === 1 ? t('st.today') : t('st.days', { n: x }))}</button>`).join('')}</div></div>
     <div class="st-kpis">
-      ${kpi(t('st.visitors'), n(d.visitors), delta(d.visitors, d.prev_visitors), t('st.visitorsHelp'))}
+      ${kpi(t('st.visitors'), n(d.visitors), delta(d.visitors, d.prev_visitors) + (d.bots ? `<small class="muted" style="display:block">${esc(t('st.bots', { n: n(d.bots) }))}</small>` : ''), t('st.visitorsHelp'))}
       ${kpi(t('st.sessions'), n(d.sessions), delta(d.sessions, d.prev_sessions))}
       ${kpi(t('st.pageviews'), n(d.pageviews), `<small class="muted">${d.sessions ? (d.pageviews / d.sessions).toFixed(1).replace('.', ',') : '0'} / ${esc(t('st.perVisit'))}</small>`)}
       ${kpi(t('st.orders'), n(d.orders), delta(d.orders, d.prev_orders))}

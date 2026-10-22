@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022120322';
-import { store } from './util.js?v=20261022120322';
+import { CONFIG } from './config.js?v=20261022121952';
+import { store } from './util.js?v=20261022121952';
 
 const D = {
   ro: {
@@ -8,7 +8,8 @@ const D = {
     'st.today': 'Azi',
     'st.days': '{n} zile',
     'st.visitors': 'Vizitatori',
-    'st.visitorsHelp': 'Persoane diferite (aproximativ).',
+    'st.visitorsHelp': 'Persoane diferite (aproximativ). Roboții (Google, Bing etc.) și dispozitivele tale de admin nu sunt numărate.',
+    'st.bots': '{n} vizite de roboți excluse',
     'st.sessions': 'Vizite',
     'st.pageviews': 'Pagini văzute',
     'st.perVisit': 'vizită',
@@ -1117,7 +1118,8 @@ const D = {
     'st.today': 'Oggi',
     'st.days': '{n} giorni',
     'st.visitors': 'Visitatori',
-    'st.visitorsHelp': 'Persone diverse (circa).',
+    'st.visitorsHelp': 'Persone diverse (circa). Robot (Google, Bing ecc.) e i tuoi dispositivi admin non sono contati.',
+    'st.bots': '{n} visite di robot escluse',
     'st.sessions': 'Visite',
     'st.pageviews': 'Pagine viste',
     'st.perVisit': 'visita',
@@ -2226,7 +2228,8 @@ const D = {
     'st.today': 'Today',
     'st.days': '{n} days',
     'st.visitors': 'Visitors',
-    'st.visitorsHelp': 'Different people (approximately).',
+    'st.visitorsHelp': 'Different people (approximately). Robots (Google, Bing etc.) and your admin devices are not counted.',
+    'st.bots': '{n} robot visits excluded',
     'st.sessions': 'Visits',
     'st.pageviews': 'Page views',
     'st.perVisit': 'visit',
@@ -3366,7 +3369,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022120322`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022121952`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

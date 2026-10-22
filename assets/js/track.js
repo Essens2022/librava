@@ -2,9 +2,9 @@
 // Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261022120322';
-import { store } from './util.js?v=20261022120322';
-import { gaEvent } from './ga.js?v=20261022120322';
+import { api } from './api.js?v=20261022121952';
+import { store } from './util.js?v=20261022121952';
+import { gaEvent } from './ga.js?v=20261022121952';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -40,7 +40,14 @@ function sid() { let s = null; try { s = sessionStorage.getItem('librava:sid'); 
 // a returning-visitor number only after the visitor accepted the notice on the first visit
 function vid() { if (!store.get('consent')) return null; let v = store.get('vid'); if (!v) { v = rnd(); store.set('vid', v); } return v; }
 
-const off = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || !/(^|\.)librava\.store$/.test(location.hostname) || api.user()?.isAdmin;
+// robots (Googlebot, Bing, Lighthouse, automated browsers) also run the site's JavaScript; they are not visitors
+const BOT = /bot|crawl|spider|slurp|google-inspectiontool|googleother|lighthouse|headless|pagespeed|preview|facebookexternalhit|phantom|puppeteer|playwright|selenium/i;
+// a device where the admin has logged in once stays out of the statistics, also after logging out
+function staff() {
+  try { if (api.user()?.isAdmin) { store.set('staff', 1); return true; } return !!store.get('staff'); } catch { return false; }
+}
+const off = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || !/(^|\.)librava\.store$/.test(location.hostname)
+  || navigator.webdriver === true || BOT.test(navigator.userAgent) || staff();
 let lastPath = '';
 export function track(type, data = {}) {
   try {
