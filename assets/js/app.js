@@ -1,18 +1,20 @@
-import { CONFIG } from './config.js?v=20261022161919';
-import { t, getLang, setLang } from './i18n.js?v=20261022161919';
-import { esc, $, $$ } from './util.js?v=20261022161919';
-import { api, chooseBackend } from './api.js?v=20261022161919';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones } from './ui.js?v=20261022161919';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022161919';
-import { trackPage } from './track.js?v=20261022161919';
-import { offline } from './offline.js?v=20261022161919';
-import { viewReader } from './reader.js?v=20261022161919';
-import { viewAdmin } from './admin.js?v=20261022161919';
+import { CONFIG } from './config.js?v=20261022171235';
+import { t, getLang, setLang } from './i18n.js?v=20261022171235';
+import { esc, $, $$ } from './util.js?v=20261022171235';
+import { api, chooseBackend } from './api.js?v=20261022171235';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261022171235';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022171235';
+import { trackPage } from './track.js?v=20261022171235';
+import { offline } from './offline.js?v=20261022171235';
+import { viewReader } from './reader.js?v=20261022171235';
+import { viewAdmin } from './admin.js?v=20261022171235';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
 let firstShown = false;
 let cleanup = null, seq = 0;
+// "Back" like Amazon: where the visitor was on each page, to put them back there
+let lastKey = null; const scrollMem = {};
 
 async function route() {
   if (pathMode) {
@@ -30,6 +32,13 @@ async function route() {
   const parts = path.split('/').filter(Boolean).map(decodeURIComponent);
   if (cleanup) { try { cleanup(); } catch { } cleanup = null; }
   const my = ++seq;
+  // the pages visited in this tab: coming back to the previous one restores its scroll position
+  const key = raw || '/';
+  if (lastKey != null && lastKey !== key) scrollMem[lastKey] = window.scrollY;
+  const st = navStack(); let isBack = false;
+  if (st.length >= 2 && st[st.length - 2] === key) { st.pop(); isBack = true; }
+  else if (st[st.length - 1] !== key) st.push(key);
+  saveNav(st); lastKey = key;
   // every navigation renders into its own fresh container: a slower, older page can never overwrite a newer one
   const app = $('#app');
   const el = document.createElement('div');
@@ -39,6 +48,11 @@ async function route() {
   $('#hdr').hidden = reading; $('#foot').hidden = reading;
   document.documentElement.classList.toggle('reading', reading);
   const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
+  // on phones: a "‹ Back" bar under the header on every page but the home page
+  let bb = $('#backbar');
+  if (!bb) { $('#hdr').insertAdjacentHTML('afterend', '<nav id="backbar" class="backbar" hidden></nav>'); bb = $('#backbar'); }
+  bb.hidden = reading || !parts[0];
+  if (!bb.hidden) bb.innerHTML = `<button type="button" class="bb-back" data-goback>${icon('chevL')} ${esc(t('nav.back'))}</button><a class="bb-home" href="#/">${icon('home')} ${esc(t('nav.home'))}</a>`;
   openDrawer(false);
   document.querySelectorAll('.modal-wrap').forEach(m => m.remove());
   document.title = CONFIG.siteName;
@@ -62,6 +76,7 @@ async function route() {
     if (my !== seq) { if (typeof res === 'function') res(); return; }
     // a refresh opens at the top of the page, not half hidden under the bar (the phone used to put back an old position)
     if (!reading && !firstShown) { firstShown = true; window.scrollTo(0, 0); requestAnimationFrame(() => window.scrollTo(0, 0)); }
+    else if (!reading && isBack && scrollMem[key]) { const y = scrollMem[key]; requestAnimationFrame(() => window.scrollTo(0, y)); setTimeout(() => { if (my === seq) window.scrollTo(0, y); }, 300); }
     cleanup = typeof res === 'function' ? res : null;
   } catch (e) {
     console.error(e);

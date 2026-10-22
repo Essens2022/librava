@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022161919';
-import { t } from './i18n.js?v=20261022161919';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261022161919';
-import { offline } from './offline.js?v=20261022161919';
-import { api } from './api.js?v=20261022161919';
-import { icon, go, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261022161919';
-import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261022161919';
+import { CONFIG } from './config.js?v=20261022171235';
+import { t } from './i18n.js?v=20261022171235';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261022171235';
+import { offline } from './offline.js?v=20261022171235';
+import { api } from './api.js?v=20261022171235';
+import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261022171235';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261022171235';
 
 const VENDOR = (f) => new URL('../vendor/' + f, import.meta.url).href;
 const defaults = { theme: 'light', fontSize: 105, font: 'serif', spread: true };
@@ -55,6 +55,7 @@ export async function viewReader(el, id, q) {
       ${user && !api.isDemo ? `<div class="rd-watermark">${esc(t('reader.licensed', { email: user.email }))}</div>` : ''}
       <div class="rd-msg" id="rd-loading"><div class="box"><div class="spinner" style="margin:0"></div><span>${esc(t('reader.loading'))}</span></div></div>
     </div>
+    <button class="rd-float-back" data-back aria-label="${esc(t('reader.back'))}">${icon('chevL')}</button>
     <div class="rd-bar top">
       <button class="rd-btn" data-back aria-label="${esc(t('reader.back'))}">${icon('chevL')}</button>
       <div class="rd-title">${esc(book.title)}</div>
@@ -82,7 +83,8 @@ export async function viewReader(el, id, q) {
   let engine = null, destroyed = false, chromeHidden = false, wakeLock = null;
 
   const setChrome = (hide) => { chromeHidden = hide; R.classList.toggle('chrome-hidden', hide); };
-  const backTo = () => go(preview || src.limited ? '/book/' + encodeURIComponent(id) : '/library');
+  // back to the page the reader came from (the book page or the library), not a new copy of it
+  const backTo = () => backOr(preview || src.limited ? '/book/' + encodeURIComponent(id) : '/library');
 
   // ---- progress saving ----
   const persist = debounce(() => {
@@ -114,7 +116,7 @@ export async function viewReader(el, id, q) {
     box.querySelector('[data-end-buy]')?.addEventListener('click', () => { cart.add(book.id); cleanup(); startCheckout([book.id]); });
     box.querySelector('[data-end-cart]')?.addEventListener('click', e => { cart.add(book.id); e.currentTarget.textContent = t('book.inCart'); e.currentTarget.disabled = true; toast(t('cart.added')); });
     box.querySelector('[data-end-free]')?.addEventListener('click', () => { cleanup(); go('/book/' + encodeURIComponent(id)); });
-    box.querySelector('[data-end-store]').onclick = () => { cleanup(); go('/book/' + encodeURIComponent(id)); };
+    box.querySelector('[data-end-store]').onclick = () => { cleanup(); backOr('/book/' + encodeURIComponent(id)); };
     const more = box.querySelector('.end-more'), row = more.querySelector('.end-row');
     const fill = list => {
       if (!box.isConnected) return;

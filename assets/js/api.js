@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022161919';
-import { applyOffers, offerRunning } from './offers.js?v=20261022161919';
-import { scoreBook } from './search.js?v=20261022161919';
-import { getLang } from './i18n.js?v=20261022161919';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022161919';
+import { CONFIG } from './config.js?v=20261022171235';
+import { applyOffers, offerRunning } from './offers.js?v=20261022171235';
+import { scoreBook } from './search.js?v=20261022171235';
+import { getLang } from './i18n.js?v=20261022171235';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022171235';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -59,9 +59,9 @@ export function filterBooks(all, o = {}) {
 }
 
 // what the store list needs for cards, filters, search and recommendations (the rest is read on the book page)
-const CARD_COLS = 'id,title,subtitle,author,contributors,category,categories,language,format,color,pages,price_cents,list_price_cents,currency,cover_path,updated_at,published_at,status,is_featured,rating_avg,rating_count,sales_count,series_name,series_number,keywords,isbn,librava_id,work_id,deleted_at,blurb';
-const ADMIN_COLS = 'file_path,file_name,sample_path,recommend_ids';
-const CAT_KEY = 'catalog:list', CAT_V = 2;
+const CARD_COLS = 'id,title,subtitle,author,contributors,category,categories,language,format,color,pages,price_cents,list_price_cents,currency,cover_path,updated_at,published_at,status,is_featured,rating_avg,rating_count,sales_count,series_name,series_number,keywords,isbn,librava_id,work_id,deleted_at,blurb,sample_path';
+const ADMIN_COLS = 'file_path,file_name,recommend_ids';
+const CAT_KEY = 'catalog:list', CAT_V = 3;
 const FMT_ORDER = { epub: 0, pdf: 1 };
 // all published editions of a book (itself included), EPUB first
 export function editionsOf(all, b) {
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022161919')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022171235')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -612,11 +612,13 @@ class SupabaseAPI {
     this._full = this._full || new Map();
     const hit = this._full.get(id);
     if (hit && Date.now() - hit.at < 300000) return hit.p;
+    let failed = false;
     const p = this.sb.from('books').select('*').eq('id', id).maybeSingle()
       .then(({ data, error }) => { if (error) throw error; return data ? { ...data, cover_url: this._coverUrl(data) } : null; })
-      .catch(() => this.__cat?.find(x => x.id === id) || null);   // offline: the light copy is better than nothing
+      .catch(() => { failed = true; return this.__cat?.find(x => x.id === id) || null; });   // no connection: the light copy (it has the preview too)
     this._full.set(id, { at: Date.now(), p });
-    p.then(v => { if (!v) this._full?.delete(id); });
+    // a failed read (weak mobile signal) is not kept: the next visit asks again
+    p.then(v => { if (!v || failed) this._full?.delete(id); });
     return p;
   }
 

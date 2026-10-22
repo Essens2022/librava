@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022161919';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022161919';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022161919';
-import { resetCompanyCache } from './views.js?v=20261022161919';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022161919';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022161919';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022161919';
-import { api } from './api.js?v=20261022161919';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022161919';
+import { CONFIG } from './config.js?v=20261022171235';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022171235';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022171235';
+import { resetCompanyCache } from './views.js?v=20261022171235';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022171235';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022171235';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022171235';
+import { api } from './api.js?v=20261022171235';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022171235';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1304,13 +1304,16 @@ async function bookForm(body, b, startStep = 1) {
     const old = btn.textContent; btn.disabled = true; btn.textContent = t('admin.saving');
     try {
       bookId = await api.saveBook(data, files);
+      // a new book, once saved, gets its own address: a reload reopens it and "Add book" always starts empty
+      if (/^#\/admin\/new/.test(location.hash)) { try { history.replaceState(null, '', location.pathname + location.search + '#/admin/edit/' + encodeURIComponent(bookId) + '/' + step); } catch { } }
       // the same book in the other format: its own edition (own file and price), linked to this one
       if (files.file2) {
         const f2 = files.file2, fmt2 = /\.epub$/i.test(f2.name) ? 'epub' : 'pdf';
         const src = await api.getBook(bookId);
         let sample = null, pages = null;
         try { sample = (await makeSample(f2, data.sample_pages)).file; } catch { }
-        if (fmt2 === 'pdf') { try { pages = (await analyzeManuscript(f2, data.language))?.meta?.pages || null; } catch { } }
+        // its own page count (PDF: real pages; EPUB: estimated like a printed book), never the other format's
+        try { pages = (await analyzeManuscript(f2, data.language))?.meta?.pages || null; } catch { }
         const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
         // published together with this one only once it has its price (otherwise it waits as a draft)
         const st2 = status === 'published' && (free || p2 >= 49) ? 'published' : 'draft';

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022161919';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022161919';
-import { esc, store, $, $$ } from './util.js?v=20261022161919';
+import { CONFIG } from './config.js?v=20261022171235';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022171235';
+import { esc, store, $, $$ } from './util.js?v=20261022171235';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022161919';
-import { suggest, highlight } from './search.js?v=20261022161919';
-import { track, trackPage } from './track.js?v=20261022161919';
-import { initGA, stopGA } from './ga.js?v=20261022161919';
-import { api } from './api.js?v=20261022161919';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022171235';
+import { suggest, highlight } from './search.js?v=20261022171235';
+import { track, trackPage } from './track.js?v=20261022171235';
+import { initGA, stopGA } from './ga.js?v=20261022171235';
+import { api } from './api.js?v=20261022171235';
 
 // ---------------- icons ----------------
 const P = {
@@ -30,7 +30,7 @@ const P = {
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   book: '<path d="M3 5.5C5 4.5 8 4.3 12 6c4-1.7 7-1.5 9-.5V19c-2-1-5-1.2-9 .5-4-1.7-7-1.5-9-.5Z"/><path d="M12 6v13.5"/>',
   library: '<rect x="3" y="4" width="4" height="16" rx="1"/><rect x="8.5" y="4" width="4" height="16" rx="1"/><path d="M14.5 5.2l3.8-1 3.7 15-3.8 1z"/>',
-  chevL: '<path d="M15 18l-6-6 6-6"/>', chevR: '<path d="M9 6l6 6-6 6"/>', chevD: '<path d="M6 9l6 6 6-6"/>',
+  chevL: '<path d="M15 18l-6-6 6-6"/>', home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', chevR: '<path d="M9 6l6 6-6 6"/>', chevD: '<path d="M6 9l6 6 6-6"/>',
   bookmark: '<path d="M6 3h12v18l-6-4.5L6 21z"/>',
   toc: '<path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r=".6"/><circle cx="4.5" cy="12" r=".6"/><circle cx="4.5" cy="18" r=".6"/>',
   type: '<path d="M3 19L8.5 5 14 19M5 14h7"/><path d="M15.5 12.2c.6-1 1.6-1.5 2.8-1.5 1.7 0 2.7 1 2.7 2.8V19M21 15.6c-.7-.3-1.5-.4-2.3-.4-1.7 0-2.9.8-2.9 2 0 1.1.9 1.9 2.2 1.9 1.4 0 2.6-.9 3-2"/>',
@@ -120,6 +120,21 @@ export function go(path) {
   else location.hash = path;
 }
 export function link(path) { return pathMode ? path : '#' + path; }
+
+// ---------------- the visitor's way through the site (for "Back" like Amazon) ----------------
+// every page visited in this tab, so "Back" returns to the page before instead of opening a new one
+const NAV_KEY = 'librava:nav';
+export function navStack() { try { return JSON.parse(sessionStorage.getItem(NAV_KEY)) || []; } catch { return []; } }
+export function saveNav(st) { try { sessionStorage.setItem(NAV_KEY, JSON.stringify(st.slice(-60))); } catch { } }
+// back to the previous page of the site; with nothing before it (opened from a link), go to `fallback`
+export function goBack(fallback = '/') {
+  if (navStack().length >= 2) history.back(); else go(fallback);
+}
+// to `path`: if it is the page we just came from, step back to it (so the phone's Back doesn't loop)
+export function backOr(path) {
+  const st = navStack();
+  if (st.length >= 2 && st[st.length - 2].split('?')[0] === path) history.back(); else go(path);
+}
 // in clean-address mode every "#/x" link printed by the views becomes "/x"
 export function fixLinks(root = document) {
   if (!pathMode) return;
@@ -150,6 +165,7 @@ export function renderChrome() {
   <div class="wrap hdr-mobile-search">${searchForm('s2')}</div></div>
   <div class="hdr-sub"><nav class="wrap subnav" aria-label="${esc(t('nav.browse'))}">
     <button class="menu-btn" data-drawer>${icon('menu')} ${esc(t('nav.all'))}</button>
+    <a href="#/search?lang=all" data-nav="all">${esc(t('nav.allBooks'))}</a>
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
@@ -162,6 +178,7 @@ export function renderChrome() {
     <div class="drawer-head"><span class="drawer-hello">${icon('user')} ${hello}</span>${langBtn('drawer-lang')}</div>
     <div class="drawer-body">
       <h3>${esc(t('nav.browse'))}</h3>
+      <a href="#/search?lang=all" class="drawer-all"><b>${esc(t('nav.allBooks'))}</b> ${icon('chevR')}</a>
       ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
       <hr>
       <a href="#/search?sort=newest">${esc(t('nav.new'))}</a>
@@ -439,6 +456,7 @@ export function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-cookie-settings]')) { e.preventDefault(); showConsent(true); return; }
+    if (e.target.closest('[data-goback]')) { e.preventDefault(); goBack('/'); return; }
     if (e.target.closest('[data-top]')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if (e.target.closest('[data-signout]')) { openDrawer(false); await api.signOut(); go('/'); }
   });
