@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022125332';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022125332';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022125332';
-import { resetCompanyCache } from './views.js?v=20261022125332';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022125332';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022125332';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022125332';
-import { api } from './api.js?v=20261022125332';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022125332';
+import { CONFIG } from './config.js?v=20261022130214';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022130214';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022130214';
+import { resetCompanyCache } from './views.js?v=20261022130214';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022130214';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022130214';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022130214';
+import { api } from './api.js?v=20261022130214';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022130214';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -891,6 +891,10 @@ async function bookForm(body, b, startStep = 1) {
           <p class="kdp-note">${icon('shield')} ${esc(t('kdp.drm'))}</p>
           <label class="check"><input type="checkbox" id="f-dl" ${v.allow_download !== false ? 'checked' : ''}> ${esc(t('kdp.allowDownload'))}</label>
           <label class="check" style="margin-left:26px"><input type="checkbox" id="f-stamp" ${v.stamp_downloads !== false ? 'checked' : ''}> ${esc(t('kdp.stampDownload'))}</label></div></div>
+      ${!v.work_id && api.newEdition ? `<div class="kdp-block" id="f2-block"><div class="kdp-label"><h3>${esc(t('ed2.title'))}</h3><p>${esc(t('ed2.help'))}</p></div>
+        <div class="kdp-fields"><label class="drop" data-drop="file2">${icon('file')}<span><span class="fname" id="n-file2">${esc(t('ed2.upload'))}</span><br><small>EPUB / PDF · max 500 MB</small></span><input type="file" id="f-file2" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
+          <div class="kdp-ok" id="file2-ok" hidden></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="b-file2-rm" hidden>${esc(t('ed2.remove'))}</button></div></div>` : ''}
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.cover'))}</h3><p>${esc(t('kdp.coverHelp'))}</p></div>
         <div class="kdp-fields"><div class="cover-up"><div class="cover-box">${v.cover_url ? `<img id="cov-prev" alt="" src="${esc(v.cover_url)}">` : `<img id="cov-prev" alt="" hidden><span id="cov-empty">${icon('image')}</span>`}</div>
           <div style="flex:1;min-width:220px"><label class="drop" data-drop="cover">${icon('image')}<span><span class="fname" id="n-cover">${esc(t('kdp.uploadCover'))}</span><br><small>${esc(t('admin.f.coverHelp'))}</small></span><input type="file" id="f-cover" accept="image/jpeg,image/png,image/webp"></label>
@@ -920,6 +924,7 @@ async function bookForm(body, b, startStep = 1) {
         <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
           <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99" value="${eur(v.price_cents).replace('.', ',')}"></label>
             <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="text" inputmode="decimal" autocomplete="off" value="${eur(v.list_price_cents).replace('.', ',')}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
+            <div class="two" id="price2-box" hidden><label class="field"><span id="price2-label"></span><input id="f-price2" type="text" inputmode="decimal" autocomplete="off" placeholder="5,99"><small>${esc(t('ed2.priceHelp'))}</small></label></div>
             <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
             <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('fbt.adminTitle'))}</h3><p>${esc(t('fbt.adminHelp'))}</p></div>
@@ -958,6 +963,8 @@ async function bookForm(body, b, startStep = 1) {
     refresh();
   };
 
+  const fmtOf = f => t('book.formatShort.' + (/\.epub$/i.test(f.name) ? 'epub' : 'pdf'));
+  const mainFmt = () => files.file ? (/\.epub$/i.test(files.file.name) ? 'epub' : 'pdf') : (v.file_path || v.file_name ? v.format : null);
   // ---- what each step still needs (shown on the tabs and in the final checklist)
   const checks = () => {
     const free = radio('ptype') === 'free', price = cents(val('f-price'));
@@ -970,6 +977,7 @@ async function bookForm(body, b, startStep = 1) {
       { step: 2, ok: !(fileCheck?.items || []).some(x => x.level === 'error'), label: t('kdp.ck.fileOk') },
       { step: 2, ok: has.sample || !!files.sample, label: t('kdp.ck.sample') },
       { step: 4, ok: free || price >= 49, label: t('kdp.ck.price') },
+      ...(files.file2 ? [{ step: 4, ok: free || cents(val('f-price2')) >= 49, label: t('ed2.ckPrice', { fmt: fmtOf(files.file2) }) }] : []),
     ];
   };
   const refresh = () => {
@@ -1031,6 +1039,12 @@ async function bookForm(body, b, startStep = 1) {
   // files
   const pick = async (kind, file) => {
     if (!file) return;
+    if (kind === 'file2') {
+      if (!/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
+      const main = mainFmt();
+      if (main && fmtOf(file) === t('book.formatShort.' + main)) { toast(t('ed2.same'), { error: true }); return; }
+      files.file2 = file; edition2UI(); refresh(); keep(); return;
+    }
     if (kind !== 'cover' && !/\.(epub|pdf)$/i.test(file.name)) { toast(t('admin.badFile'), { error: true }); return; }
     // a linked edition only takes its own format (drag & drop skips the file picker's filter)
     if (kind === 'file' && v.work_id && !new RegExp('\\.' + v.format + '$', 'i').test(file.name)) { toast(t('ed.only', { fmt: t('book.formatShort.' + v.format) }), { error: true }); return; }
@@ -1073,13 +1087,23 @@ async function bookForm(body, b, startStep = 1) {
     if (kind === 'sample') { ownSample = true; has.sample = true; $('#sample-ok', body).hidden = false; $('#sample-ok', body).textContent = '✓ ' + t('kdp.sampleOwn'); $('#b-mksample', body).hidden = true; }
     refresh();
   };
-  for (const kind of ['cover', 'file', 'sample']) {
+  for (const kind of ['cover', 'file', 'sample', 'file2']) {
+    if (!$('#f-' + kind, body)) continue;
     $('#f-' + kind, body).onchange = e => pick(kind, e.target.files[0]);
     const d = $(`[data-drop="${kind}"]`, body);
     d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('over'); });
     d.addEventListener('dragleave', () => d.classList.remove('over'));
     d.addEventListener('drop', e => { e.preventDefault(); d.classList.remove('over'); pick(kind, e.dataTransfer.files[0]); });
   }
+
+  // the second format chosen on "Content": shows its name here and its own price on "Pricing"
+  function edition2UI() {
+    const f = files.file2, ok = $('#file2-ok', body); if (!ok) return;
+    ok.hidden = !f; $('#b-file2-rm', body).hidden = !f; $('#price2-box', body).hidden = !f;
+    $('#n-file2', body).textContent = f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : t('ed2.upload');
+    if (f) { ok.textContent = '✓ ' + t('ed2.ready', { fmt: fmtOf(f) }); $('#price2-label', body).textContent = t('ed2.price', { fmt: fmtOf(f) }) + ' *'; }
+  }
+  $('#b-file2-rm', body)?.addEventListener('click', () => { files.file2 = null; $('#f-file2', body).value = ''; edition2UI(); refresh(); });
 
   function drawCheck() {
     const box = $('#fcheck', body); if (!fileCheck) { box.hidden = true; return; }
@@ -1175,11 +1199,25 @@ async function bookForm(body, b, startStep = 1) {
       const missing = checks().filter(c => !c.ok);
       if (missing.length) { show(missing[0].step); return fail(t('kdp.cannotPublish', { list: missing.map(m => m.label).join(', ') })); }
     }
+    if (files.file2 && mainFmt() && fmtOf(files.file2) === t('book.formatShort.' + mainFmt())) { show(2); return fail(t('ed2.same')); }
     const data = collect(status);
     data.id = bookId || draftId;
     const old = btn.textContent; btn.disabled = true; btn.textContent = t('admin.saving');
     try {
       bookId = await api.saveBook(data, files);
+      // the same book in the other format: its own edition (own file and price), linked to this one
+      if (files.file2) {
+        const f2 = files.file2, fmt2 = /\.epub$/i.test(f2.name) ? 'epub' : 'pdf';
+        const src = await api.getBook(bookId);
+        let sample = null, pages = null;
+        try { sample = (await makeSample(f2, data.sample_pages)).file; } catch { }
+        if (fmt2 === 'pdf') { try { pages = (await analyzeManuscript(f2, data.language))?.meta?.pages || null; } catch { } }
+        const free = radio('ptype') === 'free';
+        await api.newEdition(src, fmt2, { price_cents: free ? 0 : cents(val('f-price2')), list_price_cents: null, status, pages }, { file: f2, ...(sample ? { sample } : {}) });
+        v.work_id = src.work_id || bookId; files.file2 = null;
+        $('#f2-block', body)?.remove(); $('#price2-box', body)?.remove();
+        toast(t('ed2.created', { fmt: t('book.formatShort.' + fmt2) }), { ms: 6000 });
+      }
       try { localStorage.removeItem(DKEY(null)); localStorage.removeItem(DKEY(bookId)); } catch { } window.__libravaDirty = false;
       if (files.file) has.file = true; if (files.cover) has.cover = true;
       files.cover = files.file = files.sample = null;

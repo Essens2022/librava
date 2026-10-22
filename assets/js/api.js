@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022125332';
-import { applyOffers, offerRunning } from './offers.js?v=20261022125332';
-import { scoreBook } from './search.js?v=20261022125332';
-import { getLang } from './i18n.js?v=20261022125332';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022125332';
+import { CONFIG } from './config.js?v=20261022130214';
+import { applyOffers, offerRunning } from './offers.js?v=20261022130214';
+import { scoreBook } from './search.js?v=20261022130214';
+import { getLang } from './i18n.js?v=20261022130214';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022130214';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -105,7 +105,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022125332')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022130214')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -287,6 +287,16 @@ class DemoAPI {
     const P = store.get('demo:purchases', []);
     return filterBooks(this._catalog.filter(b => !b.deleted_at), { includeDrafts: true, sort: 'newest' })
       .map(b => ({ ...b, revenue_cents: P.filter(p => p.book_id === b.id).reduce((s, p) => s + (p.price_cents || 0), 0) }));
+  }
+  async newEdition(src, format, extra = {}, files = {}) {
+    const work = src.work_id || src.id;
+    if (!src.work_id) await this.saveBook({ id: src.id, work_id: work });
+    const row = { ...src, work_id: work, format, status: 'draft', ...extra };
+    for (const k of ['id', 'sales_count', 'rating_avg', 'rating_count', 'created_at', 'updated_at', 'revenue_cents', '_fmts', 'file_path', 'file_name', 'sample_path', 'file_check', 'librava_id', 'isbn', 'deleted_at']) delete row[k];
+    if (src._cover_url) row.cover_url = src._cover_url;
+    const id = await this.saveBook(row, files);
+    if (src._cover_url) { const c = store.get('demo:books'); const b = c.added.find(x => x.id === id); if (b) { b.cover_url = src._cover_url; store.set('demo:books', c); await this._loadCatalog(); } }
+    return id;
   }
   async saveBook(data, files = {}) {
     const custom = store.get('demo:books', { added: [], overrides: {}, deleted: [] });
@@ -734,13 +744,14 @@ class SupabaseAPI {
   }
   // another format of the same book (Amazon: "create paperback" from the eBook): copies title, description, cover,
   // categories and A+ content into a new draft; the admin then uploads that format's file and sets its own price
-  async newEdition(src, format) {
+  async newEdition(src, format, extra = {}, files = {}) {
     const work = src.work_id || src.id;
     if (!src.work_id) { const { error } = await this.sb.from('books').update({ work_id: work }).eq('id', src.id); this._err(error); }
     const row = { ...src, work_id: work, format, status: 'draft' };
     for (const k of ['id', 'cover_url', 'sales_count', 'rating_avg', 'rating_count', 'created_at', 'updated_at', 'revenue_cents', '_fmts',
       'file_path', 'file_name', 'sample_path', 'file_check', 'librava_id', 'isbn', 'pages', 'deleted_at']) delete row[k];
-    return this.saveBook(row);
+    Object.assign(row, extra);
+    return this.saveBook(row, files);
   }
   // removes files of this book that are no longer used (old covers, replaced A+ pictures, an old PDF after an EPUB…);
   // files shared with its other editions (same cover, same A+ pictures) are kept

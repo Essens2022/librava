@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022125332';
-import { store } from './util.js?v=20261022125332';
+import { CONFIG } from './config.js?v=20261022130214';
+import { store } from './util.js?v=20261022130214';
 
 const D = {
   ro: {
@@ -420,6 +420,16 @@ const D = {
     'ed.confirm': 'Creez ediția {fmt} pentru „{title}”? Se copiază titlul, descrierea, coperta, categoriile și conținutul A+. Tu încarci fișierul {fmt} și pui prețul acestei ediții.',
     'ed.created': 'Ediția {fmt} a fost creată ca ciornă. Încarcă fișierul și pune prețul.',
     'ed.only': 'Doar fișier {fmt} (ediția {fmt})',
+    'ed2.title': 'Al doilea format (opțional)',
+    'ed2.help': 'Ai cartea și în celălalt format? Încarcă și al doilea fișier: la salvare se creează automat a doua ediție, legată de aceasta, cu prețul ei. Pe pagina cărții apar ambele formate.',
+    'ed2.upload': 'Încarcă al doilea fișier (EPUB sau PDF)',
+    'ed2.ready': 'Ediția {fmt} se creează când salvezi. Prețul ei îl pui la pasul Preț.',
+    'ed2.remove': 'Scoate al doilea format',
+    'ed2.same': 'Al doilea fișier trebuie să fie în celălalt format: unul EPUB, celălalt PDF.',
+    'ed2.price': 'Preț ediția {fmt} (EUR)',
+    'ed2.priceHelp': 'Fiecare format are prețul lui, ca pe Amazon.',
+    'ed2.ckPrice': 'Preț pentru ediția {fmt}',
+    'ed2.created': 'Ediția {fmt} a fost salvată și legată de această carte.',
     'book.ratings': '{n} evaluări',
     'book.noRatings': 'Fără evaluări',
     'book.free': 'Gratuit',
@@ -1536,6 +1546,16 @@ const D = {
     'ed.confirm': 'Creo l\'edizione {fmt} di «{title}»? Vengono copiati titolo, descrizione, copertina, categorie e contenuti A+. Tu carichi il file {fmt} e imposti il prezzo di questa edizione.',
     'ed.created': 'Edizione {fmt} creata come bozza. Carica il file e imposta il prezzo.',
     'ed.only': 'Solo file {fmt} (edizione {fmt})',
+    'ed2.title': 'Secondo formato (facoltativo)',
+    'ed2.help': 'Hai il libro anche nell\'altro formato? Carica anche il secondo file: al salvataggio viene creata automaticamente la seconda edizione, collegata a questa, con il suo prezzo. Nella pagina del libro compaiono entrambi i formati.',
+    'ed2.upload': 'Carica il secondo file (EPUB o PDF)',
+    'ed2.ready': 'L\'edizione {fmt} viene creata quando salvi. Il suo prezzo lo imposti al passo Prezzo.',
+    'ed2.remove': 'Togli il secondo formato',
+    'ed2.same': 'Il secondo file deve essere nell\'altro formato: uno EPUB, l\'altro PDF.',
+    'ed2.price': 'Prezzo edizione {fmt} (EUR)',
+    'ed2.priceHelp': 'Ogni formato ha il suo prezzo, come su Amazon.',
+    'ed2.ckPrice': 'Prezzo dell\'edizione {fmt}',
+    'ed2.created': 'Edizione {fmt} salvata e collegata a questo libro.',
     'book.ratings': '{n} valutazioni',
     'book.noRatings': 'Nessuna valutazione',
     'book.free': 'Gratis',
@@ -2652,6 +2672,16 @@ const D = {
     'ed.confirm': 'Create the {fmt} edition of “{title}”? Title, description, cover, categories and A+ content are copied. You upload the {fmt} file and set this edition\'s price.',
     'ed.created': '{fmt} edition created as a draft. Upload the file and set the price.',
     'ed.only': '{fmt} file only ({fmt} edition)',
+    'ed2.title': 'Second format (optional)',
+    'ed2.help': 'Do you have the book in the other format too? Upload the second file: when you save, a second edition linked to this one is created automatically, with its own price. The book page shows both formats.',
+    'ed2.upload': 'Upload the second file (EPUB or PDF)',
+    'ed2.ready': 'The {fmt} edition is created when you save. Set its price in the Pricing step.',
+    'ed2.remove': 'Remove the second format',
+    'ed2.same': 'The second file must be in the other format: one EPUB, the other PDF.',
+    'ed2.price': '{fmt} edition price (EUR)',
+    'ed2.priceHelp': 'Each format has its own price, as on Amazon.',
+    'ed2.ckPrice': 'Price of the {fmt} edition',
+    'ed2.created': '{fmt} edition saved and linked to this book.',
     'book.ratings': '{n} ratings',
     'book.noRatings': 'No ratings yet',
     'book.free': 'Free',
@@ -3387,7 +3417,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022125332`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022130214`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
