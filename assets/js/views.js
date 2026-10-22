@@ -1,14 +1,15 @@
-import { CONFIG } from './config.js?v=20261022114121';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022114121';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022114121';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022114121';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022114121';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022114121';
-import { track } from './track.js?v=20261022114121';
-import { guessLang } from './langdetect.js?v=20261022114121';
-import { didYouMean } from './search.js?v=20261022114121';
-import { api } from './api.js?v=20261022114121';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022114121';
+import { CONFIG } from './config.js?v=20261022120322';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022120322';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022120322';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022120322';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022120322';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022120322';
+import { track } from './track.js?v=20261022120322';
+import { gaEvent } from './ga.js?v=20261022120322';
+import { guessLang } from './langdetect.js?v=20261022120322';
+import { didYouMean } from './search.js?v=20261022120322';
+import { api } from './api.js?v=20261022120322';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022120322';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -371,8 +372,12 @@ export async function startCheckout(ids) {
   }
   if (!await waiverConfirm()) return;
   track('checkout', { value_cents: null });
+  const gaBooks = (await Promise.all(ids.map(id => api.getBook(id).catch(() => null)))).filter(Boolean);
+  gaEvent('checkout', { books: gaBooks });
   try {
     const res = await api.checkout(ids, { coupon: sessionStorage.getItem(COUPON) || null });
+    // remembered for the Analytics "purchase" event when the visitor comes back from the payment page
+    try { sessionStorage.setItem('librava:ga-pending', JSON.stringify({ id: 'LIB-' + Date.now().toString(36).toUpperCase(), books: gaBooks.map(b => ({ id: b.id, title: b.title, category: b.category, price_cents: b.price_cents, currency: b.currency })), value: res.total ?? null })); } catch { }
     if (res.mode === 'done') { sessionStorage.removeItem(COUPON); cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
     if (res.mode === 'redirect') { sessionStorage.removeItem(COUPON); toast(t('cart.redirecting')); location.href = res.url; return; }
     if (res.mode === 'bank') { cart.set(cart.get().filter(id => !ids.includes(id))); showBankOrder(res); return; }
@@ -861,6 +866,7 @@ export async function viewLibrary(el, q) {
   if (q.get('welcome')) toast(t('acc.emailConfirmed'));
   if (q.get('paid')) {
     toast(t('pay.success'));
+    try { const p = JSON.parse(sessionStorage.getItem('librava:ga-pending') || 'null'); if (p) { sessionStorage.removeItem('librava:ga-pending'); gaEvent('purchase', p); } } catch { }
     // ask Stripe straight away (does not wait for the webhook); try a few times while the payment settles
     (async () => {
       for (let i = 0; i < 6; i++) {

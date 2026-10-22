@@ -24,13 +24,14 @@ const RO = {
     ['1. Operatorul datelor', '{company}, {address}, {country}, cod fiscal / P.IVA {vat}, email {email}, este operatorul datelor tale personale, conform Regulamentului (UE) 2016/679 (GDPR).'],
     ['2. Ce date folosim', 'Datele contului: nume, email, parolă (păstrată criptat). Datele cumpărăturilor: cărțile cumpărate, sumele, data, numărul comenzii. Datele de citire: pagina la care ai rămas și semnele de carte. Recenziile pe care le scrii. Consimțămintele tale (termeni, noutăți pe email). Nu primim și nu păstrăm datele cardului: plata este procesată de Stripe.'],
     ['3. De ce le folosim (temeiul legal)', 'Pentru a-ți crea contul și a-ți livra cărțile (executarea contractului). Pentru facturare și evidența vânzărilor (obligație legală). Pentru siguranța site-ului și prevenirea fraudelor (interes legitim). Pentru noutăți pe email doar dacă ai bifat acest lucru (consimțământ, pe care îl poți retrage oricând).'],
-    ['4. Cui le transmitem', 'Supabase (găzduirea bazei de date și a fișierelor, servere în Uniunea Europeană, Irlanda); Stripe (procesarea plăților); GitHub Pages (găzduirea paginilor site-ului); furnizorul nostru de email (trimiterea emailurilor despre cont). Acești furnizori prelucrează datele doar în numele nostru, pe baza unor contracte conforme GDPR. Unii pot transfera date în afara UE, cu garanții adecvate (clauze contractuale standard). Nu vindem datele tale.'],
+    ['4. Cui le transmitem', 'Supabase (găzduirea bazei de date și a fișierelor, servere în Uniunea Europeană, Irlanda); Stripe (procesarea plăților); GitHub Pages (găzduirea paginilor site-ului); furnizorul nostru de email (trimiterea emailurilor despre cont); Google Ireland Ltd. (Google Analytics, doar dacă ai acceptat statisticile). Acești furnizori prelucrează datele doar în numele nostru, pe baza unor contracte conforme GDPR. Unii pot transfera date în afara UE, cu garanții adecvate (clauze contractuale standard). Nu vindem datele tale.'],
     ['5. Cât timp le păstrăm', 'Datele contului, până când îți ștergi contul. Datele despre vânzări, cât cere legea fiscală (de regulă 10 ani), fără legătură cu contul după ștergerea lui. Datele de citire și recenziile se șterg odată cu contul.'],
     ['6. Drepturile tale', 'Ai dreptul de acces, rectificare, ștergere, restricționare, portabilitate și opoziție, precum și dreptul de a-ți retrage consimțământul. Multe le poți exercita singur din Contul meu; pentru restul scrie-ne la {email}. Ai dreptul să depui o plângere la autoritatea de protecție a datelor din țara ta.'],
     ['7. Siguranță', 'Conexiunea este criptată (HTTPS), parolele sunt păstrate criptat, iar fiecare client are acces doar la datele și cărțile proprii.'],
   ],
   cookies: [
-    ['Ce folosim', 'Librava nu folosește cookie-uri de publicitate sau de urmărire și nu folosește servicii externe de analiză (de ex. Google Analytics). Numărăm vizitele în mod anonim, pe serverul nostru (pagina vizitată, de unde vii, țara aproximativă după fusul orar, tipul de dispozitiv, căutările din site), fără nume, e-mail sau adresă IP; dacă browserul tău trimite semnalul „Do Not Track” sau „Global Privacy Control”, nu numărăm nimic. Folosim doar stocarea necesară în browserul tău (localStorage, IndexedDB și memoria cache a site-ului) pentru: a te ține conectat la cont, coșul de cumpărături, limba și tema alese, progresul de citire și cărțile salvate pentru citit offline.'],
+    ['Ce folosim', 'Librava nu folosește cookie-uri de publicitate. Pentru cont, coș, limbă și citirea offline folosim doar stocarea tehnică necesară în browser. Numărăm vizitele în mod anonim, pe serverul nostru (pagina vizitată, de unde vii, țara aproximativă din fusul orar, tipul de dispozitiv), fără adresa IP și fără date care să te identifice.'],
+    ['Statistici Google Analytics (opțional)', 'Doar dacă alegi „Accept tot”, folosim Google Analytics 4 (Google Ireland Ltd.) ca să înțelegem cum este folosit magazinul: paginile vizitate, cărțile văzute, adăugate în coș și cumpărate, sursa vizitei. Google setează cookie-urile _ga (până la 2 ani). Nu folosim datele pentru reclame personalizate. Dacă alegi „Doar necesare”, Google Analytics nu se încarcă deloc. Îți poți schimba oricând alegerea din linkul „Setări cookie” din subsolul site-ului.'],
     ['Furnizori', 'La plată ești dus pe pagina securizată Stripe, care folosește propriile cookie-uri necesare pentru siguranța plății și prevenirea fraudelor. Fonturile și toate fișierele site-ului sunt servite direct de noi.'],
     ['Cum le controlezi', 'Poți șterge oricând aceste date din setările browserului. Atunci vei fi deconectat, coșul se golește, iar cărțile salvate offline trebuie descărcate din nou.'],
   ],
@@ -47,8 +48,10 @@ const RO = {
     ['Plăți', 'Procesate de Stripe Payments Europe Ltd.'],
   ],
   consentTitle: 'Confidențialitatea ta',
-  consentText: 'Librava nu folosește reclame și nu te urmărește. Folosim doar stocarea necesară în browser pentru cont, coș, limbă și citirea offline, plus statistici anonime de vizită. Continuând, accepți Termenii și condițiile și Politica de confidențialitate.',
-  consentOk: 'Accept și continui',
+  consentText: 'Folosim stocarea necesară în browser pentru cont, coș, limbă și citirea offline. Cu acordul tău folosim și Google Analytics, ca să înțelegem ce cărți și pagini îi interesează pe cititori. Fără reclame. Continuând, accepți Termenii și condițiile și Politica de confidențialitate.',
+  consentOk: 'Accept tot',
+  consentNecessary: 'Doar necesare',
+  consentSettings: 'Setări cookie',
   consentMore: 'Citește detaliile',
 };
 
@@ -72,13 +75,14 @@ const IT = {
     ['1. Titolare del trattamento', '{company}, {address}, {country}, P.IVA / codice fiscale {vat}, email {email}, è titolare del trattamento dei tuoi dati personali ai sensi del Regolamento (UE) 2016/679 (GDPR).'],
     ['2. Quali dati trattiamo', 'Dati dell\'account: nome, email, password (conservata cifrata). Dati degli acquisti: libri acquistati, importi, data, numero d\'ordine. Dati di lettura: pagina raggiunta e segnalibri. Le recensioni che scrivi. I tuoi consensi (termini, novità via email). Non riceviamo né conserviamo i dati della carta: il pagamento è gestito da Stripe.'],
     ['3. Perché (base giuridica)', 'Per creare l\'account e consegnarti i libri (esecuzione del contratto). Per fatturazione e registri delle vendite (obbligo di legge). Per la sicurezza del sito e la prevenzione delle frodi (legittimo interesse). Per le novità via email solo se l\'hai scelto (consenso, revocabile in qualsiasi momento).'],
-    ['4. A chi li comunichiamo', 'Supabase (database e file, server nell\'Unione Europea, Irlanda); Stripe (pagamenti); GitHub Pages (pubblicazione delle pagine del sito); il nostro fornitore di email (email relative all\'account). Questi fornitori trattano i dati solo per nostro conto, con contratti conformi al GDPR. Alcuni possono trasferire dati fuori dall\'UE con garanzie adeguate (clausole contrattuali standard). Non vendiamo i tuoi dati.'],
+    ['4. A chi li comunichiamo', 'Supabase (database e file, server nell\'Unione Europea, Irlanda); Stripe (pagamenti); GitHub Pages (pubblicazione delle pagine del sito); il nostro fornitore di email (email relative all\'account); Google Ireland Ltd. (Google Analytics, solo se hai accettato le statistiche). Questi fornitori trattano i dati solo per nostro conto, con contratti conformi al GDPR. Alcuni possono trasferire dati fuori dall\'UE con garanzie adeguate (clausole contrattuali standard). Non vendiamo i tuoi dati.'],
     ['5. Per quanto tempo', 'I dati dell\'account fino alla sua cancellazione. I dati di vendita per il tempo richiesto dalla normativa fiscale (di regola 10 anni), scollegati dall\'account dopo la cancellazione. Dati di lettura e recensioni vengono cancellati con l\'account.'],
     ['6. I tuoi diritti', 'Hai diritto di accesso, rettifica, cancellazione, limitazione, portabilità e opposizione, e di revocare il consenso. Molti puoi esercitarli da solo da Il mio account; per gli altri scrivici a {email}. Puoi proporre reclamo all\'autorità di controllo (in Italia, il Garante per la protezione dei dati personali).'],
     ['7. Sicurezza', 'La connessione è cifrata (HTTPS), le password sono conservate cifrate e ogni cliente accede solo ai propri dati e libri.'],
   ],
   cookies: [
-    ['Cosa usiamo', 'Librava non usa cookie pubblicitari o di tracciamento né servizi di analisi esterni (es. Google Analytics). Contiamo le visite in forma anonima sul nostro server (pagina visitata, provenienza, paese approssimativo dal fuso orario, tipo di dispositivo, ricerche nel sito), senza nome, e-mail o indirizzo IP; se il tuo browser invia il segnale “Do Not Track” o “Global Privacy Control”, non contiamo nulla. Usiamo solo l\'archiviazione tecnica necessaria nel tuo browser (localStorage, IndexedDB e cache del sito) per: mantenere l\'accesso all\'account, il carrello, lingua e tema scelti, i progressi di lettura e i libri salvati per la lettura offline.'],
+    ['Cosa usiamo', 'Librava non usa cookie pubblicitari. Per account, carrello, lingua e lettura offline usiamo solo l\'archiviazione tecnica necessaria nel browser. Contiamo le visite in forma anonima sul nostro server (pagina visitata, provenienza, paese approssimativo dal fuso orario, tipo di dispositivo), senza indirizzo IP né dati che ti identifichino.'],
+    ['Statistiche Google Analytics (facoltative)', 'Solo se scegli «Accetta tutto» usiamo Google Analytics 4 (Google Ireland Ltd.) per capire come viene usato il negozio: pagine visitate, libri visti, aggiunti al carrello e acquistati, provenienza della visita. Google imposta i cookie _ga (fino a 2 anni). Non usiamo i dati per pubblicità personalizzata. Se scegli «Solo necessari», Google Analytics non viene caricato. Puoi cambiare la scelta in qualsiasi momento dal link «Impostazioni cookie» in fondo al sito.'],
     ['Fornitori', 'Al pagamento vieni portato sulla pagina sicura di Stripe, che usa propri cookie tecnici per la sicurezza del pagamento e la prevenzione delle frodi. I caratteri e tutti i file del sito sono serviti direttamente da noi.'],
     ['Come gestirli', 'Puoi cancellare questi dati in qualsiasi momento dalle impostazioni del browser. Verrai disconnesso, il carrello si svuoterà e i libri salvati offline andranno scaricati di nuovo.'],
   ],
@@ -89,8 +93,10 @@ const IT = {
   ],
   imprint: [['Venditore', '{company}'], ['Indirizzo', '{address}, {country}'], ['P.IVA / Codice fiscale', '{vat}'], ['Contatto', '{email}'], ['Pagamenti', 'Gestiti da Stripe Payments Europe Ltd.']],
   consentTitle: 'La tua privacy',
-  consentText: 'Librava non usa pubblicità e non ti traccia. Usiamo solo l\'archiviazione tecnica necessaria nel browser per account, carrello, lingua e lettura offline, più statistiche di visita anonime. Continuando accetti i Termini e condizioni e l\'Informativa sulla privacy.',
-  consentOk: 'Accetto e continuo',
+  consentText: 'Usiamo l\'archiviazione tecnica necessaria nel browser per account, carrello, lingua e lettura offline. Con il tuo consenso usiamo anche Google Analytics, per capire quali libri e pagine interessano ai lettori. Niente pubblicità. Continuando accetti i Termini e condizioni e l\'Informativa sulla privacy.',
+  consentOk: 'Accetta tutto',
+  consentNecessary: 'Solo necessari',
+  consentSettings: 'Impostazioni cookie',
   consentMore: 'Leggi i dettagli',
 };
 
@@ -114,13 +120,14 @@ const EN = {
     ['1. Data controller', '{company}, {address}, {country}, VAT / tax number {vat}, email {email}, is the controller of your personal data under Regulation (EU) 2016/679 (GDPR).'],
     ['2. What data we use', 'Account data: name, email, password (stored encrypted). Purchase data: books bought, amounts, date, order number. Reading data: the page you reached and your bookmarks. Reviews you write. Your consents (terms, email news). We never receive or store card details: payments are handled by Stripe.'],
     ['3. Why (legal basis)', 'To create your account and deliver your books (performance of the contract). For invoicing and sales records (legal obligation). For site security and fraud prevention (legitimate interest). For email news only if you opted in (consent, which you can withdraw at any time).'],
-    ['4. Who we share it with', 'Supabase (database and file hosting, servers in the European Union, Ireland); Stripe (payments); GitHub Pages (hosting of the site\'s pages); our email provider (account emails). These providers process data only on our behalf under GDPR-compliant contracts. Some may transfer data outside the EU with appropriate safeguards (standard contractual clauses). We do not sell your data.'],
+    ['4. Who we share it with', 'Supabase (database and file hosting, servers in the European Union, Ireland); Stripe (payments); GitHub Pages (hosting of the site\'s pages); our email provider (account emails); Google Ireland Ltd. (Google Analytics, only if you accepted statistics). These providers process data only on our behalf under GDPR-compliant contracts. Some may transfer data outside the EU with appropriate safeguards (standard contractual clauses). We do not sell your data.'],
     ['5. How long we keep it', 'Account data until you delete your account. Sales data for as long as tax law requires (usually 10 years), detached from your account after deletion. Reading data and reviews are deleted with your account.'],
     ['6. Your rights', 'You have the right of access, rectification, erasure, restriction, portability and objection, and to withdraw consent. Many you can exercise yourself from Your account; for the others write to {email}. You can lodge a complaint with the data protection authority in your country.'],
     ['7. Security', 'The connection is encrypted (HTTPS), passwords are stored encrypted and each customer can only access their own data and books.'],
   ],
   cookies: [
-    ['What we use', 'Librava does not use advertising or tracking cookies, nor external analytics services (e.g. Google Analytics). We count visits anonymously on our own server (page visited, where you came from, approximate country from the time zone, device type, searches on the site), without names, e-mails or IP addresses; if your browser sends “Do Not Track” or “Global Privacy Control”, we count nothing. We only use the storage your browser needs (localStorage, IndexedDB and the site cache) to keep you signed in, keep your cart, your chosen language and theme, your reading progress and the books saved for offline reading.'],
+    ['What we use', 'Librava uses no advertising cookies. For your account, cart, language and offline reading we only use the browser storage that is strictly necessary. We count visits anonymously on our own server (page visited, where you came from, approximate country from the time zone, device type), with no IP address and no data that identifies you.'],
+    ['Google Analytics statistics (optional)', 'Only if you choose “Accept all”, we use Google Analytics 4 (Google Ireland Ltd.) to understand how the shop is used: pages visited, books viewed, added to the cart and bought, and where visits come from. Google sets the _ga cookies (up to 2 years). We do not use the data for personalised advertising. If you choose “Necessary only”, Google Analytics is not loaded at all. You can change your choice at any time with the “Cookie settings” link at the bottom of the site.'],
     ['Providers', 'At checkout you are taken to Stripe\'s secure page, which uses its own necessary cookies for payment security and fraud prevention. Fonts and all site files are served by us directly.'],
     ['How to control it', 'You can clear this data at any time in your browser settings. You will then be signed out, your cart will be emptied and books saved offline will need to be saved again.'],
   ],
@@ -131,10 +138,12 @@ const EN = {
   ],
   imprint: [['Seller', '{company}'], ['Address', '{address}, {country}'], ['VAT / tax number', '{vat}'], ['Contact', '{email}'], ['Payments', 'Processed by Stripe Payments Europe Ltd.']],
   consentTitle: 'Your privacy',
-  consentText: 'Librava shows no ads and does not track you. We only use the browser storage needed for your account, cart, language and offline reading, plus anonymous visit statistics. By continuing you accept the Terms and conditions and the Privacy policy.',
-  consentOk: 'Accept and continue',
+  consentText: 'We use the browser storage needed for your account, cart, language and offline reading. With your consent we also use Google Analytics to understand which books and pages readers are interested in. No ads. By continuing you accept the Terms and conditions and the Privacy policy.',
+  consentOk: 'Accept all',
+  consentNecessary: 'Necessary only',
+  consentSettings: 'Cookie settings',
   consentMore: 'Read the details',
 };
 
-export const LEGAL_VERSION = '2026-10-21b';
+export const LEGAL_VERSION = '2026-10-22';
 export function legalText(lang) { return lang === 'ro' ? RO : lang === 'it' ? IT : EN; }

@@ -1,8 +1,10 @@
-// Librava statistics: anonymous, first-party (no Google Analytics, no cookies, no IP addresses, no names or e-mails).
+// Librava statistics: anonymous, first-party (no cookies, no IP addresses, no names or e-mails).
+// Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261022114121';
-import { store } from './util.js?v=20261022114121';
+import { api } from './api.js?v=20261022120322';
+import { store } from './util.js?v=20261022120322';
+import { gaEvent } from './ga.js?v=20261022120322';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -47,9 +49,19 @@ export function track(type, data = {}) {
     const lang = document.documentElement.lang;
     api.track({ type, sid: sid(), vid: vid(), lang, country: country(), ...d, ...o, path: location.pathname + location.hash.replace(/[?].*$/, ''), ...data });
   } catch { }
+  toGA(type, data);
 }
-export function trackPage() {
+// mirror to Google Analytics (only with consent; ga.js checks it)
+function toGA(type, data) {
+  try {
+    if (off()) return;
+    if ((type === 'book_view' || type === 'add_cart') && data.book_id) api.getBook(data.book_id).then(b => b && gaEvent(type, { book: b }), () => { });
+    else if (type !== 'checkout') gaEvent(type, data);
+  } catch { }
+}
+export function trackPage(again) {
   const p = location.pathname + location.hash;
-  if (p === lastPath) return; lastPath = p;
+  if (p === lastPath && !again) return; lastPath = p;
+  if (again) { gaEvent('pageview'); return; }
   track('pageview');
 }

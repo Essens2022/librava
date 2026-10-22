@@ -1656,3 +1656,5 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .mini.skel .mini-cover { background: color-mix(in srgb, var(--fg) 8%, transparent); box-shadow: none; }
 .mini.skel .mini-title, .mini.skel .mini-price { background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 4px; color: transparent; }
 .end-cover { background: transparent; }
+.consent-btns { display: flex; gap: 8px; flex: none; }
+@media (max-width: 640px) { .consent-btns { flex-direction: column-reverse; } .consent-btns .btn { width: 100%; } }
