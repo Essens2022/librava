@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022130935';
-import { store } from './util.js?v=20261022130935';
+import { CONFIG } from './config.js?v=20261022134741';
+import { store } from './util.js?v=20261022134741';
 
 const D = {
   ro: {
@@ -3417,7 +3417,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022130935`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022134741`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

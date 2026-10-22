@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022130935';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022130935';
-import { esc, store, $, $$ } from './util.js?v=20261022130935';
+import { CONFIG } from './config.js?v=20261022134741';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022134741';
+import { esc, store, $, $$ } from './util.js?v=20261022134741';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022130935';
-import { suggest, highlight } from './search.js?v=20261022130935';
-import { track, trackPage } from './track.js?v=20261022130935';
-import { initGA, stopGA } from './ga.js?v=20261022130935';
-import { api } from './api.js?v=20261022130935';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022134741';
+import { suggest, highlight } from './search.js?v=20261022134741';
+import { track, trackPage } from './track.js?v=20261022134741';
+import { initGA, stopGA } from './ga.js?v=20261022134741';
+import { api } from './api.js?v=20261022134741';
 
 // ---------------- icons ----------------
 const P = {
@@ -422,7 +422,7 @@ export function bindGlobal() {
     if (e.target.closest('[data-bell]')) { openBell(); return; }
     if (tb) { store.set('theme', tb.dataset.themeSet); applyTheme(); openDrawer(false); renderChrome(); window.dispatchEvent(new Event('librava:themechange')); return; }
     if (e.target.closest('[data-lang-open]')) { openLangPicker(); return; }
-    const lb = e.target.closest('[data-lang]');
+    const lb = e.target.closest('.lang-opt[data-lang]');   // only the language picker (other lists also carry data-lang)
     if (lb) {
       lb.closest('.modal-wrap')?.remove();
       await setLang(lb.dataset.lang);
