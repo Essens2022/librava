@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022214103';
-import { store } from './util.js?v=20261022214103';
+import { CONFIG } from './config.js?v=20261022215741';
+import { store } from './util.js?v=20261022215741';
 
 const D = {
   ro: {
@@ -1118,6 +1118,15 @@ const D = {
     'admin.draft': 'Ciornă',
     'admin.live': 'Publicată',
     'admin.colTitle': 'Carte', 'admin.colPrice': 'Preț', 'admin.colSales': 'Vânzări', 'admin.colStatus': 'Stare',
+    'qp.edit': 'Schimbă prețul',
+    'qp.price': 'Preț (€)',
+    'qp.list': 'Preț tăiat (€)',
+    'qp.save': 'Salvează',
+    'qp.cancel': 'Anulează',
+    'qp.bad': 'Scrie prețul ca număr, de ex. 6,97',
+    'qp.min': 'Prețul minim este 0,50 € (sau 0 pentru gratuit)',
+    'qp.listLow': 'Prețul tăiat trebuie să fie mai mare decât prețul',
+    'qp.saved': 'Preț salvat: {title} ({fmt})',
     'admin.revenue': 'Încasări totale',
     'admin.orders': 'Cărți vândute',
     'admin.customers': 'Cumpărători',
@@ -2275,6 +2284,15 @@ const D = {
     'admin.draft': 'Bozza',
     'admin.live': 'Pubblicato',
     'admin.colTitle': 'Libro', 'admin.colPrice': 'Prezzo', 'admin.colSales': 'Vendite', 'admin.colStatus': 'Stato',
+    'qp.edit': 'Cambia il prezzo',
+    'qp.price': 'Prezzo (€)',
+    'qp.list': 'Prezzo barrato (€)',
+    'qp.save': 'Salva',
+    'qp.cancel': 'Annulla',
+    'qp.bad': 'Scrivi il prezzo come numero, es. 6,97',
+    'qp.min': 'Il prezzo minimo è 0,50 € (o 0 per gratis)',
+    'qp.listLow': 'Il prezzo barrato deve essere più alto del prezzo',
+    'qp.saved': 'Prezzo salvato: {title} ({fmt})',
     'admin.revenue': 'Incassi totali',
     'admin.orders': 'Libri venduti',
     'admin.customers': 'Acquirenti',
@@ -3432,6 +3450,15 @@ const D = {
     'admin.draft': 'Draft',
     'admin.live': 'Published',
     'admin.colTitle': 'Book', 'admin.colPrice': 'Price', 'admin.colSales': 'Sales', 'admin.colStatus': 'Status',
+    'qp.edit': 'Change the price',
+    'qp.price': 'Price (€)',
+    'qp.list': 'Crossed-out price (€)',
+    'qp.save': 'Save',
+    'qp.cancel': 'Cancel',
+    'qp.bad': 'Type the price as a number, e.g. 6.97',
+    'qp.min': 'The minimum price is €0.50 (or 0 for free)',
+    'qp.listLow': 'The crossed-out price must be higher than the price',
+    'qp.saved': 'Price saved: {title} ({fmt})',
     'admin.revenue': 'Total revenue',
     'admin.orders': 'Books sold',
     'admin.customers': 'Customers',
@@ -3510,7 +3537,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022214103`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022215741`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

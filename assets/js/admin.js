@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022214103';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022214103';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022214103';
-import { resetCompanyCache } from './views.js?v=20261022214103';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022214103';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022214103';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022214103';
-import { api } from './api.js?v=20261022214103';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022214103';
+import { CONFIG } from './config.js?v=20261022215741';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022215741';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022215741';
+import { resetCompanyCache } from './views.js?v=20261022215741';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022215741';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022215741';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022215741';
+import { api } from './api.js?v=20261022215741';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022215741';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -164,10 +164,18 @@ async function booksList(body) {
     const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
     return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
   };
+  // the price can be changed right here, like on KDP's bookshelf: tap it, type the new price (and the crossed-out one), Save
+  const priceCell = b => `<button type="button" class="qp-show" data-qp="${esc(b.id)}" title="${esc(t('qp.edit'))}">
+      <b>${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</b>${b.list_price_cents > b.price_cents ? `<s>${money(b.list_price_cents)}</s>` : ''}${icon('edit', 'ico')}</button>`;
+  const eur = c => c ? (c / 100).toFixed(2).replace('.', ',') : '';
+  const priceForm = b => `<form class="qp-form" data-qpf="${esc(b.id)}">
+      <label><span>${esc(t('qp.price'))}</span><input class="input" name="p" inputmode="decimal" value="${eur(b.price_cents)}" required></label>
+      <label><span>${esc(t('qp.list'))}</span><input class="input" name="l" inputmode="decimal" value="${eur(b.list_price_cents)}" placeholder="—"></label>
+      <div class="qp-btns"><button type="submit" class="btn btn-buy btn-sm">${esc(t('qp.save'))}</button><button type="button" class="btn btn-ghost btn-sm" data-qpx>${esc(t('qp.cancel'))}</button></div></form>`;
   const rowHTML = (b, pos = '') => `<tr class="${pos}">
         <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b><span class="fp-chip fmt-${esc(b.format)}">${esc(t('book.formatShort.' + b.format))}</span> ${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
           <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}${edLinks(b)}</div></div></div></td>
-        <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
+        <td class="num">${priceCell(b)}</td>
         <td class="num">${b.sales_count || 0}</td>
         <td class="num">${money(b.revenue_cents || 0)}</td>
         <td style="white-space:nowrap">${b.rating_count ? `${stars(b.rating_avg)} <span class="muted">${b.rating_count}</span>` : '<span class="muted">—</span>'}</td>
@@ -220,8 +228,32 @@ async function booksList(body) {
   $('#adm-more', body).onclick = () => { shown += STEP; draw(); };
   draw();
   // one listener for all rows (rows are drawn again when filtering)
+  $('#adm-rows', body).addEventListener('submit', async e => {
+    const f = e.target.closest('[data-qpf]'); if (!f) return;
+    e.preventDefault();
+    const b = books.find(x => x.id === f.dataset.qpf);
+    const cents = v => { v = String(v || '').trim().replace(/\s|€/g, '').replace(',', '.'); if (!v) return null; const n = Math.round(parseFloat(v) * 100); return Number.isFinite(n) && n >= 0 ? n : NaN; };
+    const p = cents(f.p.value), l = cents(f.l.value);
+    if (p == null || Number.isNaN(p) || Number.isNaN(l)) { toast(t('qp.bad'), { error: true }); return; }
+    if (p > 0 && p < 50) { toast(t('qp.min'), { error: true }); return; }
+    if (l != null && l <= p) { toast(t('qp.listLow'), { error: true }); return; }
+    const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+    try {
+      await api.updateBook(b.id, { price_cents: p, list_price_cents: l });
+      b.price_cents = p; b.list_price_cents = l;
+      f.parentElement.innerHTML = priceCell(b);
+      toast(t('qp.saved', { title: b.title, fmt: t('book.formatShort.' + b.format) }));
+    } catch (err) { btn.disabled = false; toast(errText(err), { error: true }); }
+  });
+  $('#adm-rows', body).addEventListener('keydown', e => { if (e.key === 'Escape') e.target.closest('[data-qpf]')?.querySelector('[data-qpx]')?.click(); });
   $('#adm-rows', body).addEventListener('click', async e => {
     const tg = e.target.closest('[data-toggle]'), ed = e.target.closest('[data-edition]'), del = e.target.closest('[data-del]');
+    const qp = e.target.closest('[data-qp]'), qx = e.target.closest('[data-qpx]');
+    if (qp) {
+      const b = books.find(x => x.id === qp.dataset.qp); const td = qp.parentElement;
+      td.innerHTML = priceForm(b); td.querySelector('input').select(); return;
+    }
+    if (qx) { const f = qx.closest('form'); const b = books.find(x => x.id === f.dataset.qpf); f.parentElement.innerHTML = priceCell(b); return; }
     if (tg) {
       if (!api.setBookStatus) return;
       try { await api.setBookStatus(tg.dataset.toggle, tg.dataset.next); toast(t(tg.dataset.next === 'published' ? 'admin.nowPublished' : 'admin.nowHidden')); booksList(body); }
