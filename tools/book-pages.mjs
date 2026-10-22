@@ -64,6 +64,12 @@ const og = (url, title, desc, img, w = 1200, h = 630, type = 'website', locale) 
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
 <meta property="og:image" content="${esc(img)}"><meta property="og:image:width" content="${w}"><meta property="og:image:height" content="${h}">${locale ? `<meta property="og:locale" content="${locale}">` : ''}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(img)}">`;
+// Digital delivery: free and instant everywhere; EU withdrawal right lost once delivered (consent at checkout).
+const COUNTRIES = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','GB','CH','NO','IS','US','CA','AU','NZ','MD','UA'];
+const RETURN_POLICY = { '@type': 'MerchantReturnPolicy', applicableCountry: COUNTRIES, returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted', merchantReturnLink: SITE + '/#/legal/withdrawal' };
+const shipping = cur => ({ '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: cur },
+  shippingDestination: { '@type': 'DefinedRegion', addressCountry: COUNTRIES },
+  deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' } } });
 const ORG = { '@type': 'Organization', '@id': SITE + '/#org', name: 'Librava', url: SITE + '/', logo: SITE + '/assets/img/icon-512.png' };
 const ldScript = graph => `<script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>`;
 
@@ -151,7 +157,8 @@ for (const b of books) {
     publisher: { '@id': SITE + '/#org' },
     ...(b.rights === 'public' ? { copyrightNotice: 'Public domain text' } : { copyrightHolder: { '@id': SITE + '/#org' }, copyrightYear: new Date(b.published_at || Date.now()).getFullYear(), copyrightNotice: `© ${new Date(b.published_at || Date.now()).getFullYear()} Librava (librava.store). All rights reserved.` }),
     brand: { '@type': 'Brand', name: 'Librava' }, sku: b.librava_id || b.id, genre: cat ? tr(l, 'cat.' + cat) : undefined,
-    offers: { '@type': 'Offer', url, price: (b.price_cents / 100).toFixed(2), priceCurrency: (b.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' } },
+    offers: { '@type': 'Offer', url, price: (b.price_cents / 100).toFixed(2), priceCurrency: (b.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' },
+      hasMerchantReturnPolicy: RETURN_POLICY, shippingDetails: shipping((b.currency || 'eur').toUpperCase()) },
     aggregateRating: b.rating_count ? { '@type': 'AggregateRating', ratingValue: (+b.rating_avg).toFixed(1), reviewCount: b.rating_count, bestRating: 5, worstRating: 1 } : undefined };
   const crumbs = { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Librava', item: `${SITE}/${l}/` },
     ...(cat ? [{ '@type': 'ListItem', position: 2, name: tr(l, 'cat.' + cat), item: `${SITE}/${l}/${catSlug(l, cat)}/` }] : []),

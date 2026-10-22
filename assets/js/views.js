@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js?v=20261021161743';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261021161743';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261021161743';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261021161743';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261021161743';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261021161743';
-import { track } from './track.js?v=20261021161743';
-import { guessLang } from './langdetect.js?v=20261021161743';
-import { didYouMean } from './search.js?v=20261021161743';
-import { api } from './api.js?v=20261021161743';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261021161743';
+import { CONFIG } from './config.js?v=20261022114121';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022114121';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022114121';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022114121';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022114121';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022114121';
+import { track } from './track.js?v=20261022114121';
+import { guessLang } from './langdetect.js?v=20261022114121';
+import { didYouMean } from './search.js?v=20261022114121';
+import { api } from './api.js?v=20261022114121';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022114121';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
