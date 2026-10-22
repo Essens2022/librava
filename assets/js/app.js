@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261022173035';
-import { t, getLang, setLang } from './i18n.js?v=20261022173035';
-import { esc, $, $$ } from './util.js?v=20261022173035';
-import { api, chooseBackend } from './api.js?v=20261022173035';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261022173035';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022173035';
-import { trackPage } from './track.js?v=20261022173035';
-import { offline } from './offline.js?v=20261022173035';
-import { viewReader } from './reader.js?v=20261022173035';
-import { viewAdmin } from './admin.js?v=20261022173035';
+import { CONFIG } from './config.js?v=20261022174049';
+import { t, getLang, setLang } from './i18n.js?v=20261022174049';
+import { esc, $, $$ } from './util.js?v=20261022174049';
+import { api, chooseBackend } from './api.js?v=20261022174049';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261022174049';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261022174049';
+import { trackPage } from './track.js?v=20261022174049';
+import { offline } from './offline.js?v=20261022174049';
+import { viewReader } from './reader.js?v=20261022174049';
+import { viewAdmin } from './admin.js?v=20261022174049';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -131,8 +131,14 @@ async function boot() {
   setupDropZones();
   api.onAuthChange(() => rerender());
   window.addEventListener('librava:rerender', () => { const b = $('#demo-bar'); if (b) b.textContent = t('common.demoBanner'); rerender(); });
-  window.addEventListener('hashchange', () => { if (!pathMode || location.hash.startsWith('#/')) route(); });
-  window.addEventListener('popstate', () => { if (pathMode) route(); });
+  // the browser's Back/Forward: on librava.store the address also changes its path (/book/<id>/), and then Chrome
+  // sends only "popstate", not "hashchange" — listen to both and draw the page once
+  const onNav = () => {
+    let k = currentPath(); try { k = decodeURI(k); } catch { }
+    if ((k || '/') !== lastKey) route();
+  };
+  window.addEventListener('hashchange', () => { if (!pathMode || location.hash.startsWith('#/')) onNav(); });
+  window.addEventListener('popstate', () => { if (pathMode) route(); else onNav(); });
   window.addEventListener('librava:navigate', route);
   // Stripe sends the buyer back to ?paid=1#/library — move the flag into the hash route
   if (!pathMode && new URLSearchParams(location.search).get('paid')) {
