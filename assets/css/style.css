@@ -766,6 +766,9 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .kdp-bar { position: sticky; bottom: 0; display: flex; gap: 10px; align-items: center; padding: 14px 0; margin-top: 12px; background: var(--bg); border-top: 1px solid var(--line); z-index: 5; }
 .kdp-bar .spacer { flex: 1; }
 .shelf-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; font-size: 13px; }
+.shelf-links .ed-add { all: unset; cursor: pointer; color: var(--link); font-weight: 600; }
+.shelf-links .ed-add:hover { text-decoration: underline; }
+.shelf-links .ed-add:focus-visible { outline: 2px solid var(--pista-strong); outline-offset: 2px; }
 .shelf-links .continue { font-weight: 600; color: #B26A00; }
 .series-line { margin-top: 4px; font-size: 14px; }
 @media (max-width: 760px) {

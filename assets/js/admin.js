@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022123606';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022123606';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022123606';
-import { resetCompanyCache } from './views.js?v=20261022123606';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022123606';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022123606';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022123606';
-import { api } from './api.js?v=20261022123606';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022123606';
+import { CONFIG } from './config.js?v=20261022124319';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022124319';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022124319';
+import { resetCompanyCache } from './views.js?v=20261022124319';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022124319';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022124319';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022124319';
+import { api } from './api.js?v=20261022124319';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022124319';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -161,7 +161,7 @@ async function booksList(body) {
   const edLinks = b => {
     const have = new Set(sibs(b).map(x => x.format));
     const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
-    return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<a href="#" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</a>`).join('') : '');
+    return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
   };
   body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
     <div class="adm-filters">
@@ -203,7 +203,7 @@ async function booksList(body) {
     catch (e) { toast(errText(e), { error: true }); }
   });
   $$('[data-edition]', body).forEach(a => a.onclick = async e => {
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     const b = books.find(x => x.id === a.dataset.edition), fmt = t('book.formatShort.' + a.dataset.fmt);
     if (!await confirmBox(t('ed.confirm', { title: b.title, fmt }), { ok: t('ed.add', { fmt }) })) return;
     try { const id = await api.newEdition(b, a.dataset.fmt); toast(t('ed.created', { fmt })); go('/admin/edit/' + encodeURIComponent(id) + '/2'); }
