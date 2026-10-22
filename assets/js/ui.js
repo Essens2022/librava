@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022171649';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022171649';
-import { esc, store, $, $$ } from './util.js?v=20261022171649';
+import { CONFIG } from './config.js?v=20261022172106';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022172106';
+import { esc, store, $, $$ } from './util.js?v=20261022172106';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022171649';
-import { suggest, highlight } from './search.js?v=20261022171649';
-import { track, trackPage } from './track.js?v=20261022171649';
-import { initGA, stopGA } from './ga.js?v=20261022171649';
-import { api } from './api.js?v=20261022171649';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022172106';
+import { suggest, highlight } from './search.js?v=20261022172106';
+import { track, trackPage } from './track.js?v=20261022172106';
+import { initGA, stopGA } from './ga.js?v=20261022172106';
+import { api } from './api.js?v=20261022172106';
 
 // ---------------- icons ----------------
 const P = {
@@ -193,7 +193,8 @@ export function renderChrome() {
     <div class="drawer-head"><span class="drawer-hello">${icon('user')} ${hello}</span>${langBtn('drawer-lang')}</div>
     <div class="drawer-body">
       <h3>${esc(t('nav.browse'))}</h3>
-      <div class="drawer-all-group"><b>${esc(t('nav.allBooks'))}</b>
+      <button type="button" class="dlink drawer-all-toggle" aria-expanded="false" data-drawer-all>${esc(t('nav.allBooks'))} ${icon('chevD', 'ico chev')}</button>
+      <div class="drawer-subs" hidden>
         <a href="#/search" class="drawer-sub">${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))} ${icon('chevR')}</a>
         <a href="#/search?lang=all" class="drawer-sub">${esc(t('nav.inAllLangs'))} ${icon('chevR')}</a></div>
       ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
@@ -473,6 +474,8 @@ export function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-cookie-settings]')) { e.preventDefault(); showConsent(true); return; }
+    const da = e.target.closest('[data-drawer-all]');
+    if (da) { const open = da.getAttribute('aria-expanded') !== 'true'; da.setAttribute('aria-expanded', open); da.nextElementSibling.hidden = !open; return; }
     const ab = e.target.closest('[data-allbooks]');
     if (ab) { e.preventDefault(); allBooksMenu(ab); return; }
     if (!e.target.closest('.allbooks-menu')) document.querySelector('.allbooks-menu')?.remove();
