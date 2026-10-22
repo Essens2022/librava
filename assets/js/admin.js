@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022134741';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022134741';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022134741';
-import { resetCompanyCache } from './views.js?v=20261022134741';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022134741';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022134741';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022134741';
-import { api } from './api.js?v=20261022134741';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022134741';
+import { CONFIG } from './config.js?v=20261022142807';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022142807';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022142807';
+import { resetCompanyCache } from './views.js?v=20261022142807';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022142807';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022142807';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022142807';
+import { api } from './api.js?v=20261022142807';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022142807';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -48,7 +48,7 @@ export async function viewAdmin(el, parts) {
   liveAdmin(tab, parts, body);
   switch (tab) {
     case 'new': return bookForm(body, null);
-    case 'edit': { const list = await api.adminBooks(); return bookForm(body, list.find(b => b.id === parts[1]) || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }
+    case 'edit': { const book = await api.getBook(parts[1]).catch(() => null); return bookForm(body, book || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }  // the whole book, not the light list
     case 'books': return booksList(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
@@ -157,22 +157,14 @@ async function booksList(body) {
   }
   const langs = [...new Set(books.map(b => b.language))];
   // editions: the same book in EPUB and PDF, each with its own file and price (linked like Kindle / paperback on Amazon)
-  const sibs = b => b.work_id ? books.filter(x => x.work_id === b.work_id) : [b];
+  const byWork = new Map(); for (const x of books) if (x.work_id) { if (!byWork.has(x.work_id)) byWork.set(x.work_id, []); byWork.get(x.work_id).push(x); }
+  const sibs = b => b.work_id ? byWork.get(b.work_id) || [b] : [b];
   const edLinks = b => {
     const have = new Set(sibs(b).map(x => x.format));
     const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
     return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
   };
-  body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
-    <div class="adm-filters">
-      <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
-      <select class="input" id="adm-st" aria-label="${esc(t('admin.colStatus'))}"><option value="">${esc(t('admin.filter.all'))}</option><option value="published">${esc(t('admin.filter.published'))}</option><option value="draft">${esc(t('admin.filter.draft'))}</option></select>
-      <select class="input" id="adm-lang" aria-label="${esc(t('search.bookLang'))}"><option value="">${esc(t('lang.all'))}</option>${langs.map(l => `<option value="${l}">${esc(langName(l))}</option>`).join('')}</select>
-      <select class="input" id="adm-cat" aria-label="${esc(t('search.category'))}"><option value="">${esc(t('search.any'))}</option>${CATS.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('')}</select>
-    </div>
-    <div class="table-wrap"><table class="adm-table">
-      <thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('admin.colPrice'))}</th><th class="num">${esc(t('admin.colSales'))}</th><th class="num">${esc(t('admin.colRevenue'))}</th><th>${esc(t('admin.colRating'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
-      <tbody>${books.map(b => `<tr data-row data-q="${esc(norm(b.title + ' ' + b.author))}" data-st="${b.status}" data-blang="${b.language}" data-cat="${b.category}">
+  const rowHTML = b => `<tr>
         <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
           <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}${edLinks(b)}</div></div></div></td>
         <td class="num">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</td>
@@ -184,35 +176,63 @@ async function booksList(body) {
           <a class="btn btn-ghost btn-sm" href="#/admin/edit/${encodeURIComponent(b.id)}" title="${esc(t('admin.edit'))}">${icon('edit', 'ico')}<span class="sr">${esc(t('admin.edit'))}</span></a>
           <a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(b.id)}" title="${esc(t('admin.viewStore'))}">${icon('eye', 'ico')}<span class="sr">${esc(t('admin.viewStore'))}</span></a>
           <button class="btn btn-ghost btn-sm" data-del="${esc(b.id)}" title="${esc(t('admin.delete'))}">${icon('trash', 'ico')}<span class="sr">${esc(t('admin.delete'))}</span></button>
-        </td></tr>`).join('')}</tbody>
-    </table></div></div>`;
+        </td></tr>`;
+  body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
+    <div class="adm-filters">
+      <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
+      <select class="input" id="adm-st" aria-label="${esc(t('admin.colStatus'))}"><option value="">${esc(t('admin.filter.all'))}</option><option value="published">${esc(t('admin.filter.published'))}</option><option value="draft">${esc(t('admin.filter.draft'))}</option></select>
+      <select class="input" id="adm-lang" aria-label="${esc(t('search.bookLang'))}"><option value="">${esc(t('lang.all'))}</option>${langs.map(l => `<option value="${l}">${esc(langName(l))}</option>`).join('')}</select>
+      <select class="input" id="adm-cat" aria-label="${esc(t('search.category'))}"><option value="">${esc(t('search.any'))}</option>${CATS.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('')}</select>
+    </div>
+    <p class="muted adm-count" id="adm-count"></p>
+    <div class="table-wrap"><table class="adm-table">
+      <thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('admin.colPrice'))}</th><th class="num">${esc(t('admin.colSales'))}</th><th class="num">${esc(t('admin.colRevenue'))}</th><th>${esc(t('admin.colRating'))}</th><th>${esc(t('admin.colStatus'))}</th><th></th></tr></thead>
+      <tbody id="adm-rows"></tbody>
+    </table></div>
+    <div style="text-align:center;margin-top:14px"><button type="button" class="btn btn-ghost" id="adm-more" hidden></button></div></div>`;
   $('#b-optimize', body)?.addEventListener('click', async e => {
     const btn = e.currentTarget; btn.disabled = true;
     const r = await optimizeExisting(btn);
     toast(r.done ? t('img.optDone', { n: r.done, kb: Math.round(r.saved / 1024) }) : t('img.optNothing'), { ms: 6000 });
     booksList(body);
   });
+  // with thousands of books the table shows 100 rows at a time; the filters work on the whole list
+  const STEP = 100; let shown = STEP, list = books;
+  const qOf = new Map(books.map(b => [b.id, norm(b.title + ' ' + (b.subtitle || '') + ' ' + b.author + ' ' + (b.isbn || '') + ' ' + (b.librava_id || ''))]));
+  const draw = () => {
+    $('#adm-rows', body).innerHTML = list.slice(0, shown).map(rowHTML).join('');
+    $('#adm-count', body).textContent = t('admin.countShown', { n: Math.min(shown, list.length), total: list.length });
+    const more = $('#adm-more', body); more.hidden = list.length <= shown; more.textContent = t('admin.showMore', { n: Math.min(STEP, list.length - shown) });
+  };
   const apply = () => {
-    const q = norm($('#adm-q', body).value), st = $('#adm-st', body).value, l = $('#adm-lang', body).value, c = $('#adm-cat', body).value;
-    $$('[data-row]', body).forEach(r => { r.hidden = (q && !r.dataset.q.includes(q)) || (st && r.dataset.st !== st) || (l && r.dataset.blang !== l) || (c && r.dataset.cat !== c); });
+    const q = norm($('#adm-q', body).value.trim()), st = $('#adm-st', body).value, l = $('#adm-lang', body).value, c = $('#adm-cat', body).value;
+    list = books.filter(b => !((q && !qOf.get(b.id).includes(q)) || (st && b.status !== st) || (l && b.language !== l) || (c && b.category !== c && !(b.categories || []).includes(c))));
+    shown = STEP; draw();
   };
   ['#adm-q', '#adm-st', '#adm-lang', '#adm-cat'].forEach(s => $(s, body).addEventListener('input', apply));
-  $$('[data-toggle]', body).forEach(btn => btn.onclick = async () => {
-    if (!api.setBookStatus) return;
-    try { await api.setBookStatus(btn.dataset.toggle, btn.dataset.next); toast(t(btn.dataset.next === 'published' ? 'admin.nowPublished' : 'admin.nowHidden')); booksList(body); }
-    catch (e) { toast(errText(e), { error: true }); }
-  });
-  $$('[data-edition]', body).forEach(a => a.onclick = async e => {
-    e.preventDefault(); e.stopPropagation();
-    const b = books.find(x => x.id === a.dataset.edition), fmt = t('book.formatShort.' + a.dataset.fmt);
-    if (!await confirmBox(t('ed.confirm', { title: b.title, fmt }), { ok: t('ed.add', { fmt }) })) return;
-    try { const id = await api.newEdition(b, a.dataset.fmt); toast(t('ed.created', { fmt })); go('/admin/edit/' + encodeURIComponent(id) + '/2'); }
-    catch (err) { toast(errText(err), { error: true }); }
-  });
-  $$('[data-del]', body).forEach(btn => btn.onclick = async () => {
-    const b = books.find(x => x.id === btn.dataset.del);
-    if (!await confirmBox(t('admin.confirmDelete', { title: b.title }), { ok: t('admin.delete'), danger: true })) return;
-    try { await api.deleteBook(b.id); toast(t('admin.deleted')); booksList(body); } catch (e) { toast(errText(e), { error: true }); }
+  $('#adm-more', body).onclick = () => { shown += STEP; draw(); };
+  draw();
+  // one listener for all rows (rows are drawn again when filtering)
+  $('#adm-rows', body).addEventListener('click', async e => {
+    const tg = e.target.closest('[data-toggle]'), ed = e.target.closest('[data-edition]'), del = e.target.closest('[data-del]');
+    if (tg) {
+      if (!api.setBookStatus) return;
+      try { await api.setBookStatus(tg.dataset.toggle, tg.dataset.next); toast(t(tg.dataset.next === 'published' ? 'admin.nowPublished' : 'admin.nowHidden')); booksList(body); }
+      catch (err) { toast(errText(err), { error: true }); }
+    } else if (ed) {
+      e.preventDefault(); e.stopPropagation();
+      const b = books.find(x => x.id === ed.dataset.edition), fmt = t('book.formatShort.' + ed.dataset.fmt);
+      if (!await confirmBox(t('ed.confirm', { title: b.title, fmt }), { ok: t('ed.add', { fmt }) })) return;
+      try {
+        const full = await api.getBook(b.id);   // copy the whole book (description, A+…), not the light list row
+        if (!full) throw new Error(t('book.notFound'));
+        const id = await api.newEdition(full, ed.dataset.fmt); toast(t('ed.created', { fmt })); go('/admin/edit/' + encodeURIComponent(id) + '/2');
+      } catch (err) { toast(errText(err), { error: true }); }
+    } else if (del) {
+      const b = books.find(x => x.id === del.dataset.del);
+      if (!await confirmBox(t('admin.confirmDelete', { title: b.title }), { ok: t('admin.delete'), danger: true })) return;
+      try { await api.deleteBook(b.id); toast(t('admin.deleted')); booksList(body); } catch (err) { toast(errText(err), { error: true }); }
+    }
   });
 }
 
@@ -560,10 +580,11 @@ async function optimizeExisting(btn) {
         const f = await fetchFile(b.cover_url, 'cover');
         if (f.size > 105 * 1024) { const light = await compressImage(f, { maxW: 1200, maxH: 1920, name: 'cover' }); if (light.size < f.size) { await api.replaceCover(b, light); saved += f.size - light.size; done++; } }
       }
-      if ((b.aplus || []).length) {
+      const aplus = b.aplus !== undefined ? b.aplus : (await api.getBook(b.id).catch(() => null))?.aplus;   // the admin list is light
+      if ((aplus || []).length) {
         let changed = false;
         const mods = [];
-        for (const m of b.aplus) {
+        for (const m of aplus) {
           const spec = APLUS[m.type] || {};
           const imgs = [];
           for (const im of (m.imgs || [])) {

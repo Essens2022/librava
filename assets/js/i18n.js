@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261022134741';
-import { store } from './util.js?v=20261022134741';
+import { CONFIG } from './config.js?v=20261022142807';
+import { store } from './util.js?v=20261022142807';
 
 const D = {
   ro: {
@@ -420,6 +420,11 @@ const D = {
     'ed.confirm': 'Creez ediția {fmt} pentru „{title}”? Se copiază titlul, descrierea, coperta, categoriile și conținutul A+. Tu încarci fișierul {fmt} și pui prețul acestei ediții.',
     'ed.created': 'Ediția {fmt} a fost creată ca ciornă. Încarcă fișierul și pune prețul.',
     'ed.only': 'Doar fișier {fmt} (ediția {fmt})',
+    'search.pages': 'Pagini cu rezultate',
+    'search.prev': 'Înapoi',
+    'search.next': 'Înainte',
+    'admin.countShown': '{n} din {total} cărți',
+    'admin.showMore': 'Arată încă {n}',
     'ed2.title': 'Al doilea format (opțional)',
     'ed2.help': 'Ai cartea și în celălalt format? Încarcă și al doilea fișier: la salvare se creează automat a doua ediție, legată de aceasta, cu prețul ei. Pe pagina cărții apar ambele formate.',
     'ed2.upload': 'Încarcă al doilea fișier (EPUB sau PDF)',
@@ -1546,6 +1551,11 @@ const D = {
     'ed.confirm': 'Creo l\'edizione {fmt} di «{title}»? Vengono copiati titolo, descrizione, copertina, categorie e contenuti A+. Tu carichi il file {fmt} e imposti il prezzo di questa edizione.',
     'ed.created': 'Edizione {fmt} creata come bozza. Carica il file e imposta il prezzo.',
     'ed.only': 'Solo file {fmt} (edizione {fmt})',
+    'search.pages': 'Pagine dei risultati',
+    'search.prev': 'Indietro',
+    'search.next': 'Avanti',
+    'admin.countShown': '{n} di {total} libri',
+    'admin.showMore': 'Mostra altri {n}',
     'ed2.title': 'Secondo formato (facoltativo)',
     'ed2.help': 'Hai il libro anche nell\'altro formato? Carica anche il secondo file: al salvataggio viene creata automaticamente la seconda edizione, collegata a questa, con il suo prezzo. Nella pagina del libro compaiono entrambi i formati.',
     'ed2.upload': 'Carica il secondo file (EPUB o PDF)',
@@ -2672,6 +2682,11 @@ const D = {
     'ed.confirm': 'Create the {fmt} edition of “{title}”? Title, description, cover, categories and A+ content are copied. You upload the {fmt} file and set this edition\'s price.',
     'ed.created': '{fmt} edition created as a draft. Upload the file and set the price.',
     'ed.only': '{fmt} file only ({fmt} edition)',
+    'search.pages': 'Result pages',
+    'search.prev': 'Previous',
+    'search.next': 'Next',
+    'admin.countShown': '{n} of {total} books',
+    'admin.showMore': 'Show {n} more',
     'ed2.title': 'Second format (optional)',
     'ed2.help': 'Do you have the book in the other format too? Upload the second file: when you save, a second edition linked to this one is created automatically, with its own price. The book page shows both formats.',
     'ed2.upload': 'Upload the second file (EPUB or PDF)',
@@ -3417,7 +3432,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261022134741`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261022142807`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -308,3 +308,6 @@ alter table public.books add column if not exists work_id uuid;
 create index if not exists books_work_idx on public.books (work_id) where work_id is not null;
 -- statistics: visits by search-engine robots are kept but not counted
 alter table public.events add column if not exists bot boolean not null default false;
+-- light store list: plain-text start of the description + index for paged reading (5000+ books)
+alter table public.books add column if not exists blurb text generated always as (left(regexp_replace(coalesce(description, ''), '<[^>]*>', ' ', 'g'), 200)) stored;
+create index if not exists books_list_idx on public.books (published_at desc, id) where deleted_at is null;

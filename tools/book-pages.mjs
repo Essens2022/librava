@@ -37,9 +37,19 @@ const catSlug = (l, c) => { const s = slug(tr(l, 'cat.' + c)); return s.length >
 
 // ---------- data ----------
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
-const res = process.env.SEO_TEST_BOOKS ? { ok: true, json: async () => JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8')) } : await fetch(`${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights&status=eq.published&deleted_at=is.null&order=published_at.desc`, { headers: H });
-if (!res.ok) { console.error('Supabase error', res.status, await res.text()); process.exit(1); }
-const books = await res.json();
+// all published books, read in pages of 1000 (the database never returns more than 1000 rows at once)
+async function readBooks() {
+  if (process.env.SEO_TEST_BOOKS) return JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8'));
+  const q = `${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights,work_id&status=eq.published&deleted_at=is.null&order=published_at.desc,id.asc`;
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const r = await fetch(q, { headers: { ...H, Range: `${from}-${from + 999}`, 'Range-Unit': 'items' } });
+    if (!r.ok && r.status !== 206) { console.error('Supabase error', r.status, await r.text()); process.exit(1); }
+    const page = await r.json(); out.push(...page);
+    if (page.length < 1000) return out;
+  }
+}
+const books = await readBooks();
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const plain = s => String(s || '').replace(/<\s*(br|\/p|\/li|\/h\d)\s*\/?>/gi, '\n').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n\s*/g, '\n').trim();
@@ -132,7 +142,7 @@ for (const l of LANGS) {
       ldScript([ORG,
         { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Librava', item: `${SITE}/${l}/` }, { '@type': 'ListItem', position: 2, name, item: url }] },
         { '@type': 'CollectionPage', url, name: title, inLanguage: l, mainEntity: { '@type': 'ItemList', numberOfItems: list.length, itemListElement: list.slice(0, 50).map((b, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/book/${b.id}/`, name: b.title })) } }]);
-    const body = `<div class="wrap page seo-pre"><nav class="crumbs"><a href="/${l}/">Librava</a> › ${esc(name)}</nav><h1>${esc(name)}</h1><p>${esc(tr(l, 'search.inCat', { n: list.length, cat: name }).replace(/<[^>]*>/g, ''))}</p><ul class="seo-books">${list.map(b => card(l, b)).join('')}</ul></div>`;
+    const body = `<div class="wrap page seo-pre"><nav class="crumbs"><a href="/${l}/">Librava</a> › ${esc(name)}</nav><h1>${esc(name)}</h1><p>${esc(tr(l, 'search.inCat', { n: list.length, cat: name }).replace(/<[^>]*>/g, ''))}</p><ul class="seo-books">${list.slice(0, 200).map(b => card(l, b)).join('')}</ul></div>`;   // big categories: the first 200 here, every book is in the sitemap
     write(`${l}/${s}`, page({ lang: l, head, body, boot: { lang: l, force: true }, hash: `#/search?cat=${c}` }));
     urls.push({ loc: url, alts: LANGS.filter(x => catPages[x].includes(c)).map(x => [x, `${SITE}/${x}/${catSlug(x, c)}/`]), lastmod: (list[0]?.updated_at || today).slice(0, 10), pri: '0.8' });
   }

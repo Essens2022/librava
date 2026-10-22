@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022134741';
-import { applyOffers, offerRunning } from './offers.js?v=20261022134741';
-import { scoreBook } from './search.js?v=20261022134741';
-import { getLang } from './i18n.js?v=20261022134741';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022134741';
+import { CONFIG } from './config.js?v=20261022142807';
+import { applyOffers, offerRunning } from './offers.js?v=20261022142807';
+import { scoreBook } from './search.js?v=20261022142807';
+import { getLang } from './i18n.js?v=20261022142807';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261022142807';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -58,6 +58,10 @@ export function filterBooks(all, o = {}) {
   return list;
 }
 
+// what the store list needs for cards, filters, search and recommendations (the rest is read on the book page)
+const CARD_COLS = 'id,title,subtitle,author,contributors,category,categories,language,format,color,pages,price_cents,list_price_cents,currency,cover_path,updated_at,published_at,status,is_featured,rating_avg,rating_count,sales_count,series_name,series_number,keywords,isbn,librava_id,work_id,deleted_at,blurb';
+const ADMIN_COLS = 'file_path,file_name,sample_path,recommend_ids';
+const CAT_KEY = 'catalog:list', CAT_V = 2;
 const FMT_ORDER = { epub: 0, pdf: 1 };
 // all published editions of a book (itself included), EPUB first
 export function editionsOf(all, b) {
@@ -105,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022134741')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261022142807')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -469,6 +473,9 @@ class DemoAPI {
 // =====================================================================
 class SupabaseAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this._lib = null; this.isDemo = false; }
+  // clearing the store list (after any change in Admin) also forgets the full book pages kept in memory
+  get _catalog() { return this.__cat; }
+  set _catalog(v) { this.__cat = v; if (v == null) { this._full = null; this._catP = null; this._gen = (this._gen || 0) + 1; } }
 
   async init() {
     await loadScript(new URL('../vendor/supabase.min.js', import.meta.url).href);
@@ -552,21 +559,63 @@ class SupabaseAPI {
     if (!b.cover_path) return '';
     return this.sb.storage.from('covers').getPublicUrl(b.cover_path).data.publicUrl + (b.updated_at ? '?v=' + encodeURIComponent(b.updated_at) : '');
   }
-  async _loadCatalog(includeDrafts = false) {
-    let q = this.sb.from('books').select('*').order('published_at', { ascending: false });
-    q = q.is('deleted_at', null);
-    if (!includeDrafts) q = q.eq('status', 'published');
-    const { data, error } = await q; this._err(error);
-    const list = data.map(b => ({ ...b, cover_url: this._coverUrl(b) }));
-    if (!includeDrafts) this._catalog = list;
-    return list;
+  // The store list is light (what cards, filters and search need — about 1 KB a book): read in pages of 1000 at once,
+  // in parallel, so 5000+ books still arrive in about a second. The full book (description, A+, files) is read only
+  // on its page. The list is also kept on this device, so the store opens instantly next time while a fresh copy
+  // is fetched in the background.
+  async _readBooks(cols, build = q => q) {
+    const base = () => build(this.sb.from('books').select(cols).is('deleted_at', null)).order('published_at', { ascending: false, nullsFirst: false }).order('id');
+    const first = await build(this.sb.from('books').select(cols, { count: 'exact' }).is('deleted_at', null)).order('published_at', { ascending: false, nullsFirst: false }).order('id').range(0, 999);
+    this._err(first.error);
+    const out = first.data.slice(), total = first.count ?? out.length;
+    const pages = []; for (let f = 1000; f < total; f += 1000) pages.push(base().range(f, f + 999));
+    for (const r of await Promise.all(pages)) { this._err(r.error); out.push(...r.data); }
+    const seen = new Set();
+    return out.filter(b => !seen.has(b.id) && seen.add(b.id)).map(b => ({ ...b, cover_url: this._coverUrl(b) }));
   }
-  async listBooks(o = {}) { if (!this._catalog) await this._loadCatalog(); return filterBooks(this._catalog, o); }
-  async getBook(id) {
-    if (this._catalog) { const b = this._catalog.find(x => x.id === id); if (b) return b; }
-    const { data, error } = await this.sb.from('books').select('*').eq('id', id).maybeSingle();
-    if (error || !data) return null;
-    return { ...data, cover_url: this._coverUrl(data) };
+  async _loadCatalog(includeDrafts = false) {
+    if (includeDrafts) return this._readBooks(CARD_COLS + ',' + ADMIN_COLS);
+    if (this._catP) return this._catP;
+    // first visit of this session: start from the copy saved on the device (max 1 day old), refresh behind the scenes
+    if (!this._cacheTried) {
+      this._cacheTried = true;
+      try {
+        const c = await blobs.get(CAT_KEY);
+        if (c && c.v === CAT_V && Date.now() - c.at < 864e5 && Array.isArray(c.list) && c.list.length) {
+          this._catalog = c.list.map(b => ({ ...b, cover_url: this._coverUrl(b) }));
+          this._catP = Promise.resolve(this._catalog);
+          setTimeout(() => this._fetchCatalog().catch(() => { }), 1500);
+          return this._catalog;
+        }
+      } catch { }
+    }
+    return this._fetchCatalog();
+  }
+  _fetchCatalog() {
+    const gen = this._gen || 0;
+    const p = this._readBooks(CARD_COLS, q => q.eq('status', 'published')).then(list => {
+      if ((this._gen || 0) !== gen) return list;            // something changed in Admin meanwhile: a newer read follows
+      this.__cat = list; this._catP = Promise.resolve(list);
+      try { blobs.put(CAT_KEY, { v: CAT_V, at: Date.now(), list: list.map(({ cover_url, ...b }) => b) }); } catch { }
+      return list;
+    });
+    if (!this.__cat) this._catP = p;                         // nothing to show yet: every page waits for this read
+    p.catch(() => { if (this._catP === p) this._catP = null; });
+    return p;
+  }
+  async listBooks(o = {}) { const l = this._catalog || await this._loadCatalog(); return filterBooks(this._catalog || l, o); }
+  // the whole book (description, A+ content, files…): kept for a few minutes, read once even if asked twice at the same time
+  getBook(id) {
+    if (!id) return Promise.resolve(null);
+    this._full = this._full || new Map();
+    const hit = this._full.get(id);
+    if (hit && Date.now() - hit.at < 300000) return hit.p;
+    const p = this.sb.from('books').select('*').eq('id', id).maybeSingle()
+      .then(({ data, error }) => { if (error) throw error; return data ? { ...data, cover_url: this._coverUrl(data) } : null; })
+      .catch(() => this.__cat?.find(x => x.id === id) || null);   // offline: the light copy is better than nothing
+    this._full.set(id, { at: Date.now(), p });
+    p.then(v => { if (!v) this._full?.delete(id); });
+    return p;
   }
 
   // ---- library ----
@@ -729,7 +778,7 @@ class SupabaseAPI {
   async saveBook(data, files = {}) {
     const id = data.id || crypto.randomUUID();
     const row = { ...data, id, updated_at: new Date().toISOString() };
-    delete row.cover_url; delete row.sales_count; delete row.rating_avg; delete row.rating_count;
+    delete row.cover_url; delete row.sales_count; delete row.rating_avg; delete row.rating_count; delete row.blurb;
     // new names every time, so phones and WhatsApp never keep showing the old picture; the old file is deleted below
     if (files.cover) { const p = `${id}/cover-${Date.now()}.${fileExt(files.cover.name) || 'jpg'}`; await this._upload('covers', p, files.cover); row.cover_path = p; }
     if (files.file) {

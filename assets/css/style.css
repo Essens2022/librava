@@ -1672,3 +1672,12 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .ed-tag .ico { width: 13px; height: 13px; }
 
 .rcard .card-title { -webkit-line-clamp: 3; font-size: 16px; font-weight: 500; }
+
+/* search result pages (Amazon-style) */
+.pager { display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap; margin: 22px 0 6px; }
+.pager .pg-num, .pager .pg-btn { min-width: 38px; height: 38px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); text-decoration: none; font-size: 14px; }
+.pager a:hover { border-color: var(--pista-strong); }
+.pager .on { border: 2px solid var(--fg); font-weight: 700; }
+.pager .off { opacity: .45; }
+.pager .pg-gap { padding: 0 2px; color: var(--muted); }
+.adm-count { font-size: 13px; margin: 0 0 8px; }

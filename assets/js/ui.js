@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261022134741';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022134741';
-import { esc, store, $, $$ } from './util.js?v=20261022134741';
+import { CONFIG } from './config.js?v=20261022142807';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261022142807';
+import { esc, store, $, $$ } from './util.js?v=20261022142807';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261022134741';
-import { suggest, highlight } from './search.js?v=20261022134741';
-import { track, trackPage } from './track.js?v=20261022134741';
-import { initGA, stopGA } from './ga.js?v=20261022134741';
-import { api } from './api.js?v=20261022134741';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261022142807';
+import { suggest, highlight } from './search.js?v=20261022142807';
+import { track, trackPage } from './track.js?v=20261022142807';
+import { initGA, stopGA } from './ga.js?v=20261022142807';
+import { api } from './api.js?v=20261022142807';
 
 // ---------------- icons ----------------
 const P = {
@@ -391,6 +391,14 @@ export function bindGlobal() {
       if (location.hash === h) window.dispatchEvent(new Event('librava:navigate')); else location.hash = h;
     });
   }
+  // book pages open at once: the full book is read as soon as the mouse rests on a card (or a finger touches it)
+  const bookIdOf = a => { const m = /(?:^|#)\/book\/([^/?#]+)/.exec(a.getAttribute('href') || ''); return m ? decodeURIComponent(m[1]) : null; };
+  let hoverT = null;
+  document.addEventListener('pointerover', e => {
+    const a = e.target.closest?.('a[href*="/book/"]'); clearTimeout(hoverT); if (!a) return;
+    hoverT = setTimeout(() => { const id = bookIdOf(a); if (id) api.getBook(id).catch(() => { }); }, 90);
+  }, { passive: true });
+  document.addEventListener('touchstart', e => { const a = e.target.closest?.('a[href*="/book/"]'); const id = a && bookIdOf(a); if (id) api.getBook(id).catch(() => { }); }, { passive: true });
   document.addEventListener('submit', e => {
     const f = e.target.closest('[data-search]');
     if (!f) return;

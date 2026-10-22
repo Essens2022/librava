@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022134741';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022134741';
-import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022134741';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022134741';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022134741';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022134741';
-import { track } from './track.js?v=20261022134741';
-import { gaEvent } from './ga.js?v=20261022134741';
-import { guessLang } from './langdetect.js?v=20261022134741';
-import { didYouMean } from './search.js?v=20261022134741';
-import { api, editionsOf } from './api.js?v=20261022134741';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022134741';
+import { CONFIG } from './config.js?v=20261022142807';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022142807';
+import { esc, $, $$, safeHTML, hasTags, store } from './util.js?v=20261022142807';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022142807';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022142807';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022142807';
+import { track } from './track.js?v=20261022142807';
+import { gaEvent } from './ga.js?v=20261022142807';
+import { guessLang } from './langdetect.js?v=20261022142807';
+import { didYouMean } from './search.js?v=20261022142807';
+import { api, editionsOf } from './api.js?v=20261022142807';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022142807';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -21,10 +21,10 @@ export async function viewHome(el) {
   const L = getLang();
   const promosP = api.promos ? api.promos(L).catch(() => []) : Promise.resolve([]); // loads together with the books
   const [featured, newest, free, deals, all, everything] = await Promise.all([
-    api.listBooks({ lang: L, featured: true, sort: 'bestsellers' }),
+    api.listBooks({ lang: L, featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
     api.listBooks({ lang: L, sort: 'newest', limit: 14 }),
-    api.listBooks({ lang: L, free: true }),
-    api.listBooks({ lang: L, deals: true }),
+    api.listBooks({ lang: L, free: true, sort: 'bestsellers', limit: 20 }),
+    api.listBooks({ lang: L, deals: true, sort: 'bestsellers', limit: 20 }),
     api.listBooks({ lang: L }),
     api.listBooks({ sort: 'bestsellers' }),
   ]);
@@ -116,6 +116,7 @@ export async function viewSearch(el, q) {
     .sort((a, b) => langName(a).localeCompare(langName(b)));
   const mk = (patch) => {
     const p = new URLSearchParams(q);
+    if (!('pg' in patch)) p.delete('pg');   // a new filter or sort starts again from page 1
     for (const k in patch) { if (patch[k] === '' || patch[k] == null) p.delete(k); else p.set(k, patch[k]); }
     return '#/search?' + p.toString();
   };
@@ -124,6 +125,15 @@ export async function viewSearch(el, q) {
     return `<a class="fopt ${on ? 'on' : ''}" href="${mk({ [key]: val })}" role="radio" aria-checked="${on}">${on ? icon('check', 'ico') : '<span style="width:22px;display:inline-block"></span>'}${esc(label)}</a>`;
   };
   if (opts.q) track('search', { q: opts.q, results: books.length });
+  // results in pages of 48, like Amazon: the page stays fast with thousands of books
+  const PER = 48, pages = Math.max(1, Math.ceil(books.length / PER)), pg = Math.min(pages, Math.max(1, parseInt(q.get('pg')) || 1));
+  const pageBooks = books.slice((pg - 1) * PER, pg * PER);
+  const pnums = [...new Set([1, pg - 2, pg - 1, pg, pg + 1, pg + 2, pages])].filter(n => n >= 1 && n <= pages).sort((a, b) => a - b);
+  const pager = pages < 2 ? '' : `<nav class="pager" aria-label="${esc(t('search.pages'))}">
+    ${pg > 1 ? `<a class="pg-btn" href="${mk({ pg: pg - 1 === 1 ? '' : pg - 1 })}" rel="prev">‹ ${esc(t('search.prev'))}</a>` : `<span class="pg-btn off">‹ ${esc(t('search.prev'))}</span>`}
+    ${pnums.map((n, i) => `${i && n - pnums[i - 1] > 1 ? '<span class="pg-gap">…</span>' : ''}${n === pg ? `<span class="pg-num on" aria-current="page">${n}</span>` : `<a class="pg-num" href="${mk({ pg: n === 1 ? '' : n })}">${n}</a>`}`).join('')}
+    ${pg < pages ? `<a class="pg-btn" href="${mk({ pg: pg + 1 })}" rel="next">${esc(t('search.next'))} ›</a>` : `<span class="pg-btn off">${esc(t('search.next'))} ›</span>`}
+  </nav>`;
   const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
   const sortSel = ['relevance', 'bestsellers', 'newest', 'priceAsc', 'priceDesc', 'rating'].map(s => `<option value="${s}" ${(opts.sort || (opts.q ? 'relevance' : 'bestsellers')) === s ? 'selected' : ''}>${esc(t('search.s.' + s))}</option>`).join('');
   const hasFilters = ['cat', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
@@ -158,7 +168,7 @@ export async function viewSearch(el, q) {
           <select id="sort-sel">${sortSel}</select>
         </span>
       </div>
-      ${books.length ? `<div class="results">${books.map(rcardHTML).join('')}</div>`
+      ${books.length ? `<div class="results">${pageBooks.map(rcardHTML).join('')}</div>${pager}`
         : bookLang && !everything.some(b => b.language === bookLang)
           ? `<div class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(bookLang, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
           : `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p>${bookLang ? `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>` : ''}</div>`}

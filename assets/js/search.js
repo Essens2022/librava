@@ -1,8 +1,8 @@
 // Librava search: forgiving like Amazon. Ignores accents and letter case, matches the beginning of words,
 // tolerates small typos ("calistenics" → "calisthenics"), looks in title, series, author, keywords, categories,
 // ISBN / Librava code and description, and ranks the strongest matches first.
-import { norm } from './util.js?v=20261022134741';
-import { t } from './i18n.js?v=20261022134741';
+import { norm } from './util.js?v=20261022142807';
+import { t } from './i18n.js?v=20261022142807';
 
 const STOP = new Set(('a an and the of for to in on at by with from or is are de la le les des du un une et en el los las y del al il lo gli di da per con e o un una uno dei delle si din pe cu cartea carte der die das und von zu mit ein eine').split(' '));
 const words = s => norm(s).replace(/[^\p{L}\p{N}]+/gu, ' ').trim().split(/\s+/).filter(Boolean);
@@ -48,7 +48,7 @@ function fields(b) {
     title: mk(`${b.title} ${b.subtitle || ''}`), series: mk(b.series_name || ''),
     author: mk([b.author, ...(b.contributors || []).map(c => c.name)].join(' ')),
     kw: mk((b.keywords || []).join(' ')), cat: mk(cats.map(c => `${t('cat.' + c)} ${c}`).join(' ')),
-    desc: mk(String(b.description || '').replace(/<[^>]*>/g, ' ')),
+    desc: mk(String(b.description || b.blurb || '').replace(/<[^>]*>/g, ' ')),   // the store list carries only the start (blurb)
     codes: [b.isbn, b.librava_id].filter(Boolean).map(c => norm(c).replace(/[^a-z0-9]/g, '')),
   };
   cache.set(b, f);
