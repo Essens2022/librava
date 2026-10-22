@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022172106';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022172106';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261022172106';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022172106';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022172106';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022172106';
-import { track } from './track.js?v=20261022172106';
-import { gaEvent } from './ga.js?v=20261022172106';
-import { guessLang } from './langdetect.js?v=20261022172106';
-import { didYouMean } from './search.js?v=20261022172106';
-import { api, editionsOf } from './api.js?v=20261022172106';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022172106';
+import { CONFIG } from './config.js?v=20261022172526';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022172526';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261022172526';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022172526';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022172526';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022172526';
+import { track } from './track.js?v=20261022172526';
+import { gaEvent } from './ga.js?v=20261022172526';
+import { guessLang } from './langdetect.js?v=20261022172526';
+import { didYouMean } from './search.js?v=20261022172526';
+import { api, editionsOf } from './api.js?v=20261022172526';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022172526';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -517,15 +517,19 @@ async function renderSeries(box, b, offers) {
   // price like Amazon: what the books would cost one by one (their list prices) crossed out in red, the series price big
   const full = toBuy.reduce((sum, x) => sum + Math.max(x.list_price_cents || 0, x.price_cents || 0), 0);
   const save = Math.max(0, full - r.total), pct = full ? Math.round(save / full * 100) : 0;
+  // laid out like Amazon's "Buy the series": the books on the left, a tidy price box on the right (under the books on phones)
   box.innerHTML = `<section class="panel series-panel" style="margin-top:26px">
-    <div class="series-head">
-      <div class="series-name"><h2 class="section-title">${esc(t('series.title', { name: b.series_name.trim() }))}</h2><span class="muted">${esc(t('series.count', { n: list.length }))}</span></div>
-      ${toBuy.length ? `<div class="series-buy">
-        <div class="series-prices">${save > 0 ? `<s class="series-full">${money(full)}</s>` : ''}<b class="series-price">${money(r.total)}</b>${save > 0 ? `<span class="series-save">${esc(t('series.save', { amount: money(save), pct }))}</span>` : ''}</div>
-        <button type="button" class="btn btn-cart btn-sm" data-series-add>${icon('cart', 'ico')} ${esc(toBuy.length === list.length ? t('series.addAll', { n: toBuy.length }) : t('series.addRest', { n: toBuy.length }))}</button>
-      </div>` : `<span class="owned-box">${icon('check', 'ico')} ${esc(t('series.ownAll'))}</span>`}
+    <div class="series-name"><h2 class="section-title">${esc(t('series.title', { name: b.series_name.trim() }))}</h2><span class="muted">${esc(t('series.count', { n: list.length }))}</span></div>
+    <div class="series-body">
+      <div class="shelf-track series-track">${list.map((x, i) => `<div class="series-item${x.id === b.id ? ' here' : ''}"><div class="series-n">${esc(t('series.book', { n: x.series_number || i + 1 }))}${owned[i] ? ` · ${icon('check', 'ico')}` : ''}</div>${cardHTML(x)}</div>`).join('')}</div>
+      <aside class="series-box">${toBuy.length ? `
+        <div class="series-lbl">${esc(t('series.total'))}</div>
+        <div class="series-prices"><b class="series-price">${money(r.total)}</b>${save > 0 ? `<s class="series-full">${money(full)}</s>` : ''}</div>
+        ${save > 0 ? `<div><span class="series-save">${esc(t('series.save', { amount: money(save), pct }))}</span></div>` : ''}
+        <button type="button" class="btn btn-cart series-add" data-series-add>${icon('cart', 'ico')} ${esc(toBuy.length === list.length ? t('series.addAll', { n: toBuy.length }) : t('series.addRest', { n: toBuy.length }))}</button>`
+      : `<span class="owned-box">${icon('check', 'ico')} ${esc(t('series.ownAll'))}</span>`}
+      </aside>
     </div>
-    <div class="shelf-track">${list.map((x, i) => `<div class="series-item${x.id === b.id ? ' here' : ''}"><div class="series-n">${esc(t('series.book', { n: x.series_number || i + 1 }))}${owned[i] ? ` · ${icon('check', 'ico')}` : ''}</div>${cardHTML(x)}</div>`).join('')}</div>
   </section>`;
   box.querySelector('[data-series-add]')?.addEventListener('click', () => { toBuy.forEach(x => cart.add(x.id)); toast(t('series.added', { n: toBuy.length })); go('/cart'); });
 }

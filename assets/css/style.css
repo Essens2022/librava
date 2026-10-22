@@ -1685,21 +1685,25 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .adm-count { font-size: 13px; margin: 0 0 8px; }
 
 /* the whole series on the book page (Amazon-style: full price crossed out, series price big, saving) */
-.series-head { display: flex; justify-content: space-between; align-items: center; gap: 12px 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.series-name { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .series-name .section-title { margin: 0; }
 .series-name .muted { font-size: 13px; }
-.series-buy { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.series-prices { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.series-body { display: grid; grid-template-columns: minmax(0, max-content) 290px; justify-content: start; gap: 32px; align-items: start; }
+.series-track { min-width: 0; }
+.series-item + .series-item { position: relative; }
+.series-box { border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-soft, transparent); margin-top: 22px; }
+.series-lbl { font-size: 14px; color: var(--muted); font-weight: 600; }
+.series-prices { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.series-price { font-size: 28px; font-weight: 700; color: var(--fg); line-height: 1.1; }
 .series-full { color: var(--deal); font-size: 15px; }
-.series-price { font-size: 24px; font-weight: 700; color: var(--fg); }
-.series-save { font-size: 13px; font-weight: 600; color: #fff; background: var(--deal); padding: 2px 8px; border-radius: 6px; }
-.series-buy .btn-sm { padding: 8px 14px; font-size: 14px; white-space: nowrap; }
-.series-buy .btn-sm .ico { width: 16px; height: 16px; }
+.series-save { display: inline-block; font-size: 13px; font-weight: 600; color: #fff; background: var(--deal); padding: 3px 9px; border-radius: 6px; }
+.series-add { width: 100%; justify-content: center; margin-top: 4px; padding: 11px 14px; font-size: 15px; }
+.series-add .ico { width: 17px; height: 17px; }
+@media (max-width: 900px) { .series-body { grid-template-columns: minmax(0, 1fr); gap: 14px; } .series-box { margin-top: 0; } }
 .series-item { display: flex; flex-direction: column; gap: 4px; }
 .series-n { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; display: flex; align-items: center; gap: 4px; }
 .series-n .ico { width: 13px; height: 13px; color: var(--pista-strong); }
 .series-item.here .card { outline: 2px solid var(--pista-strong); outline-offset: 4px; border-radius: 6px; }
-@media (max-width: 640px) { .series-buy { width: 100%; justify-content: space-between; } }
 
 /* pricing: one box per format (PDF, EPUB), each with its own price, list price and what you receive */
 .fmt-prices { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
