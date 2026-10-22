@@ -1,15 +1,15 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261022153956';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022153956';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022153956';
-import { resetCompanyCache } from './views.js?v=20261022153956';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022153956';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022153956';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022153956';
-import { api } from './api.js?v=20261022153956';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022153956';
+import { CONFIG } from './config.js?v=20261022154422';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022154422';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261022154422';
+import { resetCompanyCache } from './views.js?v=20261022154422';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261022154422';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261022154422';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261022154422';
+import { api } from './api.js?v=20261022154422';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261022154422';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -945,7 +945,8 @@ async function bookForm(body, b, startStep = 1) {
         <div class="kdp-fields"><div class="radios"><label class="check"><input type="radio" name="ptype" value="paid" ${v.price_cents !== 0 ? 'checked' : ''}> ${esc(t('kdp.paid'))}</label><label class="check"><input type="radio" name="ptype" value="free" ${v.price_cents === 0 ? 'checked' : ''}> ${esc(t('kdp.free'))}</label></div>
           <div class="price-table" id="price-box"><div class="two"><label class="field"><span>${esc(t('kdp.listPriceEur'))} *</span><input id="f-price" type="text" inputmode="decimal" autocomplete="off" placeholder="3,99" value="${eur(v.price_cents).replace('.', ',')}"></label>
             <label class="field"><span>${esc(t('admin.f.listPrice'))}</span><input id="f-list" type="text" inputmode="decimal" autocomplete="off" value="${eur(v.list_price_cents).replace('.', ',')}"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
-            <div class="two" id="price2-box" hidden><label class="field"><span id="price2-label"></span><input id="f-price2" type="text" inputmode="decimal" autocomplete="off" placeholder="5,99"><small>${esc(t('ed2.priceHelp'))}</small></label></div>
+            <div class="two" id="price2-box" hidden><label class="field"><span id="price2-label"></span><input id="f-price2" type="text" inputmode="decimal" autocomplete="off" placeholder="5,99"><small>${esc(t('ed2.priceHelp'))}</small></label>
+              <label class="field"><span id="list2-label"></span><input id="f-list2" type="text" inputmode="decimal" autocomplete="off"><small>${esc(t('admin.f.listPriceHelp'))}</small></label></div>
             <table class="royalty"><tbody><tr><td>${esc(t('kdp.buyerPays'))}</td><td id="r-price">—</td></tr><tr><td>${esc(t('kdp.stripeFee'))}</td><td id="r-fee">—</td></tr><tr class="tot"><td>${esc(t('kdp.youGet'))}</td><td id="r-net">—</td></tr></tbody></table>
             <small class="muted">${esc(t('kdp.feeNote'))}</small></div></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('fbt.adminTitle'))}</h3><p>${esc(t('fbt.adminHelp'))}</p></div>
@@ -1135,8 +1136,9 @@ async function bookForm(body, b, startStep = 1) {
     box.hidden = !fmt;
     if (fmt) {
       $('#price2-label', body).textContent = t('ed2.price', { fmt }) + ' *';
-      const inp = $('#f-price2', body);
-      if (sib && !inp.dataset.filled) { inp.dataset.filled = '1'; if (sib.price_cents) inp.value = eur(sib.price_cents).replace('.', ','); }
+      $('#list2-label', body).textContent = t('ed2.listPrice', { fmt });
+      const inp = $('#f-price2', body), lst = $('#f-list2', body);
+      if (sib && !inp.dataset.filled) { inp.dataset.filled = '1'; if (sib.price_cents) inp.value = eur(sib.price_cents).replace('.', ','); if (sib.list_price_cents) lst.value = eur(sib.list_price_cents).replace('.', ','); }
     }
   }
   // the other format of this book (EPUB ↔ PDF), if there is one: its price is set here and it is published together
@@ -1253,7 +1255,7 @@ async function bookForm(body, b, startStep = 1) {
         const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
         // published together with this one only once it has its price (otherwise it waits as a draft)
         const st2 = status === 'published' && (free || p2 >= 49) ? 'published' : 'draft';
-        const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: null, status: st2, pages }, { file: f2, ...(sample ? { sample } : {}) });
+        const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: free ? null : (cents(val('f-list2')) || null), status: st2, pages }, { file: f2, ...(sample ? { sample } : {}) });
         v.work_id = src.work_id || bookId; files.file2 = null;
         sib = { id: id2, format: fmt2, price_cents: p2 || 0, status: st2, file_path: 'yes' };
         $('#f2-block', body)?.remove(); edition2UI();
@@ -1265,7 +1267,7 @@ async function bookForm(body, b, startStep = 1) {
         for (const k of SHARED) if (k in data) patch[k] = data[k];
         if (full) { patch.cover_path = full.cover_path; if (full.aplus !== undefined) patch.aplus = full.aplus; }
         const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
-        if (free || p2 >= 49) patch.price_cents = p2;
+        if (free || p2 >= 49) { patch.price_cents = p2; patch.list_price_cents = free ? null : (cents(val('f-list2')) || null); }
         if (status === 'published' && sib.file_path && (free || p2 >= 49)) patch.status = 'published';
         await api.updateBook(sib.id, patch);
         Object.assign(sib, { price_cents: patch.price_cents ?? sib.price_cents, status: patch.status || sib.status });
