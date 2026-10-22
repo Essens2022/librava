@@ -89,25 +89,39 @@ export function applyOffers(items, offers, ctx = {}) {
     const co = run.find(o => o.kind === 'coupon' && String(o.config?.code || '').toUpperCase() === String(ctx.coupon).trim().toUpperCase());
     couponState = !co ? 'invalid' : applied.some(a => a.id === co.id) ? 'ok' : (offerSaving(co, paid, ctx).reason || 'notBest');
   }
-  return { subtotal, total, discount, applied, final: price, couponState, nudges: nudges(paid, run) };
+  return { subtotal, total, discount, applied, final: price, couponState, nudges: ctx.noNudge ? [] : nudges(paid, run, offers, ctx, discount) };
 }
 
-// "add 1 more book to get -15%": the next tier the customer can reach
-function nudges(paid, run) {
+// "add 1 more book to get -15%": like Amazon, only ONE automatic offer applies (the best one for the customer),
+// so a hint is shown only if it is really what the customer will get. Each hint is checked by adding the books it
+// asks for (priced like the cheapest eligible book in the cart) and running the same calculation: if another offer
+// would win instead, or the customer would not save more, the hint is dropped. Only the best hint is shown.
+function nudges(paid, run, offers, ctx, discountNow) {
   const out = [];
   for (const o of run) {
     const c = o.config || {};
+    let n0 = null;
     if (o.kind === 'qty') {
       const n = paid.filter(i => inCat(i, c.category) && (!c.book_ids?.length || c.book_ids.includes(i.id))).length;
       const next = (c.tiers || []).filter(t => +t.min > n).sort((a, b) => a.min - b.min)[0];
-      if (next && +next.min - n <= 2) out.push({ id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null });
+      if (next && +next.min - n <= 2) n0 = { id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null };
     } else if (o.kind === 'bxgy') {
       const n = paid.filter(i => inCat(i, c.category)).length, size = (+c.buy || 2) + (+c.get || 1);
       const more = size - (n % size);
-      if (n > 0 && more <= 2 && more < size) out.push({ id: o.id, kind: 'bxgy', more, buy: +c.buy || 2, get: +c.get || 1, percent: c.percent ?? 100, category: c.category || null });
+      if (n > 0 && more <= 2 && more < size) n0 = { id: o.id, kind: 'bxgy', more, buy: +c.buy || 2, get: +c.get || 1, percent: c.percent ?? 100, category: c.category || null };
     }
+    if (!n0 || o.config?.book_ids?.length) continue;
+    const elig = paid.filter(i => inCat(i, c.category));
+    if (!elig.length) continue;
+    const p = Math.min(...elig.map(i => i.price_cents));
+    const extra = Array.from({ length: n0.more }, (_, k) => ({ id: '__more' + k, price_cents: p, category: c.category || (elig[0].category), categories: c.category ? [c.category] : elig[0].categories }));
+    const r = applyOffers([...paid, ...extra], offers, { ...ctx, noNudge: true });
+    const wins = r.applied.some(a => a.id === o.id && !(a.offer?.stackable));
+    const gain = r.discount - discountNow;
+    if (wins && gain > 0) out.push({ ...n0, gain });
   }
-  return out;
+  out.sort((a, b) => b.gain / b.more - a.gain / a.more);
+  return out.slice(0, 1);
 }
 
 // short text for an offer, in the visitor's language (t = translation function)
@@ -132,7 +146,7 @@ export function offersForBook(b, offers) {
 export function appliedLabel(a, t, catName = c => c) {
   const o = a.offer || {}, c = o.config || {}, d = a.detail || {};
   let txt;
-  if (a.kind === 'qty') txt = t('of.a.qty', { n: d.min || d.n, p: d.percent }) + (c.category ? ' · ' + catName(c.category) : '');
+  if (a.kind === 'qty') txt = t('of.a.qty', { n: d.n || d.min, p: d.percent }) + (c.category ? ' · ' + catName(c.category) : '');
   else if (a.kind === 'coupon') txt = t('of.a.coupon', { code: c.code, v: c.percent ? '-' + c.percent + '%' : '-' + ((c.amount_cents || 0) / 100).toFixed(2).replace('.', ',') + ' €' });
   else txt = describeOffer(o, t, catName);
   return o.name && a.kind !== 'coupon' ? `${o.name}: ${txt}` : txt;

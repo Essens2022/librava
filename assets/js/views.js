@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261022175724';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022175724';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261022175724';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022175724';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022175724';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022175724';
-import { track } from './track.js?v=20261022175724';
-import { gaEvent } from './ga.js?v=20261022175724';
-import { guessLang } from './langdetect.js?v=20261022175724';
-import { didYouMean } from './search.js?v=20261022175724';
-import { api, editionsOf } from './api.js?v=20261022175724';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022175724';
+import { CONFIG } from './config.js?v=20261022214103';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261022214103';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261022214103';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261022214103';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261022214103';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261022214103';
+import { track } from './track.js?v=20261022214103';
+import { gaEvent } from './ga.js?v=20261022214103';
+import { guessLang } from './langdetect.js?v=20261022214103';
+import { didYouMean } from './search.js?v=20261022214103';
+import { api, editionsOf } from './api.js?v=20261022214103';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261022214103';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -644,6 +644,7 @@ export async function viewCart(el) {
       <div class="sum-rows">
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
         ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}</span><span>−${money(a.saving)}</span></div>`).join('')}
+        ${r.applied.length && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
         ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
       </div>

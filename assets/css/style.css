@@ -1241,7 +1241,8 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .nudge span { flex: 1; } .nudge .ico { width: 16px; height: 16px; }
 .sum-rows { display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
 .sum-rows > div { display: flex; justify-content: space-between; gap: 10px; }
-.sum-off { color: var(--ok, #2E7D32); } .sum-off .ico { width: 14px; height: 14px; vertical-align: -2px; }
+.sum-off { color: var(--ok, #2E7D32); }
+.sum-note { font-size: 12px; margin-top: 2px; } .sum-off .ico { width: 14px; height: 14px; vertical-align: -2px; }
 .sum-total { border-top: 1px solid var(--line); padding-top: 8px; font-size: 19px; }
 .coupon { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .coupon-row { display: flex; gap: 6px; } .coupon-row .input { flex: 1; min-width: 0; text-transform: uppercase; }
