@@ -1837,3 +1837,7 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes shelfMove { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
 @keyframes pbFloat { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -6px, 0); } }
 @media (max-width: 760px) { .promo-books .promo-shelf.marq { -webkit-mask-image: none; mask-image: none; } }
+
+/* the moving shelf is driven by script (scroll position), no CSS animation */
+.marq-track { animation: none !important; transform: none !important; will-change: auto; }
+.promo-books .promo-shelf.marq { overflow: hidden; }

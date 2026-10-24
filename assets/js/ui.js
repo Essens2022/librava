@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261024063943';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024063943';
-import { esc, store, $, $$ } from './util.js?v=20261024063943';
+import { CONFIG } from './config.js?v=20261024064452';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024064452';
+import { esc, store, $, $$ } from './util.js?v=20261024064452';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261024063943';
-import { suggest, highlight } from './search.js?v=20261024063943';
-import { track, trackPage } from './track.js?v=20261024063943';
-import { initGA, stopGA } from './ga.js?v=20261024063943';
-import { api } from './api.js?v=20261024063943';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261024064452';
+import { suggest, highlight } from './search.js?v=20261024064452';
+import { track, trackPage } from './track.js?v=20261024064452';
+import { initGA, stopGA } from './ga.js?v=20261024064452';
+import { api } from './api.js?v=20261024064452';
 
 // ---------------- icons ----------------
 const P = {
@@ -732,8 +732,24 @@ function moveShelves() {
     sh.style.setProperty('--dur', pbs.length * 5 + 's');
     sh.style.removeProperty('--fit'); sh.classList.remove('fit');
     sh.appendChild(track); sh.classList.add('marq');
+    track.querySelectorAll('img').forEach(im => { im.loading = 'eager'; });
     sh.addEventListener('touchstart', () => sh.classList.add('hold'), { passive: true });
     sh.addEventListener('touchend', () => setTimeout(() => sh.classList.remove('hold'), 2500), { passive: true });
+    sh.addEventListener('mouseenter', () => sh.classList.add('hold')); sh.addEventListener('mouseleave', () => sh.classList.remove('hold'));
+    // moved by scrolling the box (not a CSS transform): smooth on iPhones, where a moving layer flickered
+    const speed = matchMedia('(prefers-reduced-motion: reduce)').matches ? 18 : 30; let last = 0, pos = 0, vis = true;
+    try { new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(sh); } catch { }
+    const step = now => {
+      if (!sh.isConnected) return;
+      const dt = last ? Math.min(64, now - last) : 0; last = now;
+      const slide = sh.closest('.promo-slide');
+      if (vis && !document.hidden && !sh.classList.contains('hold') && (!slide || slide.classList.contains('on'))) {
+        const half = track.scrollWidth / 2;
+        if (half > sh.clientWidth) { pos = (pos + speed * dt / 1000) % half; sh.scrollLeft = pos; }
+      } else pos = sh.scrollLeft;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   });
 }
 function fitShelves() {
