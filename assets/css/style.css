@@ -1825,3 +1825,8 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .rv-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 10px; border-bottom: 1px solid rgba(0,0,0,.08); }
 .rv-book .adm-review { margin: 0 18px; }
 .rv-book .adm-review:last-child { border-bottom: 0; }
+/* notifications: keep space for covers so the window does not jump while they load */
+.ntf-books img, .ntf-book img { aspect-ratio: 2 / 3; object-fit: cover; background: var(--surface-2); }
+.ntf-books img { height: 114px; }
+.ntf-book img { height: 96px; }
+.ntf-modal { width: min(520px, calc(100vw - 32px)); }
