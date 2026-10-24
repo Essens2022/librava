@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261024025404';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261024025404';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261024025404';
-import { resetCompanyCache } from './views.js?v=20261024025404';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261024025404';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261024025404';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261024025404';
-import { optimizeBook } from './optimize.js?v=20261024025404';
-import { api } from './api.js?v=20261024025404';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261024025404';
+import { CONFIG } from './config.js?v=20261024062613';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261024062613';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261024062613';
+import { resetCompanyCache } from './views.js?v=20261024062613';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261024062613';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261024062613';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261024062613';
+import { optimizeBook } from './optimize.js?v=20261024062613';
+import { api } from './api.js?v=20261024062613';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261024062613';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -360,6 +360,9 @@ async function reviews(body) {
   const [list, books] = await Promise.all([api.adminReviews(), api.adminBooks()]);
   // earlier imports, so one can be undone in one click
   const batches = {}; for (const r of list) if (r.batch) { const b = batches[r.batch] = batches[r.batch] || { n: 0, book: r.book_title, source: r.source || '—' }; b.n++; }
+  const gm = {}; for (const r of list) { const g = gm[r.book_id] = gm[r.book_id] || { id: r.book_id, title: r.book_title, items: [], imp: 0, sum: 0, batches: [] }; g.items.push(r); g.sum += r.rating || 0; if (r.imported) g.imp++; }
+  for (const [id, b] of Object.entries(batches)) { const r = list.find(x => x.batch === id); if (r && gm[r.book_id]) gm[r.book_id].batches.push([id, b]); }
+  const groups = Object.values(gm).map(g => ({ ...g, avg: g.items.length ? g.sum / g.items.length : 0 })).sort((a, b) => String(a.title).localeCompare(String(b.title)));
   body.innerHTML = `<section class="panel ri" id="ri">
       <h2 class="section-title" style="font-size:18px;margin:0 0 4px">${icon('upload', 'ico')} ${esc(t('ri.title'))}</h2>
       <p class="muted" style="margin:0 0 12px;max-width:80ch">${esc(t('ri.help'))}</p>
@@ -376,12 +379,17 @@ async function reviews(body) {
       <div id="ri-step"></div>
       <p class="ri-legal">${icon('info', 'ico')} ${esc(t('ri.legal'))}</p>
     </section>
-    ${Object.keys(batches).length ? `<section class="panel"><h3 style="margin:0 0 8px">${esc(t('ri.batches'))}</h3>${Object.entries(batches).map(([id, b]) => `<div class="adm-line"><span><b>${esc(b.book)}</b><small class="muted">${esc(b.source)} · ${esc(t('ri.count', { n: b.n }))}</small></span><button class="btn btn-ghost btn-sm" data-undo="${esc(id)}">${icon('trash', 'ico')} ${esc(t('ri.undo'))}</button></div>`).join('')}</section>` : ''}
-    <div class="panel">${list.length ? list.map(r => `<div class="review adm-review">
+    ${list.length ? `<section class="panel rv-tools"><input class="input" id="rv-q" type="search" placeholder="${esc(t('rv.searchBook'))}">
+      <div class="rv-filter" role="group">${['all', 'imp', 'site'].map((k, i) => `<button type="button" class="btn btn-ghost btn-sm${i ? '' : ' on'}" data-rvf="${k}">${esc(t({ all: 'rv.fAll', imp: 'rv.fImported', site: 'rv.fSite' }[k]))}</button>`).join('')}</div>
+      <button type="button" class="linkbtn" id="rv-exp">${esc(t('rv.expandAll'))}</button></section>
+    ${groups.map(g => `<details class="panel rv-book" data-title="${esc((g.title || '').toLowerCase())}"${groups.length === 1 ? ' open' : ''}>
+      <summary><span class="rv-head"><b>${esc(g.title)}</b><small class="muted">${esc(t('ri.count', { n: g.items.length }))} · ★ ${g.avg.toFixed(1)}${g.imp ? ' · ' + esc(t('rv.importedN', { n: g.imp })) : ''}${g.items.length - g.imp ? ' · ' + esc(t('rv.siteN', { n: g.items.length - g.imp })) : ''}</small></span><span class="rv-count">${g.items.length}</span></summary>
+      <div class="rv-actions"><a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(g.id)}">${esc(t('rv.openBook'))}</a>${g.batches.map(([id, b]) => `<button class="btn btn-ghost btn-sm" data-undo="${esc(id)}">${icon('trash', 'ico')} ${esc(t('ri.undo'))} · ${esc(b.source)} (${b.n})</button>`).join('')}</div>
+      ${g.items.map(r => `<div class="review adm-review" data-kind="${r.imported ? 'imp' : 'site'}">
       <div class="who" style="justify-content:space-between;flex-wrap:wrap"><span style="display:flex;gap:10px;align-items:center"><span class="avatar">${esc((r.author_name || '?').slice(0, 1).toUpperCase())}</span><span>${esc(r.author_name || t('rev.anon'))}<small class="muted" style="display:block;font-weight:400">${r.imported ? esc(t('ri.importedTag') + (r.source ? ' · ' + r.source : '')) : esc(r.email || '')}</small></span></span>
         <button class="btn btn-ghost btn-sm" data-delrev="${esc(r.id)}" data-name="${esc(r.author_name || '')}">${icon('trash', 'ico')} ${esc(t('admin.deleteReview'))}</button></div>
-      <div class="rating-line" style="margin-top:6px">${stars(r.rating)} <a href="#/book/${encodeURIComponent(r.book_id)}">${esc(r.book_title)}</a> <span class="muted">· ${esc(fmtDate(r.created_at))}</span></div>
-      ${(r.imported ? r.verified : true) ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}${r.title ? `<b style="display:block;margin-top:6px">${esc(r.title)}</b>` : ''}${r.body ? `<p>${esc(r.body)}</p>` : ''}</div>`).join('') : `<p class="muted" style="margin:0">${esc(t('admin.noReviews'))}</p>`}</div>`;
+      <div class="rating-line" style="margin-top:6px">${stars(r.rating)} <span class="muted">· ${esc(fmtDate(r.created_at))}</span></div>
+      ${(r.imported ? r.verified : true) ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}${r.title ? `<b style="display:block;margin-top:6px">${esc(r.title)}</b>` : ''}${r.body ? `<p>${esc(r.body)}</p>` : ''}</div>`).join('')}</details>`).join('')}` : `<div class="panel"><p class="muted" style="margin:0">${esc(t('admin.noReviews'))}</p></div>`}`;
   $$('[data-delrev]', body).forEach(b => b.onclick = async () => {
     if (!await confirmBox(t('admin.confirmDeleteReview', { name: b.dataset.name }), { ok: t('admin.deleteReview'), danger: true })) return;
     try { await api.deleteReview(b.dataset.delrev); toast(t('admin.reviewDeleted')); reviews(body); } catch (e) { toast(errText(e), { error: true }); }
@@ -391,6 +399,12 @@ async function reviews(body) {
     if (!await confirmBox(t('ri.confirmUndo', { n: x.n, book: x.book }), { ok: t('ri.undo'), danger: true })) return;
     try { await api.deleteReviewBatch(b.dataset.undo); toast(t('ri.undone')); reviews(body); } catch (e) { toast(errText(e), { error: true }); }
   });
+  const q = $('#rv-q', body);
+  const apply = () => { const v = (q?.value || '').trim().toLowerCase(), f = $('[data-rvf].on', body)?.dataset.rvf || 'all';
+    $$('.rv-book', body).forEach(d => { let n = 0; $$('.adm-review', d).forEach(c => { const ok = f === 'all' || c.dataset.kind === f; c.hidden = !ok; if (ok) n++; }); d.hidden = (v && !d.dataset.title.includes(v)) || !n; if (v && !d.hidden) d.open = true; }); };
+  if (q) q.oninput = apply;
+  $$('[data-rvf]', body).forEach(b => b.onclick = () => { $$('[data-rvf]', body).forEach(x => x.classList.toggle('on', x === b)); apply(); });
+  const ex = $('#rv-exp', body); if (ex) ex.onclick = () => { const open = !$$('.rv-book', body).every(d => d.open); $$('.rv-book', body).forEach(d => { if (!d.hidden) d.open = open; }); ex.textContent = t(open ? 'rv.collapseAll' : 'rv.expandAll'); };
   importReviewsUI(body, books);
 }
 

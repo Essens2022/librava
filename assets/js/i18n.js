@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261024025404';
-import { store } from './util.js?v=20261024025404';
+import { CONFIG } from './config.js?v=20261024062613';
+import { store } from './util.js?v=20261024062613';
 
 const D = {
   ro: {
@@ -608,6 +608,7 @@ const D = {
     'ri.dupes': '{n} existau deja și nu au fost dublate.',
     'ri.batches': 'Importuri făcute',
     'ri.count': '{n} recenzii',
+    'rv.allBooks': 'Toate cărțile', 'rv.searchBook': 'Caută cartea…', 'rv.fAll': 'Toate', 'rv.fImported': 'Importate', 'rv.fSite': 'Scrise pe site', 'rv.avg': 'nota medie {n}', 'rv.importedN': '{n} importate', 'rv.siteN': '{n} de pe site', 'rv.openBook': 'Vezi cartea', 'rv.expandAll': 'Deschide tot', 'rv.collapseAll': 'Închide tot',
     'ri.undo': 'Șterge acest import',
     'ri.confirmUndo': 'Ștergi cele {n} recenzii importate la „{book}”?',
     'ri.undone': 'Importul a fost șters.',
@@ -1817,6 +1818,7 @@ const D = {
     'ri.dupes': "{n} c'erano già e non sono state duplicate.",
     'ri.batches': 'Importazioni fatte',
     'ri.count': '{n} recensioni',
+    'rv.allBooks': 'Tutti i libri', 'rv.searchBook': 'Cerca il libro…', 'rv.fAll': 'Tutte', 'rv.fImported': 'Importate', 'rv.fSite': 'Scritte sul sito', 'rv.avg': 'media {n}', 'rv.importedN': '{n} importate', 'rv.siteN': '{n} dal sito', 'rv.openBook': 'Vedi il libro', 'rv.expandAll': 'Apri tutto', 'rv.collapseAll': 'Chiudi tutto',
     'ri.undo': 'Elimina questa importazione',
     'ri.confirmUndo': 'Eliminare le {n} recensioni importate su «{book}»?',
     'ri.undone': 'Importazione eliminata.',
@@ -3026,6 +3028,7 @@ const D = {
     'ri.dupes': '{n} were already there and were not duplicated.',
     'ri.batches': 'Imports done',
     'ri.count': '{n} reviews',
+    'rv.allBooks': 'All books', 'rv.searchBook': 'Find a book…', 'rv.fAll': 'All', 'rv.fImported': 'Imported', 'rv.fSite': 'Written on the site', 'rv.avg': 'average {n}', 'rv.importedN': '{n} imported', 'rv.siteN': '{n} from the site', 'rv.openBook': 'View book', 'rv.expandAll': 'Expand all', 'rv.collapseAll': 'Collapse all',
     'ri.undo': 'Delete this import',
     'ri.confirmUndo': 'Delete the {n} reviews imported on “{book}”?',
     'ri.undone': 'Import deleted.',
@@ -3666,7 +3669,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261024025404`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261024062613`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
