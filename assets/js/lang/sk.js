@@ -1,5 +1,12 @@
 // Slovak interface strings for Librava
 export default {
+  "ntf.giftTitle": "Dostali ste knihu ako darček!",
+  "ntf.giftBody": "Gratulujeme! Kniha je už vo vašej knižnici a môžete ju čítať kedykoľvek.",
+  "ntf.giftTag": "Darček pre vás",
+  "ntf.giftHi": "Gratulujeme, máte darček!",
+  "ntf.giftLead": "„{book}“ je teraz vaša. Čaká vo vašej knižnici, pripravená na čítanie.",
+  "ntf.giftLeadMany": "Dostali ste {n} kníh ako darček. Čakajú vo vašej knižnici, pripravené na čítanie.",
+  "ntf.giftNote": "Nájdete ju vždy v Mojej knižnici, na každom zariadení. Príjemné čítanie!",
   "ntf.title": "Upozornenia",
   "ntf.empty": "Zatiaľ žiadne upozornenia.",
   "ntf.open": "Zobraziť",

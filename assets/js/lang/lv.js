@@ -1,5 +1,12 @@
 // Latvian interface strings for Librava
 export default {
+  "ntf.giftTitle": "Jūs saņēmāt grāmatu dāvanā!",
+  "ntf.giftBody": "Apsveicam! Grāmata jau ir jūsu bibliotēkā, un to varat lasīt jebkurā laikā.",
+  "ntf.giftTag": "Dāvana jums",
+  "ntf.giftHi": "Apsveicam, jums ir dāvana!",
+  "ntf.giftLead": "“{book}” tagad ir jūsu. Tā gaida jūs bibliotēkā, gatava lasīšanai.",
+  "ntf.giftLeadMany": "Jūs saņēmāt {n} grāmatas dāvanā. Tās gaida jūs bibliotēkā, gatavas lasīšanai.",
+  "ntf.giftNote": "Jūs to vienmēr atradīsiet sadaļā Mana bibliotēka, jebkurā ierīcē. Patīkamu lasīšanu!",
   "ntf.title": "Paziņojumi",
   "ntf.empty": "Paziņojumu vēl nav.",
   "ntf.open": "Skatīt",

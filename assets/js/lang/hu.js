@@ -1,5 +1,12 @@
 // Hungarian interface strings for Librava
 export default {
+  "ntf.giftTitle": "Ajándékba kaptál egy könyvet!",
+  "ntf.giftBody": "Gratulálunk! A könyv már a könyvtáradban van, bármikor elolvashatod.",
+  "ntf.giftTag": "Ajándék neked",
+  "ntf.giftHi": "Gratulálunk, ajándékot kaptál!",
+  "ntf.giftLead": "A(z) „{book}” mostantól a tiéd. A könyvtáradban vár, olvasásra készen.",
+  "ntf.giftLeadMany": "{n} könyvet kaptál ajándékba. A könyvtáradban várnak, olvasásra készen.",
+  "ntf.giftNote": "Mindig megtalálod a Könyvtáramban, bármelyik eszközön. Jó olvasást!",
   "ntf.title": "Értesítések",
   "ntf.empty": "Még nincs értesítés.",
   "ntf.open": "Megnézem",

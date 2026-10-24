@@ -1,5 +1,12 @@
 // Swedish interface strings for Librava
 export default {
+  "ntf.giftTitle": "Du har fått en bok i present!",
+  "ntf.giftBody": "Grattis! Boken finns redan i ditt bibliotek och du kan läsa den när du vill.",
+  "ntf.giftTag": "En present till dig",
+  "ntf.giftHi": "Grattis, du har fått en present!",
+  "ntf.giftLead": "”{book}” är nu din. Den väntar i ditt bibliotek, redo att läsas.",
+  "ntf.giftLeadMany": "Du har fått {n} böcker i present. De väntar i ditt bibliotek, redo att läsas.",
+  "ntf.giftNote": "Du hittar den alltid i Mitt bibliotek, på alla enheter. Trevlig läsning!",
   "ntf.title": "Aviseringar",
   "ntf.empty": "Inga aviseringar än.",
   "ntf.open": "Visa",

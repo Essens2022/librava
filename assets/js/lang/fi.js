@@ -1,5 +1,12 @@
 // Finnish interface strings for Librava
 export default {
+  "ntf.giftTitle": "Sait kirjan lahjaksi!",
+  "ntf.giftBody": "Onnittelut! Kirja on jo kirjastossasi, ja voit lukea sen milloin vain.",
+  "ntf.giftTag": "Lahja sinulle",
+  "ntf.giftHi": "Onnittelut, sait lahjan!",
+  "ntf.giftLead": "”{book}” on nyt sinun. Se odottaa kirjastossasi valmiina luettavaksi.",
+  "ntf.giftLeadMany": "Sait {n} kirjaa lahjaksi. Ne odottavat kirjastossasi valmiina luettavaksi.",
+  "ntf.giftNote": "Löydät sen aina kohdasta Oma kirjasto, millä tahansa laitteella. Mukavia lukuhetkiä!",
   "ntf.title": "Ilmoitukset",
   "ntf.empty": "Ei vielä ilmoituksia.",
   "ntf.open": "Katso",

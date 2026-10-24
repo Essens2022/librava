@@ -1,5 +1,12 @@
 // Dutch interface strings for Librava
 export default {
+  "ntf.giftTitle": "Je hebt een boek cadeau gekregen!",
+  "ntf.giftBody": "Gefeliciteerd! Het boek staat al in je bibliotheek en je kunt het altijd lezen.",
+  "ntf.giftTag": "Een cadeau voor jou",
+  "ntf.giftHi": "Gefeliciteerd, je hebt een cadeau!",
+  "ntf.giftLead": "‘{book}’ is nu van jou. Het wacht in je bibliotheek, klaar om te lezen.",
+  "ntf.giftLeadMany": "Je hebt {n} boeken cadeau gekregen. Ze wachten in je bibliotheek, klaar om te lezen.",
+  "ntf.giftNote": "Je vindt het altijd in Mijn bibliotheek, op elk apparaat. Veel leesplezier!",
   "ntf.title": "Meldingen",
   "ntf.empty": "Nog geen meldingen.",
   "ntf.open": "Bekijken",

@@ -1,5 +1,12 @@
 // Slovenian interface strings for Librava
 export default {
+  "ntf.giftTitle": "Prejeli ste knjigo v dar!",
+  "ntf.giftBody": "Čestitamo! Knjiga je že v vaši knjižnici in jo lahko berete kadarkoli.",
+  "ntf.giftTag": "Darilo za vas",
+  "ntf.giftHi": "Čestitamo, prejeli ste darilo!",
+  "ntf.giftLead": "»{book}« je zdaj vaša. Čaka vas v knjižnici, pripravljena za branje.",
+  "ntf.giftLeadMany": "Prejeli ste {n} knjig v dar. Čakajo vas v knjižnici, pripravljene za branje.",
+  "ntf.giftNote": "Vedno jo najdete v Moji knjižnici, na vsaki napravi. Prijetno branje!",
   "ntf.title": "Obvestila",
   "ntf.empty": "Še ni obvestil.",
   "ntf.open": "Poglej",

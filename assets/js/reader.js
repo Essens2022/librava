@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261024064811';
-import { t } from './i18n.js?v=20261024064811';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261024064811';
-import { offline } from './offline.js?v=20261024064811';
-import { api } from './api.js?v=20261024064811';
-import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261024064811';
-import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261024064811';
+import { CONFIG } from './config.js?v=20261024065514';
+import { t } from './i18n.js?v=20261024065514';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261024065514';
+import { offline } from './offline.js?v=20261024065514';
+import { api } from './api.js?v=20261024065514';
+import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261024065514';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261024065514';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
@@ -436,6 +436,20 @@ class EpubEngine {
     }
     this.applySettings();
     // copying: short quotes only (like Kindle), always with the book, author and shop added
+    // boxes with their own background (key points, tips...) always keep readable text, whatever the reader theme
+    this.rendition.hooks.content.register(contents => {
+      const doc = contents.document, win = doc.defaultView;
+      const fix = () => {
+        const rgb = c => (c.match(/[\d.]+/g) || []).map(Number);
+        const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+        doc.body && doc.body.querySelectorAll('*').forEach(el => {
+          const c = rgb(win.getComputedStyle(el).backgroundColor); if (c.length < 3 || (c.length > 3 && c[3] < .5)) return;
+          const ink = lum(c) < .25 ? '#ffffff' : lum(c) > .55 ? '#1f2328' : null; if (!ink) return;
+          [el, ...el.querySelectorAll('*')].forEach(x => { if (x !== el && rgb(win.getComputedStyle(x).backgroundColor)[3] !== 0 && win.getComputedStyle(x).backgroundColor !== 'rgba(0, 0, 0, 0)') return; x.style.setProperty('color', ink, 'important'); });
+        });
+      };
+      setTimeout(fix, 0); setTimeout(fix, 400);
+    });
     this.rendition.hooks.content.register(contents => {
       const doc = contents.document;
       doc.addEventListener('copy', e => {

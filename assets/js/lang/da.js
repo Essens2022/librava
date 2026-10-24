@@ -1,5 +1,12 @@
 // Danish interface strings for Librava
 export default {
+  "ntf.giftTitle": "Du har fået en bog i gave!",
+  "ntf.giftBody": "Tillykke! Bogen er allerede i dit bibliotek, og du kan læse den når som helst.",
+  "ntf.giftTag": "En gave til dig",
+  "ntf.giftHi": "Tillykke, du har fået en gave!",
+  "ntf.giftLead": "“{book}” er nu din. Den venter i dit bibliotek, klar til at blive læst.",
+  "ntf.giftLeadMany": "Du har fået {n} bøger i gave. De venter i dit bibliotek, klar til at blive læst.",
+  "ntf.giftNote": "Du finder den altid i Mit bibliotek, på alle enheder. God læselyst!",
   "ntf.title": "Notifikationer",
   "ntf.empty": "Ingen notifikationer endnu.",
   "ntf.open": "Se",

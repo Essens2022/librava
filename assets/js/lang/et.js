@@ -1,5 +1,12 @@
 // Estonian interface strings for Librava
 export default {
+  "ntf.giftTitle": "Saite raamatu kingituseks!",
+  "ntf.giftBody": "Palju õnne! Raamat on juba teie raamatukogus ja saate seda lugeda millal iganes.",
+  "ntf.giftTag": "Kingitus teile",
+  "ntf.giftHi": "Palju õnne, teil on kingitus!",
+  "ntf.giftLead": "„{book}“ on nüüd teie oma. See ootab teid raamatukogus, lugemiseks valmis.",
+  "ntf.giftLeadMany": "Saite {n} raamatut kingituseks. Need ootavad teid raamatukogus, lugemiseks valmis.",
+  "ntf.giftNote": "Leiate selle alati jaotisest Minu raamatukogu, igas seadmes. Head lugemist!",
   "ntf.title": "Teavitused",
   "ntf.empty": "Teavitusi veel pole.",
   "ntf.open": "Vaata",

@@ -1,5 +1,12 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "ntf.giftTitle": "Du har fått en bok i gave!",
+  "ntf.giftBody": "Gratulerer! Boken ligger allerede i biblioteket ditt, og du kan lese den når du vil.",
+  "ntf.giftTag": "En gave til deg",
+  "ntf.giftHi": "Gratulerer, du har fått en gave!",
+  "ntf.giftLead": "«{book}» er nå din. Den venter i biblioteket ditt, klar til å leses.",
+  "ntf.giftLeadMany": "Du har fått {n} bøker i gave. De venter i biblioteket ditt, klare til å leses.",
+  "ntf.giftNote": "Du finner den alltid i Mitt bibliotek, på alle enheter. God lesing!",
   "ntf.title": "Varsler",
   "ntf.empty": "Ingen varsler ennå.",
   "ntf.open": "Se",

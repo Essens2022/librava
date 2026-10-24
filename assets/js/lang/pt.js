@@ -1,5 +1,12 @@
 // Portuguese interface strings for Librava
 export default {
+  "ntf.giftTitle": "Recebeu um livro de presente!",
+  "ntf.giftBody": "Parabéns! O livro já está na sua biblioteca e pode lê-lo quando quiser.",
+  "ntf.giftTag": "Um presente para si",
+  "ntf.giftHi": "Parabéns, recebeu um presente!",
+  "ntf.giftLead": "«{book}» agora é seu. Está à sua espera na biblioteca, pronto a ler.",
+  "ntf.giftLeadMany": "Recebeu {n} livros de presente. Estão à sua espera na biblioteca, prontos a ler.",
+  "ntf.giftNote": "Encontra-o sempre em A minha biblioteca, em qualquer dispositivo. Boas leituras!",
   "ntf.title": "Notificações",
   "ntf.empty": "Ainda não há notificações.",
   "ntf.open": "Ver",

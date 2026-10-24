@@ -1,5 +1,12 @@
 // Lithuanian interface strings for Librava
 export default {
+  "ntf.giftTitle": "Gavote knygą dovanų!",
+  "ntf.giftBody": "Sveikiname! Knyga jau yra jūsų bibliotekoje, ją galite skaityti bet kada.",
+  "ntf.giftTag": "Dovana jums",
+  "ntf.giftHi": "Sveikiname, gavote dovaną!",
+  "ntf.giftLead": "„{book}“ dabar jūsų. Ji laukia jūsų bibliotekoje, paruošta skaityti.",
+  "ntf.giftLeadMany": "Gavote {n} knygas dovanų. Jos laukia jūsų bibliotekoje, paruoštos skaityti.",
+  "ntf.giftNote": "Ją visada rasite skiltyje Mano biblioteka, bet kuriame įrenginyje. Malonaus skaitymo!",
   "ntf.title": "Pranešimai",
   "ntf.empty": "Pranešimų dar nėra.",
   "ntf.open": "Žiūrėti",
