@@ -1802,10 +1802,10 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .promo-shelf.floaty .pb:hover { animation-play-state: paused; }
 @keyframes pbFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @media (max-width: 760px) { .promo-books .promo-shelf.marq { --h: 170px !important; } .marq-track .pb { margin-right: 14px; } }
+/* phones with "reduce motion" or battery saver: the shelf still moves, just slower and gentler */
 @media (prefers-reduced-motion: reduce) {
-  .marq-track, .promo-shelf.floaty .pb { animation: none; }
-  .promo-books .promo-shelf.marq { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
-  .marq-track .pb[aria-hidden="true"] { display: none; }
+  .marq-track { animation-duration: calc(var(--dur, 40s) * 1.6); }
+  .promo-shelf.floaty .pb { animation: none; }
 }
 
 /* admin reviews grouped by book */
