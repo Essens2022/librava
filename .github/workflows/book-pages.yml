@@ -29,7 +29,7 @@ jobs:
       - run: node tools/book-pages.mjs
       - name: Publish if something changed
         run: |
-          git add -A book sitemap.xml robots.txt en fr de es it pt nl pl ro cs sk hu bg hr sl el da sv no fi et lv lt uk
+          git add -A book feed sitemap.xml robots.txt en fr de es it pt nl pl ro cs sk hu bg hr sl el da sv no fi et lv lt uk
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update SEO pages"
           git push origin HEAD:main

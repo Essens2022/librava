@@ -187,6 +187,36 @@ for (const b of books) {
 }
 if (existsSync('book')) for (const d of readdirSync('book')) if (!keep.has(d)) rmSync(`book/${d}`, { recursive: true, force: true });
 
+// ---------- product feed for the Meta (Facebook/Instagram) catalog: /feed/meta.csv ----------
+// Every published edition, with the same id the pixel sends (content_ids), so ads can show the right book
+// and remind visitors of the book they looked at. Both editions of a title share item_group_id (work).
+{
+  const csv = v => { const s = String(v ?? '').replace(/\r?\n+/g, ' ').trim(); return /[",]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const eur = c => `${(c / 100).toFixed(2)} ${'EUR'}`;
+  const cols = ['id', 'title', 'description', 'availability', 'condition', 'price', 'sale_price', 'link', 'image_link', 'brand', 'item_group_id', 'google_product_category', 'product_type', 'custom_label_0', 'custom_label_1'];
+  const rows = books.filter(b => coverOf[b.id] && b.price_cents > 0).map(b => {
+    const fmt = b.format === 'epub' ? 'EPUB' : 'PDF';
+    const cats = catsOf(b), cat = cats[0];
+    const list = b.list_price_cents > b.price_cents ? b.list_price_cents : 0;
+    return {
+      id: b.id,
+      title: cut(`${b.title}${b.subtitle ? ': ' + b.subtitle : ''} (eBook, ${fmt})`, 150),
+      description: cut(plain(b.description).replace(/\n/g, ' ') || b.title, 4900),
+      availability: 'in stock', condition: 'new',
+      price: eur(list || b.price_cents), sale_price: list ? eur(b.price_cents) : '',
+      link: `${SITE}/book/${b.id}/?utm_source=facebook&utm_medium=paid&utm_campaign=catalog`,
+      image_link: coverOf[b.id].url,
+      brand: 'Librava', item_group_id: b.work_id || b.id,
+      google_product_category: 'Media > Books',
+      product_type: `Books > eBooks${cat ? ' > ' + tr('en', 'cat.' + cat) : ''}`,
+      custom_label_0: cat ? tr('en', 'cat.' + cat) : 'Books', custom_label_1: fmt,
+    };
+  });
+  mkdirSync('feed', { recursive: true });
+  writeFileSync('feed/meta.csv', [cols.join(','), ...rows.map(r => cols.map(c => csv(r[c])).join(','))].join('\n') + '\n');
+  console.log(`Meta feed: ${rows.length} products`);
+}
+
 // ---------- sitemap + robots ----------
 const x = s => esc(s);
 const sm = `<?xml version="1.0" encoding="UTF-8"?>
