@@ -31,10 +31,14 @@ export async function viewHome(el) {
   // banners chosen in Admin → Advertising, only those for this language (or for all languages)
   const promos = await promosP;
   const byId = Object.fromEntries(everything.map(b => [b.id, b]));
-  const many = p => (p.book_ids || []).map(id => byId[id]).filter(Boolean);
-  const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!byId[p.book_id];
-  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, byId[p.book_id], 'hero', many(p)));
-  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, byId[p.book_id], 'strip', many(p))}</div>`);
+  // a banner may name any edition (PDF or EPUB); the store lists one edition per title, so map each to that one
+  const anyEd = Object.fromEntries((await api.listBooks({ allFormats: true })).map(b => [b.id, b]));
+  const byWork = Object.fromEntries(everything.filter(b => b.work_id).map(b => [b.work_id, b]));
+  const shown = id => { const b = byId[id] || anyEd[id]; return b ? (b.work_id && byWork[b.work_id]) || b : null; };
+  const many = p => [...new Set((p.book_ids || []).map(shown).filter(Boolean))];
+  const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!shown(p.book_id);
+  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, shown(p.book_id), 'hero', many(p)));
+  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', many(p))}</div>`);
   const noBooks = !all.length;
   let cont = null;
   if (api.user()) {

@@ -718,8 +718,27 @@ new MutationObserver(() => document.querySelectorAll('.promo-cover img:not(.ld),
 
 // multi-book banners: covers get the largest height at which they all fit in one row (computer/tablet);
 // on phones they keep a fixed size and scroll sideways
+// banners with 5 or more books turn into a slow, endless moving shelf (pauses on hover or touch; still for reduced motion);
+// smaller ones float gently
+const MARQ_MIN = 5;
+function moveShelves() {
+  document.querySelectorAll('.promo-books .promo-shelf:not(.marq):not(.floaty)').forEach(sh => {
+    const pbs = [...sh.querySelectorAll(':scope > .pb')]; if (!pbs.length) return;
+    pbs.forEach((pb, i) => pb.style.setProperty('--i', i));
+    if (pbs.length < MARQ_MIN || sh.closest('.pr-live-frame')) { sh.classList.add('floaty'); return; }
+    const track = document.createElement('div'); track.className = 'marq-track';
+    pbs.forEach(pb => track.appendChild(pb));
+    pbs.forEach(pb => { const c = pb.cloneNode(true); c.setAttribute('aria-hidden', 'true'); c.tabIndex = -1; track.appendChild(c); });
+    sh.style.setProperty('--dur', pbs.length * 5 + 's');
+    sh.style.removeProperty('--fit'); sh.classList.remove('fit');
+    sh.appendChild(track); sh.classList.add('marq');
+    sh.addEventListener('touchstart', () => sh.classList.add('hold'), { passive: true });
+    sh.addEventListener('touchend', () => setTimeout(() => sh.classList.remove('hold'), 2500), { passive: true });
+  });
+}
 function fitShelves() {
-  document.querySelectorAll('.promo-books .promo-shelf').forEach(sh => {
+  moveShelves();
+  document.querySelectorAll('.promo-books .promo-shelf:not(.marq)').forEach(sh => {
     if (innerWidth <= 760 || sh.closest('.pr-live-frame.phone')) { sh.style.removeProperty('--fit'); sh.classList.remove('fit'); return; }
     const pbs = [...sh.querySelectorAll('.pb')]; if (!pbs.length) return;
     const gap = parseFloat(getComputedStyle(sh).columnGap) || 16;
@@ -731,4 +750,4 @@ function fitShelves() {
 }
 addEventListener('resize', () => requestAnimationFrame(fitShelves));
 document.addEventListener('load', e => { if (e.target.closest?.('.promo-books')) fitShelves(); }, true);
-new MutationObserver(() => { if (document.querySelector('.promo-books .promo-shelf:not(.fit)')) requestAnimationFrame(fitShelves); }).observe(document.documentElement, { childList: true, subtree: true });
+new MutationObserver(() => { if (document.querySelector('.promo-books .promo-shelf:not(.fit):not(.marq)')) requestAnimationFrame(fitShelves); }).observe(document.documentElement, { childList: true, subtree: true });

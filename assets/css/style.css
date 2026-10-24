@@ -1790,3 +1790,20 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .imp-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 .imp-log { font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 @media (max-width: 560px) { .imp-cover { width: 70px; } }
+/* ---------- multi-book banners in motion: an endless shelf for 5+ books, a gentle float for fewer ---------- */
+.promo-books .promo-shelf.marq { display: block !important; overflow: hidden; padding: 14px 0 18px; --h: 230px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.promo-strip .promo-books .promo-shelf.marq, .promo-strip.promo-books .promo-shelf.marq { --h: 150px; }
+.marq-track { display: flex; align-items: flex-end; width: max-content; animation: shelfMove var(--dur, 40s) linear infinite; will-change: transform; }
+.marq-track .pb { margin-right: 18px; }
+.promo-shelf.marq:hover .marq-track, .promo-shelf.marq:focus-within .marq-track, .promo-shelf.marq.hold .marq-track { animation-play-state: paused; }
+@keyframes shelfMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.promo-shelf.floaty .pb { animation: pbFloat 6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -1.4s); }
+.promo-shelf.floaty .pb:hover { animation-play-state: paused; }
+@keyframes pbFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (max-width: 760px) { .promo-books .promo-shelf.marq { --h: 170px !important; } .marq-track .pb { margin-right: 14px; } }
+@media (prefers-reduced-motion: reduce) {
+  .marq-track, .promo-shelf.floaty .pb { animation: none; }
+  .promo-books .promo-shelf.marq { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+  .marq-track .pb[aria-hidden="true"] { display: none; }
+}
