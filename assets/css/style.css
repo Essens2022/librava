@@ -1857,3 +1857,8 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes giftFall { to { transform: translateY(560px) rotate(540deg); opacity: 0; } }
 @keyframes giftPop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .gift-confetti { display: none; } .gift-hero, .gift-books img { animation: none; } }
+/* windows: scrolling stays inside the window, never the page behind */
+.modal-wrap { overscroll-behavior: contain; touch-action: pan-y; }
+.modal { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.modal.ntf-modal { overflow: hidden; max-height: min(86vh, 86dvh); }
+.ntf-modal .ntf-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }

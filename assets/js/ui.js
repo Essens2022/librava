@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261024065514';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024065514';
-import { esc, store, $, $$ } from './util.js?v=20261024065514';
+import { CONFIG } from './config.js?v=20261024065720';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024065720';
+import { esc, store, $, $$ } from './util.js?v=20261024065720';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261024065514';
-import { suggest, highlight } from './search.js?v=20261024065514';
-import { track, trackPage } from './track.js?v=20261024065514';
-import { initGA, stopGA } from './ga.js?v=20261024065514';
-import { api } from './api.js?v=20261024065514';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261024065720';
+import { suggest, highlight } from './search.js?v=20261024065720';
+import { track, trackPage } from './track.js?v=20261024065720';
+import { initGA, stopGA } from './ga.js?v=20261024065720';
+import { api } from './api.js?v=20261024065720';
 
 // ---------------- icons ----------------
 const P = {
@@ -327,12 +327,23 @@ export function toast(msg, { error = false, ms = 3200 } = {}) {
   box.appendChild(el);
   setTimeout(() => { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 320); }, ms);
 }
+// while a window is open the page behind it does not move (also on iPhone, where overflow:hidden alone is not enough)
+let locks = 0, lockY = 0;
+function lockScroll(on) {
+  const b = document.body;
+  if (on) { if (locks++) return; lockY = scrollY; Object.assign(b.style, { position: 'fixed', top: -lockY + 'px', left: '0', right: '0', width: '100%', overflow: 'hidden' }); }
+  else { if (!locks || --locks) return; Object.assign(b.style, { position: '', top: '', left: '', right: '', width: '', overflow: '' }); scrollTo(0, lockY); }
+}
 export function modal(html, { onMount } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'modal-wrap';
   wrap.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
   document.body.appendChild(wrap);
-  const close = () => wrap.remove();
+  lockScroll(true);
+  let done = false;
+  const close = () => { if (done) return; done = true; wrap.remove(); lockScroll(false); };
+  // removed some other way (route change etc.): still give the page its scroll back
+  const mo = new MutationObserver(() => { if (!wrap.isConnected) { mo.disconnect(); if (!done) { done = true; lockScroll(false); } } }); mo.observe(document.body, { childList: true });
   wrap.addEventListener('click', e => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
   onMount && onMount(wrap.querySelector('.modal'), close);
   return close;
