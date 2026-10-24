@@ -1862,3 +1862,6 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .modal { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .modal.ntf-modal { overflow: hidden; max-height: min(86vh, 86dvh); }
 .ntf-modal .ntf-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+/* unread notifications: a small dot by the time instead of a coloured stripe on the side */
+.ntf2.unread { box-shadow: none; }
+.ntf2.unread .ntf-top small::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #E0453A; margin-right: 6px; vertical-align: 1px; }
