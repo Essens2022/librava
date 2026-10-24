@@ -1841,3 +1841,19 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 /* the moving shelf is driven by script (scroll position), no CSS animation */
 .marq-track { animation: none !important; transform: none !important; will-change: auto; }
 .promo-books .promo-shelf.marq { overflow: hidden; }
+/* gift: notification card and the festive window */
+.ntf2.ntf-gift { background: linear-gradient(135deg, #FFF6E8, #FDEBF0); border-color: #F2B36B; }
+.ntf-gift .ntf-ico { background: #F4A340; color: #fff; }
+.gift-tag { display: inline-block; font-size: 12px; font-weight: 700; color: #B4561E; background: #FFE3C2; border-radius: 999px; padding: 2px 8px; }
+.gift-modal { position: relative; overflow: hidden; text-align: center; align-items: center; background: linear-gradient(180deg, #FFF6E8, var(--surface) 55%); }
+.gift-modal h2 { font-size: 24px; margin: 0; }
+.gift-hero { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: #F4A340; color: #fff; box-shadow: 0 10px 24px rgba(244,163,64,.45); animation: giftPop .6s cubic-bezier(.2,1.4,.4,1) both; }
+.gift-lead { margin: 0; font-size: 16px; line-height: 1.5; }
+.gift-books { display: flex; gap: 12px; justify-content: center; }
+.gift-books img { width: 110px; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 3px; box-shadow: 0 10px 24px rgba(0,0,0,.3); animation: giftPop .7s .15s cubic-bezier(.2,1.4,.4,1) both; }
+.gift-note { margin: 0; font-size: 13px; }
+.gift-confetti { position: absolute; inset: 0; pointer-events: none; }
+.gift-confetti i { position: absolute; top: -12px; left: var(--x); width: 8px; height: 14px; background: var(--c); border-radius: 2px; opacity: .9; animation: giftFall 2.6s var(--d) ease-in forwards; }
+@keyframes giftFall { to { transform: translateY(560px) rotate(540deg); opacity: 0; } }
+@keyframes giftPop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .gift-confetti { display: none; } .gift-hero, .gift-books img { animation: none; } }

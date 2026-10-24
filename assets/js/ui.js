@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261024064601';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024064601';
-import { esc, store, $, $$ } from './util.js?v=20261024064601';
+import { CONFIG } from './config.js?v=20261024064811';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261024064811';
+import { esc, store, $, $$ } from './util.js?v=20261024064811';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261024064601';
-import { suggest, highlight } from './search.js?v=20261024064601';
-import { track, trackPage } from './track.js?v=20261024064601';
-import { initGA, stopGA } from './ga.js?v=20261024064601';
-import { api } from './api.js?v=20261024064601';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261024064811';
+import { suggest, highlight } from './search.js?v=20261024064811';
+import { track, trackPage } from './track.js?v=20261024064811';
+import { initGA, stopGA } from './ga.js?v=20261024064811';
+import { api } from './api.js?v=20261024064811';
 
 // ---------------- icons ----------------
 const P = {
@@ -504,9 +504,37 @@ export function showConsent(force) {
 
 // ---------------------------------------------------------------- notifications from Librava (bell in the header)
 let notifCache = null;
+const GIFT_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+// the first time someone sees a book they received as a gift: a festive window with congratulations
+async function celebrateGifts(gn) {
+  const seen = new Set(store.get('gift:seen', [])), fresh = gn.filter(g => !seen.has(g.id));
+  if (!fresh.length || document.querySelector('.gift-modal')) return;
+  store.set('gift:seen', [...seen, ...fresh.map(g => g.id)].slice(-100));
+  const books = (await Promise.all(fresh.map(g => api.getBook(g.book_ids[0]).catch(() => null)))).filter(Boolean);
+  if (!books.length) return;
+  const one = books.length === 1, b = books[0];
+  const conf = Array.from({ length: 28 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 7) * .18}s;--c:${['#F4A340', '#E85D75', '#4FA3D9', '#7BC47F', '#B48CE0'][i % 5]}"></i>`).join('');
+  modal(`<div class="gift-confetti" aria-hidden="true">${conf}</div>
+    <div class="gift-hero">${GIFT_SVG.replace('width="20" height="20"', 'width="44" height="44"')}</div>
+    <h2>${esc(t('ntf.giftHi'))}</h2>
+    <p class="gift-lead">${esc(one ? t('ntf.giftLead', { book: b.title }) : t('ntf.giftLeadMany', { n: books.length }))}</p>
+    <div class="gift-books">${books.slice(0, 4).map(x => `<a href="#/read/${encodeURIComponent(x.id)}" data-close>${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="${esc(x.title)}">` : `<span class="ph">${esc(x.title)}</span>`}</a>`).join('')}</div>
+    <p class="muted gift-note">${esc(t('ntf.giftNote'))}</p>
+    <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div>`,
+    { onMount: m => m.classList.add('gift-modal') });
+}
+let notifWho = null;
 export async function refreshBell(force) {
   try {
-    if (!notifCache || force) notifCache = (await api.notifications?.()) || [];
+    const who = api.user?.()?.id || '';
+    if (!notifCache || force || notifWho !== who) {
+      notifWho = who;
+      const [gen, gifts] = await Promise.all([api.notifications?.().catch(() => []), api.myGifts?.().catch(() => [])]);
+      // a book received as a gift: a personal notification, shown first
+      const gn = (gifts || []).map(g => ({ id: 'gift_' + g.id, kind: 'gift', created_at: g.created_at, title: t('ntf.giftTitle'), body: t('ntf.giftBody'), book_ids: [g.book_id], gift: true }));
+      notifCache = [...gn, ...(gen || [])];
+      celebrateGifts(gn);
+    }
     const lang = getLang(), read = new Set(store.get('notif:read', []));
     const mine = notifCache.filter(n => !n.lang || n.lang === lang);
     const unread = mine.filter(n => !read.has(n.id)).length;
@@ -516,7 +544,7 @@ export async function refreshBell(force) {
   } catch { return []; }
 }
 // one notification, Amazon-style: icon, time, title, text and the books it is about (cover, price, button)
-const NTF_ICON = { new_book: 'book', price_drop: 'tag', free_book: 'bolt', sale: 'tag', coupon: 'tag', series: 'library', picks: 'bookmark', new_week: 'bell' };
+const NTF_ICON = { gift: 'bolt', new_book: 'book', price_drop: 'tag', free_book: 'bolt', sale: 'tag', coupon: 'tag', series: 'library', picks: 'bookmark', new_week: 'bell' };
 function ago(d) {
   const s = Math.max(1, (Date.now() - new Date(d)) / 1000), rtf = new Intl.RelativeTimeFormat(getLang(), { numeric: 'auto' });
   return s < 3600 ? rtf.format(-Math.round(s / 60), 'minute') : s < 86400 ? rtf.format(-Math.round(s / 3600), 'hour') : s < 86400 * 30 ? rtf.format(-Math.round(s / 86400), 'day') : new Date(d).toLocaleDateString(getLang());
@@ -530,6 +558,15 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
       <div><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close class="ntf-bt">${esc(bs[0].title)}</a><span class="muted">${esc(t('book.by', { author: bs[0].author }))}</span><span class="ntf-price">${priceOf(bs[0])}</span>
       <a class="btn btn-buy btn-sm" href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${esc(t('promo.ctaBook'))}</a></div></div>` : '';
   const many = bs.length > 1 ? `<div class="ntf-books">${bs.map(b => `<a href="#/book/${encodeURIComponent(b.id)}" data-close title="${esc(b.title)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : `<span class="ph">${esc(b.title)}</span>`}<span class="ntf-price">${priceOf(b)}</span></a>`).join('')}</div>` : '';
+  if (n.kind === 'gift' && bs.length === 1) {
+    const b = bs[0];
+    return `<article class="ntf2 ntf-gift ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${GIFT_SVG}</span><div class="ntf-main">
+    <div class="ntf-top"><span class="ntf-brand">${logoHTML()}</span><small class="muted">${esc(ago(n.created_at))}</small></div>
+    <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${esc(t('ntf.giftBody'))}</p>
+    <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
+      <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
+      <a class="btn btn-buy btn-sm" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div></div></div></article>`;
+  }
   return `<article class="ntf2 ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
     <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${esc(n.body)}</p>` : ''}${one}${many}

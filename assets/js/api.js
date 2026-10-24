@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261024064601';
-import { applyOffers, offerRunning } from './offers.js?v=20261024064601';
-import { scoreBook } from './search.js?v=20261024064601';
-import { getLang } from './i18n.js?v=20261024064601';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261024064601';
+import { CONFIG } from './config.js?v=20261024064811';
+import { applyOffers, offerRunning } from './offers.js?v=20261024064811';
+import { scoreBook } from './search.js?v=20261024064811';
+import { getLang } from './i18n.js?v=20261024064811';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261024064811';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261024064601')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261024064811')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -355,6 +355,7 @@ class DemoAPI {
   }
   async deletePromo(p) { store.set('demo:promos', store.get('demo:promos', []).filter(x => x.id !== p.id)); }
   async promoHit(id, kind) { const all = store.get('demo:promos', []); const x = all.find(y => y.id === id); if (x) { x[kind === 'click' ? 'clicks' : 'views'] = (x[kind === 'click' ? 'clicks' : 'views'] || 0) + 1; store.set('demo:promos', all); } }
+  async myGifts() { if (!this._user) return []; return store.get('demo:purchases', []).filter(p => p.user_id === this._user.id && p.gift).map(p => ({ id: p.id, book_id: p.book_id, created_at: p.created_at })); }
   async notifications() { return store.get('demo:notifications', []).filter(n => n.published !== false); }
   async adminNotifications() { return store.get('demo:notifications', []); }
   async saveNotifications(rows) { const all = store.get('demo:notifications', []); for (const n of rows) all.unshift({ published: true, ...n, id: uid('n_'), created_at: new Date().toISOString() }); store.set('demo:notifications', all); }
@@ -753,6 +754,7 @@ class SupabaseAPI {
   // ---- shop settings (company details for the legal pages) and announcements ----
   async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
   async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
+  async myGifts() { if (!this._user) return []; const { data } = await this.sb.from('purchases').select('id,book_id,created_at').eq('user_id', this._user.id).eq('gift', true).order('created_at', { ascending: false }).limit(20); return data || []; }
   async notifications() { const { data } = await this.sb.from('notifications').select('*').eq('published', true).order('created_at', { ascending: false }).limit(30); return data || []; }
   async adminNotifications() { const { data, error } = await this.sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(200); this._err(error); return data; }
   async saveNotifications(rows) { const { error } = await this.sb.from('notifications').insert(rows); this._err(error); }

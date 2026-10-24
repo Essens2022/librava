@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js?v=20261024064601';
-import { store } from './util.js?v=20261024064601';
+import { CONFIG } from './config.js?v=20261024064811';
+import { store } from './util.js?v=20261024064811';
 
 const D = {
   ro: {
@@ -934,6 +934,7 @@ const D = {
     'off.noInternet': 'Nu ai internet: vezi cărțile salvate pe acest dispozitiv.',
     'off.full': 'Nu mai e spațiu pe dispozitiv. Scoate alte cărți salvate offline.',
     'ntf.title': 'Notificări',
+    'ntf.giftTitle': 'Ai primit o carte cadou!', 'ntf.giftBody': 'Felicitări! Cartea este deja în biblioteca ta și o poți citi oricând.', 'ntf.giftTag': 'Cadou pentru tine', 'ntf.giftHi': 'Felicitări, ai primit un cadou!', 'ntf.giftLead': '„{book}” este acum a ta. Te așteaptă în bibliotecă, gata de citit.', 'ntf.giftLeadMany': 'Ai primit {n} cărți cadou. Te așteaptă în bibliotecă, gata de citit.', 'ntf.giftNote': 'O găsești oricând în Biblioteca mea, pe orice dispozitiv. Lectură plăcută!',
     'ntf.open': 'Deschide',
     'ntf.empty': 'Nicio notificare deocamdată.',
     'ntf.new': 'Notificare nouă pentru clienți',
@@ -2144,6 +2145,7 @@ const D = {
     'off.noInternet': 'Sei offline: vedi i libri salvati su questo dispositivo.',
     'off.full': 'Spazio esaurito sul dispositivo. Rimuovi altri libri salvati offline.',
     'ntf.title': 'Notifiche',
+    'ntf.giftTitle': 'Hai ricevuto un libro in regalo!', 'ntf.giftBody': 'Congratulazioni! Il libro è già nella tua biblioteca e puoi leggerlo quando vuoi.', 'ntf.giftTag': 'Un regalo per te', 'ntf.giftHi': 'Congratulazioni, hai ricevuto un regalo!', 'ntf.giftLead': '«{book}» ora è tuo. Ti aspetta in biblioteca, pronto da leggere.', 'ntf.giftLeadMany': 'Hai ricevuto {n} libri in regalo. Ti aspettano in biblioteca, pronti da leggere.', 'ntf.giftNote': 'Lo trovi sempre nella tua biblioteca, su ogni dispositivo. Buona lettura!',
     'ntf.open': 'Apri',
     'ntf.empty': 'Nessuna notifica per ora.',
     'ntf.new': 'Nuova notifica per i clienti',
@@ -3354,6 +3356,7 @@ const D = {
     'off.noInternet': 'You\'re offline: showing the books saved on this device.',
     'off.full': 'No space left on the device. Remove other books saved offline.',
     'ntf.title': 'Notifications',
+    'ntf.giftTitle': 'You received a book as a gift!', 'ntf.giftBody': 'Congratulations! The book is already in your library, ready to read anytime.', 'ntf.giftTag': 'A gift for you', 'ntf.giftHi': 'Congratulations, you have a gift!', 'ntf.giftLead': '“{book}” is now yours. It is waiting in your library, ready to read.', 'ntf.giftLeadMany': 'You received {n} books as a gift. They are waiting in your library, ready to read.', 'ntf.giftNote': 'You will always find it in My library, on any device. Happy reading!',
     'ntf.open': 'Open',
     'ntf.empty': 'No notifications yet.',
     'ntf.new': 'New notification for customers',
@@ -3669,7 +3672,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261024064601`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261024064811`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
