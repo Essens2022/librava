@@ -50,7 +50,7 @@ export function localize(cents) {
   if (cur === 'EUR' || !rates || !rates[cur]) return null;
   const v = (cents / 100) * rates[cur] * 1.03;
   const zero = ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'PYG', 'UGX', 'ISK', 'HUF', 'COP', 'KZT', 'UZS', 'TZS'].includes(cur);
-  // friendly endings like the shop's own prices: x.99 (or whole numbers for currencies without cents)
-  const nice = zero ? Math.max(1, Math.round(v)) : Math.max(0.99, Math.ceil(v) - 0.01);
+  // the same amount the payment page will ask (no rounding up)
+  const nice = zero ? Math.max(1, Math.round(v)) : Math.round(v * 100) / 100;
   return { amount: nice, currency: cur };
 }
