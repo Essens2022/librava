@@ -1,5 +1,6 @@
-import { CONFIG } from './config.js?v=20261024070528';
-import { store } from './util.js?v=20261024070528';
+import { localize, loadRates } from './localprice.js?v=20261024135218';
+import { CONFIG } from './config.js?v=20261024135218';
+import { store } from './util.js?v=20261024135218';
 
 const D = {
   ro: {
@@ -3672,7 +3673,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261024070528`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261024135218`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
@@ -3711,6 +3712,11 @@ export function langName(code, inSentence = false) {
   return langNative(code);
 }
 export function money(cents, currency = CONFIG.currency) {
+  // shoppers outside the euro area see their own currency (the admin panel always shows the real euro amounts)
+  if (String(currency).toUpperCase() === 'EUR' && cents && !String(location.hash).startsWith('#/admin')) {
+    const l = localize(cents);
+    if (l) try { return new Intl.NumberFormat(locale(), { style: 'currency', currency: l.currency, maximumFractionDigits: l.amount % 1 ? 2 : 0 }).format(l.amount); } catch { }
+  }
   return new Intl.NumberFormat(locale(), { style: 'currency', currency }).format((cents || 0) / 100);
 }
 export function fmtDate(d) {
@@ -3719,3 +3725,6 @@ export function fmtDate(d) {
   if (isNaN(dt)) return '';
   return new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
 }
+
+// first visit from outside the euro area: get today's rates, then redraw the page with local prices
+loadRates(() => window.dispatchEvent(new HashChangeEvent('hashchange')));
