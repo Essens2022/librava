@@ -1449,7 +1449,8 @@ input[readonly], textarea[readonly] { background: var(--surface-2); color: var(-
 .st-grid h3 { margin: 0 0 10px; font-size: 16px; } .st-sub { margin: -6px 0 10px; font-size: 13px; }
 .st-chart, .st-hours { display: flex; align-items: flex-end; gap: 2px; height: 160px; border-bottom: 1px solid var(--line); }
 .st-hours { height: 110px; }
-.st-bar { flex: 1; height: 100%; display: flex; align-items: flex-end; position: relative; min-width: 2px; }
+.st-bar { flex: 1; height: 100%; display: flex; align-items: flex-end; position: relative; min-width: 2px; max-width: 48px; }
+.st-chart { justify-content: center; }
 .st-bar::before { content: ''; display: block; width: 100%; height: max(var(--h), 2px); background: var(--c); border-radius: 3px 3px 0 0; opacity: .85; }
 .st-bar:hover::before { opacity: 1; }
 .st-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); font-size: 12px; padding: 5px 8px; border-radius: 6px; white-space: nowrap; z-index: 3; pointer-events: none; text-align: center; }
