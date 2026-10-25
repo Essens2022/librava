@@ -69,7 +69,7 @@ button { cursor: pointer; }
 h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
 .wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); width: 100%; }
 .muted { color: var(--muted); }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sr { position: absolute; top: 0; left: 0; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .ico { width: 22px; height: 22px; flex: none; }
 
 /* ---------------- header ---------------- */
@@ -420,7 +420,7 @@ a.format-chip { color: var(--fg); text-decoration: none; min-width: 110px; }
 .status { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
 .status.live { background: var(--pista-soft); color: var(--pista-strong); }
 .status.draft { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
-.table-wrap { overflow-x: auto; }
+.table-wrap, .table-scroll { overflow-x: auto; position: relative; }
 .step { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); margin-bottom: 14px; overflow: hidden; }
 .step-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
 .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--hdr); color: var(--hdr-fg); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
