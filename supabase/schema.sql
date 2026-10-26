@@ -316,3 +316,39 @@ create index if not exists books_list_idx on public.books (published_at desc, id
 -- insert into storage.buckets (id, name, public) values ('originals', 'originals', false);
 -- policies "librava admin originals read/insert/update/delete": bucket_id = 'originals' and is_admin()
 -- alter table public.books add column original_path text;
+
+-- ---------------------------------------------------------------- customer activity (Admin → Customers)
+-- visits and time on the site of logged-in customers; written only through heartbeat(), read only by admins
+create table if not exists public.user_sessions (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  sid text not null,
+  started_at timestamptz not null default now(),
+  last_seen timestamptz not null default now(),
+  seconds int not null default 0,
+  pages int not null default 0,
+  device text,
+  primary key (user_id, sid)
+);
+create index if not exists user_sessions_user_seen on public.user_sessions(user_id, last_seen desc);
+alter table public.user_sessions enable row level security;
+drop policy if exists "admin reads sessions" on public.user_sessions;
+create policy "admin reads sessions" on public.user_sessions for select using (public.is_admin());
+create or replace function public.heartbeat(p_sid text, p_sec int, p_pages int, p_device text)
+returns void language plpgsql security definer set search_path to 'public' as $$
+declare u uuid := auth.uid(); s text := left(p_sid, 40); prev timestamptz;
+begin
+  if u is null or s is null or s !~ '^[a-z0-9]{6,40}$' then return; end if;
+  select last_seen into prev from public.user_sessions where user_id = u and sid = s;
+  if prev is null then
+    insert into public.user_sessions(user_id, sid, seconds, pages, device)
+    values (u, s, 0, least(greatest(coalesce(p_pages, 1), 0), 20), left(p_device, 10));
+  else
+    update public.user_sessions set
+      seconds = seconds + case when now() - prev >= interval '20 seconds' then least(greatest(coalesce(p_sec, 0), 0), 60) else 0 end,
+      pages = pages + least(greatest(coalesce(p_pages, 0), 0), 20),
+      last_seen = now()
+    where user_id = u and sid = s;
+  end if;
+end $$;
+revoke all on function public.heartbeat(text, int, int, text) from public, anon;
+grant execute on function public.heartbeat(text, int, int, text) to authenticated;

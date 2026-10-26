@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261025165349';
-import { applyOffers, offerRunning } from './offers.js?v=20261025165349';
-import { scoreBook } from './search.js?v=20261025165349';
-import { getLang } from './i18n.js?v=20261025165349';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261025165349';
+import { CONFIG } from './config.js?v=20261026030037';
+import { applyOffers, offerRunning } from './offers.js?v=20261026030037';
+import { scoreBook } from './search.js?v=20261026030037';
+import { getLang } from './i18n.js?v=20261026030037';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261026030037';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261025165349')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261026030037')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -335,6 +335,7 @@ class DemoAPI {
   async deleteOffer(id) { store.set('demo:offers', store.get('demo:offers', []).filter(o => o.id !== id)); }
   async boughtTogether() { return []; }
   track() { }
+  heartbeat() { }
   async analytics(days) {
     const day = i => new Date(Date.now() - (days - 1 - i) * 864e5).toISOString().slice(0, 10);
     return { visitors: 0, sessions: 0, pageviews: 0, orders: 0, revenue: 0, discounts: 0, daily: Array.from({ length: Math.min(days, 90) }, (_, i) => ({ day: day(i), visitors: 0, orders: 0, revenue: 0 })),
@@ -750,6 +751,7 @@ class SupabaseAPI {
   }
   async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
   track(e) { this.sb.rpc('track', { e }).then(() => { }, () => { }); }
+  heartbeat(p) { if (this._user) this.sb.rpc('heartbeat', p).then(() => { }, () => { }); }
   async analytics(days) { const { data, error } = await this.sb.rpc('analytics_summary', { days }); this._err(error); return data; }
   // ---- shop settings (company details for the legal pages) and announcements ----
   async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
@@ -938,12 +940,14 @@ class SupabaseAPI {
   async confirmOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'paid' }); this._err(error); }
   async cancelOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'cancelled' }); this._err(error); }
   async adminCustomers(q = '') {
-    const [users, P] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at', q => q.eq('test', false))]);
+    const [users, P, S] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at', q => q.eq('test', false)),
+      this._all('user_sessions', 'user_id,last_seen,seconds', q => q.gte('last_seen', new Date(Date.now() - 30 * 864e5).toISOString())).catch(() => [])]);
+    const act = {}; for (const x of S || []) { const a = act[x.user_id] = act[x.user_id] || { seen: null, sec: 0 }; a.sec += x.seconds || 0; if (!a.seen || x.last_seen > a.seen) a.seen = x.last_seen; }
     const n = norm(q);
     return users.filter(u => !n || norm((u.email || '') + ' ' + (u.full_name || '')).includes(n)).map(u => {
       const mine = P.filter(p => p.user_id === u.id);
       return { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, books: mine.length, spent_cents: mine.reduce((s, p) => s + (p.price_cents || 0), 0),
-        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.is_admin };
+        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.is_admin, seen_at: act[u.id]?.seen || null, sec30: act[u.id]?.sec || 0 };
     });
   }
   async adminCustomer(id) {
@@ -953,7 +957,10 @@ class SupabaseAPI {
       this.sb.from('purchases').select('*, book:books(*)').eq('user_id', id).order('created_at', { ascending: false }),
       this.sb.from('orders').select('*').eq('user_id', id).order('created_at', { ascending: false }),
     ]);
+    let S = [];
+    try { const r = await this.sb.from('user_sessions').select('started_at,last_seen,seconds,pages,device').eq('user_id', id).gte('last_seen', new Date(Date.now() - 90 * 864e5).toISOString()).order('last_seen', { ascending: false }).limit(500); S = r.data || []; } catch { }
     return {
+      activity: S,
       customer: { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, isAdmin: !!u.is_admin },
       purchases: (P || []).filter(p => p.book).map(p => ({ created_at: p.created_at, price_cents: p.price_cents, currency: p.currency, gift: !!p.gift, book: { ...p.book, cover_url: this._coverUrl(p.book) } })),
       orders: O || [],

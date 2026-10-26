@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261025165349';
-import { CONFIG } from './config.js?v=20261025165349';
-import { store } from './util.js?v=20261025165349';
+import { localize, loadRates } from './localprice.js?v=20261026030037';
+import { CONFIG } from './config.js?v=20261026030037';
+import { store } from './util.js?v=20261026030037';
 
 const D = {
   ro: {
@@ -1073,6 +1073,29 @@ const D = {
     "admin.roleAdmin": "administrator",
     "admin.noBooksYet": "Nicio carte încă.",
     "admin.customerOrders": "Comenzile clientului",
+    "admin.act.title": "Activitate pe site",
+    "admin.act.lastVisit": "Ultima vizită",
+    "admin.act.time30": "Timp (30 zile)",
+    "admin.act.sec": "{n} sec",
+    "admin.act.min": "{n} min",
+    "admin.act.hm": "{h} h {m} min",
+    "admin.act.now": "chiar acum",
+    "admin.act.minAgo": "acum {n} min",
+    "admin.act.hAgo": "acum {n} h",
+    "admin.act.last": "Ultima vizită: {when}",
+    "admin.act.avg": "durata medie a unei vizite: {d}",
+    "admin.act.d1": "Vizite în 24 de ore",
+    "admin.act.d7": "Vizite în 7 zile",
+    "admin.act.d30": "Vizite în 30 de zile",
+    "admin.act.d90": "Vizite în 90 de zile",
+    "admin.act.colStart": "Început vizită",
+    "admin.act.colTime": "Timp pe site",
+    "admin.act.colPages": "Pagini",
+    "admin.act.colDevice": "Aparat",
+    "admin.act.none": "Încă nicio vizită înregistrată. Datele apar când clientul intră pe site logat în cont.",
+    "admin.act.dev.desktop": "Calculator",
+    "admin.act.dev.mobile": "Telefon",
+    "admin.act.dev.tablet": "Tabletă",
     'acc.err.invalid': 'Email sau parolă greșite.',
     'acc.err.exists': 'Există deja un cont cu acest email.',
     'acc.err.short': 'Parola trebuie să aibă cel puțin 6 caractere.',
@@ -2284,6 +2307,29 @@ const D = {
     "admin.roleAdmin": "amministratore",
     "admin.noBooksYet": "Ancora nessun libro.",
     "admin.customerOrders": "Ordini del cliente",
+    "admin.act.title": "Attività sul sito",
+    "admin.act.lastVisit": "Ultima visita",
+    "admin.act.time30": "Tempo (30 giorni)",
+    "admin.act.sec": "{n} sec",
+    "admin.act.min": "{n} min",
+    "admin.act.hm": "{h} h {m} min",
+    "admin.act.now": "proprio ora",
+    "admin.act.minAgo": "{n} min fa",
+    "admin.act.hAgo": "{n} h fa",
+    "admin.act.last": "Ultima visita: {when}",
+    "admin.act.avg": "durata media di una visita: {d}",
+    "admin.act.d1": "Visite in 24 ore",
+    "admin.act.d7": "Visite in 7 giorni",
+    "admin.act.d30": "Visite in 30 giorni",
+    "admin.act.d90": "Visite in 90 giorni",
+    "admin.act.colStart": "Inizio visita",
+    "admin.act.colTime": "Tempo sul sito",
+    "admin.act.colPages": "Pagine",
+    "admin.act.colDevice": "Dispositivo",
+    "admin.act.none": "Ancora nessuna visita registrata. I dati compaiono quando il cliente visita il sito con l’accesso effettuato.",
+    "admin.act.dev.desktop": "Computer",
+    "admin.act.dev.mobile": "Telefono",
+    "admin.act.dev.tablet": "Tablet",
     'acc.err.invalid': 'Email o password errate.',
     'acc.err.exists': 'Esiste già un account con questa email.',
     'acc.err.short': 'La password deve avere almeno 6 caratteri.',
@@ -3495,6 +3541,29 @@ const D = {
     "admin.roleAdmin": "administrator",
     "admin.noBooksYet": "No books yet.",
     "admin.customerOrders": "Customer’s orders",
+    "admin.act.title": "Activity on the site",
+    "admin.act.lastVisit": "Last visit",
+    "admin.act.time30": "Time (30 days)",
+    "admin.act.sec": "{n} sec",
+    "admin.act.min": "{n} min",
+    "admin.act.hm": "{h} h {m} min",
+    "admin.act.now": "just now",
+    "admin.act.minAgo": "{n} min ago",
+    "admin.act.hAgo": "{n} h ago",
+    "admin.act.last": "Last visit: {when}",
+    "admin.act.avg": "average visit length: {d}",
+    "admin.act.d1": "Visits in 24 hours",
+    "admin.act.d7": "Visits in 7 days",
+    "admin.act.d30": "Visits in 30 days",
+    "admin.act.d90": "Visits in 90 days",
+    "admin.act.colStart": "Visit started",
+    "admin.act.colTime": "Time on site",
+    "admin.act.colPages": "Pages",
+    "admin.act.colDevice": "Device",
+    "admin.act.none": "No visits recorded yet. Data appears when the customer visits the site while signed in.",
+    "admin.act.dev.desktop": "Computer",
+    "admin.act.dev.mobile": "Phone",
+    "admin.act.dev.tablet": "Tablet",
     'acc.err.invalid': 'Wrong email or password.',
     'acc.err.exists': 'An account with this email already exists.',
     'acc.err.short': 'Password must be at least 6 characters.',
@@ -3673,7 +3742,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261025165349`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261026030037`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
