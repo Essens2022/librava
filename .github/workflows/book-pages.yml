@@ -5,7 +5,7 @@ name: SEO pages
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'assets/**', 'tools/**']
+    paths: ['index.html', 'assets/**', 'tools/**', 'content/**', '.github/workflows/book-pages.yml']
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
@@ -34,3 +34,8 @@ jobs:
           git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update SEO pages"
           git push origin HEAD:main
           git push origin HEAD:gh-pages --force
+          sleep 60   # let GitHub Pages publish before the search engines come
+          node tools/indexnow.mjs $(git diff --name-only HEAD~1 HEAD) || true
+      - name: Send every page to IndexNow (manual runs only)
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[indexnow-all]')
+        run: sleep 60 && node tools/indexnow.mjs --all || true

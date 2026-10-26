@@ -104,7 +104,9 @@ for (const b of books) {
   }
   coverOf[b.id] = info;
 }
+const mainEd = b => { const e = books.filter(x => (x.work_id || x.id) === (b.work_id || b.id)); return e.find(x => x.id === (b.work_id || b.id)) || e.find(x => x.format === 'pdf') || e[0]; };
 const card = (l, b) => `<li><a href="/book/${b.id}/">${coverOf[b.id] ? `<img src="${esc(coverOf[b.id].url)}" alt="${esc(b.title)}" width="120" loading="lazy">` : ''}<span>${esc(b.title)}</span></a> <small>${esc(b.author)} · ${b.price_cents ? esc(money(l, b.price_cents, b.currency)) : esc(tr(l, 'book.free'))}</small></li>`;
+const mains = books.filter(b => mainEd(b).id === b.id); // one entry per title in lists
 const catsOf = b => [...new Set([b.category, ...(b.categories || [])].filter(c => CATS.includes(c)))];
 
 const urls = []; // for the sitemap
@@ -114,7 +116,7 @@ const today = new Date().toISOString().slice(0, 10);
 const catPages = {}; // lang -> [cat]
 for (const l of LANGS) catPages[l] = CATS.filter(c => books.some(b => b.language === l && catsOf(b).includes(c)));
 for (const l of LANGS) {
-  const o = OG[l] || OG.en, mine = books.filter(b => b.language === l), show = (mine.length ? mine : books).slice(0, 24);
+  const o = OG[l] || OG.en, mine = mains.filter(b => b.language === l), show = (mine.length ? mine : mains).slice(0, 24);
   const url = `${SITE}/${l}/`, title = `Librava — ${o.t}`;
   const alts = LANGS.map(x => `<link rel="alternate" hreflang="${x}" href="${SITE}/${x}/">`).join('\n') + `\n<link rel="alternate" hreflang="x-default" href="${SITE}/">`;
   const head = `<title>${esc(title)}</title>\n<meta name="description" content="${esc(o.s)}">\n${og(url, title, o.s, `${SITE}/assets/img/og-${OG[l] ? l : 'en'}.jpg`, 1200, 630, 'website', l)}\n${alts}\n` +
@@ -133,7 +135,7 @@ for (const l of LANGS) {
   keepCat[l] = new Set();
   for (const c of catPages[l]) {
     const s = catSlug(l, c); keepCat[l].add(s);
-    const list = books.filter(b => b.language === l && catsOf(b).includes(c));
+    const list = mains.filter(b => b.language === l && catsOf(b).includes(c));
     const name = tr(l, 'cat.' + c), url = `${SITE}/${l}/${s}/`, title = `${name} — eBook · Librava`;
     const desc = cut(`${name}: ${list.slice(0, 6).map(b => b.title).join(', ')}. ${(OG[l] || OG.en).s}`, 160);
     const alts = LANGS.filter(x => catPages[x].includes(c)).map(x => `<link rel="alternate" hreflang="${x}" href="${SITE}/${x}/${catSlug(x, c)}/">`).join('\n');
@@ -151,39 +153,48 @@ for (const l of LANGS) {
 }
 
 // ---------- /book/<id>/ ----------
+// One title = one indexable page. A title sold as PDF and EPUB has one page per edition (the store links to both),
+// but only the main edition (PDF, else the first) is canonical and in the sitemap; it lists every format and price.
+// Before: Google saw the two edition pages as duplicates and dropped them ("duplicate, Google chose different canonical").
+const editionsOf = {}; for (const b of books) (editionsOf[b.work_id || b.id] ||= []).push(b);
+const mainOf = w => { const e = editionsOf[w]; return e.find(x => x.id === w) || e.find(x => x.format === 'pdf') || e[0]; };
 const keep = new Set();
 for (const b of books) {
   keep.add(b.id);
+  const eds = editionsOf[b.work_id || b.id], main = mainOf(b.work_id || b.id), isMain = main.id === b.id;
+  const mainUrl = `${SITE}/book/${main.id}/`;
   const l = LANGS.includes(b.language) ? b.language : 'en';
   const url = `${SITE}/book/${b.id}/`, cv = coverOf[b.id];
   const descFull = plain(b.description), desc = cut(descFull.replace(/\n/g, ' '), 160);
   const price = b.price_cents ? money(l, b.price_cents, b.currency) : tr(l, 'book.free');
   const title = `${b.title}${b.subtitle ? ': ' + b.subtitle : ''}`;
-  const pageTitle = cut(`${title} — ${b.author}`, 70) + ' | Librava';
+  const pageTitle = cut(title, 62) + ' | Librava';
+  const fmtName = x => tr(l, 'book.format.' + (x.format === 'epub' ? 'epub' : 'pdf'));
+  const offerOf = x => ({ '@type': 'Offer', url: `${SITE}/book/${x.id}/`, name: fmtName(x), price: (x.price_cents / 100).toFixed(2), priceCurrency: (x.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' },
+      hasMerchantReturnPolicy: RETURN_POLICY, shippingDetails: shipping((x.currency || 'eur').toUpperCase()) });
   const cats = catsOf(b), cat = cats[0];
-  const ld = { '@type': ['Book', 'Product'], '@id': url + '#book', name: b.title, alternativeName: b.subtitle || undefined, url, description: cut(descFull, 5000),
+  const ld = { '@type': ['Book', 'Product'], '@id': mainUrl + '#book', name: b.title, alternativeName: b.subtitle || undefined, url: mainUrl, description: cut(descFull, 5000),
     image: cv ? [cv.url] : undefined, author: { '@type': 'Person', name: b.author }, inLanguage: b.language, bookFormat: 'https://schema.org/EBook',
     isbn: b.isbn || undefined, numberOfPages: b.pages || undefined, datePublished: b.published_at ? String(b.published_at).slice(0, 10) : undefined,
     publisher: { '@id': SITE + '/#org' },
     ...(b.rights === 'public' ? { copyrightNotice: 'Public domain text' } : { copyrightHolder: { '@id': SITE + '/#org' }, copyrightYear: new Date(b.published_at || Date.now()).getFullYear(), copyrightNotice: `© ${new Date(b.published_at || Date.now()).getFullYear()} Librava (librava.store). All rights reserved.` }),
     brand: { '@type': 'Brand', name: 'Librava' }, sku: b.librava_id || b.id, genre: cat ? tr(l, 'cat.' + cat) : undefined,
-    offers: { '@type': 'Offer', url, price: (b.price_cents / 100).toFixed(2), priceCurrency: (b.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' },
-      hasMerchantReturnPolicy: RETURN_POLICY, shippingDetails: shipping((b.currency || 'eur').toUpperCase()) },
+    offers: eds.length > 1 ? eds.map(offerOf) : offerOf(b),
     aggregateRating: b.rating_count ? { '@type': 'AggregateRating', ratingValue: (+b.rating_avg).toFixed(1), reviewCount: b.rating_count, bestRating: 5, worstRating: 1 } : undefined };
   const crumbs = { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Librava', item: `${SITE}/${l}/` },
     ...(cat ? [{ '@type': 'ListItem', position: 2, name: tr(l, 'cat.' + cat), item: `${SITE}/${l}/${catSlug(l, cat)}/` }] : []),
     { '@type': 'ListItem', position: cat ? 3 : 2, name: b.title, item: url }] };
   const head = `<title>${esc(pageTitle)}</title>\n<meta name="description" content="${esc(desc)}">\n<meta name="author" content="${esc(b.author)}">\n` +
-    og(url, `${title} · ${price}`, `${b.author} · ${desc}`, cv ? cv.url : `${SITE}/assets/img/og-en.jpg`, cv ? cv.w : 1200, cv ? cv.h : 630, 'book', b.language) +
+    og(mainUrl, `${title} · ${price}`, `${b.author} · ${desc}`, cv ? cv.url : `${SITE}/assets/img/og-en.jpg`, cv ? cv.w : 1200, cv ? cv.h : 630, 'book', b.language) +
     `\n<meta property="product:price:amount" content="${(b.price_cents / 100).toFixed(2)}"><meta property="product:price:currency" content="${esc((b.currency || 'eur').toUpperCase())}">\n` + ldScript([ORG, ld, crumbs]);
-  const related = books.filter(x => x.id !== b.id && x.language === b.language && catsOf(x).some(c => cats.includes(c))).slice(0, 8);
+  const related = books.filter(x => (x.work_id || x.id) !== (b.work_id || b.id) && mainOf(x.work_id || x.id).id === x.id && x.language === b.language && catsOf(x).some(c => cats.includes(c))).slice(0, 8);
   const body = `<div class="wrap page seo-pre"><nav class="crumbs"><a href="/${l}/">Librava</a>${cat ? ` › <a href="/${l}/${catSlug(l, cat)}/">${esc(tr(l, 'cat.' + cat))}</a>` : ''}</nav>
     <article class="seo-book">${cv ? `<img src="${esc(cv.url)}" alt="${esc(b.title)}" width="${cv.w}" height="${cv.h}">` : ''}<div><h1>${esc(b.title)}</h1>${b.subtitle ? `<p class="subtitle">${esc(b.subtitle)}</p>` : ''}
-    <p>${esc(tr(l, 'book.by', { author: b.author }).replace(/<[^>]*>/g, ''))}</p><p><b>${esc(price)}</b> · ${esc(tr(l, 'book.format.' + (b.format === 'epub' ? 'epub' : 'pdf')))}</p>
+    <p>${esc(tr(l, 'book.by', { author: b.author }).replace(/<[^>]*>/g, ''))}</p><p>${eds.map(x => `<a href="/book/${x.id}/"><b>${esc(x.price_cents ? money(l, x.price_cents, x.currency) : tr(l, 'book.free'))}</b> · ${esc(fmtName(x))}</a>`).join(' &nbsp;|&nbsp; ')}</p>
     ${descFull.split('\n').filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</div></article>
     ${related.length ? `<h2>${esc(tr(l, 'book.related'))}</h2><ul class="seo-books">${related.map(x => card(l, x)).join('')}</ul>` : ''}</div>`;
   write(`book/${b.id}`, page({ lang: l, head, body, boot: { lang: l }, hash: `#/book/${b.id}` }));
-  urls.push({ loc: url, lastmod: String(b.updated_at || today).slice(0, 10), pri: '0.9', img: cv?.url, imgTitle: b.title });
+  if (isMain) urls.push({ loc: url, lastmod: String(eds.map(x => x.updated_at || today).sort().pop()).slice(0, 10), pri: '0.9', img: cv?.url, imgTitle: b.title });
 }
 if (existsSync('book')) for (const d of readdirSync('book')) if (!keep.has(d)) rmSync(`book/${d}`, { recursive: true, force: true });
 
