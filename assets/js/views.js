@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261026131048';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026131048';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261026131048';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261026131048';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261026131048';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261026131048';
-import { track } from './track.js?v=20261026131048';
-import { gaEvent } from './ga.js?v=20261026131048';
-import { guessLang } from './langdetect.js?v=20261026131048';
-import { didYouMean } from './search.js?v=20261026131048';
-import { api, editionsOf } from './api.js?v=20261026131048';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261026131048';
+import { CONFIG } from './config.js?v=20261026155826';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026155826';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261026155826';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261026155826';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261026155826';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261026155826';
+import { track } from './track.js?v=20261026155826';
+import { gaEvent } from './ga.js?v=20261026155826';
+import { guessLang } from './langdetect.js?v=20261026155826';
+import { didYouMean } from './search.js?v=20261026155826';
+import { api, editionsOf } from './api.js?v=20261026155826';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261026155826';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -251,6 +251,7 @@ export async function viewBook(el, id) {
         <h2 class="section-title" style="font-size:18px;margin-bottom:8px">${esc(t('book.description'))}</h2>
         <div class="desc clamped ${hasTags(b.description) ? 'rich' : ''}" id="desc">${safeHTML(b.description)}</div>
         <button class="linkbtn" id="desc-more" hidden>${esc(t('book.more'))}</button>
+        <div id="free-guide"></div>
         <hr>
         <div id="fbt"></div>
         ${(b.aplus || []).some(m => (m.imgs || []).some(Boolean) || m.title || m.text) ? `<h2 class="section-title" style="font-size:18px;margin-bottom:12px">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(b.aplus)}<hr>` : ''}
@@ -320,6 +321,13 @@ export async function viewBook(el, id) {
       </div>
     </div></section>
   </div>`;
+  // a free guide written from this book (built with the SEO pages): shown under the description
+  fetch('/feed/guides.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).then(m => {
+    const list = (m[b.work_id || b.id] || []), box = el.querySelector('#free-guide');
+    if (!list.length || !box) return;
+    const mine = list.find(g => g.lang === getLang()) || list.find(g => g.lang === 'en') || list[0];
+    box.innerHTML = `<p class="free-guide">${icon('book')} <b>${esc(t('book.freeGuide'))}:</b> <a href="/${mine.lang}/guide/${encodeURIComponent(mine.slug)}/">${esc(mine.title)}</a>${mine.lang !== getLang() ? ` <span class="muted">${esc(t('book.inEnglish'))}</span>` : ''}</p>`;
+  }).catch(() => { });
 
   // description clamp
   const desc = $('#desc', el), more = $('#desc-more', el);

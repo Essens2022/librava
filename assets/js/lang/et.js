@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Ilmumiskuupäev",
   "book.d.category": "Kategooria",
   "book.d.author": "Autor",
+  "book.freeGuide": "Tasuta juhend",
+  "book.inEnglish": "(inglise keeles)",
   "book.related": "Veel selles kategoorias",
   "book.notFound": "Raamatut ei leitud.",
   "book.backHome": "Tagasi poodi",

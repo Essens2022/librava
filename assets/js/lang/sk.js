@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Dátum vydania",
   "book.d.category": "Kategória",
   "book.d.author": "Autor",
+  "book.freeGuide": "Bezplatný sprievodca",
+  "book.inEnglish": "(v angličtine)",
   "book.related": "Ďalšie v tejto kategórii",
   "book.notFound": "Kniha sa nenašla.",
   "book.backHome": "Späť do obchodu",

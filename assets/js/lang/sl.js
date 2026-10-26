@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Datum izida",
   "book.d.category": "Kategorija",
   "book.d.author": "Avtor",
+  "book.freeGuide": "Brezplačni vodnik",
+  "book.inEnglish": "(v angleščini)",
   "book.related": "Več iz te kategorije",
   "book.notFound": "Knjige ni bilo mogoče najti.",
   "book.backHome": "Nazaj v trgovino",

@@ -1,17 +1,31 @@
-import { CONFIG } from './config.js?v=20261026131048';
-import { t, getLang, setLang } from './i18n.js?v=20261026131048';
-import { esc, $, $$ } from './util.js?v=20261026131048';
-import { api, chooseBackend } from './api.js?v=20261026131048';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261026131048';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261026131048';
-import { trackPage } from './track.js?v=20261026131048';
-import { offline } from './offline.js?v=20261026131048';
-import { viewReader } from './reader.js?v=20261026131048';
-import { viewAdmin } from './admin.js?v=20261026131048';
+import { CONFIG } from './config.js?v=20261026155826';
+import { t, getLang, setLang } from './i18n.js?v=20261026155826';
+import { esc, $, $$ } from './util.js?v=20261026155826';
+import { api, chooseBackend } from './api.js?v=20261026155826';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261026155826';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261026155826';
+import { trackPage } from './track.js?v=20261026155826';
+import { offline } from './offline.js?v=20261026155826';
+import { viewReader } from './reader.js?v=20261026155826';
+import { viewAdmin } from './admin.js?v=20261026155826';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
 let firstShown = false;
+// free guides (/<lang>/guide/<slug>/) are written out on the server for Google; the store only shows them again
+const PRE_GUIDE = document.querySelector('#app .seo-guide')?.outerHTML || null;
+async function viewGuide(el, slug) {
+  const want = `/${(document.querySelector('#app [data-guide-lang]')?.dataset.guideLang) || 'en'}/guide/${slug ? encodeURIComponent(slug) + '/' : ''}`;
+  let html = PRE_GUIDE && document.createRange().createContextualFragment(PRE_GUIDE).firstElementChild?.dataset.guidePath === want ? PRE_GUIDE : null;
+  if (!html) {
+    const r = await fetch(want, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('Not found');
+    html = new DOMParser().parseFromString(await r.text(), 'text/html').querySelector('.seo-guide')?.outerHTML;
+    if (!html) throw new Error('Not found');
+  }
+  el.innerHTML = html;
+  const h1 = el.querySelector('h1'); if (h1) document.title = h1.textContent + ' | ' + CONFIG.siteName;
+}
 let cleanup = null, seq = 0;
 // "Back" like Amazon: where the visitor was on each page, to put them back there
 let lastKey = null; const scrollMem = {};
@@ -71,6 +85,7 @@ async function route() {
       case 'admin': res = await viewAdmin(el, parts.slice(1)); break;
       case 'help': res = viewHelp(el); break;
       case 'legal': res = await viewLegal(el, parts[1]); break;
+      case 'guide': res = await viewGuide(el, parts[1]); break;
       default: res = await viewHome(el);
     }
     if (my !== seq) { if (typeof res === 'function') res(); return; }
@@ -89,7 +104,8 @@ async function route() {
   if (!pathMode && /(^|\.)librava\.store$/.test(location.hostname)) {
     // the same addresses Google knows: /book/<id>/, /<lang>/<category>/ and /<lang>/
     const onlyCat = parts[0] === 'search' && q.get('cat') && [...q.keys()].every(k => k === 'cat');
-    const pretty = parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : onlyCat ? `/${getLang()}/${catSlug(q.get('cat'))}/` : '/' + getLang() + '/';
+    const gp = parts[0] === 'guide' ? el.querySelector('[data-guide-path]')?.dataset.guidePath : null;
+    const pretty = gp ? gp : parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : onlyCat ? `/${getLang()}/${catSlug(q.get('cat'))}/` : '/' + getLang() + '/';
     if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
   }
   trackPage();

@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Izdošanas datums",
   "book.d.category": "Kategorija",
   "book.d.author": "Autors",
+  "book.freeGuide": "Bezmaksas ceļvedis",
+  "book.inEnglish": "(angļu valodā)",
   "book.related": "Vairāk šajā kategorijā",
   "book.notFound": "Grāmata netika atrasta.",
   "book.backHome": "Atpakaļ uz veikalu",

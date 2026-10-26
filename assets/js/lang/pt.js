@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Data de publicação",
   "book.d.category": "Categoria",
   "book.d.author": "Autor",
+  "book.freeGuide": "Guia gratuito",
+  "book.inEnglish": "(em inglês)",
   "book.related": "Mais nesta categoria",
   "book.notFound": "Livro não encontrado.",
   "book.backHome": "Voltar à loja",

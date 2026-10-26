@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Julkaisupäivä",
   "book.d.category": "Kategoria",
   "book.d.author": "Kirjoittaja",
+  "book.freeGuide": "Ilmainen opas",
+  "book.inEnglish": "(englanniksi)",
   "book.related": "Lisää tästä kategoriasta",
   "book.notFound": "Kirjaa ei löytynyt.",
   "book.backHome": "Takaisin kauppaan",

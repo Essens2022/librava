@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261026131048';
-import { CONFIG } from './config.js?v=20261026131048';
-import { store } from './util.js?v=20261026131048';
+import { localize, loadRates } from './localprice.js?v=20261026155826';
+import { CONFIG } from './config.js?v=20261026155826';
+import { store } from './util.js?v=20261026155826';
 
 const D = {
   ro: {
@@ -530,6 +530,8 @@ const D = {
     'book.d.published': 'Data publicării',
     'book.d.category': 'Categorie',
     'book.d.author': 'Autor',
+    'book.freeGuide': 'Ghid gratuit',
+    'book.inEnglish': '(în engleză)',
     'book.related': 'Din aceeași categorie',
     'book.notFound': 'Cartea nu a fost găsită.',
     'book.backHome': 'Înapoi la magazin',
@@ -1801,6 +1803,8 @@ const D = {
     'book.d.published': 'Data di pubblicazione',
     'book.d.category': 'Categoria',
     'book.d.author': 'Autore',
+    'book.freeGuide': 'Guida gratuita',
+    'book.inEnglish': '(in inglese)',
     'book.related': 'Della stessa categoria',
     'book.notFound': 'Libro non trovato.',
     'book.backHome': 'Torna al negozio',
@@ -3072,6 +3076,8 @@ const D = {
     'book.d.published': 'Publication date',
     'book.d.category': 'Category',
     'book.d.author': 'Author',
+    'book.freeGuide': 'Free guide',
+    'book.inEnglish': '(in English)',
     'book.related': 'More in this category',
     'book.notFound': 'Book not found.',
     'book.backHome': 'Back to the store',
@@ -3853,7 +3859,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261026131048`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261026155826`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

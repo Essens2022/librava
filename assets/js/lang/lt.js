@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Išleidimo data",
   "book.d.category": "Kategorija",
   "book.d.author": "Autorius",
+  "book.freeGuide": "Nemokamas gidas",
+  "book.inEnglish": "(anglų kalba)",
   "book.related": "Daugiau šioje kategorijoje",
   "book.notFound": "Knyga nerasta.",
   "book.backHome": "Atgal į parduotuvę",

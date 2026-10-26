@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Verschijningsdatum",
   "book.d.category": "Categorie",
   "book.d.author": "Auteur",
+  "book.freeGuide": "Gratis gids",
+  "book.inEnglish": "(in het Engels)",
   "book.related": "Meer in deze categorie",
   "book.notFound": "Boek niet gevonden.",
   "book.backHome": "Terug naar de winkel",

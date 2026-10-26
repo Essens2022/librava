@@ -4,7 +4,7 @@
 // step by step, until the book fits in 5 MB — but never below a floor that still looks the same on a screen.
 // If a book cannot reach 5 MB without visible loss, it stays at the best quality (e.g. 7 MB): pictures are never ruined.
 // Text, fonts, layout, chapters and links are not touched. The original file is kept apart (private) by the caller.
-import { loadScript } from './util.js?v=20261026131048';
+import { loadScript } from './util.js?v=20261026155826';
 
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
 const MB = 1048576;

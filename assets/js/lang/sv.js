@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Utgivningsdatum",
   "book.d.category": "Kategori",
   "book.d.author": "Författare",
+  "book.freeGuide": "Gratis guide",
+  "book.inEnglish": "(på engelska)",
   "book.related": "Mer i den här kategorin",
   "book.notFound": "Boken hittades inte.",
   "book.backHome": "Tillbaka till butiken",

@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Ημερομηνία έκδοσης",
   "book.d.category": "Κατηγορία",
   "book.d.author": "Συγγραφέας",
+  "book.freeGuide": "Δωρεάν οδηγός",
+  "book.inEnglish": "(στα αγγλικά)",
   "book.related": "Περισσότερα σε αυτή την κατηγορία",
   "book.notFound": "Το βιβλίο δεν βρέθηκε.",
   "book.backHome": "Επιστροφή στο κατάστημα",

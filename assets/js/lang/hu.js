@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Megjelenés dátuma",
   "book.d.category": "Kategória",
   "book.d.author": "Szerző",
+  "book.freeGuide": "Ingyenes útmutató",
+  "book.inEnglish": "(angolul)",
   "book.related": "További könyvek ebben a kategóriában",
   "book.notFound": "A könyv nem található.",
   "book.backHome": "Vissza az áruházba",

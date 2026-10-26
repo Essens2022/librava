@@ -176,6 +176,8 @@ export default {
   "book.d.published": "Дата видання",
   "book.d.category": "Категорія",
   "book.d.author": "Автор",
+  "book.freeGuide": "Безкоштовний посібник",
+  "book.inEnglish": "(англійською)",
   "book.related": "Більше в цій категорії",
   "book.notFound": "Книжку не знайдено.",
   "book.backHome": "Повернутися до магазину",
