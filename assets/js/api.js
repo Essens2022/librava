@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261026160830';
-import { applyOffers, offerRunning } from './offers.js?v=20261026160830';
-import { scoreBook } from './search.js?v=20261026160830';
-import { getLang } from './i18n.js?v=20261026160830';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261026160830';
+import { CONFIG } from './config.js?v=20261026201632';
+import { applyOffers, offerRunning } from './offers.js?v=20261026201632';
+import { scoreBook } from './search.js?v=20261026201632';
+import { getLang } from './i18n.js?v=20261026201632';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261026201632';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261026160830')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261026201632')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -421,21 +421,21 @@ class DemoAPI {
       .map(p => ({ id: p.id, reference: 'DEMO-' + String(p.id).slice(-6).toUpperCase(), amount_cents: p.price_cents, currency: p.currency || CONFIG.currency, method: 'demo', status: 'paid',
         created_at: p.created_at, email: p.customer_email, items: [{ book_id: p.book_id, title: this._catalog.find(b => b.id === p.book_id)?.title || '', price_cents: p.price_cents }] }));
   }
-  async adminCustomers(q = '') {
+  async adminCustomers(q = '', range) {
     const P = store.get('demo:purchases', []), n = norm(q);
     return this._users().filter(u => !n || norm(u.email + ' ' + u.name).includes(n)).map(u => {
       const mine = P.filter(p => p.user_id === u.id);
       return { id: u.id, email: u.email, name: u.name, created_at: u.createdAt, books: mine.length, spent_cents: mine.reduce((s, p) => s + (p.price_cents || 0), 0),
-        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.isAdmin };
+        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.isAdmin, seen_at: null, visits: 0, sec: 0, searches: 0, opened: 0, carts: 0 };
     }).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   }
-  async adminCustomer(id) {
+  async adminCustomer(id, range) {
     if (!this._catalog) await this._loadCatalog();
     const u = this._users().find(x => x.id === id);
     if (!u) throw new Error('Not found.');
     const purchases = store.get('demo:purchases', []).filter(p => p.user_id === id).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
       .map(p => { const book = this._catalog.find(b => b.id === p.book_id); return book && { created_at: p.created_at, price_cents: p.price_cents, currency: p.currency, gift: !!p.gift, book }; }).filter(Boolean);
-    return { customer: { id: u.id, email: u.email, name: u.name, created_at: u.createdAt, isAdmin: !!u.isAdmin }, purchases, orders: [] };
+    return { customer: { id: u.id, email: u.email, name: u.name, created_at: u.createdAt, isAdmin: !!u.isAdmin }, events: [], purchases, orders: [] };
   }
   async grantBook(userId, bookId) {
     const all = store.get('demo:purchases', []); const u = this._users().find(x => x.id === userId);
@@ -945,28 +945,35 @@ class SupabaseAPI {
   }
   async confirmOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'paid' }); this._err(error); }
   async cancelOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'cancelled' }); this._err(error); }
-  async adminCustomers(q = '') {
+  async adminCustomers(q = '', range) {
+    const r = range || { from: new Date(Date.now() - 30 * 864e5).toISOString(), to: new Date(Date.now() + 864e5).toISOString() };
     const [users, P, S] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at', q => q.eq('test', false)),
-      this._all('user_sessions', 'user_id,last_seen,seconds', q => q.gte('last_seen', new Date(Date.now() - 30 * 864e5).toISOString())).catch(() => [])]);
-    const act = {}; for (const x of S || []) { const a = act[x.user_id] = act[x.user_id] || { seen: null, sec: 0 }; a.sec += x.seconds || 0; if (!a.seen || x.last_seen > a.seen) a.seen = x.last_seen; }
+      this.sb.rpc('admin_customers_activity', { p_from: r.from, p_to: r.to }).then(x => x.data || [], () => [])]);
+    const act = {}; for (const x of S) act[x.user_id] = x;
     const n = norm(q);
     return users.filter(u => !n || norm((u.email || '') + ' ' + (u.full_name || '')).includes(n)).map(u => {
-      const mine = P.filter(p => p.user_id === u.id);
+      const mine = P.filter(p => p.user_id === u.id), a = act[u.id] || {};
       return { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, books: mine.length, spent_cents: mine.reduce((s, p) => s + (p.price_cents || 0), 0),
-        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.is_admin, seen_at: act[u.id]?.seen || null, sec30: act[u.id]?.sec || 0 };
+        last_at: mine.map(p => p.created_at).sort().pop() || null, isAdmin: !!u.is_admin, seen_at: a.last_seen || null, visits: a.visits || 0, sec: a.seconds || 0, searches: a.searches || 0, opened: a.books || 0, carts: a.carts || 0 };
     });
   }
-  async adminCustomer(id) {
+  async adminCustomer(id, range) {
     const { data: u, error } = await this.sb.from('profiles').select('*').eq('id', id).maybeSingle(); this._err(error);
     if (!u) throw new Error('Not found.');
     const [{ data: P }, { data: O }] = await Promise.all([
       this.sb.from('purchases').select('*, book:books(*)').eq('user_id', id).order('created_at', { ascending: false }),
       this.sb.from('orders').select('*').eq('user_id', id).order('created_at', { ascending: false }),
     ]);
-    let S = [];
-    try { const r = await this.sb.from('user_sessions').select('started_at,last_seen,seconds,pages,device').eq('user_id', id).gte('last_seen', new Date(Date.now() - 90 * 864e5).toISOString()).order('last_seen', { ascending: false }).limit(500); S = r.data || []; } catch { }
+    const rg = range || { from: new Date(Date.now() - 30 * 864e5).toISOString(), to: new Date(Date.now() + 864e5).toISOString() };
+    let E = [], titles = {};
+    try {
+      E = (await this.sb.rpc('admin_customer_events', { p_user: id, p_from: rg.from, p_to: rg.to })).data || [];
+      const ids = [...new Set(E.map(e => e.book_id).filter(Boolean))];
+      if (ids.length) (await this.sb.from('books').select('id,title').in('id', ids)).data?.forEach(b => { titles[b.id] = b.title; });
+    } catch { }
+    E.forEach(e => { e.book_title = titles[e.book_id] || ''; });
     return {
-      activity: S,
+      events: E,
       customer: { id: u.id, email: u.email, name: u.full_name, created_at: u.created_at, isAdmin: !!u.is_admin },
       purchases: (P || []).filter(p => p.book).map(p => ({ created_at: p.created_at, price_cents: p.price_cents, currency: p.currency, gift: !!p.gift, book: { ...p.book, cover_url: this._coverUrl(p.book) } })),
       orders: O || [],

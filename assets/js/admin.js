@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261026160830';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026160830';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261026160830';
-import { resetCompanyCache } from './views.js?v=20261026160830';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261026160830';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261026160830';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261026160830';
-import { optimizeBook } from './optimize.js?v=20261026160830';
-import { api } from './api.js?v=20261026160830';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261026160830';
+import { CONFIG } from './config.js?v=20261026201632';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026201632';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261026201632';
+import { resetCompanyCache } from './views.js?v=20261026201632';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261026201632';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261026201632';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261026201632';
+import { optimizeBook } from './optimize.js?v=20261026201632';
+import { api } from './api.js?v=20261026201632';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261026201632';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -415,53 +415,126 @@ function agoText(iso) {
   if (s < 86400) return t('admin.act.hAgo', { n: Math.round(s / 3600) });
   return fmtDate(iso);
 }
-function activityHTML(S) {
-  const since = d => S.filter(x => Date.now() - new Date(x.last_seen) < d * 864e5);
-  const box = (label, list) => `<div class="panel kpi" style="margin:0"><small>${esc(label)}</small><b>${list.length}</b><span class="muted" style="font-size:13px;display:block">${esc(durText(list.reduce((a, x) => a + (x.seconds || 0), 0)))}</span></div>`;
-  const all = S, avg = all.length ? all.reduce((a, x) => a + (x.seconds || 0), 0) / all.length : 0;
+// date range shared by the customers list and the customer page (kept for the browser tab)
+const CU_KEY = 'librava:cuRange';
+const ymd = d => { const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); };
+const daysAgo = n => ymd(new Date(Date.now() - n * 864e5));
+function cuRange() {
+  let r = null; try { r = JSON.parse(sessionStorage.getItem(CU_KEY)); } catch { }
+  return r && r.from && r.to ? r : { from: daysAgo(29), to: ymd(new Date()), p: '30' };
+}
+function cuISO(r) { const f = new Date(r.from + 'T00:00:00'), e = new Date(r.to + 'T00:00:00'); e.setDate(e.getDate() + 1); return { from: f.toISOString(), to: e.toISOString() }; }
+function rangeBarHTML(r) {
+  const P = [['today', t('admin.act2.p.today')], ['7', t('admin.act2.p.7')], ['30', t('admin.act2.p.30')], ['90', t('admin.act2.p.90')], ['all', t('admin.act2.p.all')]];
+  return `<div class="cu-range">
+    <div class="cu-presets">${P.map(([k, l]) => `<button type="button" class="chip${r.p === k ? ' on' : ''}" data-preset="${k}">${esc(l)}</button>`).join('')}</div>
+    <label class="cu-date"><span>${esc(t('admin.act2.rFrom'))}</span><input class="input" type="date" id="cu-from" value="${esc(r.from)}" max="${esc(ymd(new Date()))}"></label>
+    <label class="cu-date"><span>${esc(t('admin.act2.rTo'))}</span><input class="input" type="date" id="cu-to" value="${esc(r.to)}" max="${esc(ymd(new Date()))}"></label>
+    <button type="button" class="btn btn-buy btn-sm" id="cu-apply">${esc(t('admin.act2.rApply'))}</button></div>`;
+}
+function bindRange(root, onChange) {
+  const save = r => { try { sessionStorage.setItem(CU_KEY, JSON.stringify(r)); } catch { } onChange(); };
+  $$('[data-preset]', root).forEach(b => b.onclick = () => {
+    const k = b.dataset.preset, today = ymd(new Date());
+    save(k === 'today' ? { from: today, to: today, p: k } : k === 'all' ? { from: '2020-01-01', to: today, p: k } : { from: daysAgo(+k - 1), to: today, p: k });
+  });
+  $('#cu-apply', root).onclick = () => {
+    let from = $('#cu-from', root).value, to = $('#cu-to', root).value;
+    if (!from || !to) return;
+    if (from > to) [from, to] = [to, from];
+    save({ from, to, p: 'custom' });
+  };
+}
+function pageLabel(path) {
+  const base = (path || '').split('#')[0], h = ((path || '').split('#')[1] || '').split('?')[0];
+  if (/^\/cart/.test(h)) return t('admin.act2.pg.cart');
+  if (/^\/(library|my)/.test(h)) return t('admin.act2.pg.library');
+  if (/^\/(account|profile|settings)/.test(h)) return t('admin.act2.pg.account');
+  if (/^\/search/.test(h)) return t('admin.act2.pg.search');
+  if (/^\/(category|cat)\//.test(h)) return t('admin.act2.pg.category', { c: decodeURIComponent(h.split('/')[2] || '') });
+  if (/\/guide\//.test(base) || /^\/guide/.test(h)) return t('admin.act2.pg.guide');
+  if ((!h || h === '/') && /^\/([a-z]{2}\/)?$/.test(base)) return t('admin.act2.pg.home');
+  return t('admin.act2.pg.other', { p: (h || base || '/').slice(0, 60) });
+}
+function activityHTML(E, r) {
+  // group the steps by visit (sid); events arrive newest first
+  const by = new Map();
+  [...E].reverse().forEach(e => { if (!by.has(e.sid)) by.set(e.sid, []); by.get(e.sid).push(e); });
+  const visits = [...by.values()].map(list => {
+    let sec = 0;
+    list.forEach((e, i) => { const nx = list[i + 1]; sec += Math.min(nx ? (new Date(nx.created_at) - new Date(e.created_at)) / 1000 : 20, 300); });
+    return { list, sec: Math.round(sec), start: list[0].created_at };
+  }).sort((a, b) => String(b.start).localeCompare(String(a.start)));
+  const sum = f => E.filter(f).length, secAll = visits.reduce((a, v) => a + v.sec, 0);
+  const opened = new Set(E.filter(e => e.type === 'book_view' && e.book_id).map(e => e.book_id)).size;
+  const kpi = (l, v, sub) => `<div class="panel kpi" style="margin:0"><small>${esc(l)}</small><b>${esc(String(v))}</b>${sub ? `<span class="muted" style="font-size:13px;display:block">${esc(sub)}</span>` : ''}</div>`;
   const dev = d => t('admin.act.dev.' + (d || 'desktop'));
-  return `<section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:6px">${esc(t('admin.act.title'))}</h2>
-    ${S.length ? `<p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('admin.act.last', { when: agoText(S[0].last_seen) }))} · ${esc(t('admin.act.avg', { d: durText(avg) }))}</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
-      ${box(t('admin.act.d1'), since(1))}${box(t('admin.act.d7'), since(7))}${box(t('admin.act.d30'), since(30))}${box(t('admin.act.d90'), all)}</div>
-    <div class="table-wrap" style="margin-top:12px"><table class="adm-table"><thead><tr><th>${esc(t('admin.act.colStart'))}</th><th class="num">${esc(t('admin.act.colTime'))}</th><th class="num">${esc(t('admin.act.colPages'))}</th><th>${esc(t('admin.act.colDevice'))}</th></tr></thead>
-      <tbody>${S.slice(0, 15).map(x => `<tr><td style="white-space:nowrap">${esc(fmtDate(x.started_at))} ${esc(new Date(x.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</td><td class="num">${esc(durText(x.seconds))}</td><td class="num">${x.pages || 1}</td><td>${esc(dev(x.device))}</td></tr>`).join('')}</tbody></table></div>`
-    : `<p class="muted" style="margin:0">${esc(t('admin.act.none'))}</p>`}</section>`;
+  const bookLink = e => e.book_id ? `<a href="#/book/${encodeURIComponent(e.book_id)}">${esc(e.book_title || t('admin.act2.noBook'))}</a>` : esc(e.book_title || t('admin.act2.noBook'));
+  const line = e => {
+    switch (e.type) {
+      case 'pageview': return /\/book\//.test(e.path || '') ? '' : esc(t('admin.act2.ev.pageview', { p: pageLabel(e.path) }));
+      case 'book_view': return t('admin.act2.ev.book_view', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
+      case 'add_cart': return t('admin.act2.ev.add_cart', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
+      case 'search': return esc(t('admin.act2.ev.search', { q: e.q || '', n: e.results ?? 0 }));
+      default: return esc(t('admin.act2.ev.' + e.type));
+    }
+  };
+  const icons = { search: 'search', book_view: 'eye', add_cart: 'cart', checkout: 'card', purchase: 'check' };
+  const visitHTML = (v, i) => {
+    const f = v.list[0], rows = [];
+    let lastTxt = '';
+    v.list.forEach(e => { const txt = line(e); if (!txt || txt === lastTxt) return; lastTxt = txt;
+      rows.push(`<li class="tl-ev tl-${esc(e.type)}"><time>${esc(new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${txt}</span></li>`); });
+    const meta = [dev(f.device) + (f.os && f.os !== 'other' ? ' · ' + f.os : ''), f.country, f.source && f.source !== 'direct' ? t('admin.act2.src', { s: f.source }) : ''].filter(Boolean).join(' · ');
+    return `<details class="tl-visit"${i < 3 ? ' open' : ''}><summary><b>${esc(fmtDate(v.start))} ${esc(new Date(v.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</b>
+      <span class="muted"> · ${esc(durText(v.sec))} · ${esc(meta)}</span></summary><ul class="tl-list">${rows.join('')}</ul></details>`;
+  };
+  return `<section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:8px">${esc(t('admin.act.title'))}</h2>
+    ${rangeBarHTML(r)}
+    ${E.length ? `<div class="cu-kpis">${kpi(t('admin.act2.kVisits'), visits.length, t('admin.act2.tlLast') + ': ' + agoText(E[0].created_at))}${kpi(t('admin.act2.kTime'), durText(secAll))}${kpi(t('admin.act2.kAvg'), durText(visits.length ? secAll / visits.length : 0))}
+      ${kpi(t('admin.act2.kPages'), sum(e => e.type === 'pageview'))}${kpi(t('admin.act2.kSearch'), sum(e => e.type === 'search'))}${kpi(t('admin.act2.kBooks'), opened)}${kpi(t('admin.act2.kCart'), sum(e => e.type === 'add_cart'))}</div>
+    <h3 style="font-size:15px;margin:16px 0 6px">${esc(t('admin.act2.tlTitle'))}</h3>${visits.map(visitHTML).join('')}`
+    : `<p class="muted" style="margin:12px 0 0">${esc(t('admin.act2.tlNone'))}</p>`}</section>`;
 }
 
 // ---------------------------------------------------------------- customers
 async function customers(body) {
   body.innerHTML = `<div class="panel">
     <div class="adm-filters"><input class="input" id="cu-q" type="search" placeholder="${esc(t('admin.searchCustomers'))}" aria-label="${esc(t('admin.searchCustomers'))}"></div>
+    <div id="cu-rng">${rangeBarHTML(cuRange())}</div>
     <div id="cu-list"><div class="spinner"></div></div></div>`;
   const draw = async () => {
-    const list = await api.adminCustomers($('#cu-q', body).value.trim());
+    const list = await api.adminCustomers($('#cu-q', body).value.trim(), cuISO(cuRange()));
     $('#cu-list', body).innerHTML = list.length ? `<div class="table-wrap"><table class="adm-table">
-      <thead><tr><th>${esc(t('admin.colCustomer'))}</th><th>${esc(t('admin.colJoined'))}</th><th class="num">${esc(t('admin.colBooks'))}</th><th class="num">${esc(t('admin.colSpent'))}</th><th>${esc(t('admin.colLast'))}</th><th>${esc(t('admin.act.lastVisit'))}</th><th class="num">${esc(t('admin.act.time30'))}</th></tr></thead>
+      <thead><tr><th>${esc(t('admin.colCustomer'))}</th><th>${esc(t('admin.colJoined'))}</th><th class="num">${esc(t('admin.colBooks'))}</th><th class="num">${esc(t('admin.colSpent'))}</th><th>${esc(t('admin.colLast'))}</th><th>${esc(t('admin.act2.colSeen'))}</th><th class="num">${esc(t('admin.act2.colVisits'))}</th><th class="num">${esc(t('admin.act2.colTime'))}</th><th class="num">${esc(t('admin.act2.colSearch'))}</th><th class="num">${esc(t('admin.act2.colOpened'))}</th></tr></thead>
       <tbody>${list.map(c => `<tr class="click-row" data-href="/admin/customers/${encodeURIComponent(c.id)}">
         <td><a href="#/admin/customers/${encodeURIComponent(c.id)}"><b>${esc(c.name || c.email)}</b></a>${c.isAdmin ? ` <span class="status live">${esc(t('admin.roleAdmin'))}</span>` : ''}<div class="muted" style="font-size:13px">${esc(c.email)}</div></td>
         <td style="white-space:nowrap">${esc(fmtDate(c.created_at))}</td>
         <td class="num">${c.books}</td><td class="num">${esc(money(c.spent_cents))}</td>
         <td style="white-space:nowrap">${c.last_at ? esc(fmtDate(c.last_at)) : '<span class="muted">—</span>'}</td>
         <td style="white-space:nowrap">${c.seen_at ? esc(agoText(c.seen_at)) : '<span class="muted">—</span>'}</td>
-        <td class="num" style="white-space:nowrap">${c.sec30 ? esc(durText(c.sec30)) : '<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table></div>`
+        <td class="num">${c.visits || '<span class="muted">—</span>'}</td>
+        <td class="num" style="white-space:nowrap">${c.sec ? esc(durText(c.sec)) : '<span class="muted">—</span>'}</td>
+        <td class="num">${c.searches || '<span class="muted">—</span>'}</td><td class="num">${c.opened || '<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table></div>`
       : `<p class="muted" style="margin:0">${esc(t('admin.noCustomers'))}</p>`;
     $$('.click-row', body).forEach(r => r.addEventListener('click', e => { if (!e.target.closest('a')) go(r.dataset.href); }));
   };
   $('#cu-q', body).addEventListener('input', debounce(draw, 250));
+  const onRange = () => { $('#cu-rng', body).innerHTML = rangeBarHTML(cuRange()); bindRange($('#cu-rng', body), onRange); draw(); };
+  bindRange($('#cu-rng', body), onRange);
   draw();
 }
 
 async function customer(body, id) {
   const cid = /^\d+$/.test(id) ? Number(id) : id;
-  const d = await api.adminCustomer(cid);
+  const rg = cuRange(), d = await api.adminCustomer(cid, cuISO(rg));
   const c = d.customer;
   const owned = new Set(d.purchases.map(p => p.book.id));
   const catalog = (await api.adminBooks()).filter(b => !owned.has(b.id));
   body.innerHTML = `<a class="back-link" href="#/admin/customers">${icon('chevL', 'ico')} ${esc(t('admin.backCustomers'))}</a>
     <section class="panel"><h2 style="font-size:22px">${esc(c.name || c.email)} ${c.isAdmin ? `<span class="status live">${esc(t('admin.roleAdmin'))}</span>` : ''}</h2>
       <p class="muted" style="margin:4px 0 0"><span style="user-select:all">${esc(c.email)}</span> · ${esc(t('acc.memberSince', { date: fmtDate(c.created_at) }))}</p></section>
-    ${activityHTML(d.activity || [])}
+    <div id="cu-act">${activityHTML(d.events || [], rg)}</div>
     <section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:8px">${esc(t('admin.customerBooks'))} (${d.purchases.length})</h2>
       ${d.purchases.length ? d.purchases.map(p => `<div class="adm-line"><span class="adm-book">${coverHTML(p.book, { badge: false })}<span><b>${esc(p.book.title)}</b><small class="muted">${esc(fmtDate(p.created_at))} · ${p.price_cents ? esc(money(p.price_cents, cur(p.currency))) : esc(p.gift ? t('admin.gift') : t('book.free'))}</small></span></span>
         <button class="btn btn-ghost btn-sm" data-revoke="${esc(p.book.id)}" data-title="${esc(p.book.title)}">${esc(t('admin.revoke'))}</button></div>`).join('') : `<p class="muted">${esc(t('lib.empty'))}</p>`}
@@ -473,6 +546,7 @@ async function customer(body, id) {
     </section>
     ${d.orders.length ? `<section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:8px">${esc(t('admin.customerOrders'))}</h2>
       ${d.orders.map(o => `<div class="adm-line"><span><b>${esc(o.reference)}</b><small class="muted">${esc(fmtDate(o.created_at))} · ${esc(methodLabel(o.method))} · ${esc(t('admin.ord.' + o.status))}</small></span><b class="num">${esc(money(o.amount_cents, cur(o.currency)))}</b></div>`).join('')}</section>` : ''}`;
+  bindRange($('#cu-act', body), () => customer(body, id));
   $('[data-grant]', body).onclick = async () => {
     const bid = $('#gr-book', body).value; if (!bid) return;
     try { await api.grantBook(c.id, bid); toast(t('admin.granted')); customer(body, id); } catch (e) { toast(errText(e), { error: true }); }

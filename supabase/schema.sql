@@ -375,3 +375,8 @@ begin
 end $$;
 revoke all on function public.admin_set_prices(jsonb) from public, anon;
 grant execute on function public.admin_set_prices(jsonb) to authenticated;
+
+-- Customer activity timeline (migration customer_activity_timeline): events.user_id is set by track() for logged-in
+-- customers (never for admins); admin_customers_activity() and admin_customer_events() are read only by admins.
+-- alter table public.events add column user_id uuid references auth.users(id) on delete set null;
+-- (full function bodies of track(), admin_customers_activity() and admin_customer_events() are in the applied migration)

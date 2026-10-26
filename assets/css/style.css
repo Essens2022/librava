@@ -1910,3 +1910,20 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .seo-guide table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .95rem; background: var(--surface); border-radius: 8px; overflow: hidden; display: block; overflow-x: auto; }
 .seo-guide th, .seo-guide td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .seo-guide thead th { background: var(--surface-2); }
+
+/* Admin: customer activity (date range + timeline) */
+.cu-range { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin: 0 0 14px; }
+.cu-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.cu-presets .chip { border: 1px solid var(--line, #d9ddd2); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+.cu-presets .chip.on { background: var(--pista-strong, #3b6b4a); color: #fff; border-color: transparent; }
+.cu-date { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--muted, #6b7466); }
+.cu-date .input { width: auto; padding: 6px 8px; }
+.cu-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.tl-visit { border: 1px solid var(--line, #e3e6dc); border-radius: 10px; margin: 8px 0; background: #fff; }
+.tl-visit > summary { cursor: pointer; padding: 10px 12px; list-style: none; }
+.tl-visit > summary::-webkit-details-marker { display: none; }
+.tl-list { list-style: none; margin: 0; padding: 2px 12px 10px 12px; border-top: 1px solid var(--line, #eef0e8); }
+.tl-ev { display: flex; gap: 12px; padding: 5px 0 5px 12px; font-size: 14px; border-left: 3px solid var(--line, #d9ddd2); margin-top: 6px; }
+.tl-ev time { color: var(--muted, #6b7466); font-variant-numeric: tabular-nums; min-width: 66px; }
+.tl-search { border-left-color: #7a8cc4; } .tl-book_view { border-left-color: #9bb089; }
+.tl-add_cart { border-left-color: #e0a030; } .tl-checkout { border-left-color: #d9822b; } .tl-purchase { border-left-color: #2f8f4e; font-weight: 600; }
