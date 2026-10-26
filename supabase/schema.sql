@@ -352,3 +352,26 @@ begin
 end $$;
 revoke all on function public.heartbeat(text, int, int, text) from public, anon;
 grant execute on function public.heartbeat(text, int, int, text) to authenticated;
+
+-- Admin "Prices": change the prices of many books in one go (migration admin_set_prices).
+-- Runs as the caller (security invoker), so the books admin-update RLS policy still applies, and refuses non-admins.
+create or replace function public.admin_set_prices(p_items jsonb)
+returns integer language plpgsql security invoker set search_path = public as $$
+declare n integer;
+begin
+  if not public.is_admin() then raise exception 'admin.notAdmin'; end if;
+  if jsonb_typeof(p_items) <> 'array' then raise exception 'bad items'; end if;
+  if exists (
+    select 1 from jsonb_to_recordset(p_items) as x(id uuid, price integer, list integer)
+    where x.id is null or x.price is null or x.price < 0 or (x.price > 0 and x.price < 50)
+       or (x.list is not null and x.list <= x.price)
+  ) then raise exception 'qp.bad'; end if;
+  update public.books b
+     set price_cents = x.price, list_price_cents = x.list, updated_at = now()
+    from jsonb_to_recordset(p_items) as x(id uuid, price integer, list integer)
+   where b.id = x.id and b.deleted_at is null;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+revoke all on function public.admin_set_prices(jsonb) from public, anon;
+grant execute on function public.admin_set_prices(jsonb) to authenticated;

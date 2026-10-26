@@ -1,21 +1,22 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261026123224';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026123224';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261026123224';
-import { resetCompanyCache } from './views.js?v=20261026123224';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261026123224';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261026123224';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261026123224';
-import { optimizeBook } from './optimize.js?v=20261026123224';
-import { api } from './api.js?v=20261026123224';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261026123224';
+import { CONFIG } from './config.js?v=20261026131048';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261026131048';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261026131048';
+import { resetCompanyCache } from './views.js?v=20261026131048';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261026131048';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261026131048';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261026131048';
+import { optimizeBook } from './optimize.js?v=20261026131048';
+import { api } from './api.js?v=20261026131048';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261026131048';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
+  ['prices', '/admin/prices', 'tag', 'bp.tab'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['import', '/admin/import', 'upload', 'imp.tab'],
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
@@ -52,6 +53,7 @@ export async function viewAdmin(el, parts) {
     case 'new': return bookForm(body, null);
     case 'edit': { const book = await api.getBook(parts[1]).catch(() => null); return bookForm(body, book || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }  // the whole book, not the light list
     case 'books': return booksList(body);
+    case 'prices': return pricesAdmin(body);
     case 'import': return importBooks(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
@@ -151,6 +153,100 @@ async function exportCSV() {
   } catch (e) { toast(errText(e), { error: true }); }
 }
 
+// ---------------------------------------------------------------- prices (many books at once)
+// One price for all books, for all EPUB or all PDF, or for one category; each book can still be changed on "My books".
+// Each format of a book is its own row with its own price and crossed-out price, so the changes are per format.
+async function pricesAdmin(body) {
+  const books = (await api.adminBooks()).filter(b => !b.deleted_at);
+  const eur = c => (c / 100).toFixed(2).replace('.', ',');
+  const cents = v => { v = String(v || '').trim().replace(/\s|€/g, '').replace(',', '.'); if (!v) return null; const n = Math.round(parseFloat(v) * 100); return Number.isFinite(n) && n >= 0 ? n : NaN; };
+  const cats = CATS.filter(c => books.some(b => b.category === c || (b.categories || []).includes(c)));
+  const fmtCount = f => books.filter(b => b.format === f).length;
+  body.innerHTML = `<form class="panel bp-form" id="bp-form" novalidate style="padding:0">
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('bp.which'))}</h3><p>${esc(t('bp.whichHelp'))}</p></div>
+      <div class="kdp-fields">
+        <div class="bp-row"><label class="field"><span>${esc(t('bp.scope'))}</span><select class="input" id="bp-cat"><option value="">${esc(t('bp.allBooks', { n: books.length }))}</option>${cats.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('bp.format'))}</span><select class="input" id="bp-fmt"><option value="">${esc(t('bp.fmtAll'))}</option><option value="epub">${esc(t('bp.fmtOnly', { fmt: 'EPUB' }))} (${fmtCount('epub')})</option><option value="pdf">${esc(t('bp.fmtOnly', { fmt: 'PDF' }))} (${fmtCount('pdf')})</option></select></label></div>
+        <label class="check"><input type="checkbox" id="bp-pub"> ${esc(t('bp.onlyPublished'))}</label>
+        <label class="check"><input type="checkbox" id="bp-free"> ${esc(t('bp.inclFree'))}</label>
+      </div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('bp.newPrices'))}</h3><p>${esc(t('bp.newPricesHelp'))}</p></div>
+      <div class="kdp-fields">
+        <label class="field"><span>${esc(t('qp.price'))}</span><input class="input" id="bp-price" inputmode="decimal" autocomplete="off" placeholder="${esc(t('bp.keepPh'))}"><small>${esc(t('bp.priceHelp'))}</small></label>
+        <div class="bp-row"><label class="field"><span>${esc(t('qp.list'))}</span><select class="input" id="bp-lmode">
+            <option value="keep">${esc(t('bp.l.keep'))}</option><option value="pct">${esc(t('bp.l.pct'))}</option><option value="set">${esc(t('bp.l.set'))}</option><option value="none">${esc(t('bp.l.none'))}</option></select></label>
+          <label class="field" id="bp-pct-box" hidden><span>${esc(t('bp.pct'))}</span><input class="input" id="bp-pct" type="number" min="1" max="95" value="67"></label>
+          <label class="field" id="bp-list-box" hidden><span>${esc(t('qp.list'))}</span><input class="input" id="bp-list" inputmode="decimal" autocomplete="off" placeholder="21,37"></label></div>
+        <small class="muted" id="bp-lhelp"></small>
+      </div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('bp.preview'))}</h3><p>${esc(t('bp.previewHelp'))}</p></div>
+      <div class="kdp-fields">
+        <p class="bp-sum" id="bp-sum"></p>
+        <div class="table-wrap"><table class="adm-table bp-table"><thead><tr><th>${esc(t('admin.colTitle'))}</th><th class="num">${esc(t('bp.before'))}</th><th class="num">${esc(t('bp.after'))}</th></tr></thead><tbody id="bp-rows"></tbody></table></div>
+        <div class="bp-btns"><button type="submit" class="btn btn-buy" id="bp-apply" disabled>${esc(t('bp.apply'))}</button><a class="btn btn-ghost" href="#/admin/books">${icon('edit', 'ico')} ${esc(t('bp.oneBook'))}</a></div>
+      </div></div>
+  </form>`;
+  const v = s => $(s, body).value;
+  // what each chosen book would get: the new price and crossed-out price (null when nothing would change)
+  const plan = () => {
+    const cat = v('#bp-cat'), fmt = v('#bp-fmt'), pub = $('#bp-pub', body).checked, free = $('#bp-free', body).checked;
+    const p = cents(v('#bp-price')), mode = v('#bp-lmode'), pct = parseInt(v('#bp-pct')), lst = cents(v('#bp-list'));
+    let err = '';
+    if (Number.isNaN(p) || (mode === 'set' && Number.isNaN(lst))) err = t('qp.bad');
+    else if (p != null && p > 0 && p < 50) err = t('qp.min');
+    else if (mode === 'pct' && !(pct >= 1 && pct <= 95)) err = t('bp.badPct');
+    else if (mode === 'set' && lst == null) err = t('bp.needList');
+    else if (p == null && mode === 'keep') err = t('bp.nothing');
+    else if (mode === 'set' && p != null && lst <= p) err = t('qp.listLow');
+    const chosen = books.filter(b => (!cat || b.category === cat || (b.categories || []).includes(cat)) && (!fmt || b.format === fmt) && (!pub || b.status === 'published') && (free || b.price_cents > 0));
+    if (err) return { err, chosen, items: [] };
+    const items = [];
+    for (const b of chosen) {
+      const price = p ?? b.price_cents;
+      let list = mode === 'keep' ? b.list_price_cents : mode === 'none' ? null : mode === 'set' ? lst : null;
+      if (mode === 'pct' && price > 0) {
+        // the crossed-out price that shows exactly "-pct%" in the shop
+        list = Math.round(price / (1 - pct / 100));
+        for (let i = 0; i < 50 && Math.round((1 - price / list) * 100) !== pct; i++) list += Math.round((1 - price / list) * 100) < pct ? 1 : -1;
+      }
+      if (!price || (list != null && list <= price)) list = null;   // a crossed-out price lower than the price is not shown
+      if (price === b.price_cents && (list || null) === (b.list_price_cents || null)) continue;
+      items.push({ b, price, list });
+    }
+    return { err, chosen, items };
+  };
+  const cell = (pr, li) => `<b>${pr ? money(pr) : esc(t('book.free'))}</b>${li > pr ? ` <s>${money(li)}</s> <span class="badge">-${Math.round((1 - pr / li) * 100)}%</span>` : ''}`;
+  const draw = () => {
+    const mode = v('#bp-lmode');
+    $('#bp-pct-box', body).hidden = mode !== 'pct'; $('#bp-list-box', body).hidden = mode !== 'set';
+    $('#bp-lhelp', body).textContent = t('bp.lh.' + mode);
+    const r = plan();
+    $('#bp-sum', body).innerHTML = r.err ? `<span class="bp-err">${esc(r.err)}</span>` : esc(t('bp.willChange', { n: r.items.length, total: r.chosen.length }));
+    $('#bp-rows', body).innerHTML = r.items.slice(0, 30).map(x => `<tr><td><span class="fp-chip fmt-${esc(x.b.format)}">${esc(t('book.formatShort.' + x.b.format))}</span> ${esc(x.b.title)}</td><td class="num">${cell(x.b.price_cents, x.b.list_price_cents)}</td><td class="num">${cell(x.price, x.list)}</td></tr>`).join('')
+      + (r.items.length > 30 ? `<tr><td colspan="3" class="muted">${esc(t('bp.more', { n: r.items.length - 30 }))}</td></tr>` : '');
+    $('#bp-apply', body).disabled = !!r.err || !r.items.length;
+    return r;
+  };
+  $('#bp-form', body).addEventListener('input', draw);
+  $('#bp-form', body).addEventListener('change', draw);
+  $('#bp-form', body).addEventListener('submit', async e => {
+    e.preventDefault();
+    const r = draw(); if (r.err || !r.items.length) return;
+    if (!await confirmBox(t('bp.confirm', { n: r.items.length }), { ok: t('bp.apply') })) return;
+    const btn = $('#bp-apply', body); btn.disabled = true;
+    try {
+      const rows = r.items.map(x => ({ id: x.b.id, price: x.price, list: x.list }));
+      let n = 0;
+      if (api.setPrices) n = await api.setPrices(rows);
+      else for (const x of rows) { await api.updateBook(x.id, { price_cents: x.price, list_price_cents: x.list }); n++; }
+      for (const x of r.items) { x.b.price_cents = x.price; x.b.list_price_cents = x.list; }
+      toast(t('bp.done', { n }), { ms: 6000 });
+      draw();
+    } catch (err) { toast(errText(err), { error: true }); draw(); }
+  });
+  draw();
+}
+
 // ---------------------------------------------------------------- books
 async function booksList(body) {
   const books = await api.adminBooks();
@@ -188,7 +284,7 @@ async function booksList(body) {
           <a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(b.id)}" title="${esc(t('admin.viewStore'))}">${icon('eye', 'ico')}<span class="sr">${esc(t('admin.viewStore'))}</span></a>
           <button class="btn btn-ghost btn-sm" data-del="${esc(b.id)}" title="${esc(t('admin.delete'))}">${icon('trash', 'ico')}<span class="sr">${esc(t('admin.delete'))}</span></button>
         </td></tr>`;
-  body.innerHTML = `${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
+  body.innerHTML = `<div class="img-opt"><span>${icon('tag')} ${esc(t('bp.hint'))}</span><a class="btn btn-ghost btn-sm" href="#/admin/prices">${esc(t('bp.tab'))}</a></div>${api.replaceCover ? `<div class="img-opt"><span>${icon('image')} ${esc(t('img.optHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="b-optimize">${esc(t('img.optBtn'))}</button></div>` : ''}<div class="panel">
     <div class="adm-filters">
       <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
       <select class="input" id="adm-st" aria-label="${esc(t('admin.colStatus'))}"><option value="">${esc(t('admin.filter.all'))}</option><option value="published">${esc(t('admin.filter.published'))}</option><option value="draft">${esc(t('admin.filter.draft'))}</option></select>

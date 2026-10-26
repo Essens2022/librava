@@ -1867,3 +1867,11 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 /* unread notifications: a small dot by the time instead of a coloured stripe on the side */
 .ntf2.unread { box-shadow: none; }
 .ntf2.unread .ntf-top small::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #E0453A; margin-right: 6px; vertical-align: 1px; }
+/* Admin: Prices (many books at once) */
+.bp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.bp-row .field[hidden] { display: none; }
+.bp-sum { margin: 0; font-weight: 600; }
+.bp-err { color: #B3261E; }
+.bp-table s { font-size: 12px; color: var(--muted); }
+.bp-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 760px) { .bp-row { grid-template-columns: 1fr; } .bp-btns .btn { flex: 1 1 100%; } }

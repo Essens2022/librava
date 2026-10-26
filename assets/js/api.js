@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261026123224';
-import { applyOffers, offerRunning } from './offers.js?v=20261026123224';
-import { scoreBook } from './search.js?v=20261026123224';
-import { getLang } from './i18n.js?v=20261026123224';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261026123224';
+import { CONFIG } from './config.js?v=20261026131048';
+import { applyOffers, offerRunning } from './offers.js?v=20261026131048';
+import { scoreBook } from './search.js?v=20261026131048';
+import { getLang } from './i18n.js?v=20261026131048';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261026131048';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261026123224')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261026131048')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -815,6 +815,12 @@ class SupabaseAPI {
     const row = { ...patch, updated_at: new Date().toISOString() };
     const { error } = await this.sb.from('books').update(row).eq('id', id); this._err(error);
     this._catalog = null; this.refreshShare();
+  }
+  // Admin "Prices": many books at once, in one step (admin only, checked in the database); items: [{ id, price, list }] in cents
+  async setPrices(items) {
+    const { data, error } = await this.sb.rpc('admin_set_prices', { p_items: items }); this._err(error);
+    this._catalog = null; this.refreshShare();
+    return data || 0;
   }
   // another format of the same book (Amazon: "create paperback" from the eBook): copies title, description, cover,
   // categories and A+ content into a new draft; the admin then uploads that format's file and sets its own price
