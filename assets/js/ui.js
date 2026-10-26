@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261026030037';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261026030037';
-import { esc, store, $, $$ } from './util.js?v=20261026030037';
+import { CONFIG } from './config.js?v=20261026030346';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261026030346';
+import { esc, store, $, $$ } from './util.js?v=20261026030346';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261026030037';
-import { suggest, highlight } from './search.js?v=20261026030037';
-import { track, trackPage } from './track.js?v=20261026030037';
-import { initGA, stopGA } from './ga.js?v=20261026030037';
-import { api } from './api.js?v=20261026030037';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261026030346';
+import { suggest, highlight } from './search.js?v=20261026030346';
+import { track, trackPage } from './track.js?v=20261026030346';
+import { initGA, stopGA } from './ga.js?v=20261026030346';
+import { api } from './api.js?v=20261026030346';
 
 // ---------------- icons ----------------
 const P = {
@@ -93,6 +93,25 @@ export const CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'teen', '
 // address of a category page, the same as tools/book-pages.mjs writes: /<lang>/<name-in-that-language>/
 export function catSlug(c) { const s = String(t('cat.' + c)).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' ').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); return s.length >= 3 ? s : c; }
 export const MAIN_CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'selfhelp', 'health', 'business', 'cooking', 'education'];
+// the top bar shows the categories that really have books, the fullest first (counted once per title, all formats together)
+let topCatsCache = null;
+function topCats() {
+  if (!topCatsCache) { try { const c = JSON.parse(localStorage.getItem('librava:topcats') || 'null'); if (Array.isArray(c) && c.length) topCatsCache = c; } catch { } }
+  return topCatsCache || MAIN_CATS;
+}
+function refreshTopCats() {
+  api.listBooks({ limit: 1 }).then(() => {
+    const all = api._catalog || [], seen = new Map();
+    for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }
+    const n = {}; for (const c of seen.values()) n[c] = (n[c] || 0) + 1;
+    const list = CATS.filter(c => n[c] >= 3).sort((a, b) => n[b] - n[a]).slice(0, 12);
+    if (list.length < 4) return;
+    if (JSON.stringify(list) === JSON.stringify(topCatsCache)) return;
+    topCatsCache = list; try { localStorage.setItem('librava:topcats', JSON.stringify(list)); } catch { }
+    const box = document.querySelector('[data-topcats]'); if (box) { box.innerHTML = topCatLinks(); fixLinks(box); }
+  }, () => { });
+}
+const topCatLinks = () => topCats().map(c => `<a href="#/search?cat=${c}" data-nav="cat-${c}">${esc(t('cat.' + c))}</a>`).join('');
 
 // ---------------- cart ----------------
 export const cart = {
@@ -158,6 +177,7 @@ export function fixLinks(root = document) {
 
 // ---------------- header / drawer / footer ----------------
 export function renderChrome() {
+  setTimeout(refreshTopCats, 0);
   const u = api.user();
   const hello = u ? t('nav.hello', { name: esc(u.name.split(' ')[0]) }) : t('nav.helloGuest');
   const catOpts = CATS.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('');
@@ -184,7 +204,7 @@ export function renderChrome() {
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
-    ${MAIN_CATS.map(c => `<a href="#/search?cat=${c}" data-nav="cat-${c}">${esc(t('cat.' + c))}</a>`).join('')}
+    <span class="subnav-cats" data-topcats>${topCatLinks()}</span>
     <a href="#/library" data-nav="library">${esc(t('nav.library'))}</a>
     ${u?.isAdmin ? `<a href="#/admin" data-nav="admin">${icon('gear')} ${esc(t('nav.admin'))}</a>` : ''}
   </nav></div>`;

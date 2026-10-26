@@ -100,6 +100,7 @@ h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
 .subnav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; align-items: center; min-height: 40px; }
 .subnav::-webkit-scrollbar { display: none; }
 .subnav a, .subnav button { white-space: nowrap; padding: 6px 10px; border-radius: 6px; font-size: 14px; border: 1px solid transparent; background: none; color: var(--hdr-fg); display: flex; align-items: center; gap: 6px; }
+.subnav-cats { display: contents; }
 .subnav a:hover, .subnav button:hover { border-color: var(--hdr-muted); text-decoration: none; }
 .subnav .on { color: var(--pista); }
 .menu-btn { font-weight: 700; }
