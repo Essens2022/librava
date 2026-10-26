@@ -1,0 +1,83 @@
+{
+ "slug": "how-to-play-piano-for-beginners",
+ "book_title": "Piano for Beginners Made Simple",
+ "title": "How to Play Piano for Beginners: A Step-by-Step Guide for Adults",
+ "seo_title": "How to Play Piano for Beginners: Step-by-Step Guide",
+ "description": "How to play piano for beginners: find every note, sit and hold your hands well, count rhythm, read music, learn first songs and chords, and practice daily.",
+ "keywords": [
+  "how to play piano for beginners",
+  "learn piano for beginners",
+  "how to learn piano as an adult",
+  "piano notes for beginners",
+  "easy piano songs for beginners",
+  "basic piano chords for beginners",
+  "how long does it take to learn piano"
+ ],
+ "date": "2026-10-26",
+ "intro": "<p>Maybe you have a keyboard in the spare room, or you have wanted to play for decades and finally decided it is your turn. The short answer: learn where the notes are using the black key groups, sit at the right height with relaxed, curved fingers, play simple tunes in the C position, then add your left hand and three chords, C, F and G. Practice 10 to 20 minutes a day, slowly, rather than an hour once a week.</p><p>This guide walks you through each step in order, with a first melody you can play today, the basic chords behind hundreds of songs, how to read the treble and bass clefs, and a 15-minute routine.</p>",
+ "sections": [
+  {
+   "h2": "What you need to start playing piano",
+   "html": "<p>An acoustic piano is lovely, but a digital piano or keyboard works perfectly well for learning. If you are buying or borrowing one, these features matter most:</p><ul><li><strong>Full-size keys.</strong> Narrow keys make it hard to move to a real piano later.</li><li>Touch sensitivity, so a harder press plays louder. Without it you cannot learn to play with expression.</li><li>Weighted or semi-weighted keys if you can manage them; they feel more like a piano.</li><li>A sustain pedal socket, for later.</li></ul><p>A 61-key keyboard covers five octaves, enough for all beginner and most early intermediate music. An 88-key instrument covers the full range of a standard piano and gives you room to grow. If space and budget allow, 88 weighted keys are ideal, but a 61-key touch-sensitive keyboard is a fine place to start.</p><p>You also need a firm seat at the right height: an adjustable piano bench (a piano stool in the UK), or a sturdy chair without arms plus a cushion.</p>"
+  },
+  {
+   "h2": "How to find the notes on a piano",
+   "html": "<p>Look at the black keys. They come in groups of two and groups of three, and these groups are your landmarks. Pianists do not count keys from the end; they find their way by the black keys.</p><p>Music uses only seven letter names for the white keys: A, B, C, D, E, F and G, then the pattern repeats. Moving right, notes go up the alphabet and sound higher. C is the white key just to the left of every group of two black keys.</p><table><thead><tr><th>White key</th><th>Where to find it</th></tr></thead><tbody><tr><td>C</td><td>Just left of the group of two black keys</td></tr><tr><td>D</td><td>In the middle of the group of two</td></tr><tr><td>E</td><td>Just right of the group of two</td></tr><tr><td>F</td><td>Just left of the group of three</td></tr><tr><td>G</td><td>Between the first and second of the three</td></tr><tr><td>A</td><td>Between the second and third of the three</td></tr><tr><td>B</td><td>Just right of the group of three</td></tr></tbody></table><p>Middle C is the C nearest the center of the instrument, usually the fourth C from the left on an 88-key piano and the third on a 61-key keyboard.</p><p>Each black key has two names. The one just right of C is C sharp, and because it is also just left of D, it is D flat too. A sharp means one key higher and a flat one key lower.</p>"
+  },
+  {
+   "h2": "How to sit at the piano and hold your hands",
+   "html": "<p>Seat height is the most useful adjustment you can make. With your hands on the keys, your forearms should be roughly level with the keyboard and your elbows at about key height. Adult beginners almost always sit too low, which drops the wrists and strains the forearms. Sit on the front half of the seat, feet flat, back tall and shoulders relaxed and down.</p><p>Let your arms hang loosely by your sides and look at your hands. The fingers curl naturally, as if holding a small orange. Keep exactly that shape on the keys, playing on the pads near the fingertips. The thumb plays on the side of its tip.</p><table><thead><tr><th>Note</th><th>Right hand finger</th><th>Left hand finger</th></tr></thead><tbody><tr><td>C</td><td>1 (thumb)</td><td>5</td></tr><tr><td>D</td><td>2</td><td>4</td></tr><tr><td>E</td><td>3</td><td>3</td></tr><tr><td>F</td><td>4</td><td>2</td></tr><tr><td>G</td><td>5</td><td>1 (thumb)</td></tr></tbody></table><p>Fingers are numbered 1 to 5 from the thumb, on both hands. For the right-hand C position, put your thumb on middle C and let the other fingers fall on D, E, F and G. For the left hand, put your little finger on the C below middle C. Press a key by letting your finger sink to the bottom; pushing harder once it is down adds nothing but tension.</p><div class=\"g-note\">Playing should never hurt. If you feel pain, tingling, numbness or a lasting ache in your hands, wrists, arms, shoulders, neck or back, stop and rest, and see a doctor or physical therapist (physiotherapist) if it comes back. If you have arthritis or a wrist or shoulder problem, ask your doctor first how much to play. Take a short break every 15 to 20 minutes.</div>"
+  },
+  {
+   "h2": "Piano rhythm basics for beginners",
+   "html": "<p>Each note shape tells you how long it lasts. English speakers use two naming systems, so here they are side by side:</p><table><thead><tr><th>US name</th><th>UK name</th><th>Beats in 4/4</th></tr></thead><tbody><tr><td>Whole note</td><td>Semibreve</td><td>4</td></tr><tr><td>Half note</td><td>Minim</td><td>2</td></tr><tr><td>Quarter note</td><td>Crotchet</td><td>1</td></tr><tr><td>Eighth note</td><td>Quaver</td><td>Half a beat</td></tr></tbody></table><p><strong>Count out loud.</strong> It feels silly, especially if anyone else is home, but nothing keeps the beat steadier. Say \"1, 2, 3, 4\" for each measure (a bar in the UK), holding a half note through two counts and a whole note through four. For eighth notes, say \"1 and 2 and\".</p><p>The time signature at the start of the music shows how beats are grouped. In 4/4 there are four quarter-note beats per measure, as in most folk, pop and hymn tunes. In 3/4 there are three, which gives the sway of a waltz. In 2/4 there are two, like a march.</p>"
+  },
+  {
+   "h2": "How to read piano notes on the staff",
+   "html": "<p>Written music sits on a staff of five lines. The treble clef, usually for the right hand, shows higher notes. The bass clef, usually for the left hand, shows lower ones. Together they form the grand staff.</p><table><thead><tr><th>Clef</th><th>Lines, bottom to top</th><th>Spaces, bottom to top</th></tr></thead><tbody><tr><td>Treble</td><td>E G B D F: Every Good Boy Does Fine</td><td>F A C E: FACE</td></tr><tr><td>Bass</td><td>G B D F A: Good Boys Do Fine Always</td><td>A C E G: All Cows Eat Grass</td></tr></tbody></table><p>Middle C sits on its own short ledger line, just below the treble staff and just above the bass staff. It is the same key on the piano either way.</p><p>Rather than counting from the bottom every time, learn a few landmark notes and read others as a step or a skip from them. Good treble landmarks are G on the second line (where the clef curls), C in the third space and E on the bottom line.</p>"
+  },
+  {
+   "h2": "Easy piano songs to play first",
+   "html": "<p>Ode to Joy, from a symphony written in the 1820s and long in the public domain, fits entirely in the right-hand C position. Each letter is a quarter note unless marked. The dot means a dotted quarter (one and a half beats), followed by a short eighth note.</p><ul><li>Line 1: E E F G | G F E D | C C D E | E. D D (half note) |</li><li>Line 2: E E F G | G F E D | C C D E | D. C C (half note) ||</li><li>Fingers for line 1: 3 3 4 5 | 5 4 3 2 | 1 1 2 3 | 3 2 2</li></ul><p>Mary Had a Little Lamb also stays in the C position: E D C D | E E E (half) | D D D (half) | E G G (half), then E D C D | E E E E | D D E D | C (whole).</p><p>Use the same steps for every new tune:</p><ol><li>Read the note names aloud in rhythm, without playing.</li><li>Clap the rhythm while counting.</li><li>Play very slowly with your hand in position, counting aloud.</li><li>Learn one line until it is smooth, then join the lines.</li><li>Speed up a little at a time, only when the slow speed feels easy.</li></ol>"
+  },
+  {
+   "h2": "How to play piano with both hands",
+   "html": "<p>Hands together feels hard at first. This patient method works for every piece:</p><ol><li>Learn the right hand alone, slowly and steadily, counting aloud.</li><li>Learn the left hand alone the same way.</li><li>Put the hands together very slowly, one measure at a time.</li><li>Join two measures, then a line, then the whole piece.</li><li>Speed up gradually.</li></ol><p>The slow speed in step 3 should feel almost ridiculous. If you play hands together as fast as you played each hand alone, halve it. A useful trick: let your attention follow the left hand and the steady count. Most beginners watch the right hand, which has the tune, while the left hand quietly falls apart.</p>"
+  },
+  {
+   "h2": "Basic piano chords for beginners",
+   "html": "<p>A chord is three or more notes played together. The common triad is built by playing a note, skipping one, playing one, skipping one and playing one. With your right hand, play C, E and G together: that is C major.</p><table><thead><tr><th>Key</th><th>I chord</th><th>IV chord</th><th>V chord</th></tr></thead><tbody><tr><td>C major</td><td>C (C E G)</td><td>F (F A C)</td><td>G (G B D)</td></tr><tr><td>G major</td><td>G (G B D)</td><td>C (C E G)</td><td>D (D F sharp A)</td></tr><tr><td>F major</td><td>F (F A C)</td><td>B flat (B flat D F)</td><td>C (C E G)</td></tr></tbody></table><p>Many folk songs, hymns and carols use only the I, IV and V chords of a key. Learn C, F and G first, and you already have two of the chords for G major and F major too. For a softer, sadder sound, learn the white-key minor chords: A minor (A C E), D minor (D F A) and E minor (E G B).</p><p>In song books, chord symbols sit above the melody. A capital letter alone means major (C), a small m means minor (Am), and you hold or repeat each chord until the next symbol. Start by holding a chord in your left hand while your right hand plays the tune, then try a broken chord, playing the notes one after another.</p>"
+  },
+  {
+   "h2": "A daily piano practice routine",
+   "html": "<p>Your brain learns movement mostly between sessions, while you rest and sleep, so 10 minutes every day beats one long Sunday session.</p><table><thead><tr><th>Minutes</th><th>What to do</th></tr></thead><tbody><tr><td>0 to 2</td><td>Shoulder rolls, hand shakes, a five-finger warm-up</td></tr><tr><td>2 to 5</td><td>One scale, hands separately</td></tr><tr><td>5 to 12</td><td>Focused work on one small part of your piece</td></tr><tr><td>12 to 15</td><td>Play something you enjoy</td></tr></tbody></table><p>Practice at a speed where you can play a passage correctly three times in a row; if you make mistakes, it is too fast. When one spot keeps going wrong, work on just that spot, then add the note before and after, instead of restarting from the top each time.</p><p>Over three months, a simple path is C position tunes, then hands together, then C, F and G chords under a melody, then the G and F major scales and a first piece with simple accompaniment. The book Piano for Beginners Made Simple sets this out as a 90-day plan with a song library, chord chart and practice log.</p>"
+  }
+ ],
+ "faq": [
+  {
+   "q": "Can I teach myself piano as an adult?",
+   "a": "<p>Yes. Many adults learn the basics on their own with a clear step-by-step book, a keyboard and short daily practice. The people who progress are simply the ones who sit down most days, not those with special talent. Lessons or a beginners' group can help later with feedback on posture and technique, but you can start today without them.</p>"
+  },
+  {
+   "q": "How long does it take to learn piano for beginners?",
+   "a": "<p>With 10 to 20 minutes a day, most adult beginners can play simple melodies with the right hand within a few weeks, and easy tunes with both hands and basic chords within about three months. Reading music fluently and playing more complex pieces takes longer. Steady daily practice matters more than how long each session lasts.</p>"
+  },
+  {
+   "q": "Is it too late to learn piano at 50, 60 or 70?",
+   "a": "<p>No. Adults of every age learn the piano and enjoy it. Adults often progress well because they understand explanations and practice with purpose. Keep sessions short, take breaks every 15 to 20 minutes, and set your seat height carefully. If you have arthritis or joint problems, ask your doctor or physical therapist how much playing suits you.</p>"
+  },
+  {
+   "q": "Should I learn piano on a keyboard or a piano?",
+   "a": "<p>Either works for learning. Choose a keyboard or digital piano with full-size, touch-sensitive keys, ideally weighted, and at least 61 keys. Digital instruments are cheaper, need no tuning and have headphone sockets for quiet practice. An acoustic piano has a richer touch but needs tuning once or twice a year and more space.</p>"
+  },
+  {
+   "q": "What are the first chords to learn on piano?",
+   "a": "<p>Start with C major (C E G), F major (F A C) and G major (G B D). They are the I, IV and V chords in the key of C, which together accompany a huge number of simple songs. Then add the minor chords A minor (A C E), D minor (D F A) and E minor (E G B), all played on white keys only.</p>"
+  },
+  {
+   "q": "Do I need to read music to play piano?",
+   "a": "<p>You can start without it by playing melodies written as note letters, such as E E F G for Ode to Joy. Learning to read music opens up far more pieces, though, and it is easier than it looks. The memory aids Every Good Boy Does Fine and FACE for the treble clef, and Good Boys Do Fine Always and All Cows Eat Grass for the bass clef, get you started.</p>"
+  }
+ ],
+ "outro": "<p>Your first step today: sit at your instrument for five minutes, find every C on the keyboard using the groups of two black keys, put your right thumb on middle C and play the first line of Ode to Joy slowly, counting aloud. Do the same tomorrow, and you have a practice habit.</p>"
+}
