@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261027215610';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027215610';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261027215610';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261027215610';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261027215610';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261027215610';
-import { track } from './track.js?v=20261027215610';
-import { gaEvent } from './ga.js?v=20261027215610';
-import { guessLang } from './langdetect.js?v=20261027215610';
-import { didYouMean } from './search.js?v=20261027215610';
-import { api, editionsOf } from './api.js?v=20261027215610';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261027215610';
+import { CONFIG } from './config.js?v=20261027224836';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027224836';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261027224836';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261027224836';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261027224836';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261027224836';
+import { track } from './track.js?v=20261027224836';
+import { gaEvent } from './ga.js?v=20261027224836';
+import { guessLang } from './langdetect.js?v=20261027224836';
+import { didYouMean } from './search.js?v=20261027224836';
+import { api, editionsOf } from './api.js?v=20261027224836';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261027224836';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -317,6 +317,7 @@ export async function viewBook(el, id) {
           <div class="muted rev-meta">${esc(fmtDate(r.created_at))}${r.country ? ' · ' + esc(r.country) : ''}</div>
           ${r.verified ? `<div class="verified">${esc(t('rev.verified'))}</div>` : ''}
           ${r.body ? `<p class="rev-body" style="white-space:pre-line">${esc(r.body)}</p>` : ''}
+          <div class="rev-vote" data-vote="${esc(r.id)}" ${r.user_id && r.user_id === api.user()?.id ? 'data-own' : ''}></div>
           ${(r.body || r.title) && needsTr(r) ? `<div class="rev-tr"><button type="button" class="linkbtn" data-tr="${esc(r.id)}">${icon('globe', 'ico')} ${esc(t('rev.translate', { lang: trLangName() }))}</button><small class="muted" hidden></small></div>` : ''}
         </div>`).join('') + (reviews.length > 10 ? `<button class="btn btn-ghost" type="button" id="rev-more">${esc(t('rev.moreN', { n: Math.min(10, reviews.length - 10) }))}</button>` : '') : `<p class="muted">${esc(t('rev.none'))}</p>`}
       </div>
@@ -359,6 +360,23 @@ export async function viewBook(el, id) {
     try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
   });
 
+  // like / dislike on the reviews of other people (one vote each, can be changed or taken back)
+  (async () => {
+    const votes = await api.reviewVotes(reviews.map(r => r.id)), uid = api.user()?.id;
+    const draw = box => {
+      const id = box.dataset.vote, v = votes[id] || { likes: 0, dislikes: 0, mine: 0 }, own = box.hasAttribute('data-own');
+      box.innerHTML = `<button type="button" class="vt ${v.mine === 1 ? 'on' : ''}" data-v="1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === 1}" aria-label="${esc(t('rev.like'))}">${icon('thumbUp')} <span>${v.likes || ''}</span></button>
+        <button type="button" class="vt ${v.mine === -1 ? 'on' : ''}" data-v="-1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === -1}" aria-label="${esc(t('rev.dislike'))}">${icon('thumbDown')} <span>${v.dislikes || ''}</span></button>`;
+      box.querySelectorAll('button').forEach(b => b.onclick = async () => {
+        if (!api.user()) { sessionStorage.setItem('librava:after', location.hash.slice(1) || currentPath()); toast(t('rev.voteLogin')); go('/account'); return; }
+        const want = +b.dataset.v === v.mine ? 0 : +b.dataset.v;
+        box.querySelectorAll('button').forEach(x => x.disabled = true);
+        try { votes[id] = await api.voteReview(id, want); } catch (x) { toast(errText(x), { error: true }); }
+        draw(box);
+      });
+    };
+    $$('[data-vote]', el).forEach(draw);
+  })();
   // like Amazon: 10 more reviews at each click
   $('#rev-more', el)?.addEventListener('click', e => {
     const rest = $$('[data-more-rev][hidden]', el); rest.slice(0, 10).forEach(x => x.hidden = false);

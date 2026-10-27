@@ -1959,3 +1959,14 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @media (prefers-reduced-motion: reduce) { .promo-slide, .promo-slide:not(.on) { transition: none; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .promo-text > .promo-offer { animation: pr-pop .7s cubic-bezier(.2, 1.4, .4, 1) both, pr-shine 3.2s linear .7s infinite; } }
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) { .promo:hover .promo-cover img, .promo-books .pb:hover { animation-play-state: paused; transform: translateY(-6px) scale(1.04); transition: transform .25s; } }
+
+.rev-vote { display: flex; gap: 8px; margin-top: 8px; }
+.rev-vote .vt { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--fg); font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+.rev-vote .vt svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rev-vote .vt span:empty { display: none; }
+.rev-vote .vt:hover:not(:disabled) { background: var(--bg-soft, #f3f6ee); }
+.rev-vote .vt:active:not(:disabled) { transform: scale(.94); }
+.rev-vote .vt.on { background: var(--pista, #9ACD32); border-color: transparent; color: #12301c; }
+.rev-vote .vt[data-v="-1"].on { background: #f3d3cf; color: #7a1d14; }
+.rev-vote .vt:disabled { opacity: .45; cursor: default; }
+[data-own] .vt { display: none; }

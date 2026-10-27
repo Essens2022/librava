@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261027215610';
-import { CONFIG } from './config.js?v=20261027215610';
-import { store } from './util.js?v=20261027215610';
+import { localize, loadRates } from './localprice.js?v=20261027224836';
+import { CONFIG } from './config.js?v=20261027224836';
+import { store } from './util.js?v=20261027224836';
 
 const D = {
   ro: {
@@ -549,6 +549,9 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'rev.like': 'Util',
+    'rev.dislike': 'Neutil',
+    'rev.voteLogin': 'Conectează-te ca să votezi recenzia.',
     'reader.enjoy': 'Îți place extrasul?',
     'reader.seeBook': 'Vezi pagina cărții',
     'reader.alsoRead': 'Cititorii acestei cărți au citit și',
@@ -1888,6 +1891,9 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'rev.like': 'Utile',
+    'rev.dislike': 'Non utile',
+    'rev.voteLogin': 'Accedi per votare la recensione.',
     'reader.enjoy': 'Ti piace l’estratto?',
     'reader.seeBook': 'Vai alla pagina del libro',
     'reader.alsoRead': 'Chi ha letto questo libro ha letto anche',
@@ -3227,6 +3233,9 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'rev.like': 'Helpful',
+    'rev.dislike': 'Not helpful',
+    'rev.voteLogin': 'Sign in to vote on a review.',
     'reader.enjoy': 'Enjoying this sample?',
     'reader.seeBook': 'See the book page',
     'reader.alsoRead': 'Customers who read this book also read',
@@ -4057,7 +4066,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261027215610`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261027224836`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

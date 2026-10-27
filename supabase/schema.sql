@@ -384,3 +384,4 @@ grant execute on function public.admin_set_prices(jsonb) to authenticated;
 -- Admin "Visitors" (migration admin_visitors_live): admin_visits(from,to) and admin_visit_events(sid) list every visit, logged in or not;
 -- track() also attaches the earlier steps of the same visit (last 6 hours) to a customer once they sign in (never for admins).
 -- promos.seconds (3-30, default 7) and promos.transition (fade|slide|zoom|flip): migration 'promo_motion'
+-- review_votes (like/dislike on reviews): table + functions review_vote_counts(uuid[]), vote_review(uuid,int); migration 'review_votes'
