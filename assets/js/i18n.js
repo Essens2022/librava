@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261026202428';
-import { CONFIG } from './config.js?v=20261026202428';
-import { store } from './util.js?v=20261026202428';
+import { localize, loadRates } from './localprice.js?v=20261027064338';
+import { CONFIG } from './config.js?v=20261027064338';
+import { store } from './util.js?v=20261027064338';
 
 const D = {
   ro: {
@@ -1098,6 +1098,17 @@ const D = {
     "admin.act.dev.desktop": "Calculator",
     "admin.act.dev.mobile": "Telefon",
     "admin.act.dev.tablet": "Tabletă",
+    "admin.tab.visitors": "Vizitatori",
+    "admin.vis.guest": "Vizitator fără cont",
+    "admin.vis.live": "Pe site acum",
+    "admin.vis.checkout": "Au început plata",
+    "admin.vis.accounts": "Cu cont",
+    "admin.vis.direct": "direct",
+    "admin.vis.nSearch": "{n} căutări",
+    "admin.vis.nBooks": "{n} cărți văzute",
+    "admin.vis.inCart": "a pus în coș",
+    "admin.vis.bought": "a cumpărat",
+    "admin.vis.none": "Niciun vizitator în perioada aleasă.",
     "admin.act2.rFrom": "De la",
     "admin.act2.rTo": "Până la",
     "admin.act2.rApply": "Arată",
@@ -2416,6 +2427,17 @@ const D = {
     "admin.act.dev.desktop": "Computer",
     "admin.act.dev.mobile": "Telefono",
     "admin.act.dev.tablet": "Tablet",
+    "admin.tab.visitors": "Visitatori",
+    "admin.vis.guest": "Visitatore senza account",
+    "admin.vis.live": "Sul sito ora",
+    "admin.vis.checkout": "Hanno iniziato il pagamento",
+    "admin.vis.accounts": "Con account",
+    "admin.vis.direct": "diretto",
+    "admin.vis.nSearch": "{n} ricerche",
+    "admin.vis.nBooks": "{n} libri visti",
+    "admin.vis.inCart": "nel carrello",
+    "admin.vis.bought": "ha acquistato",
+    "admin.vis.none": "Nessun visitatore nel periodo scelto.",
     "admin.act2.rFrom": "Dal",
     "admin.act2.rTo": "Al",
     "admin.act2.rApply": "Mostra",
@@ -3734,6 +3756,17 @@ const D = {
     "admin.act.dev.desktop": "Computer",
     "admin.act.dev.mobile": "Phone",
     "admin.act.dev.tablet": "Tablet",
+    "admin.tab.visitors": "Visitors",
+    "admin.vis.guest": "Visitor without an account",
+    "admin.vis.live": "On the site now",
+    "admin.vis.checkout": "Started checkout",
+    "admin.vis.accounts": "With an account",
+    "admin.vis.direct": "direct",
+    "admin.vis.nSearch": "{n} searches",
+    "admin.vis.nBooks": "{n} books viewed",
+    "admin.vis.inCart": "added to cart",
+    "admin.vis.bought": "bought",
+    "admin.vis.none": "No visitors in the chosen period.",
     "admin.act2.rFrom": "From",
     "admin.act2.rTo": "To",
     "admin.act2.rApply": "Show",
@@ -3994,7 +4027,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261026202428`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261027064338`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

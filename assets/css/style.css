@@ -1927,3 +1927,5 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .tl-ev time { color: var(--muted, #6b7466); font-variant-numeric: tabular-nums; min-width: 66px; }
 .tl-search { border-left-color: #7a8cc4; } .tl-book_view { border-left-color: #9bb089; }
 .tl-add_cart { border-left-color: #e0a030; } .tl-checkout { border-left-color: #d9822b; } .tl-purchase { border-left-color: #2f8f4e; font-weight: 600; }
+.vi-live { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2f8f4e; margin-right: 8px; box-shadow: 0 0 0 0 rgba(47,143,78,.6); animation: viPulse 1.6s infinite; }
+@keyframes viPulse { 70% { box-shadow: 0 0 0 9px rgba(47,143,78,0); } 100% { box-shadow: 0 0 0 0 rgba(47,143,78,0); } }
