@@ -2,9 +2,9 @@
 // Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261027064338';
-import { store } from './util.js?v=20261027064338';
-import { gaEvent } from './ga.js?v=20261027064338';
+import { api } from './api.js?v=20261027191432';
+import { store } from './util.js?v=20261027191432';
+import { gaEvent } from './ga.js?v=20261027191432';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -49,12 +49,14 @@ function staff() {
 const off = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || !/(^|\.)librava\.store$/.test(location.hostname)
   || navigator.webdriver === true || BOT.test(navigator.userAgent) || staff();
 let lastPath = '';
+// /go/search?x → the same name the reports always used (/en/#/search)
+const hereKey = () => /^\/go\/./.test(location.pathname) ? '/' + (document.documentElement.lang || 'en') + '/#' + location.pathname.slice(3) : location.pathname + location.hash.replace(/[?].*$/, '');
 export function track(type, data = {}) {
   try {
     if (off() || !api.track) return;
     const o = origin(), d = device();
     const lang = document.documentElement.lang;
-    api.track({ type, sid: sid(), vid: vid(), lang, country: country(), ...d, ...o, path: location.pathname + location.hash.replace(/[?].*$/, ''), ...data });
+    api.track({ type, sid: sid(), vid: vid(), lang, country: country(), ...d, ...o, path: hereKey(), ...data });
   } catch { }
   toGA(type, data);
 }
@@ -67,7 +69,7 @@ function toGA(type, data) {
   } catch { }
 }
 export function trackPage(again) {
-  const p = location.pathname + location.hash;
+  const p = location.pathname + location.search + location.hash;
   if (p === lastPath && !again) return; lastPath = p;
   if (again) { gaEvent('pageview'); return; }
   track('pageview');

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261027064338';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027064338';
-import { esc, store, $, $$ } from './util.js?v=20261027064338';
+import { CONFIG } from './config.js?v=20261027191432';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027191432';
+import { esc, store, $, $$ } from './util.js?v=20261027191432';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,11 +12,11 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261027064338';
-import { suggest, highlight } from './search.js?v=20261027064338';
-import { track, trackPage } from './track.js?v=20261027064338';
-import { initGA, stopGA } from './ga.js?v=20261027064338';
-import { api } from './api.js?v=20261027064338';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261027191432';
+import { suggest, highlight } from './search.js?v=20261027191432';
+import { track, trackPage } from './track.js?v=20261027191432';
+import { initGA, stopGA } from './ga.js?v=20261027191432';
+import { api } from './api.js?v=20261027191432';
 
 // ---------------- icons ----------------
 const P = {
@@ -128,7 +128,11 @@ export function updateCartCount() { $$('.cart-count').forEach(el => el.textConte
 // Two address styles: "#/book/x" (static hosting, e.g. GitHub Pages) or clean "/book/x" (own server).
 export let pathMode = false;
 export function setPathMode(v) { pathMode = !!v; }
-export function currentPath() { return pathMode ? location.pathname + location.search : (location.hash.slice(1) || '/'); }
+export function currentPath() {
+  if (pathMode) return location.pathname + location.search;
+  if (location.hash.length > 1) return location.hash.slice(1);
+  return /^\/go\/./.test(location.pathname) ? location.pathname.slice(3) + location.search : '/';   // /go/search?price=free
+}
 export function go(path) {
   if (pathMode) {
     if (location.pathname + location.search !== path) history.pushState(null, '', path);

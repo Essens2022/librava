@@ -4,6 +4,7 @@
   // links like librava.store/book/<id> open the book inside the store, any other unknown address opens the home page
   (function () {
     var m = location.pathname.match(/^\/book\/([0-9a-zA-Z-]{6,60})\/?$/);
-    location.replace(m ? '/#/book/' + m[1] : '/' + (location.hash || ''));
+    var g = location.pathname.match(/^\/go(\/.+)$/);   // /go/search?price=free → the page inside the store
+    location.replace(m ? '/#/book/' + m[1] : g ? '/#' + g[1] + location.search : '/' + (location.hash || ''));
   })();
 </script></head><body style="background:#EDF0E9"></body></html>

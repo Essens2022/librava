@@ -1,6 +1,6 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261027064338';
+import { store } from './util.js?v=20261027191432';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
 // Meta Pixel ID: also a public identifier (visible in every page that uses it), not a secret
@@ -13,7 +13,7 @@ export const gaAllowed = () => store.get('analytics') === 'granted'
 
 // clean address for reports: https://librava.store/book/<id> instead of /#/book/<id>?x=y
 function pageLocation() {
-  const h = location.hash.replace(/^#\/?/, '').replace(/[?].*$/, '');
+  const h = /^\/go\/./.test(location.pathname) ? location.pathname.slice(4) : location.hash.replace(/^#\/?/, '').replace(/[?].*$/, '');
   return location.origin + '/' + h;
 }
 

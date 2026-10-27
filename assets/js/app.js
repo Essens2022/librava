@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261027064338';
-import { t, getLang, setLang } from './i18n.js?v=20261027064338';
-import { esc, $, $$ } from './util.js?v=20261027064338';
-import { api, chooseBackend } from './api.js?v=20261027064338';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261027064338';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261027064338';
-import { trackPage } from './track.js?v=20261027064338';
-import { offline } from './offline.js?v=20261027064338';
-import { viewReader } from './reader.js?v=20261027064338';
-import { viewAdmin } from './admin.js?v=20261027064338';
+import { CONFIG } from './config.js?v=20261027191432';
+import { t, getLang, setLang } from './i18n.js?v=20261027191432';
+import { esc, $, $$ } from './util.js?v=20261027191432';
+import { api, chooseBackend } from './api.js?v=20261027191432';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261027191432';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewHelp, viewLegal, spinner } from './views.js?v=20261027191432';
+import { trackPage } from './track.js?v=20261027191432';
+import { offline } from './offline.js?v=20261027191432';
+import { viewReader } from './reader.js?v=20261027191432';
+import { viewAdmin } from './admin.js?v=20261027191432';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -105,8 +105,12 @@ async function route() {
     // the same addresses Google knows: /book/<id>/, /<lang>/<category>/ and /<lang>/
     const onlyCat = parts[0] === 'search' && q.get('cat') && [...q.keys()].every(k => k === 'cat');
     const gp = parts[0] === 'guide' ? el.querySelector('[data-guide-path]')?.dataset.guidePath : null;
-    const pretty = gp ? gp : parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : onlyCat ? `/${getLang()}/${catSlug(q.get('cat'))}/` : '/' + getLang() + '/';
-    if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
+    // public pages without a page of their own (all books, new, deals, free, a search, help, legal) get /go/<page>:
+    // some apps cut everything after "#" when a link is sent, so the address itself must name the page (404.html opens it)
+    const goPage = !gp && ['search', 'help', 'legal'].includes(parts[0]) && !onlyCat;
+    const pretty = gp ? gp : parts[0] === 'book' && parts[1] ? '/book/' + encodeURIComponent(parts[1]) + '/' : onlyCat ? `/${getLang()}/${catSlug(q.get('cat'))}/` : goPage ? '/go' + (path.startsWith('/') ? '' : '/') + encodeURI(path) + (qs ? '?' + qs.split('#')[0] : '') : '/' + getLang() + '/';
+    if (goPage) { const u = pretty; if (location.pathname + location.search !== u || location.hash) try { history.replaceState(history.state, '', u); } catch { } }
+    else if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
   }
   trackPage();
   // highlight current strip link
