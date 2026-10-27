@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261027203146';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203146';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027203146';
-import { resetCompanyCache } from './views.js?v=20261027203146';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027203146';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027203146';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027203146';
-import { optimizeBook } from './optimize.js?v=20261027203146';
-import { api } from './api.js?v=20261027203146';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027203146';
+import { CONFIG } from './config.js?v=20261027203630';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203630';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027203630';
+import { resetCompanyCache } from './views.js?v=20261027203630';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027203630';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027203630';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027203630';
+import { optimizeBook } from './optimize.js?v=20261027203630';
+import { api } from './api.js?v=20261027203630';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027203630';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2065,6 +2065,9 @@ async function promoForm(body, id) {
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.when'))}</h3><p>${esc(t('pr.whenHelp'))}</p></div>
       <div class="kdp-fields"><div class="two"><label class="field"><span>${esc(t('pr.start'))}</span><input type="datetime-local" id="pr-start" value="${local(p.starts_at)}"></label>
         <label class="field"><span>${esc(t('pr.end'))}</span><input type="datetime-local" id="pr-end" value="${local(p.ends_at)}"></label></div>
+        <div class="two"><label class="field"><span>${esc(t('pr.seconds'))}</span><input type="number" id="pr-sec" min="3" max="30" step="1" value="${esc(p.seconds || 7)}"></label>
+          <label class="field"><span>${esc(t('pr.transition'))}</span><select id="pr-tr">${['fade', 'slide', 'zoom', 'flip'].map(k => `<option value="${k}" ${(p.transition || 'fade') === k ? 'selected' : ''}>${esc(t('pr.tr.' + k))}</option>`).join('')}</select></label></div>
+        <small class="muted">${esc(t('pr.motionHelp'))}</small>
         <label class="check"><input type="checkbox" id="pr-active" ${p.active !== false ? 'checked' : ''}> ${esc(t('pr.activeF'))}</label></div></div>
     <div class="error" id="pr-err" hidden></div>
     <div class="kdp-bar"><a class="btn btn-ghost" href="#/admin/promos">${esc(t('admin.cancel'))}</a><span class="spacer"></span><button class="btn btn-buy" type="submit">${esc(t('pr.save'))}</button></div>
@@ -2079,7 +2082,7 @@ async function promoForm(body, id) {
     theme: rad('th') || 'forest', bg_from: $('#pr-c1', f).value, bg_to: $('#pr-c2', f).value, font: rad('pf') || null, kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
     link: pick.value === 'custom' ? val('#pr-link') || null : pick.value || null,
     starts_at: val('#pr-start') ? new Date(val('#pr-start')).toISOString() : null, ends_at: val('#pr-end') ? new Date(val('#pr-end')).toISOString() : null,
-    active: $('#pr-active', f).checked,
+    active: $('#pr-active', f).checked, seconds: Math.min(30, Math.max(3, parseInt(val('#pr-sec'), 10) || 7)), transition: val('#pr-tr') || 'fade',
     image_url: files.imageUrl || p.image_url, image_mobile_url: files.removeMobile ? null : files.mobileUrl || p.image_mobile_url,
   });
   let dev = 'desk';
@@ -2148,7 +2151,7 @@ async function promoForm(body, id) {
     if (c.kind === 'books' && c.book_ids.length < 2) return fail(t('pr.needBooks'));
     if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
     if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
-    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.theme, bg_from: c.theme === 'custom' ? c.bg_from : null, bg_to: c.theme === 'custom' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, sort: p.sort ?? all.length };
+    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.theme, bg_from: c.theme === 'custom' ? c.bg_from : null, bg_to: c.theme === 'custom' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
     if (!row.id) delete row.id;
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
     try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }

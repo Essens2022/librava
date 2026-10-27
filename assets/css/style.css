@@ -1950,3 +1950,11 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes pr-float { 50% { transform: translateY(-7px) rotate(-.6deg); } }
 @keyframes pr-sweep { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
 @keyframes pr-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+/* banner entrance styles (chosen per banner in Admin → Advertising) */
+.promo-slide { transition: opacity .7s ease, visibility .7s, transform .8s cubic-bezier(.2, .8, .2, 1); }
+.promo-slide[data-tr=slide]:not(.on) { transform: translateX(7%); }
+.promo-slide[data-tr=zoom]:not(.on) { transform: scale(1.08); }
+.promo-slide[data-tr=flip]:not(.on) { transform: perspective(1200px) rotateY(-14deg) scale(.96); }
+.promo-slide.on { transform: none; }
+@media (prefers-reduced-motion: reduce) { .promo-slide, .promo-slide:not(.on) { transition: none; transform: none; } }

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261027203146';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027203146';
-import { esc, store, $, $$ } from './util.js?v=20261027203146';
+import { CONFIG } from './config.js?v=20261027203630';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027203630';
+import { esc, store, $, $$ } from './util.js?v=20261027203630';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261027203146';
-import { suggest, highlight } from './search.js?v=20261027203146';
-import { track, trackPage } from './track.js?v=20261027203146';
-import { initGA, stopGA } from './ga.js?v=20261027203146';
-import { api } from './api.js?v=20261027203146';
-import { describeOffer, offersForBook } from './offers.js?v=20261027203146';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261027203630';
+import { suggest, highlight } from './search.js?v=20261027203630';
+import { track, trackPage } from './track.js?v=20261027203630';
+import { initGA, stopGA } from './ga.js?v=20261027203630';
+import { api } from './api.js?v=20261027203630';
+import { describeOffer, offersForBook } from './offers.js?v=20261027203630';
 
 // ---------------- icons ----------------
 const P = {
@@ -668,7 +668,7 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
   const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
   const look = promoLook(p);
-  const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" href="${esc(link)}"${ext}`;
+  const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}" href="${esc(link)}"${ext}`;
   if (p.kind === 'image' && p.image_url) {
     return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
       ${title || p.kicker ? `<span class="promo-over"><span class="wrap">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${title ? `<b>${esc(title)}</b>` : ''}${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${p.cta ? `<span class="btn btn-buy">${esc(p.cta)}</span>` : ''}</span></span>` : ''}</a>`;
@@ -690,7 +690,7 @@ function promoBooksHTML(p, list, placement) {
   const anyDeal = books.some(b => b.list_price_cents > b.price_cents);
   const link = safeLink(p.link) || (anyDeal ? '#/search?deals=1' : '#/search?sort=newest'), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const look = promoLook(p);
-  return `<div class="promo promo-${placement} promo-books ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(books.map(x => x.id).join(','))}"><div class="wrap promo-in">
+  return `<div class="promo promo-${placement} promo-books ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(books.map(x => x.id).join(','))}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}"><div class="wrap promo-in">
     <div class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${p.title ? `<span class="promo-title">${esc(p.title)}</span>` : ''}
       ${p.subtitle ? `<span class="promo-sub">${esc(p.subtitle)}</span>` : ''}<a class="btn btn-buy promo-cta" href="${esc(link)}"${ext}>${esc(p.cta || t('promo.ctaBooks'))}</a></div>
     <div class="promo-shelf n${books.length}">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
@@ -738,13 +738,16 @@ export function mountPromos(root) {
       dots.forEach((d, k) => d.classList.toggle('on', k === i));
       view(slides[i]);
     };
-    const play = () => { clearInterval(timer); if (!reduce && !paused) timer = setInterval(() => { if (!c.isConnected) return clearInterval(timer); if (!document.hidden) go(i + 1); }, 7000); };
+    slides.forEach(sl => { sl.dataset.tr = sl.querySelector('[data-tr]')?.dataset.tr || 'fade'; });
+    // each banner stays as many seconds as it says (default 7), then the next one comes in with its own style
+    const play = () => { clearTimeout(timer); if (reduce || paused) return; const sec = +slides[i].querySelector('[data-sec]')?.dataset.sec || 7;
+      timer = setTimeout(() => { if (!c.isConnected) return; if (!document.hidden) go(i + 1); play(); }, sec * 1000); };
     c.querySelector('.prev').onclick = () => { go(i - 1); play(); };
     c.querySelector('.next').onclick = () => { go(i + 1); play(); };
     dots.forEach((d, k) => d.onclick = () => { go(k); play(); });
-    c.addEventListener('mouseenter', () => { paused = true; clearInterval(timer); });
+    c.addEventListener('mouseenter', () => { paused = true; clearTimeout(timer); });
     c.addEventListener('mouseleave', () => { paused = false; play(); });
-    c.addEventListener('focusin', () => { paused = true; clearInterval(timer); });
+    c.addEventListener('focusin', () => { paused = true; clearTimeout(timer); });
     c.addEventListener('focusout', () => { paused = false; play(); });
     let x0 = null, moved = false;
     c.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; moved = false; }, { passive: true });

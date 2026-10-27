@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261027203146';
-import { CONFIG } from './config.js?v=20261027203146';
-import { store } from './util.js?v=20261027203146';
+import { localize, loadRates } from './localprice.js?v=20261027203630';
+import { CONFIG } from './config.js?v=20261027203630';
+import { store } from './util.js?v=20261027203630';
 
 const D = {
   ro: {
@@ -952,6 +952,13 @@ const D = {
     'set.title': 'Setări',
     'set.company': 'Date firmă',
     'set.companyHelp': 'Apar în paginile legale (Termeni, Confidențialitate, Date despre vânzător). Sunt obligatorii pentru un magazin online în UE.',
+    'pr.seconds': 'Cât stă pe ecran (secunde)',
+    'pr.transition': 'Cum apare',
+    'pr.tr.fade': 'Estompare',
+    'pr.tr.slide': 'Glisare',
+    'pr.tr.zoom': 'Zoom',
+    'pr.tr.flip': 'Întoarcere',
+    'pr.motionHelp': 'Fiecare banner stă cât spui tu, apoi vine următorul cu stilul lui. Contează doar când ai mai multe bannere mari.',
     'set.catOrder': 'Ordinea categoriilor',
     'set.catOrderHelp': 'Mută categoriile în sus sau în jos. Prima apare prima pe pagina principală și în bara de sus. ⇈ o pune pe prima poziție.',
     'set.catReset': 'Ordine inițială',
@@ -2284,6 +2291,13 @@ const D = {
     'set.title': 'Impostazioni',
     'set.company': 'Dati aziendali',
     'set.companyHelp': 'Compaiono nelle pagine legali (Termini, Privacy, Dati del venditore). Sono obbligatori per un negozio online nell\'UE.',
+    'pr.seconds': 'Quanto resta (secondi)',
+    'pr.transition': 'Come appare',
+    'pr.tr.fade': 'Dissolvenza',
+    'pr.tr.slide': 'Scorrimento',
+    'pr.tr.zoom': 'Zoom',
+    'pr.tr.flip': 'Rotazione',
+    'pr.motionHelp': 'Ogni banner resta il tempo indicato, poi arriva il successivo con il suo stile. Conta solo con più banner grandi.',
     'set.catOrder': 'Ordine delle categorie',
     'set.catOrderHelp': 'Sposta le categorie su o giù. La prima compare per prima nella home e nella barra in alto. ⇈ la porta in cima.',
     'set.catReset': 'Ordine iniziale',
@@ -3616,6 +3630,13 @@ const D = {
     'set.title': 'Settings',
     'set.company': 'Company details',
     'set.companyHelp': 'Shown on the legal pages (Terms, Privacy, Seller information). Required for an online shop in the EU.',
+    'pr.seconds': 'Time on screen (seconds)',
+    'pr.transition': 'How it appears',
+    'pr.tr.fade': 'Fade',
+    'pr.tr.slide': 'Slide',
+    'pr.tr.zoom': 'Zoom',
+    'pr.tr.flip': 'Flip',
+    'pr.motionHelp': 'Each banner stays as long as you set, then the next one comes in with its own style. Matters only with several large banners.',
     'set.catOrder': 'Category order',
     'set.catOrderHelp': 'Move categories up or down. The first one is shown first on the home page and in the top bar. ⇈ puts it on top.',
     'set.catReset': 'Original order',
@@ -4036,7 +4057,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261027203146`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261027203630`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
