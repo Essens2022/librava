@@ -1929,3 +1929,24 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .tl-add_cart { border-left-color: #e0a030; } .tl-checkout { border-left-color: #d9822b; } .tl-purchase { border-left-color: #2f8f4e; font-weight: 600; }
 .vi-live { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #2f8f4e; margin-right: 8px; box-shadow: 0 0 0 0 rgba(47,143,78,.6); animation: viPulse 1.6s infinite; }
 @keyframes viPulse { 70% { box-shadow: 0 0 0 9px rgba(47,143,78,0); } 100% { box-shadow: 0 0 0 0 rgba(47,143,78,0); } }
+
+/* ---- banners: modern motion (all of it off for people who asked for reduced motion) ---- */
+.promo-offer { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; width: fit-content; max-width: 100%; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; letter-spacing: .02em; color: #3B2500; background: linear-gradient(100deg, #FFD36B, #FFB340 55%, #FFD36B); background-size: 200% 100%; box-shadow: 0 4px 14px rgba(255, 179, 64, .45); }
+.promo-offer svg { width: 14px; height: 14px; }
+@media (prefers-reduced-motion: no-preference) {
+  .promo-offer { animation: pr-shine 3.2s linear infinite, pr-pop .7s cubic-bezier(.2, 1.4, .4, 1) both; }
+  .promo-text > * { animation: pr-rise .7s cubic-bezier(.2, .8, .2, 1) both; }
+  .promo-text > *:nth-child(2) { animation-delay: .08s; } .promo-text > *:nth-child(3) { animation-delay: .16s; } .promo-text > *:nth-child(4) { animation-delay: .24s; } .promo-text > *:nth-child(5) { animation-delay: .32s; }
+  .promo-cover img, .promo-books .pb { animation: pr-float 6s ease-in-out infinite; transform-origin: 50% 90%; }
+  .promo-books .pb:nth-child(2n) { animation-delay: -2s; } .promo-books .pb:nth-child(3n) { animation-delay: -4s; }
+  .promo-cta { position: relative; overflow: hidden; }
+  .promo-cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .55) 50%, transparent 65%); transform: translateX(-120%); animation: pr-sweep 4.5s ease-in-out infinite; pointer-events: none; }
+  .promo-slide.on .promo-bg { animation: pr-zoom 14s ease-out both; }
+  .promo:hover .promo-cover img, .promo-books .pb:hover { animation-play-state: paused; transform: translateY(-6px) scale(1.04); transition: transform .25s; }
+}
+@keyframes pr-shine { to { background-position: -200% 0; } }
+@keyframes pr-pop { from { opacity: 0; transform: scale(.6); } }
+@keyframes pr-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes pr-float { 50% { transform: translateY(-7px) rotate(-.6deg); } }
+@keyframes pr-sweep { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@keyframes pr-zoom { from { transform: scale(1); } to { transform: scale(1.08); } }
