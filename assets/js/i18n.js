@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261027224836';
-import { CONFIG } from './config.js?v=20261027224836';
-import { store } from './util.js?v=20261027224836';
+import { localize, loadRates } from './localprice.js?v=20261027225758';
+import { CONFIG } from './config.js?v=20261027225758';
+import { store } from './util.js?v=20261027225758';
 
 const D = {
   ro: {
@@ -549,6 +549,8 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'ri.typeBook': 'Scrie numele cărții…',
+    'ri.noBook': 'Nicio carte găsită',
     'rev.like': 'Util',
     'rev.dislike': 'Neutil',
     'rev.voteLogin': 'Conectează-te ca să votezi recenzia.',
@@ -1891,6 +1893,8 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'ri.typeBook': 'Scrivi il nome del libro…',
+    'ri.noBook': 'Nessun libro trovato',
     'rev.like': 'Utile',
     'rev.dislike': 'Non utile',
     'rev.voteLogin': 'Accedi per votare la recensione.',
@@ -3233,6 +3237,8 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'ri.typeBook': 'Type the book name…',
+    'ri.noBook': 'No book found',
     'rev.like': 'Helpful',
     'rev.dislike': 'Not helpful',
     'rev.voteLogin': 'Sign in to vote on a review.',
@@ -4066,7 +4072,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261027224836`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261027225758`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

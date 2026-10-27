@@ -1970,3 +1970,9 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .rev-vote .vt[data-v="-1"].on { background: #f3d3cf; color: #7a1d14; }
 .rev-vote .vt:disabled { opacity: .45; cursor: default; }
 [data-own] .vt { display: none; }
+
+.bp { position: relative; }
+.bp-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); max-height: 320px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, .18); padding: 4px; }
+.bp-opt { display: block; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 14.5px; cursor: pointer; }
+.bp-opt:hover, .bp-opt.on { background: var(--bg-soft, #eef3e6); }
+.bp-none { padding: 10px 12px; color: var(--muted, #667); font-size: 14px; }

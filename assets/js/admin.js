@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261027224836';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027224836';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027224836';
-import { resetCompanyCache } from './views.js?v=20261027224836';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027224836';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027224836';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027224836';
-import { optimizeBook } from './optimize.js?v=20261027224836';
-import { api } from './api.js?v=20261027224836';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027224836';
+import { CONFIG } from './config.js?v=20261027225758';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027225758';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027225758';
+import { resetCompanyCache } from './views.js?v=20261027225758';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027225758';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027225758';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027225758';
+import { optimizeBook } from './optimize.js?v=20261027225758';
+import { api } from './api.js?v=20261027225758';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027225758';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -611,7 +611,7 @@ async function reviews(body) {
       <h2 class="section-title" style="font-size:18px;margin:0 0 4px">${icon('upload', 'ico')} ${esc(t('ri.title'))}</h2>
       <p class="muted" style="margin:0 0 12px;max-width:80ch">${esc(t('ri.help'))}</p>
       <div class="ri-top">
-        <label class="field"><span>${esc(t('ri.book'))}</span><select class="input" id="ri-book"><option value="">${esc(t('ri.pickBook'))}</option>${books.filter(b => !b.deleted_at).map(b => `<option value="${esc(b.id)}">${esc(b.title)}${b.language ? ' · ' + esc(b.language.toUpperCase()) : ''}</option>`).join('')}</select></label>
+        <label class="field"><span>${esc(t('ri.book'))}</span><div class="bp"><input class="input" id="ri-bookq" autocomplete="off" placeholder="${esc(t('ri.typeBook'))}"><input type="hidden" id="ri-book"><div class="bp-list" id="ri-booklist" hidden></div></div></label>
         <label class="field"><span>${esc(t('ri.source'))} <small class="muted" style="font-weight:400">${esc(t('ri.sourceNote'))}</small></span><input class="input" id="ri-source" list="ri-sources" maxlength="60" placeholder="${esc(t('ri.sourcePh'))}"><datalist id="ri-sources">${['Amazon', 'Amazon.it', 'Amazon.de', 'Amazon.com', 'Etsy', 'Payhip', 'Gumroad', 'Google Play Books', 'Kobo', 'Apple Books', 'Shopify', 'WooCommerce'].map(x => `<option value="${x}">`).join('')}</datalist></label>
         <div class="field ri-filebox"><span>${esc(t('ri.file'))}</span>
           <label class="drop" id="ri-drop">${icon('upload')}<span><span class="fname">${esc(t('ri.dropHere'))}</span><br><small class="muted">${esc(t('ri.formats'))}</small></span><input type="file" id="ri-file" accept=".csv,.tsv,.txt,.xlsx,.xls,.ods,.json"></label>
@@ -687,7 +687,7 @@ function importReviewsUI(body, books) {
     const av = $('#ri-allver', step); if (av) av.onchange = e => { allVerified = e.target.checked; render(); };
     const pr = $('#ri-prod', step); if (pr) pr.onchange = e => { product = e.target.value; render(); };
     $('#ri-go', step).onclick = async e => {
-      if (!bookSel.value) { showErr(t('ri.pickBook'), true); bookSel.focus({ preventScroll: true }); bookSel.classList.add('invalid'); return; }
+      if (!bookSel.value) { showErr(t('ri.pickBook'), true); $('#ri-bookq', body).focus({ preventScroll: true }); $('#ri-bookq', body).classList.add('invalid'); bookSel.classList.add('invalid'); return; }
       const btn = e.currentTarget; btn.disabled = true; clearErr();
       try {
         const r = await api.importReviews(bookSel.value, ok, srcIn.value.trim());
@@ -717,6 +717,28 @@ function importReviewsUI(body, books) {
       render();
     } catch (x) { data = null; step.innerHTML = ''; showErr(t('ri.readErr') + ' ' + (x.message || '')); }
   };
+  // search box instead of a long list: type a few letters of the title and the matching books appear at once
+  { const q = $('#ri-bookq', body), list = $('#ri-booklist', body);
+    const all = books.filter(b => !b.deleted_at).map(b => ({ id: b.id, title: b.title, label: b.title + (b.language ? ' · ' + b.language.toUpperCase() : '') + (b.format ? ' · ' + String(b.format).toUpperCase() : '') }));
+    const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let sel = -1, shown = [];
+    const draw = () => {
+      const w = norm(q.value).split(/\s+/).filter(Boolean);
+      shown = (w.length ? all.filter(b => w.every(x => norm(b.label).includes(x))) : all).slice(0, 12); sel = shown.length ? 0 : -1;
+      list.innerHTML = shown.length ? shown.map((b, k) => `<button type="button" class="bp-opt ${k === sel ? 'on' : ''}" data-i="${k}">${esc(b.label)}</button>`).join('') : `<div class="bp-none">${esc(t('ri.noBook'))}</div>`;
+      list.hidden = false;
+      $$('.bp-opt', list).forEach(o => o.onmousedown = e => { e.preventDefault(); pick(shown[+o.dataset.i]); });
+    };
+    const pick = b => { if (!b) return; bookSel.value = b.id; q.value = b.label; q.classList.remove('invalid'); list.hidden = true; bookSel.onchange && bookSel.onchange(); };
+    q.oninput = () => { bookSel.value = ''; draw(); };
+    q.onfocus = () => { q.select(); draw(); };
+    q.onblur = () => setTimeout(() => { list.hidden = true; }, 120);
+    q.onkeydown = e => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!shown.length) return; sel = (sel + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length; $$('.bp-opt', list).forEach((o, k) => o.classList.toggle('on', k === sel)); $$('.bp-opt', list)[sel]?.scrollIntoView({ block: 'nearest' }); }
+      else if (e.key === 'Enter') { e.preventDefault(); pick(shown[sel]); }
+      else if (e.key === 'Escape') list.hidden = true;
+    };
+  }
   bookSel.onchange = () => { bookSel.classList.remove('invalid'); if (errBox.textContent === t('ri.pickBook')) clearErr(); if (data && map.product && !product) { const bt = books.find(b => b.id === bookSel.value)?.title; const vals = [...new Set(data.rows.map(r => String(r[map.product] ?? '').trim()))]; product = vals.find(v => bt && norm(v).includes(norm(bt).slice(0, 20))) || ''; render(); } };
 }
 
