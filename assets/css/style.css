@@ -1942,7 +1942,6 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
   .promo-cta { position: relative; overflow: hidden; }
   .promo-cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .55) 50%, transparent 65%); transform: translateX(-120%); animation: pr-sweep 4.5s ease-in-out infinite; pointer-events: none; }
   .promo-slide.on .promo-bg { animation: pr-zoom 14s ease-out both; }
-  .promo:hover .promo-cover img, .promo-books .pb:hover { animation-play-state: paused; transform: translateY(-6px) scale(1.04); transition: transform .25s; }
 }
 @keyframes pr-shine { to { background-position: -200% 0; } }
 @keyframes pr-pop { from { opacity: 0; transform: scale(.6); } }
@@ -1959,3 +1958,4 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .promo-slide.on { transform: none; }
 @media (prefers-reduced-motion: reduce) { .promo-slide, .promo-slide:not(.on) { transition: none; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .promo-text > .promo-offer { animation: pr-pop .7s cubic-bezier(.2, 1.4, .4, 1) both, pr-shine 3.2s linear .7s infinite; } }
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) { .promo:hover .promo-cover img, .promo-books .pb:hover { animation-play-state: paused; transform: translateY(-6px) scale(1.04); transition: transform .25s; } }

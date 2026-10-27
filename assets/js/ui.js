@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261027213716';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027213716';
-import { esc, store, $, $$ } from './util.js?v=20261027213716';
+import { CONFIG } from './config.js?v=20261027214235';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027214235';
+import { esc, store, $, $$ } from './util.js?v=20261027214235';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261027213716';
-import { suggest, highlight } from './search.js?v=20261027213716';
-import { track, trackPage } from './track.js?v=20261027213716';
-import { initGA, stopGA } from './ga.js?v=20261027213716';
-import { api } from './api.js?v=20261027213716';
-import { describeOffer, offersForBook } from './offers.js?v=20261027213716';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261027214235';
+import { suggest, highlight } from './search.js?v=20261027214235';
+import { track, trackPage } from './track.js?v=20261027214235';
+import { initGA, stopGA } from './ga.js?v=20261027214235';
+import { api } from './api.js?v=20261027214235';
+import { describeOffer, offersForBook } from './offers.js?v=20261027214235';
 
 // ---------------- icons ----------------
 const P = {
@@ -745,9 +745,11 @@ export function mountPromos(root) {
     c.querySelector('.prev').onclick = () => { go(i - 1); play(); };
     c.querySelector('.next').onclick = () => { go(i + 1); play(); };
     dots.forEach((d, k) => d.onclick = () => { go(k); play(); });
-    c.addEventListener('mouseenter', () => { paused = true; clearTimeout(timer); });
+    // pause under a real mouse or keyboard focus only: on a phone a tap leaves "hover" stuck and the banners would stop
+    const mouse = matchMedia('(hover: hover) and (pointer: fine)');
+    c.addEventListener('mouseenter', () => { if (!mouse.matches) return; paused = true; clearTimeout(timer); });
     c.addEventListener('mouseleave', () => { paused = false; play(); });
-    c.addEventListener('focusin', () => { paused = true; clearTimeout(timer); });
+    c.addEventListener('focusin', e => { if (!e.target.matches?.(':focus-visible')) return; paused = true; clearTimeout(timer); });
     c.addEventListener('focusout', () => { paused = false; play(); });
     let x0 = null, moved = false;
     c.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; moved = false; }, { passive: true });
