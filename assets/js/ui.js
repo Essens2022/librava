@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261027203035';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027203035';
-import { esc, store, $, $$ } from './util.js?v=20261027203035';
+import { CONFIG } from './config.js?v=20261027203146';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027203146';
+import { esc, store, $, $$ } from './util.js?v=20261027203146';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261027203035';
-import { suggest, highlight } from './search.js?v=20261027203035';
-import { track, trackPage } from './track.js?v=20261027203035';
-import { initGA, stopGA } from './ga.js?v=20261027203035';
-import { api } from './api.js?v=20261027203035';
-import { describeOffer, offersForBook } from './offers.js?v=20261027203035';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261027203146';
+import { suggest, highlight } from './search.js?v=20261027203146';
+import { track, trackPage } from './track.js?v=20261027203146';
+import { initGA, stopGA } from './ga.js?v=20261027203146';
+import { api } from './api.js?v=20261027203146';
+import { describeOffer, offersForBook } from './offers.js?v=20261027203146';
 
 // ---------------- icons ----------------
 const P = {
@@ -93,14 +93,33 @@ export const CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'teen', '
   'reference', 'politics', 'engineering', 'medical', 'law', 'lgbtq'];
 // address of a category page, the same as tools/book-pages.mjs writes: /<lang>/<name-in-that-language>/
 export function catSlug(c) { const s = String(t('cat.' + c)).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' ').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, ''); return s.length >= 3 ? s : c; }
+// the order of the categories chosen in Admin → Settings (setting "home_cats"): first = shown first, on the home page and in the top bar
+let catOrder = null;
+try { const c = JSON.parse(localStorage.getItem('librava:catorder') || 'null'); if (Array.isArray(c)) catOrder = c; } catch { }
+export function applyCatOrder(list) {
+  if (!catOrder || !catOrder.length) return list;
+  const rank = c => { const i = catOrder.indexOf(c); return i < 0 ? 1e3 + list.indexOf(c) : i; };
+  return [...list].sort((a, b) => rank(a) - rank(b));
+}
+export async function loadCatOrder() {
+  try {
+    const v = await api.getSetting('home_cats');
+    const o = Array.isArray(v?.order) ? v.order.filter(c => CATS.includes(c)) : null;
+    if (JSON.stringify(o) === JSON.stringify(catOrder)) return false;
+    catOrder = o; try { localStorage.setItem('librava:catorder', JSON.stringify(o)); } catch { }
+    const box = document.querySelector('[data-topcats]'); if (box) { box.innerHTML = topCatLinks(); fixLinks(box); }
+    return true;
+  } catch { return false; }
+}
 export const MAIN_CATS = ['fiction', 'mystery', 'romance', 'scifi', 'kids', 'selfhelp', 'health', 'business', 'cooking', 'education'];
 // the top bar shows the categories that really have books, the fullest first (counted once per title, all formats together)
 let topCatsCache = null;
 function topCats() {
   if (!topCatsCache) { try { const c = JSON.parse(localStorage.getItem('librava:topcats') || 'null'); if (Array.isArray(c) && c.length) topCatsCache = c; } catch { } }
-  return topCatsCache || MAIN_CATS;
+  return applyCatOrder(topCatsCache || MAIN_CATS);
 }
 function refreshTopCats() {
+  loadCatOrder();
   api.listBooks({ limit: 1 }).then(() => {
     const all = api._catalog || [], seen = new Map();
     for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }

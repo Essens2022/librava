@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261027203035';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203035';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261027203035';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261027203035';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261027203035';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261027203035';
-import { track } from './track.js?v=20261027203035';
-import { gaEvent } from './ga.js?v=20261027203035';
-import { guessLang } from './langdetect.js?v=20261027203035';
-import { didYouMean } from './search.js?v=20261027203035';
-import { api, editionsOf } from './api.js?v=20261027203035';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos } from './ui.js?v=20261027203035';
+import { CONFIG } from './config.js?v=20261027203146';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203146';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261027203146';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261027203146';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261027203146';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261027203146';
+import { track } from './track.js?v=20261027203146';
+import { gaEvent } from './ga.js?v=20261027203146';
+import { guessLang } from './langdetect.js?v=20261027203146';
+import { didYouMean } from './search.js?v=20261027203146';
+import { api, editionsOf } from './api.js?v=20261027203146';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261027203146';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -49,7 +49,8 @@ export async function viewHome(el) {
   const shelf = (title, books, more) => !books.length ? '' : `
     <section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2>
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
-  const catTiles = CATS.map(c => {
+  await loadCatOrder();
+  const catTiles = applyCatOrder(CATS).map(c => {
     const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';
     const n = Math.min(bs.length, window.innerWidth < 700 ? 2 : 3);

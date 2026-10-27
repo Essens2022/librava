@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261027203035';
-import { CONFIG } from './config.js?v=20261027203035';
-import { store } from './util.js?v=20261027203035';
+import { localize, loadRates } from './localprice.js?v=20261027203146';
+import { CONFIG } from './config.js?v=20261027203146';
+import { store } from './util.js?v=20261027203146';
 
 const D = {
   ro: {
@@ -952,6 +952,9 @@ const D = {
     'set.title': 'Setări',
     'set.company': 'Date firmă',
     'set.companyHelp': 'Apar în paginile legale (Termeni, Confidențialitate, Date despre vânzător). Sunt obligatorii pentru un magazin online în UE.',
+    'set.catOrder': 'Ordinea categoriilor',
+    'set.catOrderHelp': 'Mută categoriile în sus sau în jos. Prima apare prima pe pagina principală și în bara de sus. ⇈ o pune pe prima poziție.',
+    'set.catReset': 'Ordine inițială',
     'set.name': 'Nume firmă sau nume complet',
     'set.address': 'Adresă',
     'set.country': 'Țara',
@@ -2281,6 +2284,9 @@ const D = {
     'set.title': 'Impostazioni',
     'set.company': 'Dati aziendali',
     'set.companyHelp': 'Compaiono nelle pagine legali (Termini, Privacy, Dati del venditore). Sono obbligatori per un negozio online nell\'UE.',
+    'set.catOrder': 'Ordine delle categorie',
+    'set.catOrderHelp': 'Sposta le categorie su o giù. La prima compare per prima nella home e nella barra in alto. ⇈ la porta in cima.',
+    'set.catReset': 'Ordine iniziale',
     'set.name': 'Ragione sociale o nome completo',
     'set.address': 'Indirizzo',
     'set.country': 'Paese',
@@ -3610,6 +3616,9 @@ const D = {
     'set.title': 'Settings',
     'set.company': 'Company details',
     'set.companyHelp': 'Shown on the legal pages (Terms, Privacy, Seller information). Required for an online shop in the EU.',
+    'set.catOrder': 'Category order',
+    'set.catOrderHelp': 'Move categories up or down. The first one is shown first on the home page and in the top bar. ⇈ puts it on top.',
+    'set.catReset': 'Original order',
     'set.name': 'Company name or full name',
     'set.address': 'Address',
     'set.country': 'Country',
@@ -4027,7 +4036,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261027203035`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261027203146`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

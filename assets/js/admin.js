@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261027203035';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203035';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027203035';
-import { resetCompanyCache } from './views.js?v=20261027203035';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027203035';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027203035';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027203035';
-import { optimizeBook } from './optimize.js?v=20261027203035';
-import { api } from './api.js?v=20261027203035';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027203035';
+import { CONFIG } from './config.js?v=20261027203146';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027203146';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027203146';
+import { resetCompanyCache } from './views.js?v=20261027203146';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027203146';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027203146';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027203146';
+import { optimizeBook } from './optimize.js?v=20261027203146';
+import { api } from './api.js?v=20261027203146';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027203146';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2358,6 +2358,31 @@ async function settingsAdmin(body) {
     ${f('email', t('set.email'), 'contact@librava.store')}
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-buy" type="submit">${esc(t('acc.save'))}</button><a class="btn btn-ghost" href="#/legal/imprint">${esc(t('set.view'))}</a></div>
   </form>`;
+  // order of the categories on the home page and in the top bar
+  const cur = (await api.getSetting('home_cats'))?.order || [];
+  let order = [...cur.filter(c => CATS.includes(c)), ...CATS.filter(c => !cur.includes(c))];
+  const box = document.createElement('form'); box.className = 'panel'; box.style.cssText = 'display:flex;flex-direction:column;gap:12px;max-width:640px;margin-top:16px';
+  body.appendChild(box);
+  const draw = () => {
+    box.innerHTML = `<h2 class="section-title" style="font-size:19px;margin:0">${esc(t('set.catOrder'))}</h2>
+      <p class="muted" style="margin:0">${esc(t('set.catOrderHelp'))}</p>
+      <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">${order.map((c, i) => `<li style="display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line,#d8ddd2);border-radius:10px">
+        <b style="width:26px;color:var(--muted,#667)">${i + 1}</b><span style="flex:1">${esc(t('cat.' + c))}</span>
+        <button type="button" class="btn btn-ghost btn-sm" data-up="${i}" ${i ? '' : 'disabled'} aria-label="↑">↑</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-top="${i}" ${i ? '' : 'disabled'}>⇈</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-down="${i}" ${i < order.length - 1 ? '' : 'disabled'} aria-label="↓">↓</button></li>`).join('')}</ol>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-buy" type="submit">${esc(t('acc.save'))}</button><button type="button" class="btn btn-ghost" data-reset>${esc(t('set.catReset'))}</button></div>`;
+    const mv = (i, j) => { const x = order.splice(i, 1)[0]; order.splice(j, 0, x); draw(); };
+    $$('[data-up]', box).forEach(b => b.onclick = () => mv(+b.dataset.up, +b.dataset.up - 1));
+    $$('[data-down]', box).forEach(b => b.onclick = () => mv(+b.dataset.down, +b.dataset.down + 1));
+    $$('[data-top]', box).forEach(b => b.onclick = () => mv(+b.dataset.top, 0));
+    $('[data-reset]', box).onclick = () => { order = [...CATS]; draw(); };
+  };
+  draw();
+  box.onsubmit = async e => {
+    e.preventDefault();
+    try { await api.saveSetting('home_cats', { order }); try { localStorage.removeItem('librava:catorder'); } catch { } toast(t('acc.saved')); } catch (x) { toast(errText(x), { error: true }); }
+  };
   $('#set-form', body).onsubmit = async e => {
     e.preventDefault();
     const v = {}; for (const k of ['company', 'address', 'country', 'vat', 'email']) v[k] = $('#c-' + k, body).value.trim();
