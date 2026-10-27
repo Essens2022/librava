@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261027214235';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027214235';
-import { esc, store, $, $$ } from './util.js?v=20261027214235';
+import { CONFIG } from './config.js?v=20261027215610';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261027215610';
+import { esc, store, $, $$ } from './util.js?v=20261027215610';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261027214235';
-import { suggest, highlight } from './search.js?v=20261027214235';
-import { track, trackPage } from './track.js?v=20261027214235';
-import { initGA, stopGA } from './ga.js?v=20261027214235';
-import { api } from './api.js?v=20261027214235';
-import { describeOffer, offersForBook } from './offers.js?v=20261027214235';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261027215610';
+import { suggest, highlight } from './search.js?v=20261027215610';
+import { track, trackPage } from './track.js?v=20261027215610';
+import { initGA, stopGA } from './ga.js?v=20261027215610';
+import { api } from './api.js?v=20261027215610';
+import { describeOffer, offersForBook } from './offers.js?v=20261027215610';
 
 // ---------------- icons ----------------
 const P = {
@@ -740,7 +740,8 @@ export function mountPromos(root) {
     };
     slides.forEach(sl => { sl.dataset.tr = sl.querySelector('[data-tr]')?.dataset.tr || 'fade'; });
     // each banner stays as many seconds as it says (default 7), then the next one comes in with its own style
-    const play = () => { clearTimeout(timer); if (reduce || paused) return; const sec = +slides[i].querySelector('[data-sec]')?.dataset.sec || 7;
+    // with "reduce motion" the banners still change by themselves (just without the sliding effect): the offers must be seen
+    const play = () => { clearTimeout(timer); if (paused) return; const sec = +slides[i].querySelector('[data-sec]')?.dataset.sec || 7;
       timer = setTimeout(() => { if (!c.isConnected) return; if (!document.hidden) go(i + 1); play(); }, sec * 1000); };
     c.querySelector('.prev').onclick = () => { go(i - 1); play(); };
     c.querySelector('.next').onclick = () => { go(i + 1); play(); };
