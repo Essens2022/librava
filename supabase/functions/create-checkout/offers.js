@@ -89,22 +89,25 @@ export function applyOffers(items, offers, ctx = {}) {
     const co = run.find(o => o.kind === 'coupon' && String(o.config?.code || '').toUpperCase() === String(ctx.coupon).trim().toUpperCase());
     couponState = !co ? 'invalid' : applied.some(a => a.id === co.id) ? 'ok' : (offerSaving(co, paid, ctx).reason || 'notBest');
   }
-  return { subtotal, total, discount, applied, final: price, couponState, nudges: ctx.noNudge ? [] : nudges(paid, run, offers, ctx, discount) };
+  return { subtotal, total, discount, applied, final: price, couponState, nudges: ctx.noNudge ? [] : nudges(paid, run, offers, ctx, discount, applied) };
 }
 
 // "add 1 more book to get -15%": like Amazon, only ONE automatic offer applies (the best one for the customer),
 // so a hint is shown only if it is really what the customer will get. Each hint is checked by adding the books it
 // asks for (priced like the cheapest eligible book in the cart) and running the same calculation: if another offer
 // would win instead, or the customer would not save more, the hint is dropped. Only the best hint is shown.
-function nudges(paid, run, offers, ctx, discountNow) {
+function nudges(paid, run, offers, ctx, discountNow, applied = []) {
   const out = [];
+  // a customer who already has an offer at least as generous (same kind) is never pushed towards a "lower" step
+  const have = k => Math.max(0, ...applied.filter(a => a.kind === k).map(a => k === 'qty' ? +(a.detail?.percent || 0) : +(a.offer?.config?.percent ?? 100)));
   for (const o of run) {
     const c = o.config || {};
+    if (o.kind === 'bxgy' && have('bxgy') >= (c.percent ?? 100)) continue;
     let n0 = null;
     if (o.kind === 'qty') {
       const n = paid.filter(i => inCat(i, c.category) && (!c.book_ids?.length || c.book_ids.includes(i.id))).length;
       const next = (c.tiers || []).filter(t => +t.min > n).sort((a, b) => a.min - b.min)[0];
-      if (next && +next.min - n <= 2) n0 = { id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null };
+      if (next && +next.percent > have('qty') && +next.min - n <= 2) n0 = { id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null };
     } else if (o.kind === 'bxgy') {
       const n = paid.filter(i => inCat(i, c.category)).length, size = (+c.buy || 2) + (+c.get || 1);
       const more = size - (n % size);
