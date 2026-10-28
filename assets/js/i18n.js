@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261028115132';
-import { CONFIG } from './config.js?v=20261028115132';
-import { store } from './util.js?v=20261028115132';
+import { localize, loadRates } from './localprice.js?v=20261028130600';
+import { CONFIG } from './config.js?v=20261028130600';
+import { store } from './util.js?v=20261028130600';
 
 const D = {
   ro: {
@@ -549,6 +549,8 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    "rev.loginToWrite": "Conectează-te în cont ca să scrii o recenzie.",
+    "rev.unverifiedNote": "Recenzia ta va apărea fără eticheta „Cumpărare verificată”, pentru că nu ai cumpărat încă această carte.",
     'sp.title': 'Previzualizare gratuită (pagini)',
     'sp.help': 'Câte pagini poate citi gratuit un vizitator înainte să cumpere. Pui un număr pentru toate cărțile PDF și altul pentru toate cărțile EPUB, iar mostrele se refac pentru toate.',
     'sp.pdf': 'PDF: pagini de mostră',
@@ -1921,6 +1923,8 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    "rev.loginToWrite": "Accedi al tuo account per scrivere una recensione.",
+    "rev.unverifiedNote": "La tua recensione apparirà senza l’etichetta «Acquisto verificato», perché non hai ancora acquistato questo libro.",
     'sp.title': 'Anteprima gratuita (pagine)',
     'sp.help': 'Quante pagine può leggere gratis un visitatore prima di acquistare. Un numero per tutti i PDF e uno per tutti gli EPUB: le anteprime vengono rifatte per tutti i libri.',
     'sp.pdf': 'PDF: pagine di anteprima',
@@ -3293,6 +3297,8 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    "rev.loginToWrite": "Sign in to write a review.",
+    "rev.unverifiedNote": "Your review will appear without the “Verified purchase” label, because you have not bought this book yet.",
     'sp.title': 'Free preview (pages)',
     'sp.help': 'How many pages a visitor can read for free before buying. One number for every PDF and one for every EPUB; the samples are rebuilt for all books.',
     'sp.pdf': 'PDF: sample pages',
@@ -4156,7 +4162,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261028115132`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261028130600`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

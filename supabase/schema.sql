@@ -439,3 +439,6 @@ begin
 end $$;
 revoke all on function public.admin_set_order(uuid, text) from public, anon;
 grant execute on function public.admin_set_order(uuid, text) to authenticated;
+
+-- migration reviews_any_member (applied): any signed-in member can review; reviews.verified is set by triggers from purchases
+-- (reviews_set_verified before insert/update, purchase_verifies_review after a purchase); insert policy no longer requires a purchase

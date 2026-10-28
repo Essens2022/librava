@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261028115132';
-import { applyOffers, offerRunning } from './offers.js?v=20261028115132';
-import { scoreBook } from './search.js?v=20261028115132';
-import { getLang } from './i18n.js?v=20261028115132';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261028115132';
+import { CONFIG } from './config.js?v=20261028130600';
+import { applyOffers, offerRunning } from './offers.js?v=20261028130600';
+import { scoreBook } from './search.js?v=20261028130600';
+import { getLang } from './i18n.js?v=20261028130600';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261028130600';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261028115132')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261028130600')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -277,9 +277,9 @@ class DemoAPI {
   }
   async listReviews(bookId) { return this._allReviews().filter(r => r.book_id === bookId).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))); }
   async addReview(bookId, rating, body) {
-    if (!await this.owns(bookId)) throw new Error('rev.onlyOwners');
+    const own = !!await this.owns(bookId);
     const all = store.get('demo:reviews', []).filter(r => !(r.book_id === bookId && r.user_id === this._user.id));
-    all.push({ id: uid('r_'), book_id: bookId, user_id: this._user.id, rating, body, author_name: this._user.name, created_at: new Date().toISOString(), verified: true });
+    all.push({ id: uid('r_'), book_id: bookId, user_id: this._user.id, rating, body, author_name: this._user.name, created_at: new Date().toISOString(), verified: own });
     store.set('demo:reviews', all);
     await this._loadCatalog();
   }
@@ -704,7 +704,7 @@ class SupabaseAPI {
   // ---- reviews ----
   async listReviews(bookId) {
     const { data, error } = await this.sb.from('reviews').select('*').eq('book_id', bookId).order('created_at', { ascending: false });
-    this._err(error); return data.map(r => ({ ...r, verified: r.imported ? !!r.verified : true }));
+    this._err(error); return data.map(r => ({ ...r, verified: !!r.verified }));
   }
   async addReview(bookId, rating, body) {
     const { error } = await this.sb.from('reviews').upsert({ book_id: bookId, user_id: this._user.id, rating, body, author_name: this._user.name }, { onConflict: 'user_id,book_id' });

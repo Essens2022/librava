@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028115132';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028115132';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028115132';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028115132';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028115132';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028115132';
-import { track } from './track.js?v=20261028115132';
-import { gaEvent } from './ga.js?v=20261028115132';
-import { guessLang } from './langdetect.js?v=20261028115132';
-import { didYouMean } from './search.js?v=20261028115132';
-import { api, editionsOf } from './api.js?v=20261028115132';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028115132';
+import { CONFIG } from './config.js?v=20261028130600';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028130600';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028130600';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028130600';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028130600';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028130600';
+import { track } from './track.js?v=20261028130600';
+import { gaEvent } from './ga.js?v=20261028130600';
+import { guessLang } from './langdetect.js?v=20261028130600';
+import { didYouMean } from './search.js?v=20261028130600';
+import { api, editionsOf } from './api.js?v=20261028130600';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028130600';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -299,16 +299,17 @@ export async function viewBook(el, id) {
         <div class="histo">${counts.map((c, i) => `<div class="histo-row"><span>${5 - i} ★</span><div class="histo-bar"><i style="width:${reviews.length ? Math.round(c / reviews.length * 100) : 0}%"></i></div><span class="muted">${reviews.length ? Math.round(c / reviews.length * 100) : 0}%</span></div>`).join('')}</div>` : ''}
         <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
         <h3 style="font-size:16px;margin-bottom:8px">${esc(t(myRev ? 'rev.yours' : 'rev.write'))}</h3>
-        ${owned && myRev ? `<div id="my-rev" class="review" style="border:0;padding:0">
+        ${api.user() && myRev ? `<div id="my-rev" class="review" style="border:0;padding:0">
             <div class="rating-line">${stars(myRev.rating)} <span class="muted">${esc(fmtDate(myRev.updated_at || myRev.created_at))}</span></div>
             ${myRev.body ? `<p style="margin:6px 0 0;white-space:pre-line">${esc(myRev.body)}</p>` : ''}
             <button class="btn btn-sm" type="button" id="rev-edit" style="margin-top:10px">${esc(t('rev.edit'))}</button></div>` : ''}
-        ${owned ? `<form id="rev-form" style="display:flex;flex-direction:column;gap:10px" ${myRev ? 'hidden' : ''}>
+        ${api.user() ? `<form id="rev-form" style="display:flex;flex-direction:column;gap:10px" ${myRev ? 'hidden' : ''}>
             <div><span style="font-size:14px;font-weight:600">${esc(t('rev.yourRating'))}</span>
             <div class="star-input" id="star-input">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-v="${n}" aria-label="${n}"><svg viewBox="0 0 24 24" fill="currentColor">${starPath}</svg></button>`).join('')}</div></div>
             <label class="field"><span class="sr">${esc(t('rev.yourText'))}</span><textarea id="rev-text" placeholder="${esc(t('rev.yourText'))}" maxlength="2000" style="min-height:90px"></textarea></label>
             <button class="btn btn-dark" type="submit">${esc(t('rev.submit'))}</button>
-          </form>` : `<p class="muted" style="font-size:14px">${esc(t('rev.onlyOwners'))}</p>`}
+            ${owned ? '' : `<small class="muted">${esc(t('rev.unverifiedNote'))}</small>`}
+          </form>` : `<p class="muted" style="font-size:14px;margin:0 0 10px">${esc(t('rev.loginToWrite'))}</p><a class="btn btn-dark" href="#/account" id="rev-login">${esc(t('acc.signIn'))}</a>`}
       </div>
       <div>
         ${reviews.length ? reviews.map((r, i) => `<div class="review" data-rid="${esc(r.id)}"${i >= 10 ? ' hidden data-more-rev' : ''}>
@@ -360,6 +361,7 @@ export async function viewBook(el, id) {
     try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
   });
 
+  $('#rev-login', el)?.addEventListener('click', () => sessionStorage.setItem('librava:after', location.hash.slice(1) || currentPath()));
   // like / dislike on the reviews of other people (one vote each, can be changed or taken back)
   (async () => {
     const votes = await api.reviewVotes(reviews.map(r => r.id)), uid = api.user()?.id;
