@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028144250';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028144250';
-import { esc, store, $, $$ } from './util.js?v=20261028144250';
+import { CONFIG } from './config.js?v=20261028144822';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028144822';
+import { esc, store, $, $$ } from './util.js?v=20261028144822';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028144250';
-import { suggest, highlight } from './search.js?v=20261028144250';
-import { track, trackPage } from './track.js?v=20261028144250';
-import { initGA, stopGA } from './ga.js?v=20261028144250';
-import { api } from './api.js?v=20261028144250';
-import { describeOffer, offersForBook } from './offers.js?v=20261028144250';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028144822';
+import { suggest, highlight } from './search.js?v=20261028144822';
+import { track, trackPage } from './track.js?v=20261028144822';
+import { initGA, stopGA } from './ga.js?v=20261028144822';
+import { api } from './api.js?v=20261028144822';
+import { describeOffer, offersForBook } from './offers.js?v=20261028144822';
 
 // ---------------- icons ----------------
 const P = {
@@ -332,8 +332,15 @@ export function ratingHTML(b) {
   if (!b.rating_count) return '';
   return `<div class="rating-line">${stars(b.rating_avg)} <span class="muted">${b.rating_count}</span></div>`;
 }
-const qaIcon = k => `<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>${k === 'in' ? '<path d="M10.3 9.6l2 2 3.6-4"/>' : '<path d="M13.2 6v5.4M10.5 8.7h5.4"/>'}</svg>`;
-const quickAdd = b => `<button type="button" class="quick-add ${cart.has(b.id) ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t('book.addToCart'))}" title="${esc(t('book.addToCart'))}">${qaIcon(cart.has(b.id) ? 'in' : 'add')}</button>`;
+// books the signed-in customer owns, remembered on the device so the covers are right from the very first paint
+const OWN_KEY = 'librava:owned';
+const ownCache = () => { try { const o = JSON.parse(localStorage.getItem(OWN_KEY) || 'null'); const uid = api.user?.()?.id; return o && uid && o.uid === uid ? new Set(o.ids) : new Set(); } catch { return new Set(); } };
+const ownSave = (uid, set) => { try { localStorage.setItem(OWN_KEY, JSON.stringify({ uid, ids: [...set] })); } catch { } };
+const qaIcon = k => `<svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>${k === 'in' ? '<path d="M10.3 9.6l2 2 3.6-4"/>' : '<path d="M13.2 6v5.4M10.5 8.7h5.4"/>'}</svg>`;
+const quickAdd = b => {
+  const own = ownCache().has(b.id), inC = !own && cart.has(b.id);
+  return `<button type="button" class="quick-add ${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}</button>`;
+};
 // "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
 export function fullTitle(b) {
   const tt = String(b.title || '').trim(), st = String(b.subtitle || '').trim();
@@ -895,13 +902,16 @@ new MutationObserver(() => { if (document.querySelector('.promo-books .promo-she
     busy = true;
     try {
       const uid = api.user?.()?.id || '-';
+      const set = ownCache(); let changed = false;
       const btns = [...document.querySelectorAll('.quick-add')].filter(b => b.dataset.ownChk !== uid);
       for (const b of btns) {
         b.dataset.ownChk = uid;
         const own = uid !== '-' && await api.owns(b.dataset.quickAdd).catch(() => null);
+        if (uid !== '-') { const id = b.dataset.quickAdd; if (own && !set.has(id)) { set.add(id); changed = true; } else if (!own && set.has(id)) { set.delete(id); changed = true; } }
         b.classList.toggle('owned', !!own);
         if (own) { b.classList.remove('in'); b.textContent = '✓'; b.title = b.ariaLabel = t('cart.owned'); }
       }
+      if (changed && uid !== '-') ownSave(uid, set);
     } finally { busy = false; if (again) { again = false; mark(); } }
   };
   let q = false;

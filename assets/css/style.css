@@ -877,13 +877,13 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .lid-row input { max-width: 220px; font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .06em; }
 /* “+” quick add on book covers, like Amazon */
 .cover-wrap { position: relative; }
-.quick-add { position: absolute; right: 6px; bottom: 6px; width: 34px; height: 34px; border-radius: 50%; border: 0; display: grid; place-items: center;
+.quick-add { position: absolute; right: 6px; bottom: 6px; width: 42px; height: 42px; border-radius: 50%; border: 0; display: grid; place-items: center;
   background: var(--cart-btn); color: #15240f; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.28); z-index: 2; transition: transform .12s, background .15s; }
 .quick-add:hover { background: var(--cart-btn-hover); transform: scale(1.08); }
 .quick-add.in { background: var(--pista-strong); color: #fff; font-size: 17px; }
 .quick-add.pop { animation: qa-pop .35s ease; }
 @keyframes qa-pop { 50% { transform: scale(1.25); } }
-@media (pointer: coarse) { .quick-add { width: 38px; height: 38px; } }
+@media (pointer: coarse) { .quick-add { width: 44px; height: 44px; } }
 .share-btn { margin-top: 8px; }
 .img-opt { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 12px; border-radius: 10px; background: var(--pista-soft); font-size: 14px; }
 .img-opt .ico { width: 18px; height: 18px; vertical-align: -4px; }
@@ -1976,7 +1976,7 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .bp-opt { display: block; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 14.5px; cursor: pointer; }
 .bp-opt:hover, .bp-opt.on { background: var(--bg-soft, #eef3e6); }
 .bp-none { padding: 10px 12px; color: var(--muted, #667); font-size: 14px; }
-.quick-add.owned { background: var(--pista-strong); color: #fff; font-size: 19px; box-shadow: 0 2px 8px rgba(0,0,0,.28); cursor: default; }
+.quick-add.owned { background: var(--pista-strong); color: #fff; font-size: 24px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,.28); cursor: default; }
 .quick-add.owned:hover { background: var(--pista-strong); transform: none; }
 .quick-add svg { display: block; }
 
