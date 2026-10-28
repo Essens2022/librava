@@ -1993,5 +1993,5 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes nudge-go { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 @media (prefers-reduced-motion: reduce) { .nudge, .nudge::after, .nudge b { animation: none; } }
 
-.nudge { font-size: 19px; font-weight: 800; line-height: 1.25; }
-.nudge .nudge-hot { font-style: normal; font-weight: 900; font-size: 1.12em; }
+.nudge { font-size: 21px; font-weight: 900; line-height: 1.22; -webkit-text-stroke: .7px #fff; }
+.nudge .nudge-hot { font-style: normal; font-weight: 900; font-size: 1.12em; -webkit-text-stroke: .9px #fff; }
