@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028141857';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028141857';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028141857';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028141857';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028141857';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028141857';
-import { track } from './track.js?v=20261028141857';
-import { gaEvent } from './ga.js?v=20261028141857';
-import { guessLang } from './langdetect.js?v=20261028141857';
-import { didYouMean } from './search.js?v=20261028141857';
-import { api, editionsOf } from './api.js?v=20261028141857';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028141857';
+import { CONFIG } from './config.js?v=20261028142325';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028142325';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028142325';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028142325';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028142325';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028142325';
+import { track } from './track.js?v=20261028142325';
+import { gaEvent } from './ga.js?v=20261028142325';
+import { guessLang } from './langdetect.js?v=20261028142325';
+import { didYouMean } from './search.js?v=20261028142325';
+import { api, editionsOf } from './api.js?v=20261028142325';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028142325';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -740,7 +740,7 @@ export async function viewCart(el) {
   const line = b => { const f = r.final[b.id]; return f != null && f < b.price_cents ? `<span class="price">${f ? money(f) : esc(t('book.free'))}</span><span class="price-old">${money(b.price_cents)}</span>` : priceHTML(b); };
   const nudge = n => {
     const where = n.category ? '#/search?cat=' + n.category : '#/search?sort=bestsellers';
-    const txt = n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
+    const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     return `<a class="nudge" href="${where}">${icon('tag')} <span>${esc(txt)}${n.category ? ' · ' + esc(t('cat.' + n.category)) : ''}</span> <b>→</b></a>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
