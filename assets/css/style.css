@@ -2018,3 +2018,8 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .cart-count { font-size: 20px; font-weight: 900; top: -6px; left: 17px; min-width: 22px; }
 .cart-sum .sum-rows > div:first-child { font-size: 20px; font-weight: 800; }
 .cart-sum .sum-rows > div:first-child span:last-child { font-weight: 800; }
+
+/* lighter to paint while scrolling */
+.quick-add, .quick-add.owned { box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: none; }
+.quick-add.pop { animation: qa-pop .25s ease; }
+img { image-rendering: auto; }
