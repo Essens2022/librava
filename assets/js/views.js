@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028133756';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028133756';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028133756';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028133756';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028133756';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028133756';
-import { track } from './track.js?v=20261028133756';
-import { gaEvent } from './ga.js?v=20261028133756';
-import { guessLang } from './langdetect.js?v=20261028133756';
-import { didYouMean } from './search.js?v=20261028133756';
-import { api, editionsOf } from './api.js?v=20261028133756';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028133756';
+import { CONFIG } from './config.js?v=20261028134158';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028134158';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028134158';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028134158';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028134158';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028134158';
+import { track } from './track.js?v=20261028134158';
+import { gaEvent } from './ga.js?v=20261028134158';
+import { guessLang } from './langdetect.js?v=20261028134158';
+import { didYouMean } from './search.js?v=20261028134158';
+import { api, editionsOf } from './api.js?v=20261028134158';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028134158';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -348,18 +348,22 @@ export async function viewBook(el, id) {
     } catch (e) { if (e?.name !== 'AbortError') { try { await navigator.clipboard.writeText(url); toast(t('book.linkCopied')); } catch { prompt('', url); } } }
   });
   const jump = $('[data-jump]', el);
-  // the images of the page (A+ content, covers) finish loading while the page scrolls and push the reviews down:
-  // so jump to the reviews, then correct the position for a moment, until the visitor scrolls by hand
-  if (jump) jump.onclick = e => {
+  // smooth scroll down to the reviews. The images above them (A+ content) are loaded first, otherwise they grow
+  // while the page scrolls and the reviews end up lower than where the scroll stopped
+  if (jump) jump.onclick = async e => {
     e.preventDefault();
-    const target = () => { const r = $('#reviews', el); return r ? Math.max(0, r.getBoundingClientRect().top + window.scrollY - (document.querySelector('#hdr')?.offsetHeight || 0) - 8) : null; };
-    $$('img[loading=lazy]', el).forEach(i => { i.loading = 'eager'; });
-    let stop = false; const halt = () => { stop = true; };
-    ['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, halt, { once: true, passive: true }));
-    const fix = () => { if (stop) return; const y = target(); if (y != null && Math.abs(window.scrollY - y) > 4) window.scrollTo(0, y); };
-    fix();
-    [150, 400, 800, 1400, 2200].forEach(ms => setTimeout(fix, ms));
+    const rev = $('#reviews', el); if (!rev) return;
+    const target = () => Math.max(0, rev.getBoundingClientRect().top + window.scrollY - (document.querySelector('#hdr')?.offsetHeight || 0) - 8);
+    const above = $$('img', el).filter(i => i.compareDocumentPosition(rev) & Node.DOCUMENT_POSITION_FOLLOWING);
+    above.forEach(i => { if (i.loading === 'lazy') i.loading = 'eager'; });
+    await Promise.race([
+      Promise.all(above.filter(i => !i.complete).map(i => new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); }))),
+      new Promise(r => setTimeout(r, 1500))]);
+    window.scrollTo({ top: target(), behavior: 'smooth' });
+    // if something still moved while scrolling, one more gentle correction
+    setTimeout(() => { if (Math.abs(window.scrollY - target()) > 6) window.scrollTo({ top: target(), behavior: 'smooth' }); }, 1100);
   };
+
 
   $('[data-preview]', el)?.addEventListener('click', () => track('sample', { book_id: b.id }));
   $('[data-preview]', el)?.addEventListener('click', () => go('/read/' + encodeURIComponent(b.id) + '?preview=1'));
