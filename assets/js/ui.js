@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028152723';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028152723';
-import { esc, store, $, $$ } from './util.js?v=20261028152723';
+import { CONFIG } from './config.js?v=20261028170942';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028170942';
+import { esc, store, $, $$ } from './util.js?v=20261028170942';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028152723';
-import { suggest, highlight } from './search.js?v=20261028152723';
-import { track, trackPage } from './track.js?v=20261028152723';
-import { initGA, stopGA } from './ga.js?v=20261028152723';
-import { api } from './api.js?v=20261028152723';
-import { describeOffer, offersForBook } from './offers.js?v=20261028152723';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028170942';
+import { suggest, highlight } from './search.js?v=20261028170942';
+import { track, trackPage } from './track.js?v=20261028170942';
+import { initGA, stopGA } from './ga.js?v=20261028170942';
+import { api } from './api.js?v=20261028170942';
+import { describeOffer, offersForBook } from './offers.js?v=20261028170942';
 
 // ---------------- icons ----------------
 const P = {
@@ -626,14 +626,14 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
   const many = bs.length > 1 ? `<div class="ntf-books">${bs.map(b => `<a href="#/book/${encodeURIComponent(b.id)}" data-close title="${esc(b.title)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : `<span class="ph">${esc(b.title)}</span>`}<span class="ntf-price">${priceOf(b)}</span></a>`).join('')}</div>` : '';
   if (n.kind === 'gift' && bs.length === 1) {
     const b = bs[0];
-    return `<article class="ntf2 ntf-gift ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${GIFT_SVG}</span><div class="ntf-main">
+    return `<article class="ntf2 ntf-gift ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${GIFT_SVG}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand">${logoHTML()}</span><small class="muted">${esc(ago(n.created_at))}</small></div>
     <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${esc(t('ntf.giftBody'))}</p>
     <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
       <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
       <a class="btn btn-buy btn-sm" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div></div></div></article>`;
   }
-  return `<article class="ntf2 ${n.unread ? 'unread' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
+  return `<article class="ntf2 ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
     <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${esc(n.body)}</p>` : ''}${one}${many}
     ${link && bs.length !== 1 ? `<a class="ntf-more" href="${esc(link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div></article>`;
@@ -646,8 +646,11 @@ export async function openBell() {
   store.set('notif:read', [...new Set([...store.get('notif:read', []), ...list.map(n => n.id)])].slice(-300));
   refreshBell();
   modal(`<div class="ntf-head"><h2 style="margin:0">${esc(t('ntf.title'))}</h2><button class="btn btn-ghost btn-sm" data-close>✕</button></div>
-    ${list.length ? `<div class="ntf-list">${list.map(n => ntfCardHTML({ ...n, unread: !read.has(n.id) }, (n.book_ids || []).map(id => books[id]))).join('')}</div>`
-      : `<div class="ntf-empty">${icon('bell')}<p class="muted">${esc(t('ntf.empty'))}</p></div>`}`, { onMount: m => m.classList.add('ntf-modal') });
+    ${list.length ? `<div class="ntf-list">${list.map(n => ntfCardHTML({ ...n, unread: !read.has(n.id), old: Date.now() - new Date(n.created_at) > 3 * 3600e3 }, (n.book_ids || []).map(id => books[id]))).join('')}</div>`
+      : `<div class="ntf-empty">${icon('bell')}<p class="muted">${esc(t('ntf.empty'))}</p></div>`}`, { onMount: m => { m.classList.add('ntf-modal');
+      // notifications older than 3 hours are folded (icon, title, date); a tap opens or folds them
+      m.addEventListener('click', e => { const c = e.target.closest('.ntf2.old'); if (c && !e.target.closest('a,button')) c.classList.toggle('open'); });
+    } });
 }
 
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)

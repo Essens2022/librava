@@ -2023,3 +2023,14 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .quick-add, .quick-add.owned { box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: none; }
 .quick-add.pop { animation: qa-pop .25s ease; }
 img { image-rendering: auto; }
+
+/* old notifications (over 3 hours) are folded to icon + title + date; a tap opens them */
+.ntf2.old { cursor: pointer; }
+.ntf2.old:not(.open) { align-items: center; padding: 10px 14px; background: var(--surface-2); }
+.ntf2.old:not(.open) .ntf-main { flex-direction: row; align-items: center; gap: 10px; }
+.ntf2.old:not(.open) .ntf-top { order: 2; margin-left: auto; flex: none; }
+.ntf2.old:not(.open) .ntf-brand { display: none; }
+.ntf2.old:not(.open) .ntf-title { order: 1; flex: 1; min-width: 0; margin: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntf2.old:not(.open) .ntf-main > :not(.ntf-top):not(.ntf-title) { display: none; }
+.ntf2.old:not(.open) .ntf-top::after { content: '▾'; margin-left: 8px; color: var(--muted); }
+.ntf2.old.open .ntf-top::after { content: '▴'; margin-left: 8px; color: var(--muted); }
