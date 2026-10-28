@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028151708';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028151708';
-import { esc, store, $, $$ } from './util.js?v=20261028151708';
+import { CONFIG } from './config.js?v=20261028152046';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028152046';
+import { esc, store, $, $$ } from './util.js?v=20261028152046';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028151708';
-import { suggest, highlight } from './search.js?v=20261028151708';
-import { track, trackPage } from './track.js?v=20261028151708';
-import { initGA, stopGA } from './ga.js?v=20261028151708';
-import { api } from './api.js?v=20261028151708';
-import { describeOffer, offersForBook } from './offers.js?v=20261028151708';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028152046';
+import { suggest, highlight } from './search.js?v=20261028152046';
+import { track, trackPage } from './track.js?v=20261028152046';
+import { initGA, stopGA } from './ga.js?v=20261028152046';
+import { api } from './api.js?v=20261028152046';
+import { describeOffer, offersForBook } from './offers.js?v=20261028152046';
 
 // ---------------- icons ----------------
 const P = {
@@ -334,7 +334,8 @@ export function ratingHTML(b) {
 }
 // books the signed-in customer owns, remembered on the device so the covers are right from the very first paint
 const OWN_KEY = 'librava:owned';
-const ownCache = () => { try { const o = JSON.parse(localStorage.getItem(OWN_KEY) || 'null'); const uid = api.user?.()?.id; return o && uid && o.uid === uid ? new Set(o.ids) : new Set(); } catch { return new Set(); } };
+let _ownRaw = null, _ownSet = new Set();
+const ownCache = () => { try { const raw = localStorage.getItem(OWN_KEY) || ''; const uid = api.user?.()?.id; if (raw !== _ownRaw || !uid) { _ownRaw = raw; const o = raw ? JSON.parse(raw) : null; _ownSet = o && uid && o.uid === uid ? new Set(o.ids) : new Set(); } return _ownSet; } catch { return new Set(); } };
 const ownSave = (uid, set) => { try { localStorage.setItem(OWN_KEY, JSON.stringify({ uid, ids: [...set] })); } catch { } };
 const qaIcon = k => `<svg viewBox="1.5 2.4 20 20" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>${k === 'in' ? '<path d="M10.3 9.6l2 2 3.6-4"/>' : '<path d="M13.2 6v5.4M10.5 8.7h5.4"/>'}</svg>`;
 const quickAdd = b => {
@@ -915,5 +916,5 @@ new MutationObserver(() => { if (document.querySelector('.promo-books .promo-she
     } finally { busy = false; if (again) { again = false; mark(); } }
   };
   let q = false;
-  new MutationObserver(() => { if (q) return; q = true; setTimeout(() => { q = false; mark(); }, 150); }).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(ms => { if (q) return; if (!ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches?.('.quick-add') || n.querySelector?.('.quick-add'))))) return; q = true; setTimeout(() => { q = false; mark(); }, 150); }).observe(document.body, { childList: true, subtree: true });
 }
