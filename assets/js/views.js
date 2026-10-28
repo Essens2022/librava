@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028134529';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028134529';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028134529';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028134529';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028134529';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028134529';
-import { track } from './track.js?v=20261028134529';
-import { gaEvent } from './ga.js?v=20261028134529';
-import { guessLang } from './langdetect.js?v=20261028134529';
-import { didYouMean } from './search.js?v=20261028134529';
-import { api, editionsOf } from './api.js?v=20261028134529';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028134529';
+import { CONFIG } from './config.js?v=20261028135143';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028135143';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028135143';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028135143';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028135143';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028135143';
+import { track } from './track.js?v=20261028135143';
+import { gaEvent } from './ga.js?v=20261028135143';
+import { guessLang } from './langdetect.js?v=20261028135143';
+import { didYouMean } from './search.js?v=20261028135143';
+import { api, editionsOf } from './api.js?v=20261028135143';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028135143';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -362,8 +362,8 @@ export async function viewBook(el, id) {
     // our own gentle, slow scroll (the phone's built-in smooth scroll is too fast on long pages); stops if the visitor touches the page
     const from = window.scrollY, dist = target() - from;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(dist) < 40) { window.scrollTo(0, target()); return; }
-    const dur = Math.min(2600, Math.max(1100, Math.abs(dist) * 0.45));
-    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const dur = Math.min(1100, Math.max(650, Math.abs(dist) * 0.22));
+    const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
     let stop = false; const halt = () => { stop = true; };
     ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, halt, { once: true, passive: true }));
     const t0 = performance.now();
