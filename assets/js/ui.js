@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028144044';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028144044';
-import { esc, store, $, $$ } from './util.js?v=20261028144044';
+import { CONFIG } from './config.js?v=20261028144250';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028144250';
+import { esc, store, $, $$ } from './util.js?v=20261028144250';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028144044';
-import { suggest, highlight } from './search.js?v=20261028144044';
-import { track, trackPage } from './track.js?v=20261028144044';
-import { initGA, stopGA } from './ga.js?v=20261028144044';
-import { api } from './api.js?v=20261028144044';
-import { describeOffer, offersForBook } from './offers.js?v=20261028144044';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028144250';
+import { suggest, highlight } from './search.js?v=20261028144250';
+import { track, trackPage } from './track.js?v=20261028144250';
+import { initGA, stopGA } from './ga.js?v=20261028144250';
+import { api } from './api.js?v=20261028144250';
+import { describeOffer, offersForBook } from './offers.js?v=20261028144250';
 
 // ---------------- icons ----------------
 const P = {
@@ -332,7 +332,8 @@ export function ratingHTML(b) {
   if (!b.rating_count) return '';
   return `<div class="rating-line">${stars(b.rating_avg)} <span class="muted">${b.rating_count}</span></div>`;
 }
-const quickAdd = b => `<button type="button" class="quick-add ${cart.has(b.id) ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t('book.addToCart'))}" title="${esc(t('book.addToCart'))}">${cart.has(b.id) ? '✓' : '+'}</button>`;
+const qaIcon = k => `<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>${k === 'in' ? '<path d="M10.3 9.6l2 2 3.6-4"/>' : '<path d="M13.2 6v5.4M10.5 8.7h5.4"/>'}</svg>`;
+const quickAdd = b => `<button type="button" class="quick-add ${cart.has(b.id) ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t('book.addToCart'))}" title="${esc(t('book.addToCart'))}">${qaIcon(cart.has(b.id) ? 'in' : 'add')}</button>`;
 // "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
 export function fullTitle(b) {
   const tt = String(b.title || '').trim(), st = String(b.subtitle || '').trim();
@@ -510,7 +511,7 @@ export function bindGlobal() {
       if (await api.owns(id).catch(() => null)) { toast(t('cart.owned')); return; }
       if (cart.has(id)) { toast(t('book.inCart')); return; }
       cart.add(id); toast(t('cart.added'));
-      $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.textContent = '✓'; });
+      $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.innerHTML = qaIcon('in'); });
       return;
     }
   }, true);
