@@ -38,7 +38,9 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
     });
     const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return json({ error: 'lib.loginNeeded' }, 401);
+    // no account yet = "guest checkout": the buyer pays first, then creates the account on the success page
+    // (see guest-register); the order stays without user_id until then
+    const guest = !user;
 
     const body = await req.json().catch(() => ({}));
     const ids: string[] = Array.isArray(body.book_ids) ? body.book_ids.filter((x: unknown) => typeof x === 'string' && UUID.test(x)).slice(0, 50) : [];
@@ -51,7 +53,7 @@ Deno.serve(async (req) => {
       .select('id,title,author,price_cents,currency,category,categories')
       .in('id', ids).eq('status', 'published').is('deleted_at', null);
     if (error) throw error;
-    const { data: owned } = await admin.from('purchases').select('book_id').eq('user_id', user.id).in('book_id', ids);
+    const { data: owned } = guest ? { data: [] as { book_id: string }[] } : await admin.from('purchases').select('book_id').eq('user_id', user!.id).in('book_id', ids);
     const ownedSet = new Set((owned || []).map((p) => p.book_id));
     const toBuy = (books || []).filter((b) => b.price_cents > 0 && !ownedSet.has(b.id));
     if (!toBuy.length) return json({ error: 'cart.empty' }, 400);
@@ -61,12 +63,12 @@ Deno.serve(async (req) => {
     const code = typeof body.coupon === 'string' ? body.coupon.trim().toUpperCase().slice(0, 40) : '';
     const { data: offerRows } = await admin.from('offers').select('*').eq('active', true);
     const offers = (offerRows || []).filter((o) => o.kind !== 'coupon' || (code && String(o.config?.code || '').toUpperCase() === code));
-    const { count: paidOrders } = await admin.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'paid');
+    const { count: paidOrders } = guest ? { count: 0 } : await admin.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', user!.id).eq('status', 'paid');
     const calc = applyOffers(toBuy, offers, { coupon: code, hasOrders: (paidOrders || 0) > 0 });
     const amount = calc.total;
     const usedCoupon = calc.applied.find((a) => a.kind === 'coupon');
     const { data: order, error: oErr } = await admin.from('orders').insert({
-      user_id: user.id, email: user.email, method: 'card', currency, amount_cents: amount, waiver_at: new Date().toISOString(),
+      user_id: user?.id ?? null, email: user?.email ?? null, method: 'card', currency, amount_cents: amount, waiver_at: new Date().toISOString(),
       livemode: /^(sk|rk)_live_/.test(STRIPE),
       subtotal_cents: calc.subtotal, discount_cents: calc.discount, coupon_code: usedCoupon ? code : null,
       offers: calc.applied.map((a) => ({ id: a.id, kind: a.kind, name: a.name, saving: a.saving })),
@@ -75,7 +77,9 @@ Deno.serve(async (req) => {
     if (oErr) throw oErr;
     // everything is covered by the offers (e.g. a 100% coupon): add the books straight away, no card needed
     if (amount === 0) {
-      const rows = toBuy.map((b) => ({ user_id: user.id, book_id: b.id, order_id: order.id, price_cents: 0, currency, customer_email: user.email, test: !/^(sk|rk)_live_/.test(STRIPE) }));
+      // free orders are added to an account, so a guest has to sign in for that
+      if (guest) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); return json({ error: 'lib.loginNeeded' }, 401); }
+      const rows = toBuy.map((b) => ({ user_id: user!.id, book_id: b.id, order_id: order.id, price_cents: 0, currency, customer_email: user!.email, test: !/^(sk|rk)_live_/.test(STRIPE) }));
       const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
       if (pErr) throw pErr;
       await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', order.id);
@@ -86,10 +90,11 @@ Deno.serve(async (req) => {
     const base = SITE.endsWith('/') ? SITE : SITE + '/';
     const p = new URLSearchParams();
     p.set('mode', 'payment');
-    p.set('success_url', `${base}?paid=1#/library`);
+    // a guest comes back to the "create your account" page, with the Stripe session id in the address (never a secret on its own: it only works after payment)
+    p.set('success_url', guest ? `${base}?paid=1&sid={CHECKOUT_SESSION_ID}#/welcome` : `${base}?paid=1#/library`);
     p.set('cancel_url', `${base}#/cart`);
-    p.set('client_reference_id', user.id);
-    if (user.email) p.set('customer_email', user.email);
+    if (user) p.set('client_reference_id', user.id);
+    if (user?.email) p.set('customer_email', user.email);
     p.set('locale', 'auto');
     p.set('metadata[order_id]', order.id);
     p.set('metadata[reference]', order.reference);

@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261028040209';
-import { applyOffers, offerRunning } from './offers.js?v=20261028040209';
-import { scoreBook } from './search.js?v=20261028040209';
-import { getLang } from './i18n.js?v=20261028040209';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261028040209';
+import { CONFIG } from './config.js?v=20261028051922';
+import { applyOffers, offerRunning } from './offers.js?v=20261028051922';
+import { scoreBook } from './search.js?v=20261028051922';
+import { getLang } from './i18n.js?v=20261028051922';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261028051922';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261028040209')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261028051922')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -631,6 +631,11 @@ class SupabaseAPI {
   // ---- library ----
   async _loadLib() {
     if (!this._user) return [];
+    // paid "guest" orders made with this (verified) email join the account, once per sign-in
+    if (this._claimedFor !== this._user.id) {
+      this._claimedFor = this._user.id;
+      try { await this.sb.rpc('claim_guest_orders'); } catch { }
+    }
     const { data, error } = await this.sb.from('purchases').select('*, book:books(*), order:orders(reference)').eq('user_id', this._user.id).order('created_at', { ascending: false });
     this._err(error);
     this._lib = data.filter(p => p.book).map(p => ({ ...p, book: { ...p.book, cover_url: this._coverUrl(p.book) } }));
@@ -655,9 +660,10 @@ class SupabaseAPI {
   async checkout(bookIds, { coupon } = {}) {
     const books = (await Promise.all(bookIds.map(id => this.getBook(id)))).filter(Boolean);
     const free = books.filter(b => !b.price_cents);
-    for (const b of free) await this.claimFree(b.id);
+    // a visitor without an account can pay (the account is created right after); free books need an account
+    if (this._user) for (const b of free) await this.claimFree(b.id);
     const paid = books.filter(b => b.price_cents > 0).map(b => b.id);
-    if (!paid.length) return { mode: 'done' };
+    if (!paid.length) { if (!this._user) throw new Error('lib.loginNeeded'); return { mode: 'done' }; }
     const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, coupon: coupon || null, return_url: location.origin + location.pathname } });
     if (error) {
       let msg = error.message;
@@ -878,6 +884,17 @@ class SupabaseAPI {
     } catch (e) { console.warn('cleanup', e); }
   }
   // asks Stripe directly about card payments still waiting (backup of the webhook); returns the references now paid
+  // guest checkout: after paying without an account, the success page asks Stripe (through guest-register) and creates the account
+  async guestInfo(sid) {
+    const { data, error } = await this.sb.functions.invoke('guest-register', { body: { action: 'info', session_id: sid } });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch { } throw new Error(m); }
+    return data;
+  }
+  async guestRegister(sid, password) {
+    const { data, error } = await this.sb.functions.invoke('guest-register', { body: { action: 'register', session_id: sid, password, lang: getLang() } });
+    if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch { } throw new Error(m); }
+    return data;
+  }
   async confirmPayments() {
     if (!this._user) return { paid: [] };
     try { const { data } = await this.sb.functions.invoke('confirm-payment', { body: {} }); if (data?.paid?.length) this._lib = null; return data || { paid: [] }; }

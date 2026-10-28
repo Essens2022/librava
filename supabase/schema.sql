@@ -385,3 +385,57 @@ grant execute on function public.admin_set_prices(jsonb) to authenticated;
 -- track() also attaches the earlier steps of the same visit (last 6 hours) to a customer once they sign in (never for admins).
 -- promos.seconds (3-30, default 7) and promos.transition (fade|slide|zoom|flip): migration 'promo_motion'
 -- review_votes (like/dislike on reviews): table + functions review_vote_counts(uuid[]), vote_review(uuid,int); migration 'review_votes'
+
+-- migration guest_checkout (applied)
+-- Guest checkout: an order can be paid before the buyer has an account (orders.user_id is null until the account exists).
+-- 1) a signed-in buyer with a VERIFIED email receives the paid guest orders made with that email
+create or replace function public.claim_guest_orders()
+returns integer language plpgsql security definer set search_path = public as $$
+declare me uuid := auth.uid(); mail text; o record; n integer := 0;
+begin
+  if me is null then return 0; end if;
+  select lower(email) into mail from auth.users where id = me and email_confirmed_at is not null;
+  if mail is null then return 0; end if;
+  for o in select * from public.orders where user_id is null and status = 'paid' and lower(email) = mail for update loop
+    insert into public.purchases (user_id, book_id, order_id, price_cents, currency, customer_email, test)
+    select me, (it->>'book_id')::uuid, o.id, (it->>'price_cents')::int, o.currency, o.email, coalesce(o.livemode, true) = false
+    from jsonb_array_elements(o.items) it
+    on conflict (user_id, book_id) do nothing;
+    update public.orders set user_id = me where id = o.id;
+    n := n + 1;
+  end loop;
+  return n;
+end $$;
+revoke all on function public.claim_guest_orders() from public, anon;
+grant execute on function public.claim_guest_orders() to authenticated;
+
+-- 2) used only by the edge functions (service key): does an account with this email already exist?
+create or replace function public.user_id_by_email(p_email text)
+returns uuid language sql security definer set search_path = public as $$
+  select id from auth.users where lower(email) = lower(p_email) limit 1;
+$$;
+revoke all on function public.user_id_by_email(text) from public, anon, authenticated;
+grant execute on function public.user_id_by_email(text) to service_role;
+
+-- 3) the admin's manual "confirm order" must not create library rows for a guest order that has no account yet
+create or replace function public.admin_set_order(p_order uuid, p_status text)
+returns void language plpgsql security definer set search_path = public as $$
+declare o public.orders;
+begin
+  if not public.is_admin() then raise exception 'admin.notAdmin'; end if;
+  select * into o from public.orders where id = p_order for update;
+  if o.id is null or o.status <> 'pending' then raise exception 'Order not pending.'; end if;
+  if p_status = 'paid' then
+    if o.user_id is not null then
+      insert into public.purchases (user_id, book_id, order_id, price_cents, currency, customer_email)
+      select o.user_id, (it->>'book_id')::uuid, o.id, (it->>'price_cents')::int, o.currency, o.email
+      from jsonb_array_elements(o.items) it
+      on conflict (user_id, book_id) do nothing;
+    end if;
+    update public.orders set status = 'paid', paid_at = now() where id = o.id;
+  elsif p_status = 'cancelled' then
+    update public.orders set status = 'cancelled' where id = o.id;
+  else raise exception 'bad status'; end if;
+end $$;
+revoke all on function public.admin_set_order(uuid, text) from public, anon;
+grant execute on function public.admin_set_order(uuid, text) to authenticated;

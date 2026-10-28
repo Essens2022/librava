@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028040209';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028040209';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028040209';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028040209';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028040209';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028040209';
-import { track } from './track.js?v=20261028040209';
-import { gaEvent } from './ga.js?v=20261028040209';
-import { guessLang } from './langdetect.js?v=20261028040209';
-import { didYouMean } from './search.js?v=20261028040209';
-import { api, editionsOf } from './api.js?v=20261028040209';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028040209';
+import { CONFIG } from './config.js?v=20261028051922';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028051922';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028051922';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028051922';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028051922';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028051922';
+import { track } from './track.js?v=20261028051922';
+import { gaEvent } from './ga.js?v=20261028051922';
+import { guessLang } from './langdetect.js?v=20261028051922';
+import { didYouMean } from './search.js?v=20261028051922';
+import { api, editionsOf } from './api.js?v=20261028051922';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028051922';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -408,9 +408,10 @@ export async function viewBook(el, id) {
 //  CHECKOUT (shared by cart & buy now)
 // =====================================================================
 export async function startCheckout(ids) {
-  if (!api.user()) { sessionStorage.setItem('librava:after', '/cart'); go('/account'); return; }
+  // no account needed to pay: the account is created on the success page (viewWelcome)
+  if (!api.user() && !api.guestInfo) { sessionStorage.setItem('librava:after', '/cart'); go('/account'); return; }
   // drop already owned books
-  const owned = (await Promise.all(ids.map(id => api.owns(id)))).map(Boolean);
+  const owned = (await Promise.all(ids.map(id => api.user() ? api.owns(id) : null))).map(Boolean);
   if (owned.some(Boolean)) {
     ids = ids.filter((_, i) => !owned[i]);
     cart.set(cart.get().filter(id => ids.includes(id)));
@@ -447,6 +448,61 @@ export async function startCheckout(ids) {
       }
     });
   } catch (e) { toast(t('pay.error', { msg: errText(e) }), { error: true, ms: 6000 }); }
+}
+
+// =====================================================================
+//  WELCOME: after paying without an account, create it (the books are already paid for)
+// =====================================================================
+export async function viewWelcome(el, q) {
+  if (api.user()) { go('/library'); return; }
+  const sid = q.get('sid') || '';
+  const shell = body => `<div class="wrap page"><div class="panel" style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px">${body}</div></div>`;
+  if (!sid || !api.guestInfo) { el.innerHTML = shell(`<p>${esc(t('welcome.badLink'))}</p><a class="btn btn-buy" href="#/account">${esc(t('acc.signIn'))}</a>`); return; }
+  el.innerHTML = shell(`<h1 style="font-size:24px;margin:0">${esc(t('welcome.title'))}</h1><p class="muted" style="margin:0">${esc(t('welcome.wait'))}</p>`);
+  let info = null, failed = null;
+  for (let i = 0; i < 6; i++) {
+    try { info = await api.guestInfo(sid); failed = null; } catch (e) { failed = e; break; }
+    if (info.state !== 'unpaid') break;
+    await new Promise(r => setTimeout(r, 2500));
+    if (!currentPath().startsWith('/welcome')) return;
+  }
+  if (!currentPath().startsWith('/welcome')) return;
+  if (failed) { el.innerHTML = shell(`<p>${esc(errText(failed))}</p><a class="btn btn-buy" href="#/account">${esc(t('acc.signIn'))}</a>`); return; }
+  if (info.state === 'unpaid') { el.innerHTML = shell(`<p>${esc(t('welcome.unpaid'))}</p><button class="btn btn-buy" onclick="location.reload()">${esc(t('welcome.retry'))}</button>`); return; }
+  // the sale counts for Analytics once, when the payment is confirmed
+  try { const p = JSON.parse(sessionStorage.getItem('librava:ga-pending') || 'null'); if (p) { sessionStorage.removeItem('librava:ga-pending'); gaEvent('purchase', p); } } catch { }
+  if (info.state === 'exists' || info.state === 'claimed') {
+    el.innerHTML = shell(`<h1 style="font-size:24px;margin:0">${esc(t('welcome.title'))}</h1>
+      <p style="margin:0;line-height:1.5">${esc(t(info.state === 'exists' ? 'welcome.exists' : 'welcome.claimed', { email: info.email }))}</p>
+      <a class="btn btn-buy" href="#/account" id="w-in">${esc(t('acc.signIn'))}</a>`);
+    $('#w-in', el).onclick = () => sessionStorage.setItem('librava:after', '/library');
+    return;
+  }
+  const L = legalText(getLang());
+  el.innerHTML = shell(`<h1 style="font-size:24px;margin:0">${esc(t('welcome.title'))}</h1>
+    <div><h2 style="font-size:19px;margin:0 0 6px">${esc(t('welcome.step'))}</h2>
+    <p style="margin:0;line-height:1.5"><b>${esc(t('welcome.why'))}</b></p></div>
+    <form id="w-form" style="display:flex;flex-direction:column;gap:12px" autocomplete="on">
+      <label style="display:flex;flex-direction:column;gap:4px"><span class="muted" style="font-size:13px">${esc(t('welcome.email'))}</span>
+        <input class="input" type="email" name="email" value="${esc(info.email)}" readonly autocomplete="username"></label>
+      <label style="display:flex;flex-direction:column;gap:4px"><span class="muted" style="font-size:13px">${esc(t('welcome.pass'))}</span>
+        <input class="input" type="password" id="w-pass" name="password" minlength="8" required autocomplete="new-password"></label>
+      <button class="btn btn-buy btn-block" type="submit">${esc(t('welcome.create'))}</button>
+      <small class="muted">${t('welcome.accept', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>` })}</small>
+    </form>`);
+  $('#w-form', el).onsubmit = async e => {
+    e.preventDefault();
+    const pw = $('#w-pass', el).value, btn = e.target.querySelector('[type=submit]');
+    if (pw.length < 8) { toast(t('welcome.short'), { error: true }); return; }
+    btn.disabled = true;
+    try {
+      const r = await api.guestRegister(sid, pw);
+      if (r.state !== 'created') { viewWelcome(el, q); return; }
+      await api.signIn({ email: info.email, password: pw });
+      toast(t('pay.success'));
+      go('/library');
+    } catch (err) { btn.disabled = false; toast(errText(err), { error: true, ms: 6000 }); }
+  };
 }
 
 // bank-transfer instructions after an order (own server)
@@ -679,7 +735,8 @@ export async function viewCart(el) {
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
         ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
       </div>
-      <button class="btn btn-buy btn-block" data-checkout>${esc(api.user() ? t('cart.checkout') : t('cart.loginToCheckout'))}</button>
+      <button class="btn btn-buy btn-block" data-checkout>${esc(t('cart.checkout'))}</button>
+      ${api.user() || !api.guestInfo ? '' : `<div class="muted" style="font-size:13px;text-align:center">${esc(t('cart.guestNote'))}</div>`}
       <form class="coupon" id="coupon-form"><label for="cp">${esc(t('cart.haveCode'))}</label>
         <div class="coupon-row"><input id="cp" class="input" maxlength="40" autocomplete="off" autocapitalize="characters" value="${esc(code)}" placeholder="${esc(t('cart.codePh'))}">
         ${code ? `<button type="button" class="btn btn-ghost btn-sm" id="cp-rm">×</button>` : ''}<button class="btn btn-dark btn-sm" type="submit">${esc(t('cart.apply'))}</button></div>

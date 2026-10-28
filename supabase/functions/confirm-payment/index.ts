@@ -20,7 +20,8 @@ async function fulfill(admin: any, order: any, session: any) {
     user_id: order.user_id, book_id: it.book_id, order_id: order.id,
     price_cents: it.price_cents, currency: order.currency, customer_email: email, test,
   }));
-  const { error } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
+  // a guest order has no account yet: its books are added by guest-register / claim_guest_orders
+  const { error } = order.user_id ? await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true }) : { error: null };
   if (error) throw error;
   const { data: upd } = await admin.from('orders')
     .update({ status: 'paid', paid_at: new Date().toISOString(), email: email || order.email, livemode: session.livemode !== false })

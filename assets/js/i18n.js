@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261028040209';
-import { CONFIG } from './config.js?v=20261028040209';
-import { store } from './util.js?v=20261028040209';
+import { localize, loadRates } from './localprice.js?v=20261028051922';
+import { CONFIG } from './config.js?v=20261028051922';
+import { store } from './util.js?v=20261028051922';
 
 const D = {
   ro: {
@@ -679,6 +679,22 @@ const D = {
     'pay.pay': 'Plătește {amount}',
     'pay.cancel': 'Anulează',
     'pay.success': 'Plata a reușit. Cărțile sunt în biblioteca ta.',
+    "welcome.title": "Plata a reușit!",
+    "welcome.step": "Ultimul pas: creează-ți contul",
+    "welcome.why": "Ai nevoie de un cont ca să ai cartea în biblioteca ta de pe Librava și să o poți citi oricând, de pe orice telefon sau computer. Alege doar o parolă.",
+    "welcome.email": "Emailul tău (cel folosit la plată)",
+    "welcome.pass": "Alege o parolă (minim 8 caractere)",
+    "welcome.create": "Creează contul și deschide cartea",
+    "welcome.accept": "Creând contul accepți {terms}.",
+    "welcome.short": "Parola trebuie să aibă cel puțin 8 caractere.",
+    "welcome.badLink": "Linkul nu mai este valid. Dacă ai plătit, intră în cont cu emailul folosit la plată și cartea va apărea în bibliotecă.",
+    "welcome.noEmail": "Nu am găsit emailul plății. Scrie-ne și îți rezolvăm imediat.",
+    "welcome.exists": "Plata a reușit. Ai deja un cont cu {email}: intră în el și cartea apare automat în bibliotecă.",
+    "welcome.claimed": "Plata a reușit. Cartea este deja în contul {email}: intră în cont.",
+    "welcome.wait": "Confirmăm plata…",
+    "welcome.unpaid": "Plata nu este confirmată încă. Reîncarcă pagina peste câteva secunde.",
+    "welcome.retry": "Reîncarcă",
+    "cart.guestNote": "Nu ai nevoie de cont acum: plătești, apoi îți creezi contul dintr-un singur pas.",
     'pay.freeAdded': 'Cartea a fost adăugată în biblioteca ta.',
     'pay.error': 'Plata nu a putut fi pornită: {msg}',
     'acc.signIn': 'Intră în cont',
@@ -2035,6 +2051,22 @@ const D = {
     'pay.pay': 'Paga {amount}',
     'pay.cancel': 'Annulla',
     'pay.success': 'Pagamento riuscito. I libri sono nella tua libreria.',
+    "welcome.title": "Pagamento riuscito!",
+    "welcome.step": "Ultimo passo: crea il tuo account",
+    "welcome.why": "Ti serve un account per avere il libro nella tua libreria su Librava e poterlo leggere quando vuoi, da qualsiasi telefono o computer. Scegli solo una password.",
+    "welcome.email": "La tua email (quella usata per il pagamento)",
+    "welcome.pass": "Scegli una password (minimo 8 caratteri)",
+    "welcome.create": "Crea l'account e apri il libro",
+    "welcome.accept": "Creando l'account accetti {terms}.",
+    "welcome.short": "La password deve avere almeno 8 caratteri.",
+    "welcome.badLink": "Il link non è più valido. Se hai pagato, accedi con l'email usata per il pagamento e il libro apparirà nella libreria.",
+    "welcome.noEmail": "Non abbiamo trovato l'email del pagamento. Scrivici e risolviamo subito.",
+    "welcome.exists": "Pagamento riuscito. Hai già un account con {email}: accedi e il libro appare da solo nella libreria.",
+    "welcome.claimed": "Pagamento riuscito. Il libro è già nell'account {email}: accedi.",
+    "welcome.wait": "Stiamo confermando il pagamento…",
+    "welcome.unpaid": "Il pagamento non è ancora confermato. Ricarica la pagina tra qualche secondo.",
+    "welcome.retry": "Ricarica",
+    "cart.guestNote": "Non ti serve un account ora: paghi, poi crei l'account in un solo passaggio.",
     'pay.freeAdded': 'Il libro è stato aggiunto alla tua libreria.',
     'pay.error': 'Impossibile avviare il pagamento: {msg}',
     'acc.signIn': 'Accedi',
@@ -3391,6 +3423,22 @@ const D = {
     'pay.pay': 'Pay {amount}',
     'pay.cancel': 'Cancel',
     'pay.success': 'Payment successful. Your books are in your library.',
+    "welcome.title": "Payment successful!",
+    "welcome.step": "Last step: create your account",
+    "welcome.why": "You need an account to keep the book in your Librava library and read it anytime, on any phone or computer. Just choose a password.",
+    "welcome.email": "Your email (the one used for payment)",
+    "welcome.pass": "Choose a password (at least 8 characters)",
+    "welcome.create": "Create account and open my book",
+    "welcome.accept": "By creating the account you accept {terms}.",
+    "welcome.short": "The password must be at least 8 characters.",
+    "welcome.badLink": "This link is no longer valid. If you paid, sign in with the email used for payment and the book will appear in your library.",
+    "welcome.noEmail": "We could not find the payment email. Write to us and we will fix it right away.",
+    "welcome.exists": "Payment successful. You already have an account with {email}: sign in and the book appears in your library by itself.",
+    "welcome.claimed": "Payment successful. The book is already in the account {email}: sign in.",
+    "welcome.wait": "Confirming your payment…",
+    "welcome.unpaid": "The payment is not confirmed yet. Reload the page in a few seconds.",
+    "welcome.retry": "Reload",
+    "cart.guestNote": "No account needed now: you pay, then create your account in one step.",
     'pay.freeAdded': 'The book has been added to your library.',
     'pay.error': 'Could not start payment: {msg}',
     'acc.signIn': 'Sign in',
@@ -4108,7 +4156,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261028040209`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261028051922`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

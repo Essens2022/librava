@@ -49,7 +49,9 @@ Deno.serve(async (req) => {
     user_id: order.user_id, book_id: it.book_id, order_id: order.id,
     price_cents: it.price_cents, currency: order.currency, customer_email: email, test: event.livemode === false,
   }));
-  const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
+  // guest order (paid before the account exists): the books are added when the buyer creates the account
+  // (guest-register) or later signs in with the same verified email (claim_guest_orders)
+  const { error: pErr } = order.user_id ? await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true }) : { error: null };
   if (pErr) { console.error(pErr); return new Response('db error', { status: 500 }); } // Stripe will retry
 
   const { data: upd } = await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString(), stripe_session_id: session.id, email: email || order.email, livemode: event.livemode !== false }).eq('id', order.id).eq('status', 'pending').select('id');
