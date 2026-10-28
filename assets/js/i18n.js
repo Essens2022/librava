@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261028135143';
-import { CONFIG } from './config.js?v=20261028135143';
-import { store } from './util.js?v=20261028135143';
+import { localize, loadRates } from './localprice.js?v=20261028141857';
+import { CONFIG } from './config.js?v=20261028141857';
+import { store } from './util.js?v=20261028141857';
 
 const D = {
   ro: {
@@ -111,6 +111,7 @@ const D = {
     'cart.nudgeQty': 'Mai adaugă {n} carte/cărți și primești {p}% reducere',
     'cart.nudgeFree': 'Mai adaugă {n} carte/cărți și una e gratuită',
     'cart.nudgeBxgy': 'Mai adaugă {n} carte/cărți și primești {p}% la una',
+    'cart.nudgeSave': 'Mai adaugă {n} carte/cărți și economisești încă {amount}',
     'cart.bestOnly': 'Ofertele nu se adună: aplicăm automat oferta cea mai avantajoasă pentru tine.',
     'imp.tab': 'Importă carte',
     'imp.title': 'Importă o carte dintr-un fișier .zip',
@@ -1485,6 +1486,7 @@ const D = {
     'cart.nudgeQty': 'Aggiungi ancora {n} libro/i e ottieni il {p}% di sconto',
     'cart.nudgeFree': 'Aggiungi ancora {n} libro/i e uno è gratis',
     'cart.nudgeBxgy': 'Aggiungi ancora {n} libro/i e ottieni il {p}% su uno',
+    'cart.nudgeSave': 'Aggiungi ancora {n} libro/i e risparmi altri {amount}',
     'cart.bestOnly': 'Le offerte non si sommano: applichiamo automaticamente quella più conveniente per te.',
     'imp.tab': 'Importa libro',
     'imp.title': 'Importa un libro da un file .zip',
@@ -2859,6 +2861,7 @@ const D = {
     'cart.nudgeQty': 'Add {n} more book(s) and get {p}% off',
     'cart.nudgeFree': 'Add {n} more book(s) and get one free',
     'cart.nudgeBxgy': 'Add {n} more book(s) and get {p}% off one',
+    'cart.nudgeSave': 'Add {n} more book(s) and save {amount} more',
     'cart.bestOnly': 'Offers don\'t add up: we automatically apply the one that saves you the most.',
     'imp.tab': 'Import book',
     'imp.title': 'Import a book from a .zip file',
@@ -4162,7 +4165,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261028135143`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261028141857`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
