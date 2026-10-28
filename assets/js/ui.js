@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028170942';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028170942';
-import { esc, store, $, $$ } from './util.js?v=20261028170942';
+import { CONFIG } from './config.js?v=20261028171149';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028171149';
+import { esc, store, $, $$ } from './util.js?v=20261028171149';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028170942';
-import { suggest, highlight } from './search.js?v=20261028170942';
-import { track, trackPage } from './track.js?v=20261028170942';
-import { initGA, stopGA } from './ga.js?v=20261028170942';
-import { api } from './api.js?v=20261028170942';
-import { describeOffer, offersForBook } from './offers.js?v=20261028170942';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028171149';
+import { suggest, highlight } from './search.js?v=20261028171149';
+import { track, trackPage } from './track.js?v=20261028171149';
+import { initGA, stopGA } from './ga.js?v=20261028171149';
+import { api } from './api.js?v=20261028171149';
+import { describeOffer, offersForBook } from './offers.js?v=20261028171149';
 
 // ---------------- icons ----------------
 const P = {
@@ -602,7 +602,7 @@ export async function refreshBell(force) {
       celebrateGifts(gn);
     }
     const lang = getLang(), read = new Set(store.get('notif:read', []));
-    const mine = notifCache.filter(n => !n.lang || n.lang === lang);
+    const mine = notifCache.filter(n => !n.lang || n.lang === lang).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // newest first
     const unread = mine.filter(n => !read.has(n.id)).length;
     $$('.bell-count').forEach(b => { b.textContent = unread > 9 ? '9+' : unread; b.hidden = !unread; });
     // the bell is always visible (also on phones); the red number shows only when there is something new
