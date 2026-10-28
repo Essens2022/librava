@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028051922';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028051922';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028051922';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028051922';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028051922';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028051922';
-import { track } from './track.js?v=20261028051922';
-import { gaEvent } from './ga.js?v=20261028051922';
-import { guessLang } from './langdetect.js?v=20261028051922';
-import { didYouMean } from './search.js?v=20261028051922';
-import { api, editionsOf } from './api.js?v=20261028051922';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028051922';
+import { CONFIG } from './config.js?v=20261028055400';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028055400';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028055400';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028055400';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028055400';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028055400';
+import { track } from './track.js?v=20261028055400';
+import { gaEvent } from './ga.js?v=20261028055400';
+import { guessLang } from './langdetect.js?v=20261028055400';
+import { didYouMean } from './search.js?v=20261028055400';
+import { api, editionsOf } from './api.js?v=20261028055400';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028055400';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -471,6 +471,8 @@ export async function viewWelcome(el, q) {
   if (info.state === 'unpaid') { el.innerHTML = shell(`<p>${esc(t('welcome.unpaid'))}</p><button class="btn btn-buy" onclick="location.reload()">${esc(t('welcome.retry'))}</button>`); return; }
   // the sale counts for Analytics once, when the payment is confirmed
   try { const p = JSON.parse(sessionStorage.getItem('librava:ga-pending') || 'null'); if (p) { sessionStorage.removeItem('librava:ga-pending'); gaEvent('purchase', p); } } catch { }
+  // our own statistics: the purchase step of this visit (once per payment, also after a refresh of the page)
+  try { if (!sessionStorage.getItem('librava:tp:' + sid)) { sessionStorage.setItem('librava:tp:' + sid, '1'); track('purchase'); } } catch { }
   if (info.state === 'exists' || info.state === 'claimed') {
     el.innerHTML = shell(`<h1 style="font-size:24px;margin:0">${esc(t('welcome.title'))}</h1>
       <p style="margin:0;line-height:1.5">${esc(t(info.state === 'exists' ? 'welcome.exists' : 'welcome.claimed', { email: info.email }))}</p>
@@ -498,6 +500,7 @@ export async function viewWelcome(el, q) {
     try {
       const r = await api.guestRegister(sid, pw);
       if (r.state !== 'created') { viewWelcome(el, q); return; }
+      track('signup', { method: 'checkout' });
       await api.signIn({ email: info.email, password: pw });
       toast(t('pay.success'));
       go('/library');
@@ -1009,7 +1012,7 @@ export async function viewLibrary(el, q) {
   if (q.get('welcome')) toast(t('acc.emailConfirmed'));
   if (q.get('paid')) {
     toast(t('pay.success'));
-    try { const p = JSON.parse(sessionStorage.getItem('librava:ga-pending') || 'null'); if (p) { sessionStorage.removeItem('librava:ga-pending'); gaEvent('purchase', p); } } catch { }
+    try { const p = JSON.parse(sessionStorage.getItem('librava:ga-pending') || 'null'); if (p) { sessionStorage.removeItem('librava:ga-pending'); gaEvent('purchase', p); track('purchase'); } } catch { }
     // ask Stripe straight away (does not wait for the webhook); try a few times while the payment settles
     (async () => {
       for (let i = 0; i < 6; i++) {
