@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261028023855';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028023855';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261028023855';
-import { resetCompanyCache } from './views.js?v=20261028023855';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261028023855';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261028023855';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261028023855';
-import { optimizeBook } from './optimize.js?v=20261028023855';
-import { api } from './api.js?v=20261028023855';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261028023855';
+import { CONFIG } from './config.js?v=20261028040209';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028040209';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261028040209';
+import { resetCompanyCache } from './views.js?v=20261028040209';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261028040209';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261028040209';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261028040209';
+import { optimizeBook } from './optimize.js?v=20261028040209';
+import { api } from './api.js?v=20261028040209';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261028040209';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -29,6 +29,38 @@ const TABS = [
   ['settings', '/admin/settings', 'gear', 'set.title'],
 ];
 const full = !!api.adminOverview; // the extended panel needs these data methods
+
+
+// a book picker you can type in: the matching books appear as you write (used instead of long lists)
+function bookComboHTML(id, items, selId, ph) {
+  const cur = items.find(b => b.id === selId);
+  return `<div class="bp" data-bp="${esc(id)}"><input class="input" id="${esc(id)}-q" autocomplete="off" placeholder="${esc(ph)}" value="${esc(cur ? cur.label : '')}"><input type="hidden" id="${esc(id)}" value="${esc(cur ? cur.id : '')}"><div class="bp-list" hidden></div></div>`;
+}
+function bindBookCombo(root, id, items) {
+  const box = root.querySelector(`[data-bp="${id}"]`); if (!box) return;
+  const q = box.querySelector('input.input'), hid = box.querySelector('input[type=hidden]'), list = box.querySelector('.bp-list');
+  const norm = x => String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  let sel = -1, shown = [];
+  const draw = () => {
+    const w = norm(q.value).split(/\s+/).filter(Boolean);
+    shown = (w.length ? items.filter(b => w.every(x => norm(b.label).includes(x))) : items).slice(0, 12); sel = shown.length ? 0 : -1;
+    list.innerHTML = shown.length ? shown.map((b, k) => `<button type="button" class="bp-opt ${k === sel ? 'on' : ''}" data-i="${k}">${esc(b.label)}</button>`).join('') : `<div class="bp-none">${esc(t('ri.noBook'))}</div>`;
+    list.hidden = false;
+    list.querySelectorAll('.bp-opt').forEach(o => o.onmousedown = e => { e.preventDefault(); pick(shown[+o.dataset.i]); });
+  };
+  const fire = () => { hid.dispatchEvent(new Event('input', { bubbles: true })); hid.dispatchEvent(new Event('change', { bubbles: true })); };
+  const pick = b => { if (!b) return; hid.value = b.id; q.value = b.label; q.classList.remove('invalid'); list.hidden = true; fire(); };
+  q.oninput = e => { e.stopPropagation(); if (hid.value) { hid.value = ''; fire(); } draw(); };
+  q.onchange = e => e.stopPropagation();
+  q.onfocus = () => { q.select(); draw(); };
+  q.onblur = () => setTimeout(() => { list.hidden = true; }, 120);
+  q.onkeydown = e => {
+    const opts = () => [...list.querySelectorAll('.bp-opt')];
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (!shown.length) return; sel = (sel + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length; opts().forEach((o, k) => o.classList.toggle('on', k === sel)); opts()[sel]?.scrollIntoView({ block: 'nearest' }); }
+    else if (e.key === 'Enter') { e.preventDefault(); pick(shown[sel]); }
+    else if (e.key === 'Escape') list.hidden = true;
+  };
+}
 
 export async function viewAdmin(el, parts) {
   const u = api.user();
@@ -573,6 +605,7 @@ async function customer(body, id) {
   const c = d.customer;
   const owned = new Set(d.purchases.map(p => p.book.id));
   const catalog = (await api.adminBooks()).filter(b => !owned.has(b.id));
+  const grItems = catalog.map(b => ({ id: b.id, label: b.title + ' (' + (b.language || '').toUpperCase() + ')' }));
   body.innerHTML = `<a class="back-link" href="#/admin/customers">${icon('chevL', 'ico')} ${esc(t('admin.backCustomers'))}</a>
     <section class="panel"><h2 style="font-size:22px">${esc(c.name || c.email)} ${c.isAdmin ? `<span class="status live">${esc(t('admin.roleAdmin'))}</span>` : ''}</h2>
       <p class="muted" style="margin:4px 0 0"><span style="user-select:all">${esc(c.email)}</span> · ${esc(t('acc.memberSince', { date: fmtDate(c.created_at) }))}</p></section>
@@ -583,12 +616,13 @@ async function customer(body, id) {
     </section>
     <section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:6px">${esc(t('admin.grant'))}</h2>
       <p class="muted" style="margin:0 0 10px;font-size:14px">${esc(t('admin.grantHelp'))}</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><select class="input" id="gr-book" style="flex:1;min-width:220px" aria-label="${esc(t('admin.chooseBook'))}"><option value="">${esc(t('admin.chooseBook'))}…</option>${catalog.map(b => `<option value="${esc(b.id)}">${esc(b.title)} (${esc(b.language.toUpperCase())})</option>`).join('')}</select>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:220px">${bookComboHTML('gr-book', grItems, '', t('ri.typeBook'))}</div>
       <button class="btn btn-buy" data-grant>${esc(t('admin.grant'))}</button></div>
     </section>
     ${d.orders.length ? `<section class="panel" style="margin-top:14px"><h2 class="section-title" style="font-size:17px;margin-bottom:8px">${esc(t('admin.customerOrders'))}</h2>
       ${d.orders.map(o => `<div class="adm-line"><span><b>${esc(o.reference)}</b><small class="muted">${esc(fmtDate(o.created_at))} · ${esc(methodLabel(o.method))} · ${esc(t('admin.ord.' + o.status))}</small></span><b class="num">${esc(money(o.amount_cents, cur(o.currency)))}</b></div>`).join('')}</section>` : ''}`;
   bindRange($('#cu-act', body), () => customer(body, id));
+  bindBookCombo(body, 'gr-book', grItems);
   $('[data-grant]', body).onclick = async () => {
     const bid = $('#gr-book', body).value; if (!bid) return;
     try { await api.grantBook(c.id, bid); toast(t('admin.granted')); customer(body, id); } catch (e) { toast(errText(e), { error: true }); }
@@ -2045,6 +2079,7 @@ async function promosAdmin(body) {
 async function promoForm(body, id) {
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
   const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
+  const prItems = pub.map(b => ({ id: b.id, label: b.title + ' · ' + (b.language || '').toUpperCase() + (b.format ? ' · ' + String(b.format).toUpperCase() : '') }));
   const p = all.find(x => x.id === id) || { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
   const files = {};
   let chosen = (p.book_ids || []).filter(id => pub.some(b => b.id === id));
@@ -2060,7 +2095,7 @@ async function promoForm(body, id) {
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
       <div class="kdp-fields">
         <div class="radios">${['book', 'books', 'image'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
-        <div id="pr-bookbox"><label class="field"><span>${esc(t('pr.book'))} *</span><select id="pr-book"><option value="">—</option>${pub.map(b => `<option value="${esc(b.id)}" data-lang="${esc(b.language || '')}" ${p.book_id === b.id ? 'selected' : ''}>${esc(b.title)} · ${esc((b.language || '').toUpperCase())}</option>`).join('')}</select><small id="pr-booklang" class="muted"></small></label>
+        <div id="pr-bookbox"><label class="field"><span>${esc(t('pr.book'))} *</span>${bookComboHTML('pr-book', prItems, p.book_id, t('ri.typeBook'))}<small id="pr-booklang" class="muted"></small></label>
         </div>
         <div id="pr-booksbox"><span class="field-l">${esc(t('pr.books'))} *</span><small class="muted">${esc(t('pr.booksHelp'))}</small>
           <input class="input" id="pr-bfind" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}" autocomplete="off">
@@ -2094,6 +2129,7 @@ async function promoForm(body, id) {
     <div class="error" id="pr-err" hidden></div>
     <div class="kdp-bar"><a class="btn btn-ghost" href="#/admin/promos">${esc(t('admin.cancel'))}</a><span class="spacer"></span><button class="btn btn-buy" type="submit">${esc(t('pr.save'))}</button></div>
   </form>`;
+  bindBookCombo(body, 'pr-book', prItems);
   const f = $('#pr-form', body), val = sel => ($(sel, f)?.value || '').trim(), rad = n => f.querySelector(`input[name="${n}"]:checked`)?.value;
   // link: known destinations in a list, anything else as a custom link
   const pick = $('#pr-linkpick', f), known = [...pick.options].map(o => o.value);
