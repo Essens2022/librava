@@ -2034,3 +2034,10 @@ img { image-rendering: auto; }
 .ntf2.old:not(.open) .ntf-main > :not(.ntf-top):not(.ntf-title) { display: none; }
 .ntf2.old:not(.open) .ntf-top::after { content: '▾'; margin-left: 8px; color: var(--muted); }
 .ntf2.old.open .ntf-top::after { content: '▴'; margin-left: 8px; color: var(--muted); }
+
+/* "Remove" in the cart: a clear red button with a bin */
+.rm-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid #D92D20; background: #FEF3F2; color: #B42318; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.rm-btn .ico { width: 18px; height: 18px; stroke-width: 2.4; }
+.rm-btn:hover { background: #D92D20; color: #fff; }
+html[data-theme="dark"] .rm-btn { background: #3A1A17; color: #FDA29B; border-color: #B42318; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .rm-btn { background: #3A1A17; color: #FDA29B; border-color: #B42318; } }
