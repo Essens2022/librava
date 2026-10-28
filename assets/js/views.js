@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028134158';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028134158';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028134158';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028134158';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028134158';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028134158';
-import { track } from './track.js?v=20261028134158';
-import { gaEvent } from './ga.js?v=20261028134158';
-import { guessLang } from './langdetect.js?v=20261028134158';
-import { didYouMean } from './search.js?v=20261028134158';
-import { api, editionsOf } from './api.js?v=20261028134158';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028134158';
+import { CONFIG } from './config.js?v=20261028134529';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028134529';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028134529';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028134529';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028134529';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028134529';
+import { track } from './track.js?v=20261028134529';
+import { gaEvent } from './ga.js?v=20261028134529';
+import { guessLang } from './langdetect.js?v=20261028134529';
+import { didYouMean } from './search.js?v=20261028134529';
+import { api, editionsOf } from './api.js?v=20261028134529';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028134529';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -359,9 +359,22 @@ export async function viewBook(el, id) {
     await Promise.race([
       Promise.all(above.filter(i => !i.complete).map(i => new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); }))),
       new Promise(r => setTimeout(r, 1500))]);
-    window.scrollTo({ top: target(), behavior: 'smooth' });
-    // if something still moved while scrolling, one more gentle correction
-    setTimeout(() => { if (Math.abs(window.scrollY - target()) > 6) window.scrollTo({ top: target(), behavior: 'smooth' }); }, 1100);
+    // our own gentle, slow scroll (the phone's built-in smooth scroll is too fast on long pages); stops if the visitor touches the page
+    const from = window.scrollY, dist = target() - from;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(dist) < 40) { window.scrollTo(0, target()); return; }
+    const dur = Math.min(2600, Math.max(1100, Math.abs(dist) * 0.45));
+    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    let stop = false; const halt = () => { stop = true; };
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, halt, { once: true, passive: true }));
+    const t0 = performance.now();
+    const tick = now => {
+      if (stop) return;
+      const k = Math.min(1, (now - t0) / dur);
+      // the target is measured again at every step, so late changes of the page do not throw the scroll off
+      window.scrollTo(0, from + (target() - from) * ease(k));
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   };
 
 
