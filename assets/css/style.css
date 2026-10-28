@@ -1992,3 +1992,6 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes nudge-shine { 0%, 55% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
 @keyframes nudge-go { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 @media (prefers-reduced-motion: reduce) { .nudge, .nudge::after, .nudge b { animation: none; } }
+
+.nudge { font-size: 16px; line-height: 1.3; }
+.nudge .nudge-hot { font-style: normal; font-size: 1.35em; font-weight: 900; background: #fff; color: #C2183F; padding: 1px 9px; border-radius: 8px; margin: 0 2px; display: inline-block; text-shadow: none; white-space: nowrap; }
