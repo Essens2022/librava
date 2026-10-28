@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028171357';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028171357';
-import { esc, store, $, $$ } from './util.js?v=20261028171357';
+import { CONFIG } from './config.js?v=20261028171408';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028171408';
+import { esc, store, $, $$ } from './util.js?v=20261028171408';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028171357';
-import { suggest, highlight } from './search.js?v=20261028171357';
-import { track, trackPage } from './track.js?v=20261028171357';
-import { initGA, stopGA } from './ga.js?v=20261028171357';
-import { api } from './api.js?v=20261028171357';
-import { describeOffer, offersForBook } from './offers.js?v=20261028171357';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028171408';
+import { suggest, highlight } from './search.js?v=20261028171408';
+import { track, trackPage } from './track.js?v=20261028171408';
+import { initGA, stopGA } from './ga.js?v=20261028171408';
+import { api } from './api.js?v=20261028171408';
+import { describeOffer, offersForBook } from './offers.js?v=20261028171408';
 
 // ---------------- icons ----------------
 const P = {
@@ -46,7 +46,7 @@ const P = {
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   devices: '<rect x="2" y="5" width="13" height="10" rx="1.5"/><path d="M5 19h7"/><rect x="16" y="8" width="6" height="12" rx="1.5"/>',
   upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
-  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   filter: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
