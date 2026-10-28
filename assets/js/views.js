@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028130600';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028130600';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028130600';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028130600';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028130600';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028130600';
-import { track } from './track.js?v=20261028130600';
-import { gaEvent } from './ga.js?v=20261028130600';
-import { guessLang } from './langdetect.js?v=20261028130600';
-import { didYouMean } from './search.js?v=20261028130600';
-import { api, editionsOf } from './api.js?v=20261028130600';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028130600';
+import { CONFIG } from './config.js?v=20261028133756';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028133756';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028133756';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028133756';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028133756';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028133756';
+import { track } from './track.js?v=20261028133756';
+import { gaEvent } from './ga.js?v=20261028133756';
+import { guessLang } from './langdetect.js?v=20261028133756';
+import { didYouMean } from './search.js?v=20261028133756';
+import { api, editionsOf } from './api.js?v=20261028133756';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028133756';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -348,7 +348,18 @@ export async function viewBook(el, id) {
     } catch (e) { if (e?.name !== 'AbortError') { try { await navigator.clipboard.writeText(url); toast(t('book.linkCopied')); } catch { prompt('', url); } } }
   });
   const jump = $('[data-jump]', el);
-  if (jump) jump.onclick = e => { e.preventDefault(); $('#reviews', el).scrollIntoView({ behavior: 'smooth' }); };
+  // the images of the page (A+ content, covers) finish loading while the page scrolls and push the reviews down:
+  // so jump to the reviews, then correct the position for a moment, until the visitor scrolls by hand
+  if (jump) jump.onclick = e => {
+    e.preventDefault();
+    const target = () => { const r = $('#reviews', el); return r ? Math.max(0, r.getBoundingClientRect().top + window.scrollY - (document.querySelector('#hdr')?.offsetHeight || 0) - 8) : null; };
+    $$('img[loading=lazy]', el).forEach(i => { i.loading = 'eager'; });
+    let stop = false; const halt = () => { stop = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, halt, { once: true, passive: true }));
+    const fix = () => { if (stop) return; const y = target(); if (y != null && Math.abs(window.scrollY - y) > 4) window.scrollTo(0, y); };
+    fix();
+    [150, 400, 800, 1400, 2200].forEach(ms => setTimeout(fix, ms));
+  };
 
   $('[data-preview]', el)?.addEventListener('click', () => track('sample', { book_id: b.id }));
   $('[data-preview]', el)?.addEventListener('click', () => go('/read/' + encodeURIComponent(b.id) + '?preview=1'));
