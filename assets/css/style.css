@@ -1994,4 +1994,4 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @media (prefers-reduced-motion: reduce) { .nudge, .nudge::after, .nudge b { animation: none; } }
 
 .nudge { font-size: 21px; font-weight: 900; line-height: 1.22; -webkit-text-stroke: .7px #fff; }
-.nudge .nudge-hot { font-style: normal; font-weight: 900; font-size: 1.12em; -webkit-text-stroke: .9px #fff; }
+.nudge .nudge-hot { font-style: normal; font-size: 1.4em; font-weight: 900; background: #fff; color: #E02A47; -webkit-text-stroke: .6px #E02A47; padding: 1px 10px; margin: 0 2px; border-radius: 9px; display: inline-block; text-shadow: none; white-space: nowrap; }
