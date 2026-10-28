@@ -17,7 +17,7 @@
   --surface: #FFFFFF;
   --surface-2: #F6F8F3;
   --fg: #151B1A;
-  --muted: #586460;
+  --muted: #46524E;
   --line: #D5DBD0;
   --link: #2C6A55;
   --deal: #B42318;
@@ -56,7 +56,7 @@ html { -webkit-text-size-adjust: 100%; background: var(--hdr-2); }
 html.reading { background: var(--bg); }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui);
-  font-size: 15px; line-height: 1.45; min-height: 100vh; display: flex; flex-direction: column;
+  font-size: 15px; font-weight: 500; line-height: 1.45; min-height: 100vh; display: flex; flex-direction: column;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--hdr); }
 img { max-width: 100%; display: block; }
@@ -1993,5 +1993,5 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 @keyframes nudge-go { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 @media (prefers-reduced-motion: reduce) { .nudge, .nudge::after, .nudge b { animation: none; } }
 
-.nudge { font-size: 21px; font-weight: 900; line-height: 1.22; -webkit-text-stroke: .7px #fff; }
-.nudge .nudge-hot { font-style: normal; font-size: 1.4em; font-weight: 900; background: #fff; color: #E02A47; -webkit-text-stroke: .6px #E02A47; padding: 1px 10px; margin: 0 2px; border-radius: 9px; display: inline-block; text-shadow: none; white-space: nowrap; }
+.nudge { font-size: 20px; font-weight: 800; line-height: 1.25; -webkit-text-stroke: 0; text-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.nudge .nudge-hot { font-style: normal; font-size: 1.4em; font-weight: 900; background: #fff; color: #E02A47; -webkit-text-stroke: 0; padding: 1px 10px; margin: 0 2px; border-radius: 9px; display: inline-block; text-shadow: none; white-space: nowrap; }
