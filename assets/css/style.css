@@ -1976,3 +1976,5 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 .bp-opt { display: block; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 14.5px; cursor: pointer; }
 .bp-opt:hover, .bp-opt.on { background: var(--bg-soft, #eef3e6); }
 .bp-none { padding: 10px 12px; color: var(--muted, #667); font-size: 14px; }
+.quick-add.owned { background: #fff; color: var(--pista-strong); border: 2px solid var(--pista-strong); font-size: 16px; box-shadow: none; cursor: default; }
+.quick-add.owned:hover { background: #fff; transform: none; }

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261028143224';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028143224';
-import { esc, store, $, $$ } from './util.js?v=20261028143224';
+import { CONFIG } from './config.js?v=20261028143906';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261028143906';
+import { esc, store, $, $$ } from './util.js?v=20261028143906';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261028143224';
-import { suggest, highlight } from './search.js?v=20261028143224';
-import { track, trackPage } from './track.js?v=20261028143224';
-import { initGA, stopGA } from './ga.js?v=20261028143224';
-import { api } from './api.js?v=20261028143224';
-import { describeOffer, offersForBook } from './offers.js?v=20261028143224';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261028143906';
+import { suggest, highlight } from './search.js?v=20261028143906';
+import { track, trackPage } from './track.js?v=20261028143906';
+import { initGA, stopGA } from './ga.js?v=20261028143906';
+import { api } from './api.js?v=20261028143906';
+import { describeOffer, offersForBook } from './offers.js?v=20261028143906';
 
 // ---------------- icons ----------------
 const P = {
@@ -885,3 +885,24 @@ function fitShelves() {
 addEventListener('resize', () => requestAnimationFrame(fitShelves));
 document.addEventListener('load', e => { if (e.target.closest?.('.promo-books')) fitShelves(); }, true);
 new MutationObserver(() => { if (document.querySelector('.promo-books .promo-shelf:not(.fit):not(.marq)')) requestAnimationFrame(fitShelves); }).observe(document.documentElement, { childList: true, subtree: true });
+
+// the “+” on covers: a book the customer already owns shows a "in your library" tick instead (checked once per account)
+{
+  let busy = false, again = false;
+  const mark = async () => {
+    if (busy) { again = true; return; }
+    busy = true;
+    try {
+      const uid = api.user?.()?.id || '-';
+      const btns = [...document.querySelectorAll('.quick-add')].filter(b => b.dataset.ownChk !== uid);
+      for (const b of btns) {
+        b.dataset.ownChk = uid;
+        const own = uid !== '-' && await api.owns(b.dataset.quickAdd).catch(() => null);
+        b.classList.toggle('owned', !!own);
+        if (own) { b.classList.remove('in'); b.textContent = '✓'; b.title = b.ariaLabel = t('cart.owned'); }
+      }
+    } finally { busy = false; if (again) { again = false; mark(); } }
+  };
+  let q = false;
+  new MutationObserver(() => { if (q) return; q = true; setTimeout(() => { q = false; mark(); }, 150); }).observe(document.body, { childList: true, subtree: true });
+}
