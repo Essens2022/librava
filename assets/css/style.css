@@ -2004,3 +2004,12 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
   .nudges-side .nudge { font-size: 18px; padding: 14px 14px; gap: 10px; }
   .nudges-side .nudge .nudge-hot { font-size: 1.25em; }
 }
+
+/* cart page: a centred, balanced layout (items + order summary), like Amazon */
+@media (min-width: 801px) {
+  .cart-layout { max-width: 1180px; margin: 0 auto; grid-template-columns: minmax(0, 1fr) 370px; gap: 24px; }
+  .cart-sum { padding: 22px; gap: 14px; top: 130px; }
+  .cart-sum .sum-rows { font-size: 16px; }
+  .cart-sum .sum-total { font-size: 21px; }
+  .cart-sum .btn-buy { padding-block: 14px; font-size: 17px; }
+}
