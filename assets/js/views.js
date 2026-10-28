@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028150737';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028150737';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028150737';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028150737';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028150737';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028150737';
-import { track } from './track.js?v=20261028150737';
-import { gaEvent } from './ga.js?v=20261028150737';
-import { guessLang } from './langdetect.js?v=20261028150737';
-import { didYouMean } from './search.js?v=20261028150737';
-import { api, editionsOf } from './api.js?v=20261028150737';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028150737';
+import { CONFIG } from './config.js?v=20261028151117';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028151117';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028151117';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028151117';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028151117';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028151117';
+import { track } from './track.js?v=20261028151117';
+import { gaEvent } from './ga.js?v=20261028151117';
+import { guessLang } from './langdetect.js?v=20261028151117';
+import { didYouMean } from './search.js?v=20261028151117';
+import { api, editionsOf } from './api.js?v=20261028151117';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028151117';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -746,7 +746,7 @@ export async function viewCart(el) {
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page"><div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
-      ${r.nudges.length ? `<div class="nudges">${r.nudges.map(nudge).join('')}</div>` : ''}
+      ${r.nudges.length ? `<div class="nudges nudges-main">${r.nudges.map(nudge).join('')}</div>` : ''}
       ${books.map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
@@ -761,6 +761,7 @@ export async function viewCart(el) {
       <div style="text-align:right;margin-top:12px;font-size:18px">${esc(t('cart.subtotal', { n: books.length }))} <b>${money(r.total)}</b></div>
     </section>
     <aside class="panel cart-sum">
+      ${r.nudges.length ? `<div class="nudges nudges-side">${r.nudges.map(nudge).join('')}</div>` : ''}
       <div class="sum-rows">
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
         ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}</span><span>−${money(a.saving)}</span></div>`).join('')}
