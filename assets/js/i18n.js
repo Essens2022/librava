@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261027225758';
-import { CONFIG } from './config.js?v=20261027225758';
-import { store } from './util.js?v=20261027225758';
+import { localize, loadRates } from './localprice.js?v=20261028023855';
+import { CONFIG } from './config.js?v=20261028023855';
+import { store } from './util.js?v=20261028023855';
 
 const D = {
   ro: {
@@ -549,6 +549,18 @@ const D = {
     'rev.none': 'Încă nu există recenzii. Fii primul care scrie una.',
     'rev.pickRating': 'Alege o notă de la 1 la 5 stele.',
     'rev.verified': 'Cumpărare verificată',
+    'sp.title': 'Previzualizare gratuită (pagini)',
+    'sp.help': 'Câte pagini poate citi gratuit un vizitator înainte să cumpere. Pui un număr pentru toate cărțile PDF și altul pentru toate cărțile EPUB, iar mostrele se refac pentru toate.',
+    'sp.pdf': 'PDF: pagini de mostră',
+    'sp.epub': 'EPUB: pagini de mostră',
+    'sp.safe': 'Fișierul cărții cumpărate nu se atinge, se schimbă doar mostra gratuită. La o carte scurtă, mostra nu depășește jumătate din carte.',
+    'sp.apply': 'Salvează și aplică la toate',
+    'sp.stop': 'Oprește',
+    'sp.nothing': 'Nu e nimic de schimbat: toate mostrele au deja aceste valori.',
+    'sp.confirm': 'Se refac mostrele pentru {n} cărți (PDF: {pdf} pagini, EPUB: {epub} pagini). Poate dura câteva minute. Rămâi pe această pagină.',
+    'sp.progress': '{i} / {n}: {title}',
+    'sp.done': 'Gata: {ok} refăcute, {bad} cu probleme.',
+    'sp.stopped': 'Oprit: {ok} refăcute, {bad} cu probleme. Poți continua apăsând din nou.',
     'ri.typeBook': 'Scrie numele cărții…',
     'ri.noBook': 'Nicio carte găsită',
     'rev.like': 'Util',
@@ -1893,6 +1905,18 @@ const D = {
     'rev.none': 'Ancora nessuna recensione. Scrivi la prima.',
     'rev.pickRating': 'Scegli un voto da 1 a 5 stelle.',
     'rev.verified': 'Acquisto verificato',
+    'sp.title': 'Anteprima gratuita (pagine)',
+    'sp.help': 'Quante pagine può leggere gratis un visitatore prima di acquistare. Un numero per tutti i PDF e uno per tutti gli EPUB: le anteprime vengono rifatte per tutti i libri.',
+    'sp.pdf': 'PDF: pagine di anteprima',
+    'sp.epub': 'EPUB: pagine di anteprima',
+    'sp.safe': 'Il file del libro acquistato non viene toccato, cambia solo l\'anteprima gratuita. Per un libro breve l\'anteprima non supera metà libro.',
+    'sp.apply': 'Salva e applica a tutti',
+    'sp.stop': 'Ferma',
+    'sp.nothing': 'Niente da cambiare: tutte le anteprime hanno già questi valori.',
+    'sp.confirm': 'Verranno rifatte le anteprime di {n} libri (PDF: {pdf} pagine, EPUB: {epub} pagine). Può richiedere qualche minuto. Resta su questa pagina.',
+    'sp.progress': '{i} / {n}: {title}',
+    'sp.done': 'Fatto: {ok} rifatte, {bad} con problemi.',
+    'sp.stopped': 'Fermato: {ok} rifatte, {bad} con problemi. Puoi continuare premendo di nuovo.',
     'ri.typeBook': 'Scrivi il nome del libro…',
     'ri.noBook': 'Nessun libro trovato',
     'rev.like': 'Utile',
@@ -3237,6 +3261,18 @@ const D = {
     'rev.none': 'No reviews yet. Be the first to write one.',
     'rev.pickRating': 'Pick a rating from 1 to 5 stars.',
     'rev.verified': 'Verified purchase',
+    'sp.title': 'Free preview (pages)',
+    'sp.help': 'How many pages a visitor can read for free before buying. One number for every PDF and one for every EPUB; the samples are rebuilt for all books.',
+    'sp.pdf': 'PDF: sample pages',
+    'sp.epub': 'EPUB: sample pages',
+    'sp.safe': 'The file of a purchased book is never touched, only the free sample changes. For a short book the sample never goes over half of it.',
+    'sp.apply': 'Save and apply to all',
+    'sp.stop': 'Stop',
+    'sp.nothing': 'Nothing to change: every sample already has these values.',
+    'sp.confirm': 'The samples of {n} books will be rebuilt (PDF: {pdf} pages, EPUB: {epub} pages). It can take a few minutes. Stay on this page.',
+    'sp.progress': '{i} / {n}: {title}',
+    'sp.done': 'Done: {ok} rebuilt, {bad} with problems.',
+    'sp.stopped': 'Stopped: {ok} rebuilt, {bad} with problems. You can continue by pressing again.',
     'ri.typeBook': 'Type the book name…',
     'ri.noBook': 'No book found',
     'rev.like': 'Helpful',
@@ -4072,7 +4108,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261027225758`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261028023855`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

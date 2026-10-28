@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261027225758';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261027225758';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261027225758';
-import { resetCompanyCache } from './views.js?v=20261027225758';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261027225758';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261027225758';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261027225758';
-import { optimizeBook } from './optimize.js?v=20261027225758';
-import { api } from './api.js?v=20261027225758';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261027225758';
+import { CONFIG } from './config.js?v=20261028023855';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028023855';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261028023855';
+import { resetCompanyCache } from './views.js?v=20261028023855';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261028023855';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261028023855';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261028023855';
+import { optimizeBook } from './optimize.js?v=20261028023855';
+import { api } from './api.js?v=20261028023855';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261028023855';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2408,6 +2408,47 @@ async function settingsAdmin(body) {
     e.preventDefault();
     try { await api.saveSetting('home_cats', { order }); try { localStorage.removeItem('librava:catorder'); } catch { } toast(t('acc.saved')); } catch (x) { toast(errText(x), { error: true }); }
   };
+  // free preview length: one number for every PDF, one for every EPUB
+  if (api.replaceSample) {
+    const sp = (await api.getSetting('sample_pages')) || {};
+    const pbox = document.createElement('form'); pbox.className = 'panel'; pbox.style.cssText = 'display:flex;flex-direction:column;gap:12px;max-width:640px;margin-top:16px';
+    body.appendChild(pbox);
+    pbox.innerHTML = `<h2 class="section-title" style="font-size:19px;margin:0">${esc(t('sp.title'))}</h2>
+      <p class="muted" style="margin:0">${esc(t('sp.help'))}</p>
+      <div class="two"><label class="field"><span>${esc(t('sp.pdf'))}</span><input id="sp-pdf" type="number" min="1" max="200" value="${esc(sp.pdf || 12)}"></label>
+        <label class="field"><span>${esc(t('sp.epub'))}</span><input id="sp-epub" type="number" min="1" max="200" value="${esc(sp.epub || 12)}"></label></div>
+      <small class="muted">${esc(t('sp.safe'))}</small>
+      <div class="progress" id="sp-bar" hidden><i style="width:0"></i></div><div class="muted" id="sp-msg" aria-live="polite"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-buy" type="submit" id="sp-go">${esc(t('sp.apply'))}</button><button class="btn btn-ghost" type="button" id="sp-stop" hidden>${esc(t('sp.stop'))}</button></div>`;
+    let stop = false;
+    $('#sp-stop', pbox).onclick = () => { stop = true; };
+    pbox.onsubmit = async e => {
+      e.preventDefault();
+      const n = k => Math.max(1, Math.min(200, parseInt($('#sp-' + k, pbox).value, 10) || 12)), want = { pdf: n('pdf'), epub: n('epub') };
+      const all = (await api.adminBooks()).filter(b => !b.deleted_at && b.file_path && (b.format === 'pdf' || b.format === 'epub'));
+      // a preview is never more than half of a short book
+      const target = b => Math.max(1, Math.min(want[b.format], b.pages ? Math.floor(b.pages / 2) : want[b.format]));
+      const todo = all.filter(b => !b.sample_path || +b.sample_pages !== target(b));
+      await api.saveSetting('sample_pages', want);
+      if (!todo.length) { toast(t('sp.nothing')); return; }
+      if (!await confirmBox(t('sp.confirm', { n: todo.length, pdf: want.pdf, epub: want.epub }), { ok: t('sp.apply') })) return;
+      stop = false; const bar = $('#sp-bar', pbox), msg = $('#sp-msg', pbox), go = $('#sp-go', pbox), st = $('#sp-stop', pbox);
+      go.disabled = true; st.hidden = false; bar.hidden = false;
+      let ok = 0, bad = 0;
+      for (const [i, b] of todo.entries()) {
+        if (stop) break;
+        msg.textContent = t('sp.progress', { i: i + 1, n: todo.length, title: b.title });
+        try {
+          const full = await api.fullFileFor(b), pg = target(b);
+          const r = await makeSample(full, pg);
+          await api.replaceSample(b, r.file, pg); ok++;
+        } catch (x) { bad++; console.warn('sample not rebuilt', b.id, x); }
+        bar.firstElementChild.style.width = Math.round((i + 1) / todo.length * 100) + '%';
+      }
+      go.disabled = false; st.hidden = true;
+      msg.textContent = t(stop ? 'sp.stopped' : 'sp.done', { ok, bad });
+    };
+  }
   $('#set-form', body).onsubmit = async e => {
     e.preventDefault();
     const v = {}; for (const k of ['company', 'address', 'country', 'vat', 'email']) v[k] = $('#c-' + k, body).value.trim();
