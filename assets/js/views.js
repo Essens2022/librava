@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261028055400';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028055400';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028055400';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028055400';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028055400';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028055400';
-import { track } from './track.js?v=20261028055400';
-import { gaEvent } from './ga.js?v=20261028055400';
-import { guessLang } from './langdetect.js?v=20261028055400';
-import { didYouMean } from './search.js?v=20261028055400';
-import { api, editionsOf } from './api.js?v=20261028055400';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028055400';
+import { CONFIG } from './config.js?v=20261028115132';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028115132';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261028115132';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261028115132';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261028115132';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261028115132';
+import { track } from './track.js?v=20261028115132';
+import { gaEvent } from './ga.js?v=20261028115132';
+import { guessLang } from './langdetect.js?v=20261028115132';
+import { didYouMean } from './search.js?v=20261028115132';
+import { api, editionsOf } from './api.js?v=20261028115132';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261028115132';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -365,8 +365,8 @@ export async function viewBook(el, id) {
     const votes = await api.reviewVotes(reviews.map(r => r.id)), uid = api.user()?.id;
     const draw = box => {
       const id = box.dataset.vote, v = votes[id] || { likes: 0, dislikes: 0, mine: 0 }, own = box.hasAttribute('data-own');
-      box.innerHTML = `<button type="button" class="vt ${v.mine === 1 ? 'on' : ''}" data-v="1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === 1}" aria-label="${esc(t('rev.like'))}">${icon('thumbUp')} <span>${v.likes || ''}</span></button>
-        <button type="button" class="vt ${v.mine === -1 ? 'on' : ''}" data-v="-1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === -1}" aria-label="${esc(t('rev.dislike'))}">${icon('thumbDown')} <span>${v.dislikes || ''}</span></button>`;
+      box.innerHTML = `<button type="button" class="vt ${v.mine === 1 ? 'on' : ''}" data-v="1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === 1}" aria-label="${esc(t('rev.like'))}">${icon('thumbUp')} <span>${v.likes || 0}</span></button>
+        <button type="button" class="vt ${v.mine === -1 ? 'on' : ''}" data-v="-1" ${own ? 'disabled' : ''} aria-pressed="${v.mine === -1}" aria-label="${esc(t('rev.dislike'))}">${icon('thumbDown')} <span>${v.dislikes || 0}</span></button>`;
       box.querySelectorAll('button').forEach(b => b.onclick = async () => {
         if (!api.user()) { sessionStorage.setItem('librava:after', location.hash.slice(1) || currentPath()); toast(t('rev.voteLogin')); go('/account'); return; }
         const want = +b.dataset.v === v.mine ? 0 : +b.dataset.v;
