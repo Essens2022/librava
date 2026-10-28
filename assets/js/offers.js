@@ -109,9 +109,10 @@ function nudges(paid, run, offers, ctx, discountNow, applied = []) {
       const next = (c.tiers || []).filter(t => +t.min > n).sort((a, b) => a.min - b.min)[0];
       if (next && +next.percent > have('qty') && +next.min - n <= 2) n0 = { id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null };
     } else if (o.kind === 'bxgy') {
+      // always the NEXT step up: a better offer than the one the customer has now, that needs the fewest more books
       const n = paid.filter(i => inCat(i, c.category)).length, size = (+c.buy || 2) + (+c.get || 1);
-      const more = size - (n % size);
-      if (n > 0 && more <= 2 && more < size) n0 = { id: o.id, kind: 'bxgy', more, buy: +c.buy || 2, get: +c.get || 1, percent: c.percent ?? 100, category: c.category || null };
+      if (n > 0 && size > n) { out.push({ id: o.id, kind: 'bxgy', more: size - n, buy: +c.buy || 2, get: +c.get || 1, percent: c.percent ?? 100, category: c.category || null }); }
+      continue;
     }
     if (!n0 || o.config?.book_ids?.length) continue;
     const elig = paid.filter(i => inCat(i, c.category));
@@ -123,7 +124,7 @@ function nudges(paid, run, offers, ctx, discountNow, applied = []) {
     const gain = r.discount - discountNow;
     if (wins && gain > 0) out.push({ ...n0, gain });
   }
-  out.sort((a, b) => b.gain / b.more - a.gain / a.more);
+  out.sort((a, b) => a.more - b.more || (a.percent - b.percent) || ((b.gain || 0) - (a.gain || 0)));
   return out.slice(0, 1);
 }
 
