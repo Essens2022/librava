@@ -1995,3 +1995,12 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
 
 .nudge { font-size: 20px; font-weight: 800; line-height: 1.25; -webkit-text-stroke: 0; text-shadow: 0 1px 3px rgba(0,0,0,.35); }
 .nudge .nudge-hot { font-style: normal; font-size: 1.4em; font-weight: 900; background: #fff; color: #E02A47; -webkit-text-stroke: 0; padding: 1px 10px; margin: 0 2px; border-radius: 9px; display: inline-block; text-shadow: none; white-space: nowrap; }
+
+/* cart hint on wide screens: a compact, well-spaced banner instead of a bar across the whole page */
+@media (min-width: 900px) {
+  .nudges { margin: 16px 0 22px; align-items: flex-start; }
+  .nudge { width: auto; max-width: 100%; padding: 14px 20px; gap: 14px; font-size: 22px; border-radius: 14px; }
+  .nudge span { flex: none; }
+  .nudge .nudge-hot { font-size: 1.3em; }
+  .nudge b { margin-left: 6px; }
+}
