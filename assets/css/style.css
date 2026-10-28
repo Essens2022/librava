@@ -2013,3 +2013,8 @@ html, body, a, button, input, select, textarea, label, .card, .rd, .rd * { touch
   .cart-sum .sum-total { font-size: 21px; }
   .cart-sum .btn-buy { padding-block: 14px; font-size: 17px; }
 }
+
+/* number of books: easy to see in the header and in the order summary */
+.cart-count { font-size: 20px; font-weight: 900; top: -6px; left: 17px; min-width: 22px; }
+.cart-sum .sum-rows > div:first-child { font-size: 20px; font-weight: 800; }
+.cart-sum .sum-rows > div:first-child span:last-child { font-weight: 800; }
