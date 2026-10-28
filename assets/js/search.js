@@ -1,8 +1,8 @@
 // Librava search: forgiving like Amazon. Ignores accents and letter case, matches the beginning of words,
 // tolerates small typos ("calistenics" → "calisthenics"), looks in title, series, author, keywords, categories,
 // ISBN / Librava code and description, and ranks the strongest matches first.
-import { norm } from './util.js?v=20261028145038';
-import { t } from './i18n.js?v=20261028145038';
+import { norm } from './util.js?v=20261028145131';
+import { t } from './i18n.js?v=20261028145131';
 
 const STOP = new Set(('a an and the of for to in on at by with from or is are de la le les des du un une et en el los las y del al il lo gli di da per con e o un una uno dei delle si din pe cu cartea carte der die das und von zu mit ein eine').split(' '));
 const words = s => norm(s).replace(/[^\p{L}\p{N}]+/gu, ' ').trim().split(/\s+/).filter(Boolean);
