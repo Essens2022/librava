@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261029191919';
-import { CONFIG } from './config.js?v=20261029191919';
-import { store } from './util.js?v=20261029191919';
+import { localize, loadRates } from './localprice.js?v=20261029192055';
+import { CONFIG } from './config.js?v=20261029192055';
+import { store } from './util.js?v=20261029192055';
 
 const D = {
   ro: {
@@ -981,8 +981,13 @@ const D = {
     'ntf.new': 'Notificare nouă pentru clienți',
     'ntf.link': 'Link (opțional)',
     'ntf.bold': 'Accentuează',
+    'ntf.size': 'Mărime',
+    'ntf.sz1': 'Normal',
+    'ntf.sz2': 'Mare',
+    'ntf.sz3': 'Foarte mare',
+    'ntf.sz4': 'Uriaș',
     'ntf.big': 'Mai mare',
-    'ntf.bigHelp': 'Selectează textul sau emoji-ul și apasă ca să fie mai mare.',
+    'ntf.bigHelp': 'Selectează textul sau emoji-ul și alege mărimea.',
     'ntf.boldHelp': 'Selectează cuvintele din text și apasă pe buton, ca să iasă în evidență.',
     'ntf.boldPick': 'Selectează mai întâi cuvintele din text.',
     'ntf.lang': 'Pentru cine',
@@ -2363,6 +2368,11 @@ const D = {
     'ntf.new': 'Nuova notifica per i clienti',
     'ntf.link': 'Link (facoltativo)',
     'ntf.bold': 'Evidenzia',
+    'ntf.size': 'Dimensione',
+    'ntf.sz1': 'Normale',
+    'ntf.sz2': 'Grande',
+    'ntf.sz3': 'Molto grande',
+    'ntf.sz4': 'Enorme',
     'ntf.big': 'Più grande',
     'ntf.bigHelp': 'Seleziona il testo o l\'emoji e premi per ingrandirlo.',
     'ntf.boldHelp': 'Seleziona le parole nel testo e premi il pulsante per metterle in evidenza.',
@@ -3745,6 +3755,11 @@ const D = {
     'ntf.new': 'New notification for customers',
     'ntf.link': 'Link (optional)',
     'ntf.bold': 'Highlight',
+    'ntf.size': 'Size',
+    'ntf.sz1': 'Normal',
+    'ntf.sz2': 'Big',
+    'ntf.sz3': 'Very big',
+    'ntf.sz4': 'Huge',
     'ntf.big': 'Bigger',
     'ntf.bigHelp': 'Select text or an emoji and press to make it bigger.',
     'ntf.boldHelp': 'Select words in the text and press the button to make them stand out.',
@@ -4186,7 +4201,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261029191919`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261029192055`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

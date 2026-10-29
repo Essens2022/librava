@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261029191919';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029191919';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029191919';
-import { resetCompanyCache } from './views.js?v=20261029191919';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029191919';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029191919';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029191919';
-import { optimizeBook } from './optimize.js?v=20261029191919';
-import { api } from './api.js?v=20261029191919';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029191919';
+import { CONFIG } from './config.js?v=20261029192055';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029192055';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029192055';
+import { resetCompanyCache } from './views.js?v=20261029192055';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029192055';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029192055';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029192055';
+import { optimizeBook } from './optimize.js?v=20261029192055';
+import { api } from './api.js?v=20261029192055';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029192055';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1960,7 +1960,7 @@ async function notificationsAdmin(body) {
       <div class="two" id="n-vars"><label class="field" data-v="code"><span>${esc(t('of.code'))}</span><input id="n-code" maxlength="30" style="text-transform:uppercase"></label><label class="field" data-v="percent"><span>${esc(t('of.percent'))}</span><input id="n-pct" type="number" min="1" max="90" value="20"></label></div>
       <label class="field"><span>${esc(t('ap.title'))} *</span><input id="n-title" maxlength="120" required></label>
       <div class="field"><span>${esc(t('ap.text'))}</span>
-        <div class="ntf-fmt"><button type="button" class="btn btn-ghost btn-sm" id="n-bold" title="${esc(t('ntf.boldHelp'))}"><b>B</b> ${esc(t('ntf.bold'))}</button><button type="button" class="btn btn-ghost btn-sm" id="n-big" title="${esc(t('ntf.bigHelp'))}">A<b style="font-size:1.25em">A</b> ${esc(t('ntf.big'))}</button><button type="button" class="btn btn-ghost btn-sm" id="n-emo">😊 Emoji</button><small class="muted">${esc(t('ntf.boldHelp'))}</small></div>
+        <div class="ntf-fmt"><button type="button" class="btn btn-ghost btn-sm" id="n-bold" title="${esc(t('ntf.boldHelp'))}"><b>B</b> ${esc(t('ntf.bold'))}</button><select class="input" id="n-size" title="${esc(t('ntf.bigHelp'))}" style="width:auto;padding:6px 10px"><option value="">${esc(t('ntf.size'))}…</option><option value="1">${esc(t('ntf.sz1'))}</option><option value="2">${esc(t('ntf.sz2'))}</option><option value="3">${esc(t('ntf.sz3'))}</option><option value="4">${esc(t('ntf.sz4'))}</option></select><button type="button" class="btn btn-ghost btn-sm" id="n-emo">😊 Emoji</button><small class="muted">${esc(t('ntf.boldHelp'))}</small></div>
         <div class="ntf-emojis" id="n-emojis" hidden>${['🎉', '🎊', '🥳', '🎁', '🎈', '🏆', '🌟', '✨', '⭐', '❤️', '💚', '🔥', '💥', '🚀', '👏', '🙌', '😍', '😊', '👍', '🙏', '📚', '📖', '🔖', '🏷️', '💸', '💰', '🛒', '⏰', '⚡', '🆕', '🆓', '✅', '👉', '🎯', '📣', '🍂', '🎃', '🎄', '☀️', '🌈'].map(e => `<button type="button" data-emo="${e}">${e}</button>`).join('')}</div>
         <textarea id="n-body" maxlength="600" rows="3"></textarea></div>
       <label class="field"><span>${esc(t('ntf.link'))}</span><input id="n-link" maxlength="300" placeholder="${esc(t('ntf.linkAuto'))}"></label>
@@ -1984,7 +1984,17 @@ async function notificationsAdmin(body) {
     ta.focus(); ta.setSelectionRange(wrapped ? a - L : a + L, wrapped ? b - L : b + L);
     ta.dispatchEvent(new Event('input', { bubbles: true }));
   };
-  $('#n-big', f).onclick = () => wrapSel('++');
+  // size of the selected text or emoji: normal / big / very big / huge
+  $('#n-size', f).onchange = e => {
+    const lvl = e.target.value; e.target.value = ''; if (!lvl) return;
+    const ta = $('#n-body', f); let a = ta.selectionStart, b = ta.selectionEnd, val = ta.value;
+    if (a === b) return toast(t('ntf.boldPick'), { error: true });
+    // remove an existing size marker around the selection
+    for (const n of [4, 3, 2]) { const m = '+'.repeat(n); if (val.slice(a - n, a) === m && val.slice(b, b + n) === m) { val = val.slice(0, a - n) + val.slice(a, b) + val.slice(b + n); a -= n; b -= n; break; } }
+    const m = lvl === '1' ? '' : '+'.repeat(+lvl);
+    ta.value = val.slice(0, a) + m + val.slice(a, b) + m + val.slice(b);
+    ta.focus(); ta.setSelectionRange(a + m.length, b + m.length); ta.dispatchEvent(new Event('input', { bubbles: true }));
+  };
   $('#n-emo', f).onclick = () => { const bx = $('#n-emojis', f); bx.hidden = !bx.hidden; };
   $('#n-emojis', f).onclick = e => {
     const b = e.target.closest('[data-emo]'); if (!b) return;

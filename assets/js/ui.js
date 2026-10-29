@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261029191919';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029191919';
-import { esc, store, $, $$ } from './util.js?v=20261029191919';
+import { CONFIG } from './config.js?v=20261029192055';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029192055';
+import { esc, store, $, $$ } from './util.js?v=20261029192055';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261029191919';
-import { suggest, highlight } from './search.js?v=20261029191919';
-import { track, trackPage } from './track.js?v=20261029191919';
-import { initGA, stopGA } from './ga.js?v=20261029191919';
-import { api } from './api.js?v=20261029191919';
-import { describeOffer, offersForBook } from './offers.js?v=20261029191919';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261029192055';
+import { suggest, highlight } from './search.js?v=20261029192055';
+import { track, trackPage } from './track.js?v=20261029192055';
+import { initGA, stopGA } from './ga.js?v=20261029192055';
+import { api } from './api.js?v=20261029192055';
+import { describeOffer, offersForBook } from './offers.js?v=20261029192055';
 
 // ---------------- icons ----------------
 const P = {
@@ -618,7 +618,9 @@ function ago(d) {
 // **word** in a notification text is shown highlighted
 export const ntfRich = txt => esc(txt)
   .replace(/\*\*([^*\n][^*]*?)\*\*/g, '<strong class="ntf-hl">$1</strong>')   // **highlighted**
-  .replace(/\+\+([^+\n][^+]*?)\+\+/g, '<span class="ntf-big">$1</span>')         // ++bigger++
+  .replace(/\+{4}([^+\n][^+]*?)\+{4}/g, '<span class="ntf-big s4">$1</span>')   // ++++huge++++
+  .replace(/\+{3}([^+\n][^+]*?)\+{3}/g, '<span class="ntf-big s3">$1</span>')   // +++very big+++
+  .replace(/\+\+([^+\n][^+]*?)\+\+/g, '<span class="ntf-big s2">$1</span>')    // ++big++
   .replace(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\p{Emoji_Modifier})*)/gu, '<span class="ntf-emo">$1</span>'); // emoji: larger
 export function ntfCardHTML(n, books = [], { preview = false } = {}) {
   const bs = books.filter(Boolean);
