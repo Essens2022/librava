@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261028171408';
-import { CONFIG } from './config.js?v=20261028171408';
-import { store } from './util.js?v=20261028171408';
+import { localize, loadRates } from './localprice.js?v=20261029112905';
+import { CONFIG } from './config.js?v=20261029112905';
+import { store } from './util.js?v=20261029112905';
 
 const D = {
   ro: {
@@ -46,6 +46,8 @@ const D = {
     'st.campaigns': 'Campanii (UTM)',
     'st.campaignsHelp': 'Creează mai jos un link pentru fiecare reclamă sau postare. Când cineva intră pe site prin el, aici vezi câți vizitatori a adus.',
     'st.c.source': 'Unde îl postezi',
+    'st.c.page': 'Pagina (carte sau prima pagină)',
+    'st.c.home': 'Prima pagină a site-ului',
     'st.c.name': 'Numele campaniei',
     'st.c.namePh': 'ex. toamna',
     'st.c.link': 'Linkul campaniei',
@@ -1421,6 +1423,8 @@ const D = {
     'st.campaigns': 'Campagne (UTM)',
     'st.campaignsHelp': 'Crea qui sotto un link per ogni pubblicità o post. Quando qualcuno entra nel sito da quel link, qui vedi quanti visitatori ha portato.',
     'st.c.source': 'Dove lo pubblichi',
+    'st.c.page': 'Pagina (libro o home)',
+    'st.c.home': 'Home del sito',
     'st.c.name': 'Nome della campagna',
     'st.c.namePh': 'es. autunno',
     'st.c.link': 'Link della campagna',
@@ -2796,6 +2800,8 @@ const D = {
     'st.campaigns': 'Campaigns (UTM)',
     'st.campaignsHelp': 'Create a link below for each ad or post. When someone visits the shop through it, you see here how many visitors it brought.',
     'st.c.source': 'Where you post it',
+    'st.c.page': 'Page (book or home)',
+    'st.c.home': 'Site home page',
     'st.c.name': 'Campaign name',
     'st.c.namePh': 'e.g. autumn',
     'st.c.link': 'Campaign link',
@@ -4165,7 +4171,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261028171408`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261029112905`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

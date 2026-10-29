@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261028171408';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261028171408';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261028171408';
-import { resetCompanyCache } from './views.js?v=20261028171408';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261028171408';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261028171408';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261028171408';
-import { optimizeBook } from './optimize.js?v=20261028171408';
-import { api } from './api.js?v=20261028171408';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261028171408';
+import { CONFIG } from './config.js?v=20261029112905';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029112905';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029112905';
+import { resetCompanyCache } from './views.js?v=20261029112905';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029112905';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029112905';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029112905';
+import { optimizeBook } from './optimize.js?v=20261029112905';
+import { api } from './api.js?v=20261029112905';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029112905';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2340,10 +2340,11 @@ async function offerForm(body, id) {
 const FLAG = cc => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🌐';
 // builds the tracked link for a campaign (what the visitor sees is just a normal link to the shop)
 function utmMaker(root) {
-  const src = $('#utm-src', root), name = $('#utm-name', root), out = $('#utm-link', root), copy = $('#utm-copy', root);
+  const src = $('#utm-src', root), name = $('#utm-name', root), out = $('#utm-link', root), copy = $('#utm-copy', root), page = $('#utm-page', root);
   if (!src) return;
   const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-  const make = () => { const p = new URLSearchParams({ utm_source: src.value === 'other' ? 'altro' : src.value }); const c = slug(name.value); if (c) p.set('utm_campaign', c); out.textContent = 'https://librava.store/?' + p.toString(); };
+  const make = () => { const p = new URLSearchParams({ utm_source: src.value === 'other' ? 'altro' : src.value }); const c = slug(name.value); if (c) p.set('utm_campaign', c); const pg = page?.value || ''; out.textContent = 'https://librava.store/' + (pg ? 'book/' + pg + '/' : '') + '?' + p.toString(); };
+  if (page) page.onchange = make;
   src.onchange = make; name.oninput = make; make();
   copy.onclick = async () => { try { await navigator.clipboard.writeText(out.textContent); } catch { const r = document.createRange(); r.selectNodeContents(out); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); } toast(t('st.c.copied')); };
 }
@@ -2351,7 +2352,9 @@ function utmMaker(root) {
 async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays') || 30)) {
   body.innerHTML = `<div class="panel"><div class="spinner"></div></div>`;
   let d;
+  let utmBooks = [];
   try { d = await api.analytics(days); } catch (x) { body.innerHTML = `<div class="panel">${esc(errText(x))}</div>`; return; }
+  try { utmBooks = (await api.adminBooks()).filter(b => b.status !== 'draft').sort((a, b) => String(a.title).localeCompare(b.title)); } catch { }
   const n = v => new Intl.NumberFormat(getLang()).format(v || 0);
   const pct = (a, b) => b ? (a / b * 100).toFixed(1).replace('.', ',') + '%' : '—';
   const delta = (now, before) => { if (!before) return ''; const ch = Math.round((now - before) / before * 100); return `<span class="st-delta ${ch >= 0 ? 'up' : 'down'}">${ch >= 0 ? '▲' : '▼'} ${Math.abs(ch)}%</span>`; };
@@ -2389,7 +2392,8 @@ async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays'
       <section class="panel"><h3>${esc(t('st.searches'))}</h3><p class="muted st-sub">${esc(t('st.searchesHelp'))}</p>${list(d.searches, '', (k, x) => `${esc(k)}${x.zero ? ` <span class="st-zero">${esc(t('st.zero'))}</span>` : ''}`)}</section>
       <section class="panel"><h3>${esc(t('st.campaigns'))}</h3><p class="muted st-sub">${esc(t('st.campaignsHelp'))}</p>
         <div class="utm-make">
-          <label class="field"><span>${esc(t('st.c.source'))}</span><select class="input" id="utm-src">${['instagram', 'facebook', 'tiktok', 'youtube', 'whatsapp', 'email', 'other'].map(k => `<option value="${k}">${esc(k === 'other' ? t('st.c.other') : k === 'email' ? 'E-mail' : k === 'tiktok' ? 'TikTok' : k === 'youtube' ? 'YouTube' : k === 'whatsapp' ? 'WhatsApp' : k[0].toUpperCase() + k.slice(1))}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('st.c.source'))}</span><select class="input" id="utm-src">${['instagram', 'facebook', 'tiktok', 'youtube', 'pinterest', 'whatsapp', 'email', 'other'].map(k => `<option value="${k}">${esc(k === 'other' ? t('st.c.other') : k === 'email' ? 'E-mail' : k === 'tiktok' ? 'TikTok' : k === 'youtube' ? 'YouTube' : k === 'whatsapp' ? 'WhatsApp' : k[0].toUpperCase() + k.slice(1))}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('st.c.page'))}</span><select class="input" id="utm-page"><option value="">${esc(t('st.c.home'))}</option>${(utmBooks || []).map(b => `<option value="${esc(b.id)}">${esc(b.title)}</option>`).join('')}</select></label>
           <label class="field"><span>${esc(t('st.c.name'))}</span><input class="input" id="utm-name" maxlength="40" placeholder="${esc(t('st.c.namePh'))}"></label>
           <div class="utm-out"><small class="muted">${esc(t('st.c.link'))}</small><div class="utm-link"><code id="utm-link"></code><button type="button" class="btn btn-sm btn-dark" id="utm-copy">${esc(t('st.c.copy'))}</button></div></div>
         </div>
