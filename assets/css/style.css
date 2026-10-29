@@ -2041,3 +2041,10 @@ img { image-rendering: auto; }
 .rm-btn:hover { background: #D92D20; color: #fff; }
 html[data-theme="dark"] .rm-btn { background: #3A1A17; color: #FDA29B; border-color: #B42318; }
 @media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .rm-btn { background: #3A1A17; color: #FDA29B; border-color: #B42318; } }
+
+/* highlighted words in notifications */
+.ntf-main p { white-space: pre-line; }
+.ntf-hl { font-weight: 900; color: var(--fg); background: #FFE9B8; padding: 0 5px; border-radius: 5px; }
+html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .ntf-hl { background: #5A4520; color: #FFE9B8; } }
+.ntf-fmt { display: flex; align-items: center; gap: 10px; margin: 2px 0 6px; flex-wrap: wrap; }

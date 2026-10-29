@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261029112905';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029112905';
-import { esc, store, $, $$ } from './util.js?v=20261029112905';
+import { CONFIG } from './config.js?v=20261029191803';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029191803';
+import { esc, store, $, $$ } from './util.js?v=20261029191803';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261029112905';
-import { suggest, highlight } from './search.js?v=20261029112905';
-import { track, trackPage } from './track.js?v=20261029112905';
-import { initGA, stopGA } from './ga.js?v=20261029112905';
-import { api } from './api.js?v=20261029112905';
-import { describeOffer, offersForBook } from './offers.js?v=20261029112905';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261029191803';
+import { suggest, highlight } from './search.js?v=20261029191803';
+import { track, trackPage } from './track.js?v=20261029191803';
+import { initGA, stopGA } from './ga.js?v=20261029191803';
+import { api } from './api.js?v=20261029191803';
+import { describeOffer, offersForBook } from './offers.js?v=20261029191803';
 
 // ---------------- icons ----------------
 const P = {
@@ -615,6 +615,8 @@ function ago(d) {
   const s = Math.max(1, (Date.now() - new Date(d)) / 1000), rtf = new Intl.RelativeTimeFormat(getLang(), { numeric: 'auto' });
   return s < 3600 ? rtf.format(-Math.round(s / 60), 'minute') : s < 86400 ? rtf.format(-Math.round(s / 3600), 'hour') : s < 86400 * 30 ? rtf.format(-Math.round(s / 86400), 'day') : new Date(d).toLocaleDateString(getLang());
 }
+// **word** in a notification text is shown highlighted
+export const ntfRich = txt => esc(txt).replace(/\*\*([^*\n][^*]*?)\*\*/g, '<strong class="ntf-hl">$1</strong>');
 export function ntfCardHTML(n, books = [], { preview = false } = {}) {
   const bs = books.filter(Boolean);
   const link = safeLink(n.link) || (bs.length === 1 ? `#/book/${encodeURIComponent(bs[0].id)}` : '');
@@ -628,14 +630,14 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
     const b = bs[0];
     return `<article class="ntf2 ntf-gift ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${GIFT_SVG}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand">${logoHTML()}</span><small class="muted">${esc(ago(n.created_at))}</small></div>
-    <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${esc(t('ntf.giftBody'))}</p>
+    <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${ntfRich(t('ntf.giftBody'))}</p>
     <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
       <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
       <a class="btn btn-buy btn-sm" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div></div></div></article>`;
   }
   return `<article class="ntf2 ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>
-    <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${esc(n.body)}</p>` : ''}${one}${many}
+    <div class="ntf-title">${esc(n.title)}</div>${n.body ? `<p>${ntfRich(n.body)}</p>` : ''}${one}${many}
     ${link && bs.length !== 1 ? `<a class="ntf-more" href="${esc(link)}" data-close>${esc(t('ntf.open'))} →</a>` : ''}</div></article>`;
 }
 export async function openBell() {

@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261029112905';
-import { CONFIG } from './config.js?v=20261029112905';
-import { store } from './util.js?v=20261029112905';
+import { localize, loadRates } from './localprice.js?v=20261029191803';
+import { CONFIG } from './config.js?v=20261029191803';
+import { store } from './util.js?v=20261029191803';
 
 const D = {
   ro: {
@@ -980,6 +980,9 @@ const D = {
     'ntf.empty': 'Nicio notificare deocamdată.',
     'ntf.new': 'Notificare nouă pentru clienți',
     'ntf.link': 'Link (opțional)',
+    'ntf.bold': 'Accentuează',
+    'ntf.boldHelp': 'Selectează cuvintele din text și apasă pe buton, ca să iasă în evidență.',
+    'ntf.boldPick': 'Selectează mai întâi cuvintele din text.',
     'ntf.lang': 'Pentru cine',
     'ntf.allLangs': 'Toți clienții (toate limbile)',
     'ntf.send': 'Publică notificarea',
@@ -2357,6 +2360,9 @@ const D = {
     'ntf.empty': 'Nessuna notifica per ora.',
     'ntf.new': 'Nuova notifica per i clienti',
     'ntf.link': 'Link (facoltativo)',
+    'ntf.bold': 'Evidenzia',
+    'ntf.boldHelp': 'Seleziona le parole nel testo e premi il pulsante per metterle in evidenza.',
+    'ntf.boldPick': 'Seleziona prima le parole nel testo.',
     'ntf.lang': 'Per chi',
     'ntf.allLangs': 'Tutti i clienti (tutte le lingue)',
     'ntf.send': 'Pubblica la notifica',
@@ -3734,6 +3740,9 @@ const D = {
     'ntf.empty': 'No notifications yet.',
     'ntf.new': 'New notification for customers',
     'ntf.link': 'Link (optional)',
+    'ntf.bold': 'Highlight',
+    'ntf.boldHelp': 'Select words in the text and press the button to make them stand out.',
+    'ntf.boldPick': 'Select some words in the text first.',
     'ntf.lang': 'For whom',
     'ntf.allLangs': 'All customers (all languages)',
     'ntf.send': 'Publish notification',
@@ -4171,7 +4180,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261029112905`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261029191803`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

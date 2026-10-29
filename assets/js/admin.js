@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261029112905';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029112905';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029112905';
-import { resetCompanyCache } from './views.js?v=20261029112905';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029112905';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029112905';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029112905';
-import { optimizeBook } from './optimize.js?v=20261029112905';
-import { api } from './api.js?v=20261029112905';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029112905';
+import { CONFIG } from './config.js?v=20261029191803';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029191803';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029191803';
+import { resetCompanyCache } from './views.js?v=20261029191803';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029191803';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029191803';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029191803';
+import { optimizeBook } from './optimize.js?v=20261029191803';
+import { api } from './api.js?v=20261029191803';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029191803';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1959,7 +1959,9 @@ async function notificationsAdmin(body) {
         <input class="input" id="n-find" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}" style="margin-top:6px"><div class="pr-chosen" id="n-chosen" style="margin-top:6px"></div><div class="pr-pick" id="n-pick" style="max-height:220px;margin-top:6px"></div></div>
       <div class="two" id="n-vars"><label class="field" data-v="code"><span>${esc(t('of.code'))}</span><input id="n-code" maxlength="30" style="text-transform:uppercase"></label><label class="field" data-v="percent"><span>${esc(t('of.percent'))}</span><input id="n-pct" type="number" min="1" max="90" value="20"></label></div>
       <label class="field"><span>${esc(t('ap.title'))} *</span><input id="n-title" maxlength="120" required></label>
-      <label class="field"><span>${esc(t('ap.text'))}</span><textarea id="n-body" maxlength="600" rows="3"></textarea></label>
+      <div class="field"><span>${esc(t('ap.text'))}</span>
+        <div class="ntf-fmt"><button type="button" class="btn btn-ghost btn-sm" id="n-bold" title="${esc(t('ntf.boldHelp'))}"><b>B</b> ${esc(t('ntf.bold'))}</button><small class="muted">${esc(t('ntf.boldHelp'))}</small></div>
+        <textarea id="n-body" maxlength="600" rows="3"></textarea></div>
       <label class="field"><span>${esc(t('ntf.link'))}</span><input id="n-link" maxlength="300" placeholder="${esc(t('ntf.linkAuto'))}"></label>
       <div class="ntf-preview"><span class="field-l">${esc(t('pr.preview'))}</span><div id="n-prev"></div></div>
       <button class="btn btn-buy" type="submit" id="n-send">${esc(t('ntf.send'))}</button>
@@ -1972,6 +1974,15 @@ async function notificationsAdmin(body) {
           <button class="btn btn-ghost btn-sm" data-del-ntf="${esc(g.batch || n.id)}" data-is-batch="${g.batch ? 1 : ''}">${esc(t('admin.delete'))}</button></div>`; }).join('') : `<p class="muted">${esc(t('ntf.none'))}</p>`}
     </div></div>`;
   const f = $('#ntf-form', body), v = sel => ($(sel, f)?.value || '').trim();
+  // highlight the selected words: they are wrapped in ** ** (shown bold and marked in the notification)
+  $('#n-bold', f).onclick = () => {
+    const ta = $('#n-body', f), a = ta.selectionStart, b = ta.selectionEnd, val = ta.value;
+    if (a === b) return toast(t('ntf.boldPick'), { error: true });
+    const sel = val.slice(a, b), wrapped = val.slice(a - 2, a) === '**' && val.slice(b, b + 2) === '**';
+    ta.value = wrapped ? val.slice(0, a - 2) + sel + val.slice(b + 2) : val.slice(0, a) + '**' + sel + '**' + val.slice(b);
+    ta.focus(); ta.setSelectionRange(wrapped ? a - 2 : a + 2, (wrapped ? b - 2 : b + 2));
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  };
   let edited = false;
   const meta = () => NTF_TEMPLATES.find(x => x.key === tpl);
   const valsFor = l => { const b = byId[chosen[0]]; return { book: b?.title || '', author: b?.author || '', price: b ? (b.price_cents ? new Intl.NumberFormat(l === 'no' ? 'nb' : l, { style: 'currency', currency: (b.currency || CONFIG.currency || 'eur').toUpperCase() }).format(b.price_cents / 100) : t('book.free')) : '', code: v('#n-code').toUpperCase(), percent: v('#n-pct') }; };
