@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261029191803';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029191803';
-import { esc, store, $, $$ } from './util.js?v=20261029191803';
+import { CONFIG } from './config.js?v=20261029191919';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261029191919';
+import { esc, store, $, $$ } from './util.js?v=20261029191919';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261029191803';
-import { suggest, highlight } from './search.js?v=20261029191803';
-import { track, trackPage } from './track.js?v=20261029191803';
-import { initGA, stopGA } from './ga.js?v=20261029191803';
-import { api } from './api.js?v=20261029191803';
-import { describeOffer, offersForBook } from './offers.js?v=20261029191803';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261029191919';
+import { suggest, highlight } from './search.js?v=20261029191919';
+import { track, trackPage } from './track.js?v=20261029191919';
+import { initGA, stopGA } from './ga.js?v=20261029191919';
+import { api } from './api.js?v=20261029191919';
+import { describeOffer, offersForBook } from './offers.js?v=20261029191919';
 
 // ---------------- icons ----------------
 const P = {
@@ -616,7 +616,10 @@ function ago(d) {
   return s < 3600 ? rtf.format(-Math.round(s / 60), 'minute') : s < 86400 ? rtf.format(-Math.round(s / 3600), 'hour') : s < 86400 * 30 ? rtf.format(-Math.round(s / 86400), 'day') : new Date(d).toLocaleDateString(getLang());
 }
 // **word** in a notification text is shown highlighted
-export const ntfRich = txt => esc(txt).replace(/\*\*([^*\n][^*]*?)\*\*/g, '<strong class="ntf-hl">$1</strong>');
+export const ntfRich = txt => esc(txt)
+  .replace(/\*\*([^*\n][^*]*?)\*\*/g, '<strong class="ntf-hl">$1</strong>')   // **highlighted**
+  .replace(/\+\+([^+\n][^+]*?)\+\+/g, '<span class="ntf-big">$1</span>')         // ++bigger++
+  .replace(/(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\p{Emoji_Modifier})*)/gu, '<span class="ntf-emo">$1</span>'); // emoji: larger
 export function ntfCardHTML(n, books = [], { preview = false } = {}) {
   const bs = books.filter(Boolean);
   const link = safeLink(n.link) || (bs.length === 1 ? `#/book/${encodeURIComponent(bs[0].id)}` : '');

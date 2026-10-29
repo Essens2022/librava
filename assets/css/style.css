@@ -2048,3 +2048,11 @@ html[data-theme="dark"] .rm-btn { background: #3A1A17; color: #FDA29B; border-co
 html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 @media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .ntf-hl { background: #5A4520; color: #FFE9B8; } }
 .ntf-fmt { display: flex; align-items: center; gap: 10px; margin: 2px 0 6px; flex-wrap: wrap; }
+
+.ntf-emo { font-size: 1.55em; line-height: 1; vertical-align: -.12em; }
+.ntf-big { font-size: 1.4em; font-weight: 800; line-height: 1.2; }
+.ntf-big .ntf-emo { font-size: 1.3em; }
+.ntf-emojis { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); margin-bottom: 6px; }
+.ntf-emojis[hidden] { display: none; }
+.ntf-emojis button { font-size: 24px; line-height: 1; width: 40px; height: 40px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; }
+.ntf-emojis button:hover { background: var(--pista-soft); }
