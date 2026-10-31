@@ -1,0 +1,31 @@
+{
+  "slug": "basic-home-repair-guide",
+  "title": "Basic Home Repair Guide: Choose a Safe First Project",
+  "seo_title": "Basic Home Repair Guide: Choose a Safe First Project",
+  "description": "A basic home repair guide for choosing a small first project, preparing your tools and knowing when to stop and call a qualified professional.",
+  "keywords": [
+    "basic home repair guide"
+  ],
+  "date": "2026-10-31",
+  "intro": "<p>A basic home repair guide for choosing a small first project, preparing your tools and knowing when to stop and call a qualified professional.</p>",
+  "sections": [
+    {
+      "h2": "Describe the problem before buying parts",
+      "html": "<p>Write down what happens, where it happens and when you first noticed it. Take clear photographs of the fixture and any model label. A toilet that keeps running, a loose handle and a damp patch need different kinds of investigation. Avoid covering up symptoms before you understand their cause.</p><p>Choose one accessible, non-structural task for a first project. Do not begin by dismantling a system just to see what is inside. Check the manufacturer’s instructions and whether the work is restricted in your area.</p>"
+    },
+    {
+      "h2": "Make a simple project card",
+      "html": "<ul><li>Problem: what needs fixing?</li><li>Scope: what small result are you aiming for?</li><li>Instructions: which model-specific directions will you follow?</li><li>Supplies: what tools and compatible parts are required?</li><li>Stop point: what observation means you should ask for help?</li></ul><p>Set out the tools, protect nearby surfaces and allow enough time to leave the area safe. Photograph the original arrangement before removing an accessible part, and keep small parts together. If the instructions do not match what you find, stop rather than improvising.</p>"
+    },
+    {
+      "h2": "Start with a focused tutorial",
+      "html": "<p>For a toilet that continues filling, read <a href=\"/en/guide/how-to-fix-a-running-toilet/\">how to identify the cause of a running toilet</a> before ordering parts. The guide explains the difference between common components and when a plumber is the better choice. Follow the instructions for your own fixture.</p><p>For decorating rather than repairs, see <a href=\"/en/guide/how-to-decorate-on-a-budget/\">how to decorate on a budget</a>. Keep cosmetic changes separate from repairs involving a leak, structural damage or an unknown material.</p>"
+    },
+    {
+      "h2": "Know which jobs to hand over",
+      "html": "<p>Use a qualified professional for work involving gas, hazardous materials, structural uncertainty or electrical work you are not qualified and permitted to perform. Stop if you find burning smells, serious water damage or an unsafe working area. If there is immediate danger, leave the area and contact the appropriate local emergency service.</p><p>The full home repair ebook linked below is a place to learn terminology and plan small tasks. Reading a guide does not make every repair suitable for DIY. The useful skill is knowing both how to prepare and when a job exceeds your experience.</p>"
+    }
+  ],
+  "faq": [],
+  "book_title": "Fix It Yourself"
+}

@@ -1,10 +1,19 @@
 {
   "slug": "how-to-start-a-lawn-care-business",
   "book_title": "Lawn Care Business Made Simple",
-  "title": "How to Start a Lawn Care Business: A Practical First-Season Plan",
-  "seo_title": "How to Start a Lawn Care Business: First-Season Plan",
+  "title": "Start a Lawn Care Business: Your First-Season Plan",
+  "seo_title": "Start a Lawn Care Business: Your First-Season Plan",
   "description": "How to start a lawn care business: choose services, buy the right equipment, stay legal and insured, price jobs and build a tight round of loyal customers.",
-  "keywords": ["how to start a lawn care business", "how to start a lawn mowing business", "how much to charge for mowing a lawn", "lawn care business equipment list", "do I need a license for lawn care", "gardening business for beginners", "how to get lawn care customers"],
+  "keywords": [
+    "start a lawn care business",
+    "how to start a lawn care business",
+    "how to start a lawn mowing business",
+    "how much to charge for mowing a lawn",
+    "lawn care business equipment list",
+    "do I need a license for lawn care",
+    "gardening business for beginners",
+    "how to get lawn care customers"
+  ],
   "date": "2026-10-26",
   "intro": "<p>If you already mow a few lawns for neighbors and enjoy working outside, you may be wondering how to turn that into a proper business. To start a lawn care business, offer mowing and basic garden maintenance first, check local rules and register the business, get liability insurance, price every visit from your real costs and time, and fill one tight round of streets before spreading out.</p><p>This guide walks you through those steps in order, with an equipment list, a worked pricing example and a seasonal plan. It also explains the safety and chemical rules that catch many new lawn businesses out.</p>",
   "sections": [
@@ -43,6 +52,10 @@
     {
       "h2": "Finding customers and planning the year",
       "html": "<p>Start with neighbors, friends and family, then target nearby streets so your round stays tight. Ten lawns on three streets mean far less unpaid driving than ten lawns spread across town.</p><ul><li>Drop flyers or door hangers on the streets around existing customers, where allowed</li><li>Add your name and number to your vehicle</li><li>Set up your free local map listing and a simple website</li><li>Use neighborhood apps and home services marketplaces carefully</li><li>Ask happy customers for reviews and referrals</li></ul><p>Plan by season, not month, and remember seasons are reversed in Australia and New Zealand. Spring brings startup cleanups, the growing season is your peak, fall (autumn) means leaves and tidy-ups, and winter is for hedges, servicing equipment, snow clearing where relevant and booking next season early. Lawn Care Business Made Simple includes a 30-day launch plan and a seasonal service calendar to keep you on track.</p>"
+    },
+    {
+      "h2": "Before buying your first mower",
+      "html": "<p>To start a lawn care business, first define one small service area and a service you can deliver reliably. List the travel time, equipment, maintenance, disposal and insurance costs for a typical job before choosing a price. Use the first few enquiries to test whether your proposed route and schedule are practical. Avoid buying equipment for services that no customer has asked for.</p>"
     }
   ],
   "faq": [
@@ -71,5 +84,6 @@
       "a": "<p>With a walk-behind mower, mow across the slope so the mower cannot roll back onto you. Ride-on or riding mowers usually go up and down slopes instead, but always follow the manufacturer's instructions. Avoid steep or wet slopes and banks near drop-offs entirely, and use a different tool or leave them out of the quote.</p>"
     }
   ],
-  "outro": "<p>Your first step today is to draw your service area around home and pick the three streets closest to you. Then call an insurer for a liability quote and check your local business and noise rules. Once those are sorted, a stack of flyers on those three streets is the start of your first round.</p>"
+  "outro": "<p>Your first step today is to draw your service area around home and pick the three streets closest to you. Then call an insurer for a liability quote and check your local business and noise rules. Once those are sorted, a stack of flyers on those three streets is the start of your first round.</p>",
+  "updated": "2026-10-31"
 }

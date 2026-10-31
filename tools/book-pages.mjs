@@ -130,21 +130,23 @@ for (const l of LANGS) {
 }
 
 // ---------- /<lang>/<category>/ ----------
+const categorySeoEn = JSON.parse(readFileSync('content/category-seo-en.json', 'utf8'));
 const keepCat = {};
 for (const l of LANGS) {
   keepCat[l] = new Set();
   for (const c of catPages[l]) {
     const s = catSlug(l, c); keepCat[l].add(s);
     const list = mains.filter(b => b.language === l && catsOf(b).includes(c));
-    const name = tr(l, 'cat.' + c), url = `${SITE}/${l}/${s}/`, title = `${name} — eBook · Librava`;
-    const desc = cut(`${name}: ${list.slice(0, 6).map(b => b.title).join(', ')}. ${(OG[l] || OG.en).s}`, 160);
+    const name = tr(l, 'cat.' + c), url = `${SITE}/${l}/${s}/`, title = (l === 'en' && categorySeoEn[c]?.title) || `${name} — eBook · Librava`;
+    const categoryIntro = l === 'en' ? categorySeoEn[c]?.intro : '';
+    const desc = cut(categoryIntro || `${name}: ${list.slice(0, 6).map(b => b.title).join(', ')}. ${(OG[l] || OG.en).s}`, 160);
     const alts = LANGS.filter(x => catPages[x].includes(c)).map(x => `<link rel="alternate" hreflang="${x}" href="${SITE}/${x}/${catSlug(x, c)}/">`).join('\n');
     const first = list.find(b => coverOf[b.id]);
     const head = `<title>${esc(title)}</title>\n<meta name="description" content="${esc(desc)}">\n${og(url, title, desc, first ? coverOf[first.id].url : `${SITE}/assets/img/og-${OG[l] ? l : 'en'}.jpg`, first ? coverOf[first.id].w : 1200, first ? coverOf[first.id].h : 630, 'website', l)}\n${alts}\n` +
       ldScript([ORG,
         { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Librava', item: `${SITE}/${l}/` }, { '@type': 'ListItem', position: 2, name, item: url }] },
         { '@type': 'CollectionPage', url, name: title, inLanguage: l, mainEntity: { '@type': 'ItemList', numberOfItems: list.length, itemListElement: list.slice(0, 50).map((b, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/book/${b.id}/`, name: b.title })) } }]);
-    const body = `<div class="wrap page seo-pre"><nav class="crumbs"><a href="/${l}/">Librava</a> › ${esc(name)}</nav><h1>${esc(name)}</h1><p>${esc(tr(l, 'search.inCat', { n: list.length, cat: name }).replace(/<[^>]*>/g, ''))}</p><ul class="seo-books">${list.slice(0, 200).map(b => card(l, b)).join('')}</ul></div>`;   // big categories: the first 200 here, every book is in the sitemap
+    const body = `<div class="wrap page seo-pre"><nav class="crumbs"><a href="/${l}/">Librava</a> › ${esc(name)}</nav><h1>${esc(name)}</h1>${categoryIntro ? `<p>${esc(categoryIntro)}</p>` : ''}<p>${esc(tr(l, 'search.inCat', { n: list.length, cat: name }).replace(/<[^>]*>/g, ''))}</p><ul class="seo-books">${list.slice(0, 200).map(b => card(l, b)).join('')}</ul></div>`;   // big categories: the first 200 here, every book is in the sitemap
     write(`${l}/${s}`, page({ lang: l, head, body, boot: { lang: l, force: true }, hash: `#/search?cat=${c}` }));
     urls.push({ loc: url, alts: LANGS.filter(x => catPages[x].includes(c)).map(x => [x, `${SITE}/${x}/${catSlug(x, c)}/`]), lastmod: (list[0]?.updated_at || today).slice(0, 10), pri: '0.8' });
   }
