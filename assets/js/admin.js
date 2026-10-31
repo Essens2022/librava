@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261029192055';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261029192055';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261029192055';
-import { resetCompanyCache } from './views.js?v=20261029192055';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261029192055';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261029192055';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261029192055';
-import { optimizeBook } from './optimize.js?v=20261029192055';
-import { api } from './api.js?v=20261029192055';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261029192055';
+import { CONFIG } from './config.js?v=20261031120940';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261031120940';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261031120940';
+import { resetCompanyCache } from './views.js?v=20261031120940';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261031120940';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261031120940';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261031120940';
+import { optimizeBook } from './optimize.js?v=20261031120940';
+import { api } from './api.js?v=20261031120940';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261031120940';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -80,6 +80,10 @@ export async function viewAdmin(el, parts) {
     </nav>
     <div id="adm-body"></div>
   </div>`;
+  // the tab bar scrolls sideways on phones: keep the open section in view (it used to jump back to the first tab)
+  const nav = $('.adm-tabs', el), on = nav?.querySelector('a.on');
+  const centre = () => { if (nav && on) nav.scrollLeft = Math.max(0, on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2); };
+  centre(); requestAnimationFrame(centre); setTimeout(centre, 250);
   const body = $('#adm-body', el);
   liveAdmin(tab, parts, body);
   switch (tab) {
