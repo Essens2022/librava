@@ -2061,3 +2061,4 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .ntf-big.s4 { font-size: 2.8em; }
 .ntf-big { line-height: 1.15; font-weight: 800; }
 .ntf-big .ntf-emo { font-size: 1em; }
+.adm-tabs { position: relative; }
