@@ -5,7 +5,7 @@
   "seo_title": "Learn HTML and CSS: Build Your First Website Step by Step",
   "description": "Learn HTML and CSS by building a small website: create your files, write a page, add styles, adapt it for phones and publish your work.",
   "keywords": [
-    "learn HTML and CSS",
+    "Learn HTML And CSS",
     "how to make a website with html",
     "how to make a website with html and css",
     "html and css for beginners",
@@ -50,7 +50,7 @@
       "html": "<p>For a site made of plain HTML and CSS files, free hosting is easy to find. There are free static hosting services built for exactly this kind of site, and free code sharing sites that can also publish a folder as a website. Most include HTTPS (the padlock) and give you a free web address. Free tiers have limits and terms can change, so read them first.</p><p>Before you upload, run through this checklist:</p><ul><li>index.html sits at the top level of the folder, not inside another folder.</li><li>All file names are lowercase with hyphens, and the capital letters in every path match the real file names exactly.</li><li>Every link and image works on your own computer.</li><li>Your HTML and CSS have been through a free online validator. Fix the first error, then re-check, because one missing tag can cause a chain of errors.</li><li>There are no passwords, private phone numbers or personal notes anywhere, including comments. Anyone can view the source of a page.</li><li>Every image is yours or properly licensed, and people in photos have agreed to appear.</li></ul><p>Then create an account, choose to make a new site, and upload the contents of your project folder so that index.html, styles.css and the images folder sit side by side at the root. Open the live address on a computer and a phone, and click everything again.</p><div class=\"g-note\">A custom domain name, such as your club's own .com or .org.uk address, is rented yearly from a registrar rather than bought forever. Check the renewal price as well as the first-year price, and turn on auto-renew if you plan to keep it.</div><p>To update the site later, edit the copy on your computer, test it, then upload again. Keep backups in at least two other places, because your host is not a backup.</p>"
     },
     {
-      "h2": "A small project to check your understanding",
+      "h2": "Learn HTML And CSS",
       "html": "<p>As you learn HTML and CSS, build a page about something you know. Add a heading, two paragraphs, an image with useful alternative text and a link. Then use a separate stylesheet to set readable spacing and a comfortable line length. Resize the window and test every link. This gives you a complete project to improve instead of a folder of disconnected examples.</p>"
     }
   ],

@@ -1,26 +1,32 @@
 {
   "romance": {
     "title": "Romance Ebooks | Librava",
-    "intro": "Browse romance ebooks in the Librava catalog. Open a book page to check its story description, language, available formats and reading options before choosing your next read."
+    "intro": "Browse romance ebooks in the Librava catalog. Open a book page to check its story description, language, available formats and reading options before choosing your next read.",
+    "heading": "Romance Ebooks"
   },
   "children": {
-    "title": "Children Ebooks: Stories, Crafts and Activities | Librava",
-    "intro": "Explore children ebooks for story time, crafts and hands-on activities. Check each description for the intended reader, materials and any adult help needed for an activity."
+    "title": "Children Ebooks | Librava",
+    "intro": "Explore children ebooks for story time, crafts and hands-on activities. Check each description for the intended reader, materials and any adult help needed for an activity.",
+    "heading": "Children Ebooks"
   },
   "parenting": {
-    "title": "Parenting Books and Practical Ebooks | Librava",
-    "intro": "Explore parenting books about everyday family routines, money conversations, teaching at home and supporting children. Choose a topic that matches the challenge your family is working on."
+    "title": "Parenting Books | Librava",
+    "intro": "Explore parenting books about everyday family routines, money conversations, teaching at home and supporting children. Choose a topic that matches the challenge your family is working on.",
+    "heading": "Parenting Books"
   },
   "selfhelp": {
-    "title": "Self Help Ebooks for Everyday Routines | Librava",
-    "intro": "Browse self help ebooks for everyday routines, communication, organization and personal goals. Read the description and preview where available to choose a practical guide that fits your needs."
+    "title": "Self Help Ebooks | Librava",
+    "intro": "Browse self help ebooks for everyday routines, communication, organization and personal goals. Read the description and preview where available to choose a practical guide that fits your needs.",
+    "heading": "Self Help Ebooks"
   },
   "travel": {
-    "title": "Travel Guide Ebooks for Planning Your Next Trip | Librava",
-    "intro": "Explore travel guide ebooks for planning, budgeting, solo trips, cruises and useful travel phrases. Check local conditions, entry requirements and opening times separately before travelling."
+    "title": "Travel Guide Ebooks | Librava",
+    "intro": "Explore travel guide ebooks for planning, budgeting, solo trips, cruises and useful travel phrases. Check local conditions, entry requirements and opening times separately before travelling.",
+    "heading": "Travel Guide Ebooks"
   },
   "history": {
-    "title": "History Ebooks Online: Explore Your Family History | Librava",
-    "intro": "Browse the history ebooks online in this catalog, including a practical introduction to researching your family history. Check the book description to see which research skills it covers."
+    "title": "History Ebooks Online | Librava",
+    "intro": "Browse the history ebooks online in this catalog, including a practical introduction to researching your family history. Check the book description to see which research skills it covers.",
+    "heading": "History Ebooks Online"
   }
 }

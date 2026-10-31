@@ -6,14 +6,15 @@
   "description": "A beginner baking guide with practical baking tips for measuring, oven temperature, mixing, choosing pans and troubleshooting common mistakes.",
   "keywords": [
     "baking guide",
+    "baking tips",
+    "baking tips for women",
     "baking tips for beginners",
     "baking for beginners",
     "how to start baking",
     "why did my cake sink in the middle",
     "why are my cookies flat",
     "how to measure flour correctly",
-    "easy things to bake for beginners",
-    "baking tips"
+    "easy things to bake for beginners"
   ],
   "date": "2026-10-26",
   "intro": "<p>If your cakes come out dry, your cookies spread into one big sheet or your bread refuses to rise, you are not a bad baker. The short answer: most baking failures come from just three things, how you measure flour, how hot your oven really is and how much you mix, and fixing those three makes nearly every recipe work.</p><p>This guide covers the handful of rules that matter most, with simple numbers, a troubleshooting table, a swap chart and a five-bake plan for your first month. Read it once, keep it near the kitchen, and your next bake should behave much better.</p>",
@@ -55,8 +56,16 @@
       "html": "<p>The best way to learn is five bakes, about one a week, each teaching a skill the next one uses.</p><ol><li>Soft chocolate chip cookies, for creaming and pulling cookies out while the centers look soft</li><li>Blueberry muffins, for the gentle just combined stir</li><li>A one-bowl chocolate cake, for the toothpick test</li><li>A simple sandwich loaf, for kneading and seeing what doubled in size looks like</li><li>Apple crumble, the most forgiving dessert of all</li></ol><p>Banana bread is another good first loaf. Mash 3 very ripe bananas, whisk in melted butter, sugar, 2 eggs and vanilla, then fold in 2 cups (250 g) flour, 1 teaspoon baking soda and salt just until no dry flour shows. Bake in a lined 9x5 in loaf pan at 350°F / 180°C (160°C fan) for 55 to 65 minutes, until a toothpick comes out clean or with moist crumbs. The ripe bananas supply the acid the soda needs.</p><p>Most cookies, muffins and butter cakes keep 3 to 4 days in an airtight container, and nearly everything freezes well for up to 3 months. Easy Everyday Baking has more than 70 recipes built on these same rules, with cups and grams side by side.</p>"
     },
     {
-      "h2": "Use this baking guide one recipe at a time",
+      "h2": "baking guide",
       "html": "<p>Choose one familiar recipe and change only one thing at a time. Write down the pan size, oven setting, baking time and result. These baking tips are easier to use when you can compare two batches instead of relying on memory. Start with the measuring and mixing basics, then use your notes to decide which part of the process to adjust next.</p>"
+    },
+    {
+      "h2": "baking tips for women",
+      "html": "<p>Make a baking routine that fits the time and kitchen space you have. Before starting, read the full recipe, weigh the ingredients and set out the correct pan. Pick one recipe to repeat so you can compare results, and note what worked instead of changing several ingredients at once.</p><p>For a short baking session, choose a recipe with a manageable preparation time and a clear stopping point. If you bake for other people, ask about allergies and preferences before choosing the recipe. Keep your notes with the recipe so the next batch starts with what you have already learned.</p>"
+    },
+    {
+      "h2": "baking tips",
+      "html": "<p>Keep your most useful reminders next to the recipe: check the pan size, measure consistently, prepare the oven as directed and allow time for cooling. For the explanations behind each step, return to the corresponding section in this baking guide.</p>"
     }
   ],
   "faq": [
