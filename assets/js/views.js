@@ -87,6 +87,7 @@ export async function viewHome(el) {
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
     ${strips[0] || ''}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
+    ${L === 'en' ? `<section class="panel"><h2 class="section-title">Find your next practical read</h2><p>Explore free guides on everyday questions, then discover the books behind them.</p><div class="hero-actions"><a class="btn btn-light" href="/en/guide/">Free practical guides</a><a class="btn btn-light" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
     ${strips[2] || ''}
@@ -329,7 +330,7 @@ export async function viewBook(el, id) {
     const list = (m[b.work_id || b.id] || []), box = el.querySelector('#free-guide');
     if (!list.length || !box) return;
     const mine = list.find(g => g.lang === getLang()) || list.find(g => g.lang === 'en') || list[0];
-    box.innerHTML = `<p class="free-guide">${icon('book')} <b>${esc(t('book.freeGuide'))}:</b> <a href="/${mine.lang}/guide/${encodeURIComponent(mine.slug)}/">${esc(mine.title)}</a>${mine.lang !== getLang() ? ` <span class="muted">${esc(t('book.inEnglish'))}</span>` : ''}</p>`;
+    box.innerHTML = `<p class="free-guide">${icon('book')} <b>${esc(t('book.freeGuide'))}:</b> <a href="/${mine.lang}/guide/${encodeURIComponent(mine.slug)}/">${esc(mine.topic || mine.title)}</a>${mine.lang !== getLang() ? ` <span class="muted">${esc(t('book.inEnglish'))}</span>` : ''}</p>`;
   }).catch(() => { });
 
   // description clamp

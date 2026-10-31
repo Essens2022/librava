@@ -3,7 +3,7 @@ import { t, getLang, setLang } from './i18n.js?v=20261031120959';
 import { esc, $, $$ } from './util.js?v=20261031120959';
 import { api, chooseBackend } from './api.js?v=20261031120959';
 import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261031120959';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261031120959';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261031topics1';
 import { trackPage } from './track.js?v=20261031120959';
 import { offline } from './offline.js?v=20261031120959';
 import { viewReader } from './reader.js?v=20261031120959';
@@ -25,6 +25,17 @@ async function viewGuide(el, slug) {
   }
   el.innerHTML = html;
   const h1 = el.querySelector('h1'); if (h1) document.title = h1.textContent + ' | ' + CONFIG.siteName;
+  // Section links scroll inside the guide without replacing the store's hash route.
+  el.addEventListener('click', e => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = e.target.closest('a[href^="#"]');
+    const href = link?.getAttribute('href');
+    if (!href || href.startsWith('#/')) return;
+    const target = document.getElementById(href.slice(1));
+    if (!target || !el.contains(target)) return;
+    e.preventDefault();
+    target.scrollIntoView({ block: 'start' });
+  });
 }
 let cleanup = null, seq = 0;
 // "Back" like Amazon: where the visitor was on each page, to put them back there

@@ -123,6 +123,7 @@ for (const l of LANGS) {
     ldScript([ORG, { '@type': 'WebSite', '@id': SITE + '/#site', url: SITE + '/', name: 'Librava', publisher: { '@id': SITE + '/#org' } },
       { '@type': 'CollectionPage', url, name: title, description: o.s, inLanguage: l, isPartOf: { '@id': SITE + '/#site' } }]);
   const body = `<div class="wrap page seo-pre"><h1>${esc(o.t)}</h1><p>${esc(o.s)}</p>
+    ${l === 'en' ? '<p><a href="/en/guide/">Free practical guides</a> · <a href="/en/guide/ebook-catalogue/">Browse the complete eBook catalogue</a></p>' : ''}
     ${catPages[l].length ? `<h2>${esc(tr(l, 'home.catCardTitle'))}</h2><ul class="seo-cats">${catPages[l].map(c => `<li><a href="/${l}/${catSlug(l, c)}/">${esc(tr(l, 'cat.' + c))}</a></li>`).join('')}</ul>` : ''}
     <h2>${esc(tr(l, 'home.new'))}</h2><ul class="seo-books">${show.map(b => card(l, b)).join('')}</ul></div>`;
   write(l, page({ lang: l, head, body, boot: { lang: l, force: true } }));
@@ -170,6 +171,7 @@ if (existsSync('content/guides')) for (const l of readdirSync('content/guides'))
 }
 const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 for (const g of guides) g.book = mains.find(b => norm(b.title) === norm(g.book_title)) || null;
+const keywordTargets = JSON.parse(readFileSync('content/keyword-targets.json', 'utf8'));
 // ---------- /book/<id>/ ----------
 // One title = one indexable page. A title sold as PDF and EPUB has one page per edition (the store links to both),
 // but only the main edition (PDF, else the first) is canonical and in the sitemap; it lists every format and price.
@@ -210,7 +212,7 @@ for (const b of books) {
     <article class="seo-book">${cv ? `<img src="${esc(cv.url)}" alt="${esc(b.title)}" width="${cv.w}" height="${cv.h}">` : ''}<div><h1>${esc(b.title)}</h1>${b.subtitle ? `<p class="subtitle">${esc(b.subtitle)}</p>` : ''}
     <p>${esc(tr(l, 'book.by', { author: b.author }).replace(/<[^>]*>/g, ''))}</p><p>${eds.map(x => `<a href="/book/${x.id}/"><b>${esc(x.price_cents ? money(l, x.price_cents, x.currency) : tr(l, 'book.free'))}</b> · ${esc(fmtName(x))}</a>`).join(' &nbsp;|&nbsp; ')}</p>
     ${descFull.split('\n').filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</div></article>
-    ${guides.filter(g => g.book && (g.book.work_id || g.book.id) === (b.work_id || b.id)).map(g => `<p><a href="/${g.lang}/guide/${esc(g.slug)}/">${esc(g.title)}</a></p>`).join('')}
+    ${guides.filter(g => g.book && (g.book.work_id || g.book.id) === (b.work_id || b.id)).map(g => `<p><a href="/${g.lang}/guide/${esc(g.slug)}/">${esc((g.lang === 'en' && keywordTargets.guides?.[g.slug]?.[0]) || g.title)}</a></p>`).join('')}
     ${related.length ? `<h2>${esc(tr(l, 'book.related'))}</h2><ul class="seo-books">${related.map(x => card(l, x)).join('')}</ul>` : ''}</div>`;
   write(`book/${b.id}`, page({ lang: l, head, body, boot: { lang: l }, hash: `#/book/${b.id}` }));
   if (isMain) urls.push({ loc: url, lastmod: String(eds.map(x => x.updated_at || today).sort().pop()).slice(0, 10), pri: '0.9', img: cv?.url, imgTitle: b.title });
@@ -258,15 +260,41 @@ ${rel.length ? `<h2>${esc(gu(l, 'rel'))}</h2><ul class="g-rel">${rel.map(x => `<
 for (const l of Object.keys(keepGuide)) {
   const list = guides.filter(g => g.lang === l).sort((a, b) => a.title.localeCompare(b.title));
   const url = `${SITE}/${l}/guide/`, name = `${GUIDE_WORD[l] || GUIDE_WORD.en} · Librava`;
+  const categoryLinks = l === 'en' ? Object.entries(keywordTargets.categories || {}).filter(([c]) => catPages[l].includes(c)).map(([c, label]) => `<li><a href="/${l}/${catSlug(l, c)}/">${esc(label)}</a></li>`).join('') : '';
   const body = `<article class="seo-guide" data-guide-path="/${l}/guide/" data-guide-lang="${l}"><nav class="crumbs"><a href="/${l}/">Librava</a></nav><h1>${esc(GUIDE_WORD[l] || GUIDE_WORD.en)}</h1><p class="g-lead">${esc(gu(l, 'lead'))}</p>
-<ul class="g-list">${list.map(g => `<li><a href="/${l}/guide/${esc(g.slug)}/">${esc(g.title)}</a><p>${esc(cut(g.description || '', 170))}</p></li>`).join('')}</ul></article>`;
+${l === 'en' ? '<p><a class="g-btn" href="/en/guide/ebook-catalogue/">Browse the complete eBook catalogue</a></p>' : ''}
+${categoryLinks ? `<nav aria-label="Browse eBook categories"><h2>Browse eBook categories</h2><ul>${categoryLinks}</ul></nav>` : ''}
+<h2>Find a practical guide</h2>
+<ul class="g-list">${list.map(g => `<li><a href="/${l}/guide/${esc(g.slug)}/">${esc((l === 'en' && keywordTargets.guides?.[g.slug]?.[0]) || g.title)}</a><p>${esc(cut(g.description || '', 170))}</p></li>`).join('')}</ul></article>`;
   const head = `<title>${esc(name)}</title>\n<meta name="description" content="${esc(gu(l, 'lead'))}">\n${og(url, name, gu(l, 'lead'), `${SITE}/assets/img/og-en.jpg`, 1200, 630, 'website', l)}\n` +
     ldScript([ORG, { '@type': 'CollectionPage', url, name, inLanguage: l, mainEntity: { '@type': 'ItemList', numberOfItems: list.length, itemListElement: list.map((g, i) => ({ '@type': 'ListItem', position: i + 1, url: guideUrl(g), name: g.title })) } }]);
   write(`${l}/guide`, page({ lang: l, head, body, boot: { lang: l, force: true }, hash: '#/guide' }));
   urls.push({ loc: url, lastmod: today, pri: '0.7' });
 }
+// A visible catalogue links every work once, including titles outside the home shelves.
+if (keepGuide.en) {
+  const l = 'en', path = 'en/guide/ebook-catalogue', url = `${SITE}/${path}/`;
+  const name = 'eBook Catalogue | Librava';
+  const desc = 'Browse the complete Librava eBook catalogue by subject. Find each book, read its description, and explore related free practical guides.';
+  const list = [...mains].sort((a, b) => a.title.localeCompare(b.title, 'en'));
+  const groups = [...CATS.map(c => [c, list.filter(b => catsOf(b)[0] === c)]), ['other', list.filter(b => !catsOf(b).length)]].filter(([, bs]) => bs.length);
+  const label = c => c === 'other' ? 'More books' : tr(l, 'cat.' + c);
+  const body = `<article class="seo-guide" data-guide-path="/${path}/" data-guide-lang="en"><nav class="crumbs"><a href="/en/">Librava</a> › <a href="/en/guide/">Free practical guides</a></nav>
+<h1>eBook catalogue</h1><p class="g-lead">Explore ${list.length} books by subject. Open a book to see its full description, author, price and available formats.</p>
+<nav class="g-toc" aria-label="Catalogue subjects"><b>Browse by subject</b><ul>${groups.map(([c, bs]) => `<li><a href="#catalogue-${c}">${esc(label(c))} (${bs.length})</a></li>`).join('')}</ul></nav>
+${groups.map(([c, bs]) => `<section><h2 id="catalogue-${c}">${esc(label(c))}</h2><ul class="g-list">${bs.map(b => {
+    const related = guides.filter(g => g.lang === l && g.book && (g.book.work_id || g.book.id) === (b.work_id || b.id));
+    return `<li><a href="/book/${b.id}/">${esc(b.title)}</a><p>${esc(b.author)}${b.language && b.language !== 'en' ? ` · ${esc(b.language.toUpperCase())}` : ''}</p><p>${esc(cut(plain(b.subtitle || b.description).replace(/\n/g, ' '), 200))}</p>${related.length ? `<p>Free guides: ${related.map(g => `<a href="/en/guide/${esc(g.slug)}/">${esc(g.title)}</a>`).join(' · ')}</p>` : ''}</li>`;
+  }).join('')}</ul></section>`).join('')}
+<p><a href="/en/guide/">Explore all free practical guides</a></p></article>`;
+  const head = `<title>${esc(name)}</title><meta name="description" content="${esc(desc)}">\n${og(url, name, desc, `${SITE}/assets/img/og-en.jpg`, 1200, 630, 'website', l)}\n` + ldScript([ORG,
+    { '@type': 'CollectionPage', url, name, description: desc, inLanguage: l, mainEntity: { '@type': 'ItemList', numberOfItems: list.length, itemListElement: list.map((b, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/book/${b.id}/`, name: b.title })) } }]);
+  write(path, page({ lang: l, head, body, boot: { lang: l, force: true }, hash: '#/guide/ebook-catalogue' }));
+  keepGuide.en.add('ebook-catalogue');
+  urls.push({ loc: url, lastmod: today, pri: '0.7' });
+}
 // the store shows "Free guide: ..." on each book page: work id -> its guides
-{ const m = {}; for (const g of guides) if (g.book) (m[g.book.work_id || g.book.id] ||= []).push({ lang: g.lang, slug: g.slug, title: g.title });
+{ const m = {}; for (const g of guides) if (g.book) (m[g.book.work_id || g.book.id] ||= []).push({ lang: g.lang, slug: g.slug, title: g.title, topic: (g.lang === 'en' && keywordTargets.guides?.[g.slug]?.[0]) || g.title });
   mkdirSync('feed', { recursive: true }); writeFileSync('feed/guides.json', JSON.stringify(m)); }
 // guides that were removed lose their page
 for (const l of LANGS) if (existsSync(`${l}/guide`)) for (const d of readdirSync(`${l}/guide`)) if (statSync(`${l}/guide/${d}`).isDirectory() && !keepGuide[l]?.has(d)) rmSync(`${l}/guide/${d}`, { recursive: true, force: true });
