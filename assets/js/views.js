@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101160807';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101160807';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101160807';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101160807';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101160807';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101160807';
-import { track } from './track.js?v=20261101160807';
-import { gaEvent } from './ga.js?v=20261101160807';
-import { guessLang } from './langdetect.js?v=20261101160807';
-import { didYouMean } from './search.js?v=20261101160807';
-import { api, editionsOf } from './api.js?v=20261101160807';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101160807';
+import { CONFIG } from './config.js?v=20261101161230';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101161230';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101161230';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101161230';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101161230';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101161230';
+import { track } from './track.js?v=20261101161230';
+import { gaEvent } from './ga.js?v=20261101161230';
+import { guessLang } from './langdetect.js?v=20261101161230';
+import { didYouMean } from './search.js?v=20261101161230';
+import { api, editionsOf } from './api.js?v=20261101161230';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101161230';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -260,10 +260,12 @@ export async function viewBook(el, id) {
         ${canPreview ? `<button class="look-inside" data-preview>${icon('eye')} ${esc(t('book.lookInside'))}</button>` : ''}
       </div>
       <div class="book-main book-head">
-        <h1 class="pt"><span class="pt-title">${esc(b.title)}</span>${b.subtitle ? `<span class="pt-sub">${/[:.?!—–-]$/.test(b.title.trim()) || /^[—–-]/.test(b.subtitle.trim()) ? ' ' : ': '}${esc(b.subtitle)}</span>` : ''} <span class="pt-ed">${esc(t('book.format.' + b.format))}</span></h1>
+        <div class="pt-fmt">${esc(t('book.format.' + b.format))}</div>
+        <h1 class="pt"><span class="pt-title">${esc(b.title)}</span>${b.subtitle ? `<span class="pt-sub">${/[:.?!—–-]$/.test(b.title.trim()) || /^[—–-]/.test(b.subtitle.trim()) ? ' ' : ': '}${esc(b.subtitle)}</span>` : ''}</h1>
         ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
         <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')}</div>
-        <div class="rating-line" style="margin-top:8px">${reviews.length ? `<b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a>` : `<span class="muted">${esc(t('book.noRatings'))}</span>`}</div>
+        ${reviews.length ? `<div class="rating-line" style="margin-top:8px"><b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a></div>` : ''}
+        <ul class="trust-strip">${['trust1', 'trust2', 'trust3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'shield'][i])}<span>${esc(t('book.' + k))}</span></li>`).join('')}</ul>
       </div>
       <div class="book-main book-body">
         <div class="formats" role="list" aria-label="${esc(t('book.d.format'))}">${eds.map(x => `<a role="listitem" class="format-chip${x.id === b.id ? '' : ' alt'}" href="#/book/${encodeURIComponent(x.id)}"${x.id === b.id ? ' aria-current="true"' : ''}><span class="muted">${esc(t('book.color.' + (x.color === 'bw' ? 'bw' : 'color')))} · ${esc(t('book.formatShort.' + x.format))}</span><b>${x.price_cents ? money(x.price_cents) : esc(t('book.free'))}</b></a>`).join('')}</div>

@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261101160807';
-import { CONFIG } from './config.js?v=20261101160807';
-import { store } from './util.js?v=20261101160807';
+import { localize, loadRates } from './localprice.js?v=20261101161230';
+import { CONFIG } from './config.js?v=20261101161230';
+import { store } from './util.js?v=20261101161230';
 
 const D = {
   ro: {
@@ -516,6 +516,9 @@ const D = {
     'book.vat': 'TVA inclus',
     'book.addToCart': 'Adaugă în coș',
     'book.offersHead': 'Oferte pentru tine',
+    'book.trust1': 'Acces instant',
+    'book.trust2': 'Citești pe orice dispozitiv',
+    'book.trust3': 'Plată securizată',
     'book.offerAdd': 'ADAUGĂ',
     'book.offerUnlocked': 'ACTIVĂ',
     'book.offerWith': 'Cu această carte în coș: {label} (economisești {amount})',
@@ -1928,6 +1931,9 @@ const D = {
     'book.vat': 'IVA inclusa',
     'book.addToCart': 'Aggiungi al carrello',
     'book.offersHead': 'Offerte per te',
+    'book.trust1': 'Accesso immediato',
+    'book.trust2': 'Leggi su ogni dispositivo',
+    'book.trust3': 'Pagamento sicuro',
     'book.offerAdd': 'AGGIUNGI',
     'book.offerUnlocked': 'ATTIVA',
     'book.offerWith': 'Con questo libro nel carrello: {label} (risparmi {amount})',
@@ -3340,6 +3346,9 @@ const D = {
     'book.vat': 'VAT included',
     'book.addToCart': 'Add to cart',
     'book.offersHead': 'Offers for you',
+    'book.trust1': 'Instant access',
+    'book.trust2': 'Read on any device',
+    'book.trust3': 'Secure payment',
     'book.offerAdd': 'ADD',
     'book.offerUnlocked': 'UNLOCKED',
     'book.offerWith': 'With this book in your cart: {label} (you save {amount})',
@@ -4276,7 +4285,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261101160807`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261101161230`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
