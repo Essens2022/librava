@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101133458';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101133458';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101133458';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101133458';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101133458';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101133458';
-import { track } from './track.js?v=20261101133458';
-import { gaEvent } from './ga.js?v=20261101133458';
-import { guessLang } from './langdetect.js?v=20261101133458';
-import { didYouMean } from './search.js?v=20261101133458';
-import { api, editionsOf } from './api.js?v=20261101133458';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101133458';
+import { CONFIG } from './config.js?v=20261101150131';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101150131';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101150131';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101150131';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101150131';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101150131';
+import { track } from './track.js?v=20261101150131';
+import { gaEvent } from './ga.js?v=20261101150131';
+import { guessLang } from './langdetect.js?v=20261101150131';
+import { didYouMean } from './search.js?v=20261101150131';
+import { api, editionsOf } from './api.js?v=20261101150131';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101150131';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -403,6 +403,21 @@ export async function viewBook(el, id) {
   if ($('[data-preview]', el)) setTimeout(() => { warmCovers([b.cover_url]); alsoReadFor(b, 12).catch(() => { }); }, 600);
   $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); toast(t('cart.added')); });
   $('[data-buy]', el)?.addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
+  // phone: a price + "Buy now" bar stays at the bottom until the real buy box is on screen
+  const mainBuy = $('[data-buy]', el);
+  if (mainBuy) {
+    const bar = document.createElement('div');
+    bar.className = 'buy-sticky'; bar.hidden = true;
+    bar.innerHTML = `<div class="bs-price">${money(b.price_cents)}${disc ? ` <s>${money(b.list_price_cents)}</s>` : ''}</div><button class="btn btn-buy" type="button">${esc(t('book.buyNow'))}</button>`;
+    bar.querySelector('button').addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
+    el.appendChild(bar);
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(es => { bar.hidden = es.some(x => x.isIntersecting) || !document.body.contains(bar); }, { threshold: 0.1 });
+      io.observe(mainBuy);
+      const watch = new MutationObserver(() => { if (!document.body.contains(bar)) { io.disconnect(); watch.disconnect(); } });
+      watch.observe(document.body, { childList: true, subtree: true });
+    }
+  }
   $('[data-free]', el)?.addEventListener('click', async () => {
     if (!api.user()) { sessionStorage.setItem('librava:after', '/book/' + b.id); go('/account'); return; }
     try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
