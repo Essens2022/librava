@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261101124316';
-import { CONFIG } from './config.js?v=20261101124316';
-import { store } from './util.js?v=20261101124316';
+import { localize, loadRates } from './localprice.js?v=20261101133458';
+import { CONFIG } from './config.js?v=20261101133458';
+import { store } from './util.js?v=20261101133458';
 
 const D = {
   ro: {
@@ -992,7 +992,7 @@ const D = {
     'kdp.pagesN': "{n} pagini",
     'kdp.spine': "cotor {n} in",
     'kdp.bw': "alb-negru",
-    'kdp.contains': "Zip cu interior PDF, copertă PDF și fișă de încărcare",
+    'kdp.contains': "Zip cu interior PDF, copertă PDF, titlu, subtitlu, descriere, cuvinte cheie, categorii și imaginile A+",
     'kdp.download': "Descarcă pentru Amazon",
     'kdp.err': "Nu am putut deschide fișierul. Reîncarcă pagina și încearcă din nou.",
     'kdp.rulesTitle': "Reguli de reținut la încărcarea pe KDP",
@@ -2400,7 +2400,7 @@ const D = {
     'kdp.pagesN': "{n} pagine",
     'kdp.spine': "dorso {n} in",
     'kdp.bw': "bianco e nero",
-    'kdp.contains': "Zip con interno PDF, copertina PDF e scheda di caricamento",
+    'kdp.contains': "Zip con interno PDF, copertina PDF, titolo, sottotitolo, descrizione, parole chiave, categorie e immagini A+",
     'kdp.download': "Scarica per Amazon",
     'kdp.err': "Impossibile aprire il file. Ricarica la pagina e riprova.",
     'kdp.rulesTitle': "Regole da ricordare al caricamento su KDP",
@@ -3808,7 +3808,7 @@ const D = {
     'kdp.pagesN': "{n} pages",
     'kdp.spine': "spine {n} in",
     'kdp.bw': "black and white",
-    'kdp.contains': "Zip with interior PDF, cover PDF and an upload sheet",
+    'kdp.contains': "Zip with interior PDF, cover PDF, title, subtitle, description, keywords, categories and A+ images",
     'kdp.download': "Download for Amazon",
     'kdp.err': "Could not open the file. Reload the page and try again.",
     'kdp.rulesTitle': "Remember when uploading to KDP",
@@ -4264,7 +4264,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261101124316`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261101133458`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
