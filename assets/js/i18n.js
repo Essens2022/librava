@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261101151123';
-import { CONFIG } from './config.js?v=20261101151123';
-import { store } from './util.js?v=20261101151123';
+import { localize, loadRates } from './localprice.js?v=20261101151958';
+import { CONFIG } from './config.js?v=20261101151958';
+import { store } from './util.js?v=20261101151958';
 
 const D = {
   ro: {
@@ -515,6 +515,8 @@ const D = {
     'book.save': 'Economisești {amount} ({pct}%)',
     'book.vat': 'TVA inclus',
     'book.addToCart': 'Adaugă în coș',
+    'book.offersHead': 'Oferte pentru tine',
+    'book.offerUnlocked': 'ACTIVĂ',
     'book.offerWith': 'Cu această carte în coș: {label} (economisești {amount})',
     'book.inCart': 'În coș',
     'book.buyNow': 'Cumpără acum',
@@ -1924,6 +1926,8 @@ const D = {
     'book.save': 'Risparmi {amount} ({pct}%)',
     'book.vat': 'IVA inclusa',
     'book.addToCart': 'Aggiungi al carrello',
+    'book.offersHead': 'Offerte per te',
+    'book.offerUnlocked': 'ATTIVA',
     'book.offerWith': 'Con questo libro nel carrello: {label} (risparmi {amount})',
     'book.inCart': 'Nel carrello',
     'book.buyNow': 'Acquista ora',
@@ -3333,6 +3337,8 @@ const D = {
     'book.save': 'You save {amount} ({pct}%)',
     'book.vat': 'VAT included',
     'book.addToCart': 'Add to cart',
+    'book.offersHead': 'Offers for you',
+    'book.offerUnlocked': 'UNLOCKED',
     'book.offerWith': 'With this book in your cart: {label} (you save {amount})',
     'book.inCart': 'In cart',
     'book.buyNow': 'Buy now',
@@ -4267,7 +4273,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261101151123`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261101151958`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

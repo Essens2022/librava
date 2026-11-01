@@ -2138,6 +2138,22 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .buy-sticky .bs-price s { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 4px }
   .buy-sticky .btn { flex: 1; max-width: 220px; min-height: 46px }
   .book-cover-col .cover { max-width: 160px }
-  .buybox .offer-chip:nth-child(n+3) { display: none }
+  .buybox .offer-box:not(.is-smart) .offer-row:nth-child(n+3) { display: none }
   body:has(.buy-sticky:not([hidden])) .site-foot, body:has(.buy-sticky:not([hidden])) footer { padding-bottom: 70px }
 }
+
+/* ---- offer card (book page) ---- */
+.offer-box { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, #FFF6E3 0%, #FFFFFF 70%); border: 1px solid #F1D9A6; box-shadow: 0 4px 14px rgba(196, 130, 20, .10) }
+.offer-head { font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #9A6200 }
+.offer-row { display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.35; color: var(--fg) }
+.offer-ico { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #F6A53B, #E8841A); color: #fff; box-shadow: 0 2px 6px rgba(232, 132, 26, .35) }
+.offer-ico .ico, .offer-ico svg { width: 16px; height: 16px }
+.offer-ico.on { background: linear-gradient(135deg, #6DBE45, #3F9B2B); box-shadow: 0 2px 6px rgba(63, 155, 43, .35) }
+.offer-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-weight: 600 }
+.offer-row.is-on .offer-main { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px }
+.offer-pill { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; padding: 2px 8px; border-radius: 999px; background: #E5F5DC; color: #2F7A1E }
+.offer-save { margin-left: auto; color: var(--deal); font-size: 16px; font-variant-numeric: tabular-nums }
+.offer-box .nudge-hot { font-style: normal; font-weight: 800; color: #C2410C; background: #FFE9D2; padding: 0 5px; border-radius: 6px }
+.offer-prog { display: flex; gap: 4px }
+.offer-prog i { flex: 1; max-width: 34px; height: 6px; border-radius: 4px; background: #EBD9B4 }
+.offer-prog i.f { background: linear-gradient(90deg, #F6A53B, #E8841A) }

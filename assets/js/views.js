@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101151123';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101151123';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101151123';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101151123';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101151123';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101151123';
-import { track } from './track.js?v=20261101151123';
-import { gaEvent } from './ga.js?v=20261101151123';
-import { guessLang } from './langdetect.js?v=20261101151123';
-import { didYouMean } from './search.js?v=20261101151123';
-import { api, editionsOf } from './api.js?v=20261101151123';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101151123';
+import { CONFIG } from './config.js?v=20261101151958';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101151958';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101151958';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101151958';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101151958';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101151958';
+import { track } from './track.js?v=20261101151958';
+import { gaEvent } from './ga.js?v=20261101151958';
+import { guessLang } from './langdetect.js?v=20261101151958';
+import { didYouMean } from './search.js?v=20261101151958';
+import { api, editionsOf } from './api.js?v=20261101151958';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101151958';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -248,7 +248,7 @@ export async function viewBook(el, id) {
       <div class="bigprice">${money(b.price_cents)}</div>
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
-      ${badges.length ? `<div class="offer-badges">${badges.map(o => `<span class="offer-chip">${icon('tag')} ${esc(describeOffer(o, t, c => t('cat.' + c)))}</span>`).join('')}</div>` : ''}
+      ${badges.length ? `<div class="offer-badges offer-box"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map(o => `<div class="offer-row"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`);
 
@@ -412,14 +412,19 @@ export async function viewBook(el, id) {
     const run = offers.filter(o => o.kind !== 'coupon');
     if (!have.length) return;
     const now = applyOffers(have, run, { noNudge: true }), withIt = applyOffers([...have.filter(x => x.id !== b.id), b], run);
-    const lines = [];
     const gain = withIt.discount - now.discount;
     const top = withIt.applied.find(a => a.kind !== 'coupon');
-    if (top && gain > 0) lines.push(t('book.offerWith', { label: appliedLabel(top, t, c => t('cat.' + c)), amount: money(gain) }));
     const n = withIt.nudges[0];
-    if (n) lines.push(n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent }));
-    if (!lines.length) { box.remove(); return; }
-    box.innerHTML = lines.map(x => `<span class="offer-chip">${icon('tag')} ${esc(x)}</span>`).join('');
+    const count = have.filter(x => x.id !== b.id).length + 1;
+    const rows = [];
+    if (top && gain > 0) rows.push(`<div class="offer-row is-on"><span class="offer-ico on">${icon('check')}</span><span class="offer-main"><span class="offer-pill">${esc(t('book.offerUnlocked'))}</span> ${hot(esc(appliedLabel(top, t, c => t('cat.' + c))))}</span><b class="offer-save">-${money(gain)}</b></div>`);
+    if (n) {
+      const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
+      const total = Math.min(count + n.more, 8);
+      rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(txt))}<span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < count ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
+    }
+    if (!rows.length) { box.remove(); return; }
+    box.classList.add('is-smart'); box.innerHTML = rows.join('');
   })();
   // phone: a price + "Buy now" bar stays at the bottom until the real buy box is on screen
   const mainBuy = $('[data-buy]', el);
@@ -773,6 +778,8 @@ async function translateReviewEl(btn, r) {
   note.textContent = t('rev.translatedFrom', { lang: from || '' }); note.hidden = false;
   btn.lastChild.textContent = ' ' + t('rev.original');
 }
+
+const hot = x => x.replace(/(-?\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em class="nudge-hot">$1</em>');
 
 export async function viewCart(el) {
   const ids = cart.get();
