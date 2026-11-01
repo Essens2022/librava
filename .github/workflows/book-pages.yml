@@ -32,7 +32,8 @@ jobs:
           git add -A book feed sitemap.xml robots.txt en fr de es it pt nl pl ro cs sk hu bg hr sl el da sv no fi et lv lt uk
           if git diff --cached --quiet; then echo "No changes"; exit 0; fi
           git -c user.name="Librava bot" -c user.email="bot@librava.store" commit -m "Update SEO pages"
-          git push origin HEAD:main
+          git pull --rebase origin main || true
+          git push origin HEAD:main || (git pull --rebase origin main && git push origin HEAD:main)
           git push origin HEAD:gh-pages --force
           sleep 60   # let GitHub Pages publish before the search engines come
           node tools/indexnow.mjs $(git diff --name-only HEAD~1 HEAD) || true
