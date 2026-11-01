@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101114510';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101114510';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101114510';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101114510';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101114510';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101114510';
-import { track } from './track.js?v=20261101114510';
-import { gaEvent } from './ga.js?v=20261101114510';
-import { guessLang } from './langdetect.js?v=20261101114510';
-import { didYouMean } from './search.js?v=20261101114510';
-import { api, editionsOf } from './api.js?v=20261101114510';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101114510';
+import { CONFIG } from './config.js?v=20261101115319';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101115319';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101115319';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101115319';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101115319';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101115319';
+import { track } from './track.js?v=20261101115319';
+import { gaEvent } from './ga.js?v=20261101115319';
+import { guessLang } from './langdetect.js?v=20261101115319';
+import { didYouMean } from './search.js?v=20261101115319';
+import { api, editionsOf } from './api.js?v=20261101115319';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101115319';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -87,7 +87,7 @@ export async function viewHome(el) {
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
     ${strips[0] || ''}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
-    ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><p style="margin:14px 0 0"><a class="btn btn-buy" href="/en/guide/">See all free guides</a> <a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></p></section>` : ''}
+    ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
     ${strips[2] || ''}
