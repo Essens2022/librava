@@ -2080,3 +2080,14 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .guide-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
 .guide-chips .chip { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 14px; color: inherit; text-decoration: none; }
 .guide-chips .chip:hover { border-color: var(--brand, #2f8f4e); }
+
+/* home: free guide cards */
+.guide-home { background: linear-gradient(135deg, #FFF6E3, #EAF4E6); border: 1.5px solid #E7D7A8; }
+.guide-rail { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; }
+.guide-card { flex: 0 0 150px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 16px; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 4px 14px rgba(0,0,0,.07); color: inherit; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+.guide-card:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,.13); }
+.guide-card img { width: 100%; height: auto; aspect-ratio: 5 / 8; object-fit: cover; border-radius: 8px; background: #E8EBE4; }
+.guide-card .gc-tag { align-self: flex-start; background: #2f8f4e; color: #fff; font: 800 11px/1 var(--font-ui); padding: 4px 8px; border-radius: 999px; letter-spacing: .03em; text-transform: uppercase; }
+.guide-card b { font-size: 15px; line-height: 1.25; }
+.guide-card small { color: #2f8f4e; font-weight: 800; }
+@media (min-width: 900px) { .guide-card { flex-basis: 170px; } }

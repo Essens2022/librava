@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101114007';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101114007';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101114007';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101114007';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101114007';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101114007';
-import { track } from './track.js?v=20261101114007';
-import { gaEvent } from './ga.js?v=20261101114007';
-import { guessLang } from './langdetect.js?v=20261101114007';
-import { didYouMean } from './search.js?v=20261101114007';
-import { api, editionsOf } from './api.js?v=20261101114007';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101114007';
+import { CONFIG } from './config.js?v=20261101114510';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101114510';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101114510';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101114510';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101114510';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101114510';
+import { track } from './track.js?v=20261101114510';
+import { gaEvent } from './ga.js?v=20261101114510';
+import { guessLang } from './langdetect.js?v=20261101114510';
+import { didYouMean } from './search.js?v=20261101114510';
+import { api, editionsOf } from './api.js?v=20261101114510';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101114510';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -87,7 +87,7 @@ export async function viewHome(el) {
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
     ${strips[0] || ''}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
-    ${L === 'en' ? `<section class="panel"><h2 class="section-title">Find your next practical read</h2><p>Explore free guides on everyday questions, then discover the books behind them.</p><div class="guide-chips"><a class="chip" href="/en/guide/how-to-grill-for-beginners/">How to Grill for Beginners</a><a class="chip" href="/en/guide/baking-tips-for-beginners/">Baking Tips for Beginners</a><a class="chip" href="/en/guide/how-to-go-vegan/">How to Go Vegan</a><a class="chip" href="/en/guide/yoga-for-beginners-at-home/">Yoga for Beginners at Home</a><a class="chip" href="/en/guide/how-to-start-a-youtube-channel/">How to Start a YouTube Channel</a><a class="chip" href="/en/guide/how-to-start-journaling/">How to Start Journaling</a><a class="chip" href="/en/guide/canning-for-beginners/">Canning for Beginners</a><a class="chip" href="/en/guide/top-9-allergen-free-meal-ideas/">Allergen-Free Meal Ideas</a></div><div class="hero-actions"><a class="btn btn-light" href="/en/guide/">Free practical guides</a><a class="btn btn-light" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
+    ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><p style="margin:14px 0 0"><a class="btn btn-buy" href="/en/guide/">See all free guides</a> <a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></p></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
     ${strips[2] || ''}
@@ -96,6 +96,24 @@ export async function viewHome(el) {
     ${shelf(t('home.free'), free, '#/search?price=free')}
   </div>`;
   mountPromos(el);
+  if (L === 'en') mountGuideRail(el);
+}
+
+// home: the best free guides as cover cards (picture + title + "Free guide"), so they get noticed
+const POP_GUIDES = ['how-to-grill-for-beginners', 'yoga-for-beginners-at-home', 'how-to-go-vegan', 'baking-tips-for-beginners', 'how-to-start-a-youtube-channel', 'how-to-start-journaling', 'canning-for-beginners', 'top-9-allergen-free-meal-ideas'];
+function mountGuideRail(el) {
+  const rail = el.querySelector('#guide-rail');
+  if (!rail) return;
+  fetch('/feed/guides.json').then(r => r.ok ? r.json() : {}).then(m => {
+    const by = {};
+    for (const id in m) for (const g of m[id]) if (g.lang === 'en') by[g.slug] = { id, g };
+    const cards = POP_GUIDES.filter(sl => by[sl]).map(sl => {
+      const { id, g } = by[sl], title = String(g.title).split(':')[0];
+      return `<a class="guide-card" href="/en/guide/${esc(sl)}/"><img src="/book/${esc(id)}/cover.jpg" alt="" loading="lazy" width="120" height="192"><span class="gc-tag">Free guide</span><b>${esc(title)}</b><small>Read now →</small></a>`;
+    });
+    if (cards.length) rail.innerHTML = cards.join('');
+    else rail.closest('section').hidden = true;
+  }).catch(() => { rail.closest('section').hidden = true; });
 }
 
 // =====================================================================
