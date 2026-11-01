@@ -2157,3 +2157,5 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .offer-prog { display: flex; gap: 4px }
 .offer-prog i { flex: 1; max-width: 34px; height: 6px; border-radius: 4px; background: #EBD9B4 }
 .offer-prog i.f { background: linear-gradient(90deg, #F6A53B, #E8841A) }
+.offer-box .nudge-hot { display: inline !important; white-space: nowrap }
+.offer-txt { display: block }

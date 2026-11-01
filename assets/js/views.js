@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101151958';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101151958';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101151958';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101151958';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101151958';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101151958';
-import { track } from './track.js?v=20261101151958';
-import { gaEvent } from './ga.js?v=20261101151958';
-import { guessLang } from './langdetect.js?v=20261101151958';
-import { didYouMean } from './search.js?v=20261101151958';
-import { api, editionsOf } from './api.js?v=20261101151958';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101151958';
+import { CONFIG } from './config.js?v=20261101152242';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101152242';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101152242';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101152242';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101152242';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101152242';
+import { track } from './track.js?v=20261101152242';
+import { gaEvent } from './ga.js?v=20261101152242';
+import { guessLang } from './langdetect.js?v=20261101152242';
+import { didYouMean } from './search.js?v=20261101152242';
+import { api, editionsOf } from './api.js?v=20261101152242';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101152242';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -421,7 +421,7 @@ export async function viewBook(el, id) {
     if (n) {
       const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
       const total = Math.min(count + n.more, 8);
-      rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(txt))}<span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < count ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
+      rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main"><span class="offer-txt">${hot(esc(txt))}</span><span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < count ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
     }
     if (!rows.length) { box.remove(); return; }
     box.classList.add('is-smart'); box.innerHTML = rows.join('');
