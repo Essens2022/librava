@@ -18,6 +18,13 @@ export const CONFIG = {
   previewPages: 6,              // câte pagini PDF vede gratuit un vizitator (în modul demo)
   previewPercent: 0.25,         // ce procent dintr-un EPUB vede gratuit (în modul demo)
   supportEmail: 'contact@librava.store',
+  social: [
+    ['YouTube', 'https://www.youtube.com/@LibravaStore'],
+    ['Pinterest', 'https://pin.it/1jF6MLTus'],
+    ['TikTok', 'https://www.tiktok.com/@librava.store_ebook'],
+    ['Instagram', 'https://www.instagram.com/librava.store_ebook/'],
+    ['Facebook', 'https://www.facebook.com/profile.php?id=61596030620371'],
+  ],
 
   // --- Login cu Google (activează providerul în Supabase → Authentication) ---
   googleLogin: false,          // devine true după ce activezi Google în Supabase → Authentication → Providers

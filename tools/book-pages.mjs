@@ -81,7 +81,8 @@ const RETURN_POLICY = { '@type': 'MerchantReturnPolicy', applicableCountry: COUN
 const shipping = cur => ({ '@type': 'OfferShippingDetails', shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: cur },
   shippingDestination: { '@type': 'DefinedRegion', addressCountry: COUNTRIES },
   deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' } } });
-const ORG = { '@type': 'Organization', '@id': SITE + '/#org', name: 'Librava', url: SITE + '/', logo: SITE + '/assets/img/icon-512.png' };
+const ORG = { '@type': 'Organization', '@id': SITE + '/#org', name: 'Librava', url: SITE + '/', logo: SITE + '/assets/img/icon-512.png',
+  sameAs: ['https://www.youtube.com/@LibravaStore', 'https://pin.it/1jF6MLTus', 'https://www.tiktok.com/@librava.store_ebook', 'https://www.instagram.com/librava.store_ebook/', 'https://www.facebook.com/profile.php?id=61596030620371'] };
 const ldScript = graph => `<script type="application/ld+json">${json({ '@context': 'https://schema.org', '@graph': graph })}</script>`;
 
 // ---------- covers: a JPEG copy on librava.store (WhatsApp on iPhone ignores WebP) ----------
