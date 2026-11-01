@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261101120809';
-import { t, getLang, setLang } from './i18n.js?v=20261101120809';
-import { esc, $, $$ } from './util.js?v=20261101120809';
-import { api, chooseBackend } from './api.js?v=20261101120809';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261101120809';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261101120809';
-import { trackPage } from './track.js?v=20261101120809';
-import { offline } from './offline.js?v=20261101120809';
-import { viewReader } from './reader.js?v=20261101120809';
-import { viewAdmin } from './admin.js?v=20261101120809';
+import { CONFIG } from './config.js?v=20261101121615';
+import { t, getLang, setLang } from './i18n.js?v=20261101121615';
+import { esc, $, $$ } from './util.js?v=20261101121615';
+import { api, chooseBackend } from './api.js?v=20261101121615';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261101121615';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261101121615';
+import { trackPage } from './track.js?v=20261101121615';
+import { offline } from './offline.js?v=20261101121615';
+import { viewReader } from './reader.js?v=20261101121615';
+import { viewAdmin } from './admin.js?v=20261101121615';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -64,25 +64,39 @@ async function route() {
   if (st.length >= 2 && st[st.length - 2] === key) { st.pop(); isBack = true; }
   else if (st[st.length - 1] !== key) st.push(key);
   saveNav(st); lastKey = key;
-  // every navigation renders into its own fresh container: a slower, older page can never overwrite a newer one
+  // every navigation renders into its own fresh container: a slower, older page can never overwrite a newer one.
+  // The page you are leaving stays on screen until the new one is ready (no spinner flash, no jump); only a slow page shows the spinner
   const app = $('#app');
   const el = document.createElement('div');
   el.className = 'route';
-  app.replaceChildren(el);
   const reading = parts[0] === 'read';
-  $('#hdr').hidden = reading; $('#foot').hidden = reading;
-  document.documentElement.classList.toggle('reading', reading);
-  const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
-  // on phones: a "‹ Back" bar under the header on every page but the home page
-  let bb = $('#backbar');
-  if (!bb) { $('#hdr').insertAdjacentHTML('afterend', '<nav id="backbar" class="backbar" hidden></nav>'); bb = $('#backbar'); }
-  bb.hidden = reading || !parts[0];
-  if (!bb.hidden) bb.innerHTML = `<button type="button" class="bb-back" data-goback>${icon('chevL')} ${esc(t('nav.back'))}</button><a class="bb-home" href="#/">${icon('home')} ${esc(t('nav.home'))}</a>`;
-  openDrawer(false);
-  document.querySelectorAll('.modal-wrap').forEach(m => m.remove());
-  document.title = CONFIG.siteName;
-  if (!reading) window.scrollTo(0, 0);
-  el.innerHTML = reading ? '' : spinner;
+  let swapped = false;
+  const commit = () => {
+    if (swapped || my !== seq) return;
+    swapped = true;
+    el.removeAttribute('style');
+    app.replaceChildren(el);
+    $('#hdr').hidden = reading; $('#foot').hidden = reading;
+    document.documentElement.classList.toggle('reading', reading);
+    const bar = $('#demo-bar'); if (bar) bar.hidden = reading || !api.isDemo;
+    // on phones: a "‹ Back" bar under the header on every page but the home page
+    let bb = $('#backbar');
+    if (!bb) { $('#hdr').insertAdjacentHTML('afterend', '<nav id="backbar" class="backbar" hidden></nav>'); bb = $('#backbar'); }
+    bb.hidden = reading || !parts[0];
+    if (!bb.hidden) bb.innerHTML = `<button type="button" class="bb-back" data-goback>${icon('chevL')} ${esc(t('nav.back'))}</button><a class="bb-home" href="#/">${icon('home')} ${esc(t('nav.home'))}</a>`;
+    openDrawer(false);
+    document.querySelectorAll('.modal-wrap').forEach(m => m.remove());
+    document.title = CONFIG.siteName;
+    if (!reading) window.scrollTo(0, 0);
+  };
+  if (reading) { commit(); el.innerHTML = ''; }
+  else {
+    // built out of sight (but measured normally) next to the old page
+    el.style.cssText = 'position:absolute;left:0;right:0;top:0;visibility:hidden;pointer-events:none';
+    app.style.position = 'relative';
+    app.prepend(el);
+    setTimeout(() => { if (!swapped && my === seq) { if (!el.innerHTML.trim()) el.innerHTML = spinner; commit(); } }, 300);
+  }
   try {
     let res;
     switch (parts[0]) {
@@ -100,14 +114,16 @@ async function route() {
       case 'guide': res = await viewGuide(el, parts[1]); break;
       default: res = await viewHome(el);
     }
-    if (my !== seq) { if (typeof res === 'function') res(); return; }
+    if (my !== seq) { if (typeof res === 'function') res(); if (!swapped) el.remove(); return; }
+    commit();
     // a refresh opens at the top of the page, not half hidden under the bar (the phone used to put back an old position)
     if (!reading && !firstShown) { firstShown = true; window.scrollTo(0, 0); requestAnimationFrame(() => window.scrollTo(0, 0)); }
     else if (!reading && isBack && scrollMem[key]) { const y = scrollMem[key]; requestAnimationFrame(() => window.scrollTo(0, y)); setTimeout(() => { if (my === seq) window.scrollTo(0, y); }, 300); }
     cleanup = typeof res === 'function' ? res : null;
   } catch (e) {
     console.error(e);
-    if (my !== seq) return;
+    if (my !== seq) { if (!swapped) el.remove(); return; }
+    commit();
     if (!el.isConnected) return;
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('info')}<p>${esc(t('common.error', { msg: e.message || e }))}</p><a class="btn btn-dark" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
   }

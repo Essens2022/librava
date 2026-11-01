@@ -2115,8 +2115,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 /* covers: soft shimmer while loading, then a gentle fade-in (no sudden pop-in) */
 .cover, .guide-card img { background: linear-gradient(100deg, #E8EBE4 30%, #F4F6F1 50%, #E8EBE4 70%); background-size: 200% 100%; animation: cvShimmer 1.4s linear infinite; }
-.cover img, .guide-card img { opacity: 0; transition: opacity .4s ease; animation: cvShow 0s 3s forwards; }
-.cover img.ld, .guide-card img.ld { opacity: 1; }
 @keyframes cvShimmer { to { background-position: -200% 0; } }
 @keyframes cvShow { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .cover, .guide-card img { animation: none; } }
