@@ -2213,3 +2213,5 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 .offer-box { transition: opacity .3s ease }
 .offer-box.o-pending { opacity: 0; min-height: 96px; max-height: 96px; overflow: hidden }
+
+.offer-box .offer-row.rot-hide { display: none }

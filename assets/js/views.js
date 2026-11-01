@@ -408,6 +408,8 @@ export async function viewBook(el, id) {
   const buyBox = $('.buybox', el);
   let offerBox = $('.offer-badges', el); const staticOffers = offerBox ? offerBox.innerHTML : '';
   let offerSeq = 0, ui = null; const bookCache = new Map();
+  // generic (static) offers show one at a time, rotating, instead of the whole list at once
+  if (offerBox) { let ri = 0; const tick = () => { if (!offerBox.isConnected) return clearInterval(rt); const rows = [...offerBox.querySelectorAll('.o-static .offer-row, :scope:not(.is-smart) > .offer-row')]; if (rows.length < 2) { rows.forEach(r => r.classList.remove('rot-hide')); return; } ri = (ri + 1) % rows.length; rows.forEach((r, i) => r.classList.toggle('rot-hide', i !== ri)); }; const rt = setInterval(tick, 3500); tick(); }
   const swap = (node, html) => {
     if (node.dataset.h === html) return;
     const first = node.dataset.h === undefined; node.dataset.h = html;
