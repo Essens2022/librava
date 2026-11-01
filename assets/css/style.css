@@ -2164,3 +2164,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .offer-box.pop { animation: offerPop .45s ease }
 @keyframes offerPop { 0% { transform: scale(.97); box-shadow: 0 0 0 0 rgba(232, 132, 26, .45) } 60% { transform: scale(1.015); box-shadow: 0 0 0 10px rgba(232, 132, 26, 0) } 100% { transform: scale(1) } }
 @media (prefers-reduced-motion: reduce) { .offer-box.pop { animation: none } }
+
+.offer-save { white-space: nowrap; align-self: center; flex: none }
+.offer-row .offer-main { min-width: 0; flex: 1 }
