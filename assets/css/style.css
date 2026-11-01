@@ -2076,3 +2076,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .vi-chip.dim { opacity: .65; }
 .vi-who { margin-top: 6px; font-size: 13px; }
 .tl-visit.vi-inst { opacity: .6; }
+
+.guide-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.guide-chips .chip { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 14px; color: inherit; text-decoration: none; }
+.guide-chips .chip:hover { border-color: var(--brand, #2f8f4e); }

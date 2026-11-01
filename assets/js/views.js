@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101104704';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101104704';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101104704';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101104704';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101104704';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101104704';
-import { track } from './track.js?v=20261101104704';
-import { gaEvent } from './ga.js?v=20261101104704';
-import { guessLang } from './langdetect.js?v=20261101104704';
-import { didYouMean } from './search.js?v=20261101104704';
-import { api, editionsOf } from './api.js?v=20261101104704';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101104704';
+import { CONFIG } from './config.js?v=20261101114007';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101114007';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101114007';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101114007';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101114007';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101114007';
+import { track } from './track.js?v=20261101114007';
+import { gaEvent } from './ga.js?v=20261101114007';
+import { guessLang } from './langdetect.js?v=20261101114007';
+import { didYouMean } from './search.js?v=20261101114007';
+import { api, editionsOf } from './api.js?v=20261101114007';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101114007';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -87,7 +87,7 @@ export async function viewHome(el) {
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
     ${strips[0] || ''}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
-    ${L === 'en' ? `<section class="panel"><h2 class="section-title">Find your next practical read</h2><p>Explore free guides on everyday questions, then discover the books behind them.</p><div class="hero-actions"><a class="btn btn-light" href="/en/guide/">Free practical guides</a><a class="btn btn-light" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
+    ${L === 'en' ? `<section class="panel"><h2 class="section-title">Find your next practical read</h2><p>Explore free guides on everyday questions, then discover the books behind them.</p><div class="guide-chips"><a class="chip" href="/en/guide/how-to-grill-for-beginners/">How to Grill for Beginners</a><a class="chip" href="/en/guide/baking-tips-for-beginners/">Baking Tips for Beginners</a><a class="chip" href="/en/guide/how-to-go-vegan/">How to Go Vegan</a><a class="chip" href="/en/guide/yoga-for-beginners-at-home/">Yoga for Beginners at Home</a><a class="chip" href="/en/guide/how-to-start-a-youtube-channel/">How to Start a YouTube Channel</a><a class="chip" href="/en/guide/how-to-start-journaling/">How to Start Journaling</a><a class="chip" href="/en/guide/canning-for-beginners/">Canning for Beginners</a><a class="chip" href="/en/guide/top-9-allergen-free-meal-ideas/">Allergen-Free Meal Ideas</a></div><div class="hero-actions"><a class="btn btn-light" href="/en/guide/">Free practical guides</a><a class="btn btn-light" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
     ${strips[2] || ''}

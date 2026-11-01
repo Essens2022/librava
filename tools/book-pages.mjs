@@ -123,6 +123,7 @@ for (const l of LANGS) {
     ldScript([ORG, { '@type': 'WebSite', '@id': SITE + '/#site', url: SITE + '/', name: 'Librava', publisher: { '@id': SITE + '/#org' } },
       { '@type': 'CollectionPage', url, name: title, description: o.s, inLanguage: l, isPartOf: { '@id': SITE + '/#site' } }]);
   const body = `<div class="wrap page seo-pre"><h1>${esc(o.t)}</h1><p>${esc(o.s)}</p>
+    ${l === 'en' ? `<h2>Popular free guides</h2><ul class="seo-cats">${POP_GUIDES.map(([s, t]) => `<li><a href="/en/guide/${s}/">${t}</a></li>`).join('')}</ul>` : ''}
     ${l === 'en' ? '<p><a href="/en/guide/">Free practical guides</a> · <a href="/en/guide/ebook-catalogue/">Browse the complete eBook catalogue</a></p>' : ''}
     ${catPages[l].length ? `<h2>${esc(tr(l, 'home.catCardTitle'))}</h2><ul class="seo-cats">${catPages[l].map(c => `<li><a href="/${l}/${catSlug(l, c)}/">${esc(tr(l, 'cat.' + c))}</a></li>`).join('')}</ul>` : ''}
     <h2>${esc(tr(l, 'home.new'))}</h2><ul class="seo-books">${show.map(b => card(l, b)).join('')}</ul></div>`;
@@ -155,6 +156,7 @@ for (const l of LANGS) {
   if (existsSync(l)) for (const d of readdirSync(l)) if (statSync(`${l}/${d}`).isDirectory() && !keepCat[l].has(d) && d !== 'guide') rmSync(`${l}/${d}`, { recursive: true, force: true });
 }
 
+const POP_GUIDES = [["how-to-grill-for-beginners", "How to Grill for Beginners"], ["baking-tips-for-beginners", "Baking Tips for Beginners"], ["how-to-go-vegan", "How to Go Vegan"], ["yoga-for-beginners-at-home", "Yoga for Beginners at Home"], ["how-to-start-a-youtube-channel", "How to Start a YouTube Channel"], ["how-to-start-journaling", "How to Start Journaling"], ["canning-for-beginners", "Canning for Beginners"], ["top-9-allergen-free-meal-ideas", "Allergen-Free Meal Ideas"]];
 // ---------- guides (read first: book pages link to them) ----------
 const GUIDE_WORD = { en: 'Guides', fr: 'Guides', de: 'Ratgeber', es: 'Guías', it: 'Guide', pt: 'Guias', nl: 'Gidsen', pl: 'Poradniki', ro: 'Ghiduri' };
 const GUIDE_UI = {
