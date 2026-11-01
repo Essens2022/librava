@@ -2201,7 +2201,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .o-line { flex-direction: column !important; align-items: flex-start !important; gap: 3px !important; flex-wrap: nowrap }
 .o-line .o-label { line-height: 1.3 }
 .o-smart .offer-txt { min-height: 2.7em; display: block }
-@media (min-width: 560px) { .o-smart .offer-txt { min-height: 0 } .o-line { flex-direction: row !important; align-items: center !important; gap: 6px !important } }
+
 
 /* book head: format chip, title + subtitle on separate lines, trust strip */
 .book-main h1.pt .pt-title { display: block; font-weight: 700; font-size: 1.12em; line-height: 1.25; letter-spacing: -.01em }
