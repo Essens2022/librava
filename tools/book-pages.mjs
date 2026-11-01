@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync, existsSync, statSync } from 'node:fs';
 import sharp from 'sharp';
 
+const POP_GUIDES = [["how-to-grill-for-beginners", "How to Grill for Beginners"], ["baking-tips-for-beginners", "Baking Tips for Beginners"], ["how-to-go-vegan", "How to Go Vegan"], ["yoga-for-beginners-at-home", "Yoga for Beginners at Home"], ["how-to-start-a-youtube-channel", "How to Start a YouTube Channel"], ["how-to-start-journaling", "How to Start Journaling"], ["canning-for-beginners", "Canning for Beginners"], ["top-9-allergen-free-meal-ideas", "Allergen-Free Meal Ideas"]];
 const SITE = 'https://librava.store';
 const cfg = readFileSync('assets/js/config.js', 'utf8');
 const URL_ = /supabaseUrl:\s*'([^']+)'/.exec(cfg)?.[1];
@@ -156,7 +157,6 @@ for (const l of LANGS) {
   if (existsSync(l)) for (const d of readdirSync(l)) if (statSync(`${l}/${d}`).isDirectory() && !keepCat[l].has(d) && d !== 'guide') rmSync(`${l}/${d}`, { recursive: true, force: true });
 }
 
-const POP_GUIDES = [["how-to-grill-for-beginners", "How to Grill for Beginners"], ["baking-tips-for-beginners", "Baking Tips for Beginners"], ["how-to-go-vegan", "How to Go Vegan"], ["yoga-for-beginners-at-home", "Yoga for Beginners at Home"], ["how-to-start-a-youtube-channel", "How to Start a YouTube Channel"], ["how-to-start-journaling", "How to Start Journaling"], ["canning-for-beginners", "Canning for Beginners"], ["top-9-allergen-free-meal-ideas", "Allergen-Free Meal Ideas"]];
 // ---------- guides (read first: book pages link to them) ----------
 const GUIDE_WORD = { en: 'Guides', fr: 'Guides', de: 'Ratgeber', es: 'Guías', it: 'Guide', pt: 'Guias', nl: 'Gidsen', pl: 'Poradniki', ro: 'Ghiduri' };
 const GUIDE_UI = {
