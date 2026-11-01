@@ -99,6 +99,12 @@ for (const b of books) {
         await sharp(Buffer.from(await r.arrayBuffer())).flatten({ background: '#ffffff' }).resize({ width: 600, height: 960, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toFile(jpg);
         writeFileSync(stamp, ver);
       }
+      // small copy for the store lists (about 20 KB instead of the full cover)
+      const thumb = `book/${b.id}/thumb.webp`, tstamp = `book/${b.id}/.tv`;
+      if (!existsSync(thumb) || !existsSync(tstamp) || readFileSync(tstamp, 'utf8') !== ver) {
+        await sharp(jpg).resize({ width: 320, height: 512, fit: 'inside', withoutEnlargement: true }).webp({ quality: 78 }).toFile(thumb);
+        writeFileSync(tstamp, ver);
+      }
       const m = await sharp(jpg).metadata();
       info = { url: `${SITE}/book/${b.id}/cover.jpg?v=${ver}`, w: m.width, h: m.height };
     } catch (e) { console.error('cover failed for', b.id, e.message); }

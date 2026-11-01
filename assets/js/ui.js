@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261101120245';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261101120245';
-import { esc, store, $, $$ } from './util.js?v=20261101120245';
+import { CONFIG } from './config.js?v=20261101120809';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261101120809';
+import { esc, store, $, $$ } from './util.js?v=20261101120809';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,12 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261101120245';
-import { suggest, highlight } from './search.js?v=20261101120245';
-import { track, trackPage } from './track.js?v=20261101120245';
-import { initGA, stopGA } from './ga.js?v=20261101120245';
-import { api } from './api.js?v=20261101120245';
-import { describeOffer, offersForBook } from './offers.js?v=20261101120245';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261101120809';
+import { suggest, highlight } from './search.js?v=20261101120809';
+import { track, trackPage } from './track.js?v=20261101120809';
+import { initGA, stopGA } from './ga.js?v=20261101120809';
+import { api } from './api.js?v=20261101120809';
+import { describeOffer, offersForBook } from './offers.js?v=20261101120809';
 
 // ---------------- icons ----------------
 const P = {
@@ -317,10 +317,10 @@ export function aplusHTML(mods = []) {
     return '';
   }).join('')}</div>`;
 }
-export function coverHTML(b, { badge = true } = {}) {
+export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
-  const img = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
+  const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
   return `<div class="cover">${bd}${img}</div>`;
 }
 export function priceHTML(b) {
@@ -350,7 +350,7 @@ export function fullTitle(b) {
 }
 export function cardHTML(b) {
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
-    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
     <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
     <div class="card-author">${esc(b.author)}</div>
     ${ratingHTML(b)}
@@ -360,7 +360,7 @@ export function cardHTML(b) {
 }
 export function rcardHTML(b) {
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">
-    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
     <div class="rinfo">
       <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
       <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
@@ -928,3 +928,7 @@ new MutationObserver(() => { if (document.querySelector('.promo-books .promo-she
   let q = false;
   new MutationObserver(ms => { if (q) return; if (!ms.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches?.('.quick-add') || n.querySelector?.('.quick-add'))))) return; q = true; setTimeout(() => { q = false; mark(); }, 150); }).observe(document.body, { childList: true, subtree: true });
 }
+
+// covers fade in softly when they arrive; if a small copy is not there yet, the full cover is used
+document.addEventListener('load', e => { const i = e.target; if (i.tagName === 'IMG' && i.closest?.('.cover, .guide-card')) i.classList.add('ld'); }, true);
+document.addEventListener('error', e => { const i = e.target; if (i.tagName === 'IMG' && i.dataset?.full && i.src !== i.dataset.full) i.src = i.dataset.full; }, true);

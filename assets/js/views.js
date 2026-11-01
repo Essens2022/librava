@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101120245';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101120245';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101120245';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101120245';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101120245';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101120245';
-import { track } from './track.js?v=20261101120245';
-import { gaEvent } from './ga.js?v=20261101120245';
-import { guessLang } from './langdetect.js?v=20261101120245';
-import { didYouMean } from './search.js?v=20261101120245';
-import { api, editionsOf } from './api.js?v=20261101120245';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101120245';
+import { CONFIG } from './config.js?v=20261101120809';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101120809';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101120809';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101120809';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101120809';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101120809';
+import { track } from './track.js?v=20261101120809';
+import { gaEvent } from './ga.js?v=20261101120809';
+import { guessLang } from './langdetect.js?v=20261101120809';
+import { didYouMean } from './search.js?v=20261101120809';
+import { api, editionsOf } from './api.js?v=20261101120809';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101120809';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -109,7 +109,7 @@ function mountGuideRail(el) {
     for (const id in m) for (const g of m[id]) if (g.lang === 'en') by[g.slug] = { id, g };
     const cards = POP_GUIDES.filter(sl => by[sl]).map(sl => {
       const { id, g } = by[sl], title = String(g.title).split(':')[0];
-      return `<a class="guide-card" href="/en/guide/${esc(sl)}/"><img src="/book/${esc(id)}/cover.jpg" alt="" loading="lazy" width="120" height="192"><span class="gc-tag">Free guide</span><b>${esc(title)}</b><small>Read now →</small></a>`;
+      return `<a class="guide-card" href="/en/guide/${esc(sl)}/"><img src="/book/${esc(id)}/thumb.webp" data-full="/book/${esc(id)}/cover.jpg" alt="" loading="lazy" width="120" height="192"><span class="gc-tag">Free guide</span><b>${esc(title)}</b><small>Read now →</small></a>`;
     });
     if (cards.length) rail.innerHTML = cards.join('');
     else rail.closest('section').hidden = true;
