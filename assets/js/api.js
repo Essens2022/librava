@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261101122206';
-import { applyOffers, offerRunning } from './offers.js?v=20261101122206';
-import { scoreBook } from './search.js?v=20261101122206';
-import { getLang } from './i18n.js?v=20261101122206';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261101122206';
+import { CONFIG } from './config.js?v=20261101124316';
+import { applyOffers, offerRunning } from './offers.js?v=20261101124316';
+import { scoreBook } from './search.js?v=20261101124316';
+import { getLang } from './i18n.js?v=20261101124316';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261101124316';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261101122206')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261101124316')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -952,6 +952,15 @@ class SupabaseAPI {
       this._err(error); out.push(...data);
       if (data.length < 1000) return out;
     }
+  }
+  // Amazon KDP files: encrypted copies live on the site; the key pair is made in the admin's browser and kept in the database (admin only)
+  async kdpKeys() {
+    const { data, error } = await this.sb.from('admin_kdp_keys').select('public_jwk,private_jwk').eq('id', 1).maybeSingle();
+    this._err(error); return data;
+  }
+  async kdpSaveKeys(pub, priv) {
+    const { error } = await this.sb.from('admin_kdp_keys').insert({ id: 1, public_jwk: pub, private_jwk: priv });
+    this._err(error);
   }
   async adminBooks() {
     const [books, P] = await Promise.all([this._loadCatalog(true), this._all('purchases', 'book_id,price_cents', q => q.eq('test', false))]);

@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261101122206';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101122206';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261101122206';
-import { resetCompanyCache } from './views.js?v=20261101122206';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261101122206';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261101122206';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261101122206';
-import { optimizeBook } from './optimize.js?v=20261101122206';
-import { api } from './api.js?v=20261101122206';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261101122206';
+import { CONFIG } from './config.js?v=20261101124316';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101124316';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261101124316';
+import { resetCompanyCache } from './views.js?v=20261101124316';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261101124316';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261101124316';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261101124316';
+import { optimizeBook } from './optimize.js?v=20261101124316';
+import { api } from './api.js?v=20261101124316';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261101124316';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -19,6 +19,7 @@ const TABS = [
   ['prices', '/admin/prices', 'tag', 'bp.tab'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['import', '/admin/import', 'upload', 'imp.tab'],
+  ['kdp', '/admin/kdp', 'file', 'kdp.tab'],
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -92,6 +93,7 @@ export async function viewAdmin(el, parts) {
     case 'books': return booksList(body);
     case 'prices': return pricesAdmin(body);
     case 'import': return importBooks(body);
+    case 'kdp': return kdpAdmin(body);
     case 'orders': return orders(body, parts[1] || 'pending');
     case 'customers': return parts[1] ? customer(body, parts[1]) : customers(body);
     case 'visitors': return visitorsAdmin(body);
@@ -537,6 +539,48 @@ function activityHTML(E, r) {
 
 
 // ---------------------------------------------------------------- visitors (everyone on the site, logged in or not; "live" = last 5 minutes)
+
+// ---------------------------------------------------------------- Amazon KDP: print-ready files, downloadable only by the admin
+const b64u = b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function kdpAdmin(body) {
+  body.innerHTML = `<section class="panel"><h2 style="margin:0 0 6px">${esc(t('kdp.title'))}</h2><p class="muted" style="margin:0">${esc(t('kdp.intro'))}</p></section><div id="kdp-list"></div>`;
+  const box = $('#kdp-list', body);
+  if (!api.kdpKeys) { box.innerHTML = `<section class="panel"><p class="muted">${esc(t('kdp.noBackend'))}</p></section>`; return; }
+  try {
+    let keys = await api.kdpKeys();
+    if (!keys) {
+      // first visit: make the key pair here, in this browser; the private half is stored where only the admin can read it
+      const kp = await crypto.subtle.generateKey({ name: 'RSA-OAEP', modulusLength: 3072, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['encrypt', 'decrypt']);
+      const pub = await crypto.subtle.exportKey('jwk', kp.publicKey), priv = await crypto.subtle.exportKey('jwk', kp.privateKey);
+      await api.kdpSaveKeys(pub, priv); keys = { public_jwk: pub, private_jwk: priv };
+    }
+    let list = [];
+    try { const r = await fetch('/kdp/index.json', { cache: 'no-store' }); if (r.ok) list = await r.json(); } catch { }
+    if (!list.length) { box.innerHTML = `<section class="panel"><p style="margin:0">${esc(t('kdp.ready'))}</p></section>`; return; }
+    const mb = n => (n / 1048576).toFixed(1) + ' MB';
+    box.innerHTML = list.map(x => `<section class="panel kdp-row">
+      <img src="/book/${esc(x.book_id)}/thumb.webp" alt="" width="64" height="102" loading="lazy">
+      <div class="kdp-info"><b>${esc(x.title)}</b><small class="muted">${esc(x.author)}</small>
+        <span class="kdp-chips"><i>${esc(t('kdp.size'))}</i><i>${esc(t('kdp.pagesN', { n: x.pages }))}</i><i>${esc(t('kdp.spine', { n: x.spine_in }))}</i><i>${esc(t('kdp.bw'))}</i></span>
+        <small class="muted">${esc(t('kdp.contains'))} · ${mb(x.size)}</small></div>
+      <button type="button" class="btn btn-buy" data-kdp="${esc(x.slug)}">${icon('download')} ${esc(t('kdp.download'))}</button></section>`).join('') +
+      `<section class="panel"><b>${esc(t('kdp.rulesTitle'))}</b><ul class="kdp-rules">${['r1', 'r2', 'r3', 'r4', 'r5'].map(k => `<li>${esc(t('kdp.' + k))}</li>`).join('')}</ul></section>`;
+    box.querySelectorAll('[data-kdp]').forEach(btn => btn.addEventListener('click', async () => {
+      const x = list.find(y => y.slug === btn.dataset.kdp); btn.disabled = true;
+      try {
+        const buf = new Uint8Array(await (await fetch(`/kdp/${x.slug}.enc`, { cache: 'no-store' })).arrayBuffer());
+        const n = (buf[0] << 8) | buf[1], wrapped = buf.slice(2, 2 + n), iv = buf.slice(2 + n, 14 + n), ct = buf.slice(14 + n);
+        const priv = await crypto.subtle.importKey('jwk', keys.private_jwk, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
+        const raw = await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, priv, wrapped);
+        const aes = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+        const zip = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, aes, ct);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([zip], { type: 'application/zip' })); a.download = x.zip_name; document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+      } catch (e) { toast(t('kdp.err'), { error: true }); }
+      btn.disabled = false;
+    }));
+  } catch (e) { box.innerHTML = `<section class="panel"><p class="muted">${esc(errText ? errText(e) : e.message)}</p></section>`; }
+}
 
 // source logo + device icon for the visitors list (one glance: where from, which country, which device)
 const SRC_LOGO = { instagram: ['IG', 'linear-gradient(45deg,#F9A03F,#E1306C,#833AB4)'], ig: ['IG', 'linear-gradient(45deg,#F9A03F,#E1306C,#833AB4)'], facebook: ['f', '#1877F2'], fb: ['f', '#1877F2'], youtube: ['▶', '#E02424'], tiktok: ['♪', '#111'], google: ['G', '#4285F4'], 'google-ads': ['G', '#4285F4'], pinterest: ['P', '#E60023'], whatsapp: ['W', '#25D366'], bing: ['b', '#008373'], email: ['@', '#6B7280'], direct: ['↗', '#6B7280'] };

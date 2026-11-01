@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261101122206';
-import { CONFIG } from './config.js?v=20261101122206';
-import { store } from './util.js?v=20261101122206';
+import { localize, loadRates } from './localprice.js?v=20261101124316';
+import { CONFIG } from './config.js?v=20261101124316';
+import { store } from './util.js?v=20261101124316';
 
 const D = {
   ro: {
@@ -983,6 +983,24 @@ const D = {
     'vi.instant': 'ieșire instant (probabil automat)',
     'vi.showInst': 'Arată {n} ieșiri instant (probabil automate)',
     'vi.hideInst': 'Ascunde cele {n} ieșiri instant',
+    'kdp.tab': "Amazon KDP",
+    'kdp.title': "Cărți gata pentru Amazon KDP",
+    'kdp.intro': "Fișiere pentru cărți broșate (print on demand): interior alb-negru 6 x 9 inch și copertă completă cu cotor, fără nicio mențiune despre Librava. Doar tu, ca administrator, le poți descărca.",
+    'kdp.noBackend': "Această secțiune merge doar pe site-ul real.",
+    'kdp.ready': "Secțiunea este pregătită. Cărțile apar aici imediat ce sunt generate.",
+    'kdp.size': "6 x 9 in",
+    'kdp.pagesN': "{n} pagini",
+    'kdp.spine': "cotor {n} in",
+    'kdp.bw': "alb-negru",
+    'kdp.contains': "Zip cu interior PDF, copertă PDF și fișă de încărcare",
+    'kdp.download': "Descarcă pentru Amazon",
+    'kdp.err': "Nu am putut deschide fișierul. Reîncarcă pagina și încearcă din nou.",
+    'kdp.rulesTitle': "Reguli de reținut la încărcarea pe KDP",
+    'kdp.r1': "Alege: broșată, alb-negru, hârtie albă, 6 x 9 in, fără bleed pentru interior, copertă mată.",
+    'kdp.r2': "Încarcă interiorul PDF și apoi coperta completă PDF. Lasă liberă căsuța albă din spate: KDP pune acolo codul de bare.",
+    'kdp.r3': "La întrebarea despre AI răspunde sincer: textul și imaginile au fost generate cu AI și editate de tine.",
+    'kdp.r4': "Numărul de pagini și lățimea cotorului sunt calculate pentru fiecare carte. Dacă schimbi cartea, cere fișierele din nou.",
+    'kdp.r5': "Cărțile nu conțin Librava, linkuri sau adrese web, ca să nu fie respinse.",
     'ntf.bold': 'Accentuează',
     'ntf.size': 'Mărime',
     'ntf.sz1': 'Normal',
@@ -2373,6 +2391,24 @@ const D = {
     'vi.instant': 'uscita istantanea (probabilmente automatica)',
     'vi.showInst': 'Mostra {n} uscite istantanee (probabilmente automatiche)',
     'vi.hideInst': 'Nascondi le {n} uscite istantanee',
+    'kdp.tab': "Amazon KDP",
+    'kdp.title': "Libri pronti per Amazon KDP",
+    'kdp.intro': "File per libri brossurati (stampa su richiesta): interno in bianco e nero 6 x 9 pollici e copertina completa con dorso, senza alcun riferimento a Librava. Solo tu, come amministratore, puoi scaricarli.",
+    'kdp.noBackend': "Questa sezione funziona solo sul sito reale.",
+    'kdp.ready': "La sezione è pronta. I libri compaiono qui appena vengono generati.",
+    'kdp.size': "6 x 9 in",
+    'kdp.pagesN': "{n} pagine",
+    'kdp.spine': "dorso {n} in",
+    'kdp.bw': "bianco e nero",
+    'kdp.contains': "Zip con interno PDF, copertina PDF e scheda di caricamento",
+    'kdp.download': "Scarica per Amazon",
+    'kdp.err': "Impossibile aprire il file. Ricarica la pagina e riprova.",
+    'kdp.rulesTitle': "Regole da ricordare al caricamento su KDP",
+    'kdp.r1': "Scegli: brossura, bianco e nero, carta bianca, 6 x 9 in, senza abbondanza per l'interno, copertina opaca.",
+    'kdp.r2': "Carica prima l'interno PDF, poi la copertina completa PDF. Lascia libero il riquadro bianco sul retro: KDP vi inserisce il codice a barre.",
+    'kdp.r3': "Alla domanda sull'IA rispondi onestamente: testo e immagini sono stati generati con IA e modificati da te.",
+    'kdp.r4': "Numero di pagine e larghezza del dorso sono calcolati per ogni libro. Se cambi il libro, rigenera i file.",
+    'kdp.r5': "I libri non contengono Librava, link o indirizzi web, per evitare rifiuti.",
     'ntf.bold': 'Evidenzia',
     'ntf.size': 'Dimensione',
     'ntf.sz1': 'Normale',
@@ -3763,6 +3799,24 @@ const D = {
     'vi.instant': 'instant exit (probably automatic)',
     'vi.showInst': 'Show {n} instant exits (probably automatic)',
     'vi.hideInst': 'Hide the {n} instant exits',
+    'kdp.tab': "Amazon KDP",
+    'kdp.title': "Books ready for Amazon KDP",
+    'kdp.intro': "Files for paperbacks (print on demand): black and white 6 x 9 in interior and a full wrap cover with spine, with no mention of Librava. Only you, as admin, can download them.",
+    'kdp.noBackend': "This section only works on the live site.",
+    'kdp.ready': "The section is ready. Books appear here as soon as they are generated.",
+    'kdp.size': "6 x 9 in",
+    'kdp.pagesN': "{n} pages",
+    'kdp.spine': "spine {n} in",
+    'kdp.bw': "black and white",
+    'kdp.contains': "Zip with interior PDF, cover PDF and an upload sheet",
+    'kdp.download': "Download for Amazon",
+    'kdp.err': "Could not open the file. Reload the page and try again.",
+    'kdp.rulesTitle': "Remember when uploading to KDP",
+    'kdp.r1': "Choose: paperback, black and white, white paper, 6 x 9 in, no bleed for the interior, matte cover.",
+    'kdp.r2': "Upload the interior PDF, then the full cover PDF. Leave the white box on the back empty: KDP adds the barcode there.",
+    'kdp.r3': "Answer the AI question honestly: the text and images were generated with AI and edited by you.",
+    'kdp.r4': "Page count and spine width are calculated for each book. If you change the book, ask for the files again.",
+    'kdp.r5': "The books contain no Librava name, links or web addresses, so they are not rejected.",
     'ntf.bold': 'Highlight',
     'ntf.size': 'Size',
     'ntf.sz1': 'Normal',
@@ -4210,7 +4264,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261101122206`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261101124316`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

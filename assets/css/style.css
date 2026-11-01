@@ -2120,3 +2120,11 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 @media (prefers-reduced-motion: reduce) { .cover, .guide-card img { animation: none; } }
 /* stop the shimmer once the picture is there (saves battery) */
 .cover:has(img.ld), .guide-card:has(img.ld) img, .cover:not(:has(img)) { animation: none; }
+
+/* admin: Amazon KDP */
+.kdp-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.kdp-row img { border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+.kdp-info { flex: 1 1 240px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.kdp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.kdp-chips i { font-style: normal; font-weight: 700; font-size: 12px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2, #F1F3EE); border: 1px solid var(--line); }
+.kdp-rules { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
