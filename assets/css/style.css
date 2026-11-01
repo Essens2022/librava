@@ -2103,3 +2103,12 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .guide-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .guide-btns .btn { flex: 1 1 200px; justify-content: center; text-align: center; }
 @media (min-width: 900px) { .guide-card { flex-basis: 170px; } .guide-btns .btn { flex: 0 0 auto; } }
+
+/* narrower cards so the whole block fits one phone screen */
+.guide-card { flex-basis: 108px; padding: 7px; gap: 4px; border-radius: 14px; }
+.guide-card b { font-size: 13px; -webkit-line-clamp: 3; }
+.guide-card small { font-size: 12px; }
+.guide-card .gc-tag { font-size: 10px; padding: 3px 7px; }
+.guide-home .section-title { font-size: 20px; line-height: 1.2; }
+.guide-home { padding-top: 16px; padding-bottom: 16px; }
+@media (min-width: 900px) { .guide-card { flex-basis: 150px; } }
