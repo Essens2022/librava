@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261031120959';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261031120959';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261031120959';
-import { resetCompanyCache } from './views.js?v=20261031120959';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261031120959';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261031120959';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261031120959';
-import { optimizeBook } from './optimize.js?v=20261031120959';
-import { api } from './api.js?v=20261031120959';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261031120959';
+import { CONFIG } from './config.js?v=20261101104543';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101104543';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261101104543';
+import { resetCompanyCache } from './views.js?v=20261101104543';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261101104543';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261101104543';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261101104543';
+import { optimizeBook } from './optimize.js?v=20261101104543';
+import { api } from './api.js?v=20261101104543';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261101104543';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -537,6 +537,12 @@ function activityHTML(E, r) {
 
 
 // ---------------------------------------------------------------- visitors (everyone on the site, logged in or not; "live" = last 5 minutes)
+
+// source logo + device icon for the visitors list (one glance: where from, which country, which device)
+const SRC_LOGO = { instagram: ['IG', 'linear-gradient(45deg,#F9A03F,#E1306C,#833AB4)'], ig: ['IG', 'linear-gradient(45deg,#F9A03F,#E1306C,#833AB4)'], facebook: ['f', '#1877F2'], fb: ['f', '#1877F2'], youtube: ['▶', '#E02424'], tiktok: ['♪', '#111'], google: ['G', '#4285F4'], 'google-ads': ['G', '#4285F4'], pinterest: ['P', '#E60023'], whatsapp: ['W', '#25D366'], bing: ['b', '#008373'], email: ['@', '#6B7280'], direct: ['↗', '#6B7280'] };
+const srcLabel = s => ({ ig: 'Instagram', fb: 'Facebook', 'google-ads': 'Google Ads' }[s] || (s ? s[0].toUpperCase() + s.slice(1) : 'Direct'));
+const srcBadge = s => { const k = String(s || 'direct').toLowerCase(), [g, bg] = SRC_LOGO[k] || [k[0]?.toUpperCase() || '?', '#6B7280']; return `<span class="vi-src" title="${esc(srcLabel(k))}"><i style="background:${bg}">${esc(g)}</i>${esc(srcLabel(k))}</span>`; };
+const devIcon = d => d === 'mobile' ? '📱' : d === 'tablet' ? '📟' : '💻';
 async function visitorsAdmin(body) {
   const r = cuRange();
   body.innerHTML = `<div class="panel">${rangeBarHTML(r)}<div id="vi-sum"></div><div id="vi-list"><div class="spinner"></div></div></div>`;
@@ -545,24 +551,32 @@ async function visitorsAdmin(body) {
   const draw = async () => {
     if (!body.isConnected || !$('#vi-list', body)) return;
     let L = []; try { L = await api.adminVisits(cuISO(cuRange())); } catch (x) { $('#vi-list', body).innerHTML = `<p class="muted">${esc(errText(x))}</p>`; return; }
-    const live = L.filter(v => Date.now() - new Date(v.ended) < 5 * 60e3);
-    const sum = (f) => L.filter(f).length;
+    // a visit that lasted 2 seconds or less with nothing done is almost always automatic (link preview, ad check): kept apart
+    const instant = v => v.seconds <= 2 && !v.searches && !v.carts && !v.checkouts && !v.purchases && !v.user_id;
+    const showInst = sessionStorage.getItem('librava:viInst') === '1';
+    const real = L.filter(v => !instant(v)), nInst = L.length - real.length, shown = showInst ? L : real;
+    const live = real.filter(v => Date.now() - new Date(v.ended) < 5 * 60e3);
+    const sum = (f) => real.filter(f).length;
     $('#vi-sum', body).innerHTML = `<div class="cu-kpis" style="margin-bottom:14px">
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.live'))}</small><b style="color:#2f8f4e">${live.length}</b></div>
-      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kVisits'))}</small><b>${L.length}</b></div>
-      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kSearch'))}</small><b>${L.reduce((a, v) => a + v.searches, 0)}</b></div>
+      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kVisits'))}</small><b>${real.length}</b></div>
+      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kSearch'))}</small><b>${real.reduce((a, v) => a + v.searches, 0)}</b></div>
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kCart'))}</small><b>${sum(v => v.carts > 0)}</b></div>
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.checkout'))}</small><b>${sum(v => v.checkouts > 0)}</b></div>
-      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.accounts'))}</small><b>${sum(v => v.user_id)}</b></div></div>`;
+      <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.accounts'))}</small><b>${sum(v => v.user_id)}</b></div></div>
+      ${nInst ? `<button type="button" class="btn btn-ghost btn-sm" id="vi-inst" style="margin-bottom:12px">⚡ ${esc(t(showInst ? 'vi.hideInst' : 'vi.showInst', { n: nInst }))}</button>` : ''}`;
+    $('#vi-inst', body)?.addEventListener('click', () => { sessionStorage.setItem('librava:viInst', showInst ? '0' : '1'); draw(); });
     const open = new Set($$('details[open][data-sid]', body).map(d => d.dataset.sid));
-    $('#vi-list', body).innerHTML = L.length ? L.map(v => {
-      const isLive = Date.now() - new Date(v.ended) < 5 * 60e3;
-      const meta = [t('admin.act.dev.' + (v.device || 'desktop')) + (v.os && v.os !== 'other' ? ' · ' + v.os : ''), v.country, v.source && v.source !== 'direct' ? t('admin.act2.src', { s: v.source }) : t('admin.vis.direct')].filter(Boolean).join(' · ');
-      const acts = [v.searches ? t('admin.vis.nSearch', { n: v.searches }) : '', v.books ? t('admin.vis.nBooks', { n: v.books }) : '', v.carts ? '🛒 ' + t('admin.vis.inCart') : '', v.checkouts ? t('admin.vis.checkout') : '', v.purchases ? '✔ ' + t('admin.vis.bought') : ''].filter(Boolean).join(' · ');
-      return `<details class="tl-visit" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
-        <b>${isLive ? '<span class="vi-live"></span>' : ''}${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</b>
-        <span class="muted"> · ${esc(durText(v.seconds))} · ${esc(meta)}</span>${acts ? `<div style="font-size:14px;margin-top:2px">${esc(acts)}</div>` : ''}
-        <div style="margin-top:2px">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
+    $('#vi-list', body).innerHTML = shown.length ? shown.map(v => {
+      const isLive = Date.now() - new Date(v.ended) < 5 * 60e3, inst = instant(v);
+      const chips = [v.books ? `<span class="vi-chip">📖 ${esc(t('admin.vis.nBooks', { n: v.books }))}</span>` : '', v.searches ? `<span class="vi-chip">🔎 ${esc(t('admin.vis.nSearch', { n: v.searches }))}</span>` : '',
+        v.carts ? `<span class="vi-chip hot">🛒 ${esc(t('admin.vis.inCart'))}</span>` : '', v.checkouts ? `<span class="vi-chip hot">💳 ${esc(t('admin.vis.checkout'))}</span>` : '', v.purchases ? `<span class="vi-chip buy">✔ ${esc(t('admin.vis.bought'))}</span>` : '',
+        inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : ''].filter(Boolean).join('');
+      const dur = inst ? '<1 s' : durText(v.seconds);
+      return `<details class="tl-visit${inst ? ' vi-inst' : ''}" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
+        <div class="vi-row">${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur">⏱ ${esc(dur)}</span><span class="vi-time">${isLive ? '<span class="vi-live"></span>' : ''}${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
+        ${chips ? `<div class="vi-chips">${chips}</div>` : ''}
+        <div class="vi-who">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
     }).join('') : `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
     $$('details[data-sid]', body).forEach(d => { const load = async () => { const ul = $('[data-ev]', d); if (ul.dataset.done) return; ul.dataset.done = 1;
       try { const E = await api.adminVisitEvents(d.dataset.sid); let last = '';

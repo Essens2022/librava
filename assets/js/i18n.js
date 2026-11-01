@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261031120959';
-import { CONFIG } from './config.js?v=20261031120959';
-import { store } from './util.js?v=20261031120959';
+import { localize, loadRates } from './localprice.js?v=20261101104543';
+import { CONFIG } from './config.js?v=20261101104543';
+import { store } from './util.js?v=20261101104543';
 
 const D = {
   ro: {
@@ -980,6 +980,9 @@ const D = {
     'ntf.empty': 'Nicio notificare deocamdată.',
     'ntf.new': 'Notificare nouă pentru clienți',
     'ntf.link': 'Link (opțional)',
+    'vi.instant': 'ieșire instant (probabil automat)',
+    'vi.showInst': 'Arată {n} ieșiri instant (probabil automate)',
+    'vi.hideInst': 'Ascunde cele {n} ieșiri instant',
     'ntf.bold': 'Accentuează',
     'ntf.size': 'Mărime',
     'ntf.sz1': 'Normal',
@@ -2367,6 +2370,9 @@ const D = {
     'ntf.empty': 'Nessuna notifica per ora.',
     'ntf.new': 'Nuova notifica per i clienti',
     'ntf.link': 'Link (facoltativo)',
+    'vi.instant': 'uscita istantanea (probabilmente automatica)',
+    'vi.showInst': 'Mostra {n} uscite istantanee (probabilmente automatiche)',
+    'vi.hideInst': 'Nascondi le {n} uscite istantanee',
     'ntf.bold': 'Evidenzia',
     'ntf.size': 'Dimensione',
     'ntf.sz1': 'Normale',
@@ -3754,6 +3760,9 @@ const D = {
     'ntf.empty': 'No notifications yet.',
     'ntf.new': 'New notification for customers',
     'ntf.link': 'Link (optional)',
+    'vi.instant': 'instant exit (probably automatic)',
+    'vi.showInst': 'Show {n} instant exits (probably automatic)',
+    'vi.hideInst': 'Hide the {n} instant exits',
     'ntf.bold': 'Highlight',
     'ntf.size': 'Size',
     'ntf.sz1': 'Normal',
@@ -4201,7 +4210,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261031120959`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261101104543`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

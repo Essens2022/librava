@@ -2062,3 +2062,17 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .ntf-big { line-height: 1.15; font-weight: 800; }
 .ntf-big .ntf-emo { font-size: 1em; }
 .adm-tabs { position: relative; }
+
+/* visitors list: source logo, country flag, device and time in one line */
+.vi-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 15px; }
+.vi-src { display: inline-flex; align-items: center; gap: 7px; font-weight: 800; }
+.vi-src i { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; color: #fff; font: 800 13px/1 var(--font-ui); font-style: normal; }
+.vi-flag, .vi-dev, .vi-dur { white-space: nowrap; }
+.vi-time { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.vi-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.vi-chip { padding: 3px 10px; border-radius: 999px; background: var(--surface-2, #F1F3EE); border: 1px solid var(--line); font-size: 13px; font-weight: 700; }
+.vi-chip.hot { background: #FFF1DA; border-color: #F3C77E; color: #7A4B00; }
+.vi-chip.buy { background: #DDF3E2; border-color: #7CC48F; color: #1E6B35; }
+.vi-chip.dim { opacity: .65; }
+.vi-who { margin-top: 6px; font-size: 13px; }
+.tl-visit.vi-inst { opacity: .6; }
