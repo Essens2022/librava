@@ -2138,6 +2138,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .buy-sticky .bs-price s { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 4px }
   .buy-sticky .btn { flex: 1; max-width: 220px; min-height: 46px }
   .book-cover-col .cover { max-width: 160px }
-  .buybox .offer-chip:nth-child(n+2) { display: none }
+  .buybox .offer-chip:nth-child(n+3) { display: none }
   body:has(.buy-sticky:not([hidden])) .site-foot, body:has(.buy-sticky:not([hidden])) footer { padding-bottom: 70px }
 }
