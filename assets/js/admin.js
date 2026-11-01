@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261101225653';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101225653';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261101225653';
-import { resetCompanyCache } from './views.js?v=20261101225653';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261101225653';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261101225653';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261101225653';
-import { optimizeBook } from './optimize.js?v=20261101225653';
-import { api } from './api.js?v=20261101225653';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261101225653';
+import { CONFIG } from './config.js?v=20261102002040';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102002040';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102002040';
+import { resetCompanyCache } from './views.js?v=20261102002040';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102002040';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102002040';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102002040';
+import { optimizeBook } from './optimize.js?v=20261102002040';
+import { api } from './api.js?v=20261102002040';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102002040';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -618,7 +618,7 @@ async function visitorsAdmin(body) {
         inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : ''].filter(Boolean).join('');
       const dur = inst ? '<1 s' : durText(v.seconds);
       return `<details class="tl-visit${inst ? ' vi-inst' : ''}" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
-        <div class="vi-row">${srcBadge(v.source)}${isLive ? '<span class="vi-live" style="margin:0 -4px 0 -6px"></span>' : ''}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur">⏱ ${esc(dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
+        <div class="vi-row">${isLive ? '<span class="vi-live" style="margin:0 6px 0 0;flex:none"></span>' : ''}${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur">⏱ ${esc(dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
         ${chips ? `<div class="vi-chips">${chips}</div>` : ''}
         <div class="vi-who">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
     }).join('') : `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
