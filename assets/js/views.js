@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101154025';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101154025';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101154025';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101154025';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101154025';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101154025';
-import { track } from './track.js?v=20261101154025';
-import { gaEvent } from './ga.js?v=20261101154025';
-import { guessLang } from './langdetect.js?v=20261101154025';
-import { didYouMean } from './search.js?v=20261101154025';
-import { api, editionsOf } from './api.js?v=20261101154025';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101154025';
+import { CONFIG } from './config.js?v=20261101154617';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101154617';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101154617';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101154617';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101154617';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101154617';
+import { track } from './track.js?v=20261101154617';
+import { gaEvent } from './ga.js?v=20261101154617';
+import { guessLang } from './langdetect.js?v=20261101154617';
+import { didYouMean } from './search.js?v=20261101154617';
+import { api, editionsOf } from './api.js?v=20261101154617';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101154617';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -407,22 +407,25 @@ export async function viewBook(el, id) {
   // (what the customer gets if it is added, and the next step). It redraws by itself on every cart change.
   const buyBox = $('.buybox', el);
   let offerBox = $('.offer-badges', el); const staticOffers = offerBox ? offerBox.innerHTML : '';
-  let offerSeq = 0;
+  let offerSeq = 0; const bookCache = new Map();
   const renderOffers = async () => {
     if (!buyBox || !document.body.contains(buyBox)) { window.removeEventListener('librava:cart', renderOffers); return; }
     const seq = ++offerSeq, others = cart.get().filter(id => id !== b.id);
     if (!offerBox) { const anchor = $('[data-add]', buyBox); if (!anchor) return; offerBox = document.createElement('div'); offerBox.className = 'offer-badges offer-box'; offerBox.hidden = true; anchor.before(offerBox); }
     if (!others.length) { offerBox.classList.remove('is-smart'); offerBox.innerHTML = staticOffers; offerBox.hidden = !staticOffers; return; }
-    const have = (await Promise.all(others.map(id => api.getBook(id).catch(() => null)))).filter(Boolean);
-    if (seq !== offerSeq || !have.length) return;
+    const missing = others.filter(id => !bookCache.has(id));
+    if (missing.length) await Promise.all(missing.map(id => api.getBook(id).then(x => bookCache.set(id, x)).catch(() => null)));
+    if (seq !== offerSeq) return;
+    const have = others.map(id => bookCache.get(id)).filter(Boolean); if (!have.length) return;
+    const inCart = cart.get().includes(b.id);
     const run = offers.filter(o => o.kind !== 'coupon');
     const now = applyOffers(have, run, { noNudge: true }), withIt = applyOffers([...have, b], run);
     const gain = withIt.discount - now.discount, top = withIt.applied.find(a => a.kind !== 'coupon'), n = withIt.nudges[0], count = have.length + 1, rows = [];
-    if (top && gain > 0) rows.push(`<div class="offer-row is-on"><span class="offer-ico on">${icon('check')}</span><span class="offer-main"><span class="offer-pill">${esc(t('book.offerUnlocked'))}</span> ${hot(esc(appliedLabel(top, t, c => t('cat.' + c))))}</span><b class="offer-save">-${money(gain)}</b></div>`);
+    if (top && gain > 0) rows.push(`<div class="offer-row ${inCart ? 'is-on' : 'is-try'}"><span class="offer-ico ${inCart ? 'on' : ''}">${icon(inCart ? 'check' : 'tag')}</span><span class="offer-main"><span class="offer-pill ${inCart ? '' : 'try'}">${esc(t(inCart ? 'book.offerUnlocked' : 'book.offerAdd'))}</span> ${hot(esc(appliedLabel(top, t, c => t('cat.' + c))))}</span><b class="offer-save">-${money(gain)}</b></div>`);
     if (n) {
       const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
       const total = Math.min(count + n.more, 8);
-      rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main"><span class="offer-txt">${hot(esc(txt))}</span><span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < count ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
+      rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main"><span class="offer-txt">${hot(esc(txt))}</span><span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < (inCart ? count : count - 1) ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
     }
     offerBox.classList.add('is-smart'); offerBox.innerHTML = rows.join(''); offerBox.hidden = !rows.length;
     if (rows.length) { offerBox.classList.remove('pop'); void offerBox.offsetWidth; offerBox.classList.add('pop'); }

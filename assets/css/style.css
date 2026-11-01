@@ -2167,3 +2167,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 .offer-save { white-space: nowrap; align-self: center; flex: none }
 .offer-row .offer-main { min-width: 0; flex: 1 }
+
+.offer-pill.try { background: #fff0d6; color: #b8650a }
+.offer-row.is-try .offer-ico { background: #e8841a; color: #fff }
