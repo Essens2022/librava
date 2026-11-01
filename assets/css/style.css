@@ -2170,3 +2170,30 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 .offer-pill.try { background: #fff0d6; color: #b8650a }
 .offer-row.is-try .offer-ico { background: #e8841a; color: #fff }
+
+/* offer card: fixed structure, soft transitions */
+.offer-box.is-smart { gap: 0 }
+.o-collapse { overflow: hidden; max-height: 420px; opacity: 1; transition: max-height .38s cubic-bezier(.4, 0, .2, 1), opacity .28s ease, padding .38s ease }
+.o-collapse.off { max-height: 0; opacity: 0; padding-top: 0 !important; padding-bottom: 0 !important; pointer-events: none }
+.o-smart .o-r1 { padding-bottom: 8px }
+.o-smart .offer-row.o-collapse { max-height: 140px }
+.o-smart .offer-row.o-collapse.off { max-height: 0 }
+.o-line { flex-direction: row !important; flex-wrap: wrap; align-items: center; gap: 6px !important }
+.offer-pill, .o-label, .offer-save, .offer-txt { transition: opacity .15s ease, background-color .3s ease, color .3s ease }
+.fade { opacity: 0 }
+.offer-pill.try { background: #FFF0D6; color: #B8650A }
+.offer-ico.ico2 { position: relative; background: linear-gradient(135deg, #F6A53B, #E8841A); box-shadow: 0 2px 6px rgba(232, 132, 26, .30); transition: box-shadow .3s ease; overflow: hidden }
+.offer-ico.ico2::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, #6DBE45, #3F9B2B); opacity: 0; transition: opacity .35s ease }
+.offer-ico.ico2.on::before { opacity: 1 }
+.offer-ico.ico2.on { box-shadow: 0 2px 6px rgba(63, 155, 43, .35) }
+.offer-ico.ico2 .ic { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .3s ease, transform .35s cubic-bezier(.3, 1.4, .5, 1) }
+.offer-ico.ico2 .ic-check { opacity: 0; transform: scale(.4) rotate(-30deg) }
+.offer-ico.ico2.on .ic-check { opacity: 1; transform: none }
+.offer-ico.ico2.on .ic-tag { opacity: 0; transform: scale(.4) }
+.offer-ico.ico2 .ic svg { width: 16px; height: 16px; position: relative; z-index: 1 }
+.offer-prog i { position: relative; overflow: hidden }
+.offer-prog i::after { content: ''; position: absolute; inset: 0; border-radius: 4px; background: linear-gradient(90deg, #F6A53B, #E8841A); transform: scaleX(0); transform-origin: left; transition: transform .55s cubic-bezier(.4, 0, .2, 1) }
+.offer-prog i.f { background: #EBD9B4 }
+.offer-prog i.f::after { transform: scaleX(1) }
+@media (max-width: 760px) { .buybox .offer-box .o-static .offer-row:nth-child(n+4) { display: none } }
+@media (prefers-reduced-motion: reduce) { .o-collapse, .offer-ico.ico2 .ic, .offer-prog i::after, .offer-pill, .o-label, .offer-save, .offer-txt { transition: none } }
