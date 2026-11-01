@@ -2094,7 +2094,8 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 /* guide cards: compact, same height, no underline (phone first) */
 .guide-rail { align-items: stretch; }
-.guide-card, .guide-card:visited, .guide-card:hover, .guide-card * { text-decoration: none !important; }
+.guide-card, .guide-card * { text-decoration: none; }
+.guide-card:hover b, .guide-card:active b, .guide-card:focus-visible b, .guide-card:active small { text-decoration: underline; }
 .guide-card { flex: 0 0 132px; padding: 8px; gap: 5px; }
 .guide-card img { margin-bottom: 2px; }
 .guide-card b { font-size: 14px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
