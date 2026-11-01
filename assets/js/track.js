@@ -2,9 +2,9 @@
 // Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261101225343';
-import { store } from './util.js?v=20261101225343';
-import { gaEvent } from './ga.js?v=20261101225343';
+import { api } from './api.js?v=20261101225653';
+import { store } from './util.js?v=20261101225653';
+import { gaEvent } from './ga.js?v=20261101225653';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -92,3 +92,13 @@ function beat(first) {
 }
 setTimeout(() => beat(true), 4000);
 setInterval(() => beat(false), 30e3);
+
+// Time on the site for every visitor (also without an account): a small "still here" signal every 15 seconds,
+// only while the page is visible and the person scrolled, tapped or typed in the last 90 seconds. Visits that
+// never do anything (automatic link checks) send none, so their time stays tiny instead of looking real.
+setInterval(() => {
+  try {
+    if (document.visibilityState !== 'visible' || Date.now() - lastInput > 90e3) return;
+    track('ping');
+  } catch { }
+}, 15e3);
