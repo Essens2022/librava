@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101152242';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101152242';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101152242';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101152242';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101152242';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101152242';
-import { track } from './track.js?v=20261101152242';
-import { gaEvent } from './ga.js?v=20261101152242';
-import { guessLang } from './langdetect.js?v=20261101152242';
-import { didYouMean } from './search.js?v=20261101152242';
-import { api, editionsOf } from './api.js?v=20261101152242';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101152242';
+import { CONFIG } from './config.js?v=20261101154017';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101154017';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101154017';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101154017';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101154017';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101154017';
+import { track } from './track.js?v=20261101154017';
+import { gaEvent } from './ga.js?v=20261101154017';
+import { guessLang } from './langdetect.js?v=20261101154017';
+import { didYouMean } from './search.js?v=20261101154017';
+import { api, editionsOf } from './api.js?v=20261101154017';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101154017';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -404,28 +404,31 @@ export async function viewBook(el, id) {
   $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); toast(t('cart.added')); });
   $('[data-buy]', el)?.addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
   // offers that depend on the cart: with books already in the cart, show only what this book really changes
-  // (what the customer gets if it is added, and the next step), not the whole list of offers
-  (async () => {
-    const box = $('.offer-badges', el); const others = cart.get().filter(id => id !== b.id);
-    if (!box || !others.length) return;
+  // (what the customer gets if it is added, and the next step). It redraws by itself on every cart change.
+  const buyBox = $('.buybox', el);
+  let offerBox = $('.offer-badges', el); const staticOffers = offerBox ? offerBox.innerHTML : '';
+  let offerSeq = 0;
+  const renderOffers = async () => {
+    if (!buyBox || !document.body.contains(buyBox)) { window.removeEventListener('librava:cart', renderOffers); return; }
+    const seq = ++offerSeq, others = cart.get().filter(id => id !== b.id);
+    if (!offerBox) { const anchor = $('[data-add]', buyBox); if (!anchor) return; offerBox = document.createElement('div'); offerBox.className = 'offer-badges offer-box'; offerBox.hidden = true; anchor.before(offerBox); }
+    if (!others.length) { offerBox.classList.remove('is-smart'); offerBox.innerHTML = staticOffers; offerBox.hidden = !staticOffers; return; }
     const have = (await Promise.all(others.map(id => api.getBook(id).catch(() => null)))).filter(Boolean);
+    if (seq !== offerSeq || !have.length) return;
     const run = offers.filter(o => o.kind !== 'coupon');
-    if (!have.length) return;
-    const now = applyOffers(have, run, { noNudge: true }), withIt = applyOffers([...have.filter(x => x.id !== b.id), b], run);
-    const gain = withIt.discount - now.discount;
-    const top = withIt.applied.find(a => a.kind !== 'coupon');
-    const n = withIt.nudges[0];
-    const count = have.filter(x => x.id !== b.id).length + 1;
-    const rows = [];
+    const now = applyOffers(have, run, { noNudge: true }), withIt = applyOffers([...have, b], run);
+    const gain = withIt.discount - now.discount, top = withIt.applied.find(a => a.kind !== 'coupon'), n = withIt.nudges[0], count = have.length + 1, rows = [];
     if (top && gain > 0) rows.push(`<div class="offer-row is-on"><span class="offer-ico on">${icon('check')}</span><span class="offer-main"><span class="offer-pill">${esc(t('book.offerUnlocked'))}</span> ${hot(esc(appliedLabel(top, t, c => t('cat.' + c))))}</span><b class="offer-save">-${money(gain)}</b></div>`);
     if (n) {
       const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
       const total = Math.min(count + n.more, 8);
       rows.push(`<div class="offer-row is-next"><span class="offer-ico">${icon('tag')}</span><span class="offer-main"><span class="offer-txt">${hot(esc(txt))}</span><span class="offer-prog" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<i class="${i < count ? 'f' : ''}"></i>`).join('')}</span></span></div>`);
     }
-    if (!rows.length) { box.remove(); return; }
-    box.classList.add('is-smart'); box.innerHTML = rows.join('');
-  })();
+    offerBox.classList.add('is-smart'); offerBox.innerHTML = rows.join(''); offerBox.hidden = !rows.length;
+    if (rows.length) { offerBox.classList.remove('pop'); void offerBox.offsetWidth; offerBox.classList.add('pop'); }
+  };
+  window.addEventListener('librava:cart', renderOffers);
+  renderOffers();
   // phone: a price + "Buy now" bar stays at the bottom until the real buy box is on screen
   const mainBuy = $('[data-buy]', el);
   if (mainBuy) {
