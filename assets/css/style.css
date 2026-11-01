@@ -2210,3 +2210,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .trust-strip { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 0; padding: 0; font-size: 13px; color: var(--muted) }
 .trust-strip li { display: inline-flex; align-items: center; gap: 6px }
 .trust-strip .ico { width: 16px; height: 16px; color: #3F9B2B }
+
+.offer-box { transition: opacity .3s ease }
+.offer-box.o-pending { opacity: 0; min-height: 96px; max-height: 96px; overflow: hidden }

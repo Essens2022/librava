@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261101161355';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101161355';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101161355';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101161355';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101161355';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101161355';
-import { track } from './track.js?v=20261101161355';
-import { gaEvent } from './ga.js?v=20261101161355';
-import { guessLang } from './langdetect.js?v=20261101161355';
-import { didYouMean } from './search.js?v=20261101161355';
-import { api, editionsOf } from './api.js?v=20261101161355';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101161355';
+import { CONFIG } from './config.js?v=20261101163020';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261101163020';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261101163020';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261101163020';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261101163020';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261101163020';
+import { track } from './track.js?v=20261101163020';
+import { gaEvent } from './ga.js?v=20261101163020';
+import { guessLang } from './langdetect.js?v=20261101163020';
+import { didYouMean } from './search.js?v=20261101163020';
+import { api, editionsOf } from './api.js?v=20261101163020';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261101163020';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -248,7 +248,7 @@ export async function viewBook(el, id) {
       <div class="bigprice">${money(b.price_cents)}</div>
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
-      ${badges.length ? `<div class="offer-badges offer-box"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map(o => `<div class="offer-row"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
+      ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map(o => `<div class="offer-row"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`);
 
@@ -419,7 +419,7 @@ export async function viewBook(el, id) {
     if (ui) return ui;
     if (!offerBox) { const anchor = $('[data-add]', buyBox); if (!anchor) return null; offerBox = document.createElement('div'); offerBox.className = 'offer-badges offer-box'; offerBox.hidden = true; anchor.before(offerBox); }
     offerBox.classList.add('is-smart');
-    offerBox.innerHTML = `<div class="o-static o-collapse${staticOffers ? '' : ' off'}">${staticOffers}</div>
+    offerBox.innerHTML = `<div class="o-static o-collapse${staticOffers && !offerBox.classList.contains('o-pending') ? '' : ' off'}">${staticOffers}</div>
       <div class="o-smart o-collapse off">
         <div class="offer-row o-r1 o-collapse off"><span class="offer-ico ico2"><span class="ic ic-tag">${icon('tag')}</span><span class="ic ic-check">${icon('check')}</span></span><span class="offer-main o-line"><span class="offer-pill"></span><span class="o-label"></span></span><b class="offer-save"></b></div>
         <div class="offer-row o-r2 o-collapse off"><span class="offer-ico ico2"><span class="ic ic-tag">${icon('tag')}</span></span><span class="offer-main"><span class="offer-txt"></span><span class="offer-prog" aria-hidden="true"></span></span></div>
@@ -435,11 +435,11 @@ export async function viewBook(el, id) {
     if (!ui && !others.length) return;
     if (!ensureUi()) return;
     const showSmart = (on) => { ui.smart.classList.toggle('off', !on); ui.stat.classList.toggle('off', on || !staticOffers); offerBox.hidden = !(on || staticOffers); };
-    if (!others.length) { showSmart(false); return; }
+    if (!others.length) { showSmart(false); offerBox.classList.remove('o-pending'); return; }
     const missing = others.filter(id => !bookCache.has(id));
     if (missing.length) await Promise.all(missing.map(id => api.getBook(id).then(x => bookCache.set(id, x)).catch(() => null)));
     if (seq !== offerSeq) return;
-    const have = others.map(id => bookCache.get(id)).filter(Boolean); if (!have.length) return;
+    const have = others.map(id => bookCache.get(id)).filter(Boolean); if (!have.length) { offerBox.classList.remove('o-pending'); return; }
     const inCart = cart.get().includes(b.id), run = offers.filter(o => o.kind !== 'coupon');
     const now = applyOffers(have, run, { noNudge: true }), withIt = applyOffers([...have, b], run);
     const gain = withIt.discount - now.discount, top = withIt.applied.find(a => a.kind !== 'coupon'), n = withIt.nudges[0], count = have.length + 1;
@@ -460,7 +460,7 @@ export async function viewBook(el, id) {
       while (ui.prog.children.length > total) ui.prog.lastChild.remove();
       requestAnimationFrame(() => [...ui.prog.children].forEach((seg, i) => seg.classList.toggle('f', i < filled)));
     }
-    showSmart(true);
+    showSmart(true); offerBox.classList.remove('o-pending');
   };
   window.addEventListener('librava:cart', renderOffers);
   renderOffers();
