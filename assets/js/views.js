@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102002434';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102002434';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102002434';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102002434';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102002434';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102002434';
-import { track } from './track.js?v=20261102002434';
-import { gaEvent } from './ga.js?v=20261102002434';
-import { guessLang } from './langdetect.js?v=20261102002434';
-import { didYouMean } from './search.js?v=20261102002434';
-import { api, editionsOf } from './api.js?v=20261102002434';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102002434';
+import { CONFIG } from './config.js?v=20261102020945';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102020945';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102020945';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102020945';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102020945';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102020945';
+import { track } from './track.js?v=20261102020945';
+import { gaEvent } from './ga.js?v=20261102020945';
+import { guessLang } from './langdetect.js?v=20261102020945';
+import { didYouMean } from './search.js?v=20261102020945';
+import { api, editionsOf } from './api.js?v=20261102020945';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102020945';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -248,7 +248,7 @@ export async function viewBook(el, id) {
       <div class="bigprice">${money(b.price_cents)}</div>
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
-      ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map((o, oi) => `<div class="offer-row${oi ? ' rot-hide' : ''}"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
+      ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map((o, oi) => `<div class="offer-row"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`);
 
@@ -409,7 +409,6 @@ export async function viewBook(el, id) {
   let offerBox = $('.offer-badges', el); const staticOffers = offerBox ? offerBox.innerHTML : '';
   let offerSeq = 0, ui = null; const bookCache = new Map();
   // generic (static) offers show one at a time, rotating, instead of the whole list at once
-  if (offerBox) { let ri = 0; const tick = () => { if (!offerBox.isConnected) return clearInterval(rt); const rows = [...offerBox.querySelectorAll('.o-static > .offer-row, :scope:not(.is-smart) > .offer-row')]; if (rows.length < 2) { rows.forEach(r => r.classList.remove('rot-hide')); return; } ri = (ri + 1) % rows.length; rows.forEach((r, i) => r.classList.toggle('rot-hide', i !== ri)); }; const rt = setInterval(tick, 3500); tick(); }
   const swap = (node, html) => {
     if (node.dataset.h === html) return;
     const first = node.dataset.h === undefined; node.dataset.h = html;
