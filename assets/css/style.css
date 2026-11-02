@@ -2245,3 +2245,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .cc-save { margin: 10px 14px 12px; background: var(--cart-btn); border-color: transparent; color: #1C2B2D; }
 .cc-save:hover { background: var(--cart-btn-hover); }
 @media (max-width: 640px) { .consent-btns { flex-direction: column; min-width: 0; } }
+
+.tl-diag { list-style: none; padding: 8px 12px; margin: 0 0 6px; border-radius: 10px; background: var(--card, #f4f6ef); font-size: 14px; border-left: 4px solid var(--line, #d9ddd2); }
+.tl-diag.buy { border-left-color: #2e9d57; } .tl-diag.hot { border-left-color: #e0a030; } .tl-diag.bad { border-left-color: #d0453b; }
+.tl-ev.tl-click, .tl-ev.tl-scroll { opacity: .78; font-size: 13px; } .tl-ev.tl-click span::before { content: "👆 "; } .tl-ev.tl-scroll span::before { content: "📜 "; }

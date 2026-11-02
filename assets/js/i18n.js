@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102183744';
-import { CONFIG } from './config.js?v=20261102183744';
-import { store } from './util.js?v=20261102183744';
+import { localize, loadRates } from './localprice.js?v=20261102184804';
+import { CONFIG } from './config.js?v=20261102184804';
+import { store } from './util.js?v=20261102184804';
 
 const D = {
   ro: {
@@ -1227,6 +1227,26 @@ const D = {
     "admin.act2.ev.leave": "A părăsit pagina",
     "admin.act2.ev.return": "S-a întors pe pagină",
     "admin.act2.ev.add_cartN": "A pus în coș {n} cărți:",
+    "admin.act2.ev.click": "A apăsat",
+    "admin.act2.ev.field": "A început să completeze câmpul «{f}»",
+    "admin.act2.ev.scroll50": "A citit până la jumătatea paginii",
+    "admin.act2.ev.scroll90": "A citit aproape toată pagina",
+    "admin.act2.ev.leaveInfo": "de pe „{p}”, după {s}, citit {sc}% din pagină",
+    "admin.diag.title": "Concluzie",
+    "admin.diag.buy": "a cumpărat.",
+    "admin.diag.error": "a întâmpinat o eroare la plată sau la cont — verifică pașii de mai jos.",
+    "admin.diag.waiver": "a refuzat declarația de la plată și s-a oprit acolo.",
+    "admin.diag.payOpen": "a ajuns la pagina de plată (la procesatorul de plăți) dar nu a finalizat.",
+    "admin.diag.checkout": "a apăsat pe plată dar nu a ajuns la plata propriu-zisă.",
+    "admin.diag.cartSeen": "a pus cărți în coș și a văzut coșul, dar nu a început plata (preț, taxe sau încredere?).",
+    "admin.diag.cartNo": "a pus cartea în coș dar nu a mai deschis coșul.",
+    "admin.diag.book": "a deschis cărți dar nu a pus nimic în coș (preț, descriere sau copertă?).",
+    "admin.diag.search": "a căutat dar nu a deschis nicio carte (nu a găsit ce voia?).",
+    "admin.diag.home": "a văzut doar «{p}» și a plecat.",
+    "admin.diag.sChk": "a oprit la plată",
+    "admin.diag.sCart": "a oprit la coș",
+    "admin.diag.sBook": "a oprit la carte",
+    "admin.diag.sHome": "a oprit la început",
     "admin.act2.ev.remove_cart": "A scos din coș",
     "admin.act2.ev.pay_redirect": "A fost trimis la pagina de plată",
     "admin.act2.ev.pay_error": "Eroare la plată",
@@ -2651,6 +2671,26 @@ const D = {
     "admin.act2.ev.leave": "Ha lasciato la pagina",
     "admin.act2.ev.return": "È tornato sulla pagina",
     "admin.act2.ev.add_cartN": "Ha messo nel carrello {n} libri:",
+    "admin.act2.ev.click": "Ha premuto",
+    "admin.act2.ev.field": "Ha iniziato a compilare il campo «{f}»",
+    "admin.act2.ev.scroll50": "Ha letto fino a metà pagina",
+    "admin.act2.ev.scroll90": "Ha letto quasi tutta la pagina",
+    "admin.act2.ev.leaveInfo": "da «{p}», dopo {s}, letto {sc}% della pagina",
+    "admin.diag.title": "Conclusione",
+    "admin.diag.buy": "ha acquistato.",
+    "admin.diag.error": "ha avuto un errore nel pagamento o nell’account — controlla i passaggi sotto.",
+    "admin.diag.waiver": "ha rifiutato la dichiarazione al pagamento e si è fermato lì.",
+    "admin.diag.payOpen": "è arrivato alla pagina di pagamento ma non ha finito.",
+    "admin.diag.checkout": "ha premuto paga ma non è arrivato al pagamento vero e proprio.",
+    "admin.diag.cartSeen": "ha messo libri nel carrello e l’ha visto, ma non ha iniziato il pagamento (prezzo, costi o fiducia?).",
+    "admin.diag.cartNo": "ha messo il libro nel carrello ma non ha più aperto il carrello.",
+    "admin.diag.book": "ha aperto dei libri ma non ha messo nulla nel carrello (prezzo, descrizione o copertina?).",
+    "admin.diag.search": "ha cercato ma non ha aperto nessun libro (non ha trovato ciò che voleva?).",
+    "admin.diag.home": "ha visto solo «{p}» ed è uscito.",
+    "admin.diag.sChk": "si è fermato al pagamento",
+    "admin.diag.sCart": "si è fermato al carrello",
+    "admin.diag.sBook": "si è fermato al libro",
+    "admin.diag.sHome": "si è fermato all’inizio",
     "admin.act2.ev.remove_cart": "Ha tolto dal carrello",
     "admin.act2.ev.pay_redirect": "Mandato alla pagina di pagamento",
     "admin.act2.ev.pay_error": "Errore nel pagamento",
@@ -4075,6 +4115,26 @@ const D = {
     "admin.act2.ev.leave": "Left the page",
     "admin.act2.ev.return": "Came back to the page",
     "admin.act2.ev.add_cartN": "Added {n} books to the cart:",
+    "admin.act2.ev.click": "Pressed",
+    "admin.act2.ev.field": "Started filling in the field “{f}”",
+    "admin.act2.ev.scroll50": "Read down to half of the page",
+    "admin.act2.ev.scroll90": "Read almost the whole page",
+    "admin.act2.ev.leaveInfo": "from “{p}”, after {s}, read {sc}% of the page",
+    "admin.diag.title": "Summary",
+    "admin.diag.buy": "bought.",
+    "admin.diag.error": "ran into an error at payment or sign-in — check the steps below.",
+    "admin.diag.waiver": "declined the waiver at checkout and stopped there.",
+    "admin.diag.payOpen": "reached the payment page but did not finish.",
+    "admin.diag.checkout": "pressed pay but never reached the actual payment.",
+    "admin.diag.cartSeen": "added books and saw the cart, but did not start paying (price, fees or trust?).",
+    "admin.diag.cartNo": "added the book but never opened the cart.",
+    "admin.diag.book": "opened books but added nothing to the cart (price, description or cover?).",
+    "admin.diag.search": "searched but opened no book (did not find what they wanted?).",
+    "admin.diag.home": "only saw “{p}” and left.",
+    "admin.diag.sChk": "stopped at payment",
+    "admin.diag.sCart": "stopped at the cart",
+    "admin.diag.sBook": "stopped at a book",
+    "admin.diag.sHome": "stopped at the start",
     "admin.act2.ev.remove_cart": "Removed from cart",
     "admin.act2.ev.pay_redirect": "Sent to the payment page",
     "admin.act2.ev.pay_error": "Payment error",
@@ -4312,7 +4372,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102183744`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102184804`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102183744';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102183744';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102183744';
-import { resetCompanyCache } from './views.js?v=20261102183744';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102183744';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102183744';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102183744';
-import { optimizeBook } from './optimize.js?v=20261102183744';
-import { api } from './api.js?v=20261102183744';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102183744';
+import { CONFIG } from './config.js?v=20261102184804';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102184804';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102184804';
+import { resetCompanyCache } from './views.js?v=20261102184804';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102184804';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102184804';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102184804';
+import { optimizeBook } from './optimize.js?v=20261102184804';
+import { api } from './api.js?v=20261102184804';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102184804';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -510,12 +510,33 @@ const evLine = e => {
     case 'add_cart': return t('admin.act2.ev.add_cart', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
     case 'search': return esc(t('admin.act2.ev.search', { q: e.q || '', n: e.results ?? 0 }));
     case 'return': return esc(t('admin.act2.ev.return'));
+    case 'click': { const n = e.note || ''; return n.startsWith('field:') ? esc(t('admin.act2.ev.field', { f: n.slice(6) })) : esc(t('admin.act2.ev.click')) + ' «' + esc(n) + '»'; }
+    case 'scroll': return esc(t('admin.act2.ev.scroll' + (e.note === '90' ? '90' : '50')));
+    case 'leave': { const m = /s=(\d+);sc=(\d+)/.exec(e.note || ''); const p = esc(pageLabel(e.path));
+      return esc(t('admin.act2.ev.leave')) + (m ? ' — ' + esc(t('admin.act2.ev.leaveInfo', { p: pageLabel(e.path), s: durText(+m[1]), sc: m[2] })) : ' — ' + p); }
     case 'error': case 'pay_error': case 'auth_error': return esc(t('admin.act2.ev.' + e.type)) + (e.note ? ': <i>' + esc(e.note) + '</i>' : '');
     case 'remove_cart': return e.book_title ? esc(t('admin.act2.ev.remove_cart')) + ' «' + esc(e.book_title) + '»' : esc(t('admin.act2.ev.remove_cart'));
     default: return esc(t('admin.act2.ev.' + e.type));
   }
 };
-// one clear, non-contradicting story: no repeated lines, a "left" line only when they really left, a return marked on the next step, several books added at once = one line
+// where did this visit stop, and what probably happened (the same facts for the summary and the timeline)
+function diagnose(E) {
+  const has = ty => E.some(e => e.type === ty);
+  const cartPage = E.some(e => e.type === 'pageview' && /cart|cos|carrello/i.test(e.path || ''));
+  const last = [...E].reverse().find(e => e.type === 'pageview');
+  const lastP = last ? pageLabel(last.path) : '';
+  if (has('purchase')) return ['buy', t('admin.diag.buy')];
+  if (has('pay_error') || has('auth_error')) return ['bad', t('admin.diag.error')];
+  if (has('waiver_no')) return ['bad', t('admin.diag.waiver')];
+  if (has('pay_redirect')) return ['hot', t('admin.diag.payOpen')];
+  if (has('checkout')) return ['hot', t('admin.diag.checkout')];
+  if (has('add_cart')) return ['hot', cartPage ? t('admin.diag.cartSeen') : t('admin.diag.cartNo')];
+  if (has('book_view')) return ['', t('admin.diag.book')];
+  if (has('search')) return ['', t('admin.diag.search')];
+  return ['', t('admin.diag.home', { p: lastP || '—' })];
+}
+// one clear, non-contradicting story: no repeated lines, a "left" line only when they really left, a return marked on the next step,
+// several books added at once = one line, time spent on a step, what was pressed and how far down they read
 function tlHTML(E) {
   const rows = []; let away = false, lastTxt = '';
   const list = E.filter(e => e.type !== 'ping');
@@ -528,9 +549,15 @@ function tlHTML(E) {
       txt = grp.length > 1 ? esc(t('admin.act2.ev.add_cartN', { n: grp.length })) + ' ' + grp.map(g => '«' + bookLink(g) + '»').join(', ') : evLine(e);
     } else txt = evLine(e);
     if (!txt || txt === lastTxt) continue; lastTxt = txt;
-    rows.push({ e, txt, back: away }); away = false;
+    rows.push({ e, txt, back: away, t0: new Date(e.created_at) }); away = false;
   }
-  return rows.map(({ e, txt, back }) => `<li class="tl-ev tl-${esc(e.type)}"><time>${esc(new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${back ? '<small class="muted">↩ ' + esc(t('admin.act2.ev.return')) + '</small> ' : ''}${txt}</span></li>`).join('');
+  const html = rows.map(({ e, txt, back }, k) => {
+    const nx = rows[k + 1]; let dw = '';
+    if (nx && /^(pageview|book_view|search|checkout|pay_redirect)$/.test(e.type)) { const s = (new Date(nx.e.created_at) - new Date(e.created_at)) / 1000; if (s >= 3 && s <= 900) dw = ' <small class="muted tl-dw">· ' + esc(durText(Math.round(s))) + '</small>'; }
+    const cls = e.type === 'click' ? 'tl-click' : e.type === 'scroll' ? 'tl-scroll' : '';
+    return `<li class="tl-ev tl-${esc(e.type)} ${cls}"><time>${esc(new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${back ? '<small class="muted">↩ ' + esc(t('admin.act2.ev.return')) + '</small> ' : ''}${txt}${dw}</span></li>`; }).join('');
+  const [kind, dtxt] = diagnose(list);
+  return `<li class="tl-diag ${esc(kind)}"><b>${esc(t('admin.diag.title'))}:</b> ${esc(dtxt)}</li>` + html;
 }
 function activityHTML(E, r) {
   // group the steps by visit (sid); events arrive newest first
@@ -642,7 +669,8 @@ async function visitorsAdmin(body) {
       const isLive = isLiveV(v), inst = instant(v);
       const chips = [v.books ? `<span class="vi-chip">📖 ${esc(t('admin.vis.nBooks', { n: v.books }))}</span>` : '', v.searches ? `<span class="vi-chip">🔎 ${esc(t('admin.vis.nSearch', { n: v.searches }))}</span>` : '',
         v.carts ? `<span class="vi-chip hot">🛒 ${esc(t('admin.vis.inCart'))}</span>` : '', v.checkouts ? `<span class="vi-chip hot">💳 ${esc(t('admin.vis.checkout'))}</span>` : '', v.purchases ? `<span class="vi-chip buy">✔ ${esc(t('admin.vis.bought'))}</span>` : '',
-        inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : ''].filter(Boolean).join('');
+        inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : '',
+        !inst && !v.purchases ? `<span class="vi-chip dim">⏹ ${esc(v.checkouts ? t('admin.diag.sChk') : v.carts ? t('admin.diag.sCart') : v.books ? t('admin.diag.sBook') : t('admin.diag.sHome'))}</span>` : ''].filter(Boolean).join('');
       const dur = inst ? '<1 s' : durExact(v.seconds);
       return `<details class="tl-visit${inst ? ' vi-inst' : ''}" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
         <div class="vi-row">${isLive ? '<span class="vi-live" style="margin:0 -7px 0 0;flex:none"></span>' : ''}${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur"${isLive ? ` data-base="${v.seconds}" data-end="${new Date(v.ended).getTime()}"` : ''}>⏱ ${esc(isLive ? durExact(v.seconds + (Date.now() - new Date(v.ended)) / 1000) : dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>

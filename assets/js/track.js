@@ -2,9 +2,9 @@
 // Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261102183744';
-import { store } from './util.js?v=20261102183744';
-import { gaEvent } from './ga.js?v=20261102183744';
+import { api } from './api.js?v=20261102184804';
+import { store } from './util.js?v=20261102184804';
+import { gaEvent } from './ga.js?v=20261102184804';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -49,6 +49,10 @@ function staff() {
 const off = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || !/(^|\.)librava\.store$/.test(location.hostname)
   || navigator.webdriver === true || BOT.test(navigator.userAgent) || staff();
 let lastPath = '';
+// how long the person stayed on the current step and how far down they read (sent when they leave)
+let pageStart = Date.now(), maxScroll = 0, sent50 = false, sent90 = false;
+const resetPage = () => { pageStart = Date.now(); maxScroll = 0; sent50 = sent90 = false; seenFields.clear(); };
+const seenFields = new Set();
 // /go/search?x → the same name the reports always used (/en/#/search)
 const hereKey = () => /^\/go\/./.test(location.pathname) ? '/' + (document.documentElement.lang || 'en') + '/#' + location.pathname.slice(3) : location.pathname + location.hash.replace(/[?].*$/, '');
 export function track(type, data = {}) {
@@ -75,7 +79,7 @@ function leaveNow() {
   try {
     if (leftSent || off() || !api.trackLeave) return; leftSent = true;
     const o = origin(), d = device();
-    api.trackLeave({ type: 'leave', sid: sid(), vid: vid(), lang: document.documentElement.lang, country: country(), ...d, ...o, path: hereKey() });
+    api.trackLeave({ type: 'leave', sid: sid(), vid: vid(), lang: document.documentElement.lang, country: country(), ...d, ...o, path: hereKey(), note: 's=' + Math.round((Date.now() - pageStart) / 1000) + ';sc=' + maxScroll });
   } catch { }
 }
 addEventListener('pagehide', leaveNow);
@@ -92,6 +96,7 @@ export function trackPage(again) {
   const p = location.pathname + location.search + location.hash;
   if (p === lastPath && !again) return; lastPath = p;
   if (again) { gaEvent('pageview'); return; }
+  resetPage();
   track('pageview');
 }
 
@@ -122,3 +127,36 @@ setInterval(() => {
     track('ping');
   } catch { }
 }, 15e3);
+
+// What the person pressed and how far they read: short labels only (never what they type), a limited number per visit,
+// so the admin can see why a step was taken and where people stop.
+let clicksN = 0;
+const clean = x => String(x || '').replace(/\s+/g, ' ').trim().slice(0, 45);
+function hrefOf(a) { try { const u = new URL(a.href, location.href); if (u.origin !== location.origin) return u.hostname; return (u.pathname.replace(/^\/go/, '') + u.hash.replace(/[?].*$/, '')).slice(0, 50); } catch { return ''; } }
+document.addEventListener('click', e => {
+  try {
+    if (off() || clicksN >= 60) return;
+    const el = e.target && e.target.closest && e.target.closest('a,button,[role=button],summary,select,input[type=checkbox],input[type=radio],input[type=submit]');
+    if (!el) return;
+    let label = clean(el.getAttribute('aria-label') || el.getAttribute('title') || el.innerText || el.value || el.getAttribute('data-nav') || el.id);
+    if (!label) { const img = el.querySelector && el.querySelector('img[alt]'); label = clean(img && img.alt) || (el.tagName === 'A' ? 'link' : el.tagName.toLowerCase()); }
+    const where = el.tagName === 'A' ? hrefOf(el) : '';
+    clicksN++; track('click', { note: where && where !== '/' ? label + ' → ' + where : label });
+  } catch { }
+}, { capture: true, passive: true });
+// which form field the person started to fill in (field name only)
+document.addEventListener('focusin', e => {
+  try {
+    const el = e.target; if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || /^(checkbox|radio|submit|button|hidden)$/.test(el.type) || off() || clicksN >= 60) return;
+    const f = clean(el.getAttribute('autocomplete') || el.name || el.id || el.type); if (!f || seenFields.has(f)) return; seenFields.add(f); clicksN++;
+    track('click', { note: 'field:' + f });
+  } catch { }
+}, { capture: true });
+addEventListener('scroll', () => {
+  try {
+    const h = document.documentElement.scrollHeight, v = innerHeight; if (h <= v + 80) return;
+    const p = Math.min(100, Math.round((scrollY + v) / h * 100)); if (p > maxScroll) maxScroll = p;
+    if (!sent50 && p >= 50) { sent50 = true; track('scroll', { note: '50' }); }
+    if (!sent90 && p >= 90) { sent90 = true; track('scroll', { note: '90' }); }
+  } catch { }
+}, { passive: true });
