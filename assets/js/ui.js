@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102164011';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102164011';
-import { esc, store, $, $$ } from './util.js?v=20261102164011';
+import { CONFIG } from './config.js?v=20261102165037';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102165037';
+import { esc, store, $, $$ } from './util.js?v=20261102165037';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,12 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102164011';
-import { suggest, highlight } from './search.js?v=20261102164011';
-import { track, trackPage } from './track.js?v=20261102164011';
-import { initGA, stopGA } from './ga.js?v=20261102164011';
-import { api } from './api.js?v=20261102164011';
-import { describeOffer, offersForBook } from './offers.js?v=20261102164011';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102165037';
+import { suggest, highlight } from './search.js?v=20261102165037';
+import { track, trackPage } from './track.js?v=20261102165037';
+import { initGA, applyConsent } from './ga.js?v=20261102165037';
+import { consentStrings } from './consent-i18n.js?v=20261102165037';
+import { api } from './api.js?v=20261102165037';
+import { describeOffer, offersForBook } from './offers.js?v=20261102165037';
 
 // ---------------- icons ----------------
 const P = {
@@ -266,7 +267,7 @@ export function renderChrome() {
       <div class="foot-cols">
         <div><h4>${esc(t('foot.about'))}</h4><p>${esc(t('foot.aboutText', { site: CONFIG.siteName }))}</p></div>
         <div><h4>${esc(t('foot.help'))}</h4><a href="#/help">${esc(t('foot.howRead'))}</a><a href="#/help">${esc(t('foot.payments'))}</a><a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></div>
-        <div><h4>${esc(t('foot.legal'))}</h4>${['terms', 'privacy', 'cookies', 'imprint'].map(p => `<a href="#/legal/${p}">${esc(legalText(getLang()).title[p])}</a>`).join('')}<a href="javascript:void 0" data-cookie-settings>${esc(legalText(getLang()).consentSettings || 'Cookie settings')}</a></div>
+        <div><h4>${esc(t('foot.legal'))}</h4>${['terms', 'privacy', 'cookies', 'imprint'].map(p => `<a href="#/legal/${p}">${esc(['ro', 'it'].includes(getLang()) || p === 'imprint' ? legalText(getLang()).title[p] : consentStrings(getLang())[p])}</a>`).join('')}<a href="javascript:void 0" data-cookie-settings>${esc(['ro', 'it'].includes(getLang()) ? legalText(getLang()).consentSettings : consentStrings(getLang()).cookies + ': ' + consentStrings(getLang()).manage)}</a></div>
         <div><h4>${esc(t('nav.browse'))}</h4>${CATS.slice(0, 5).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join('')}</div>
         <div><h4>${esc(t('foot.contact'))}</h4><p style="user-select:all">${esc(CONFIG.supportEmail)}</p>${(CONFIG.social || []).map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener me">${esc(n)}</a>`).join('')}</div>
       </div>
@@ -567,16 +568,34 @@ export function bindGlobal() {
 export function showConsent(force) {
   if (!force && store.get('consent') === LEGAL_VERSION) { initGA(); return; }
   if (document.querySelector('.consent')) return;
-  const L = legalText(getLang());
+  const C = consentStrings(getLang());
+  const had = store.get('consent') === LEGAL_VERSION;   // reopened from "Cookie settings": show the current choices
+  const on = k => had && store.get(k) === 'granted';
+  const row = (key, title, desc, checked) => `<label class="cc-row"><span><b>${esc(title)}</b><small>${esc(desc)}</small></span><input type="checkbox" class="cc-sw" data-cc="${key}" ${checked ? 'checked' : ''}></label>`;
   const box = document.createElement('div');
-  box.className = 'consent'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', L.consentTitle);
-  box.innerHTML = `<div class="consent-in"><div><b>${esc(L.consentTitle)}</b><p>${esc(L.consentText)}</p>
-      <p class="consent-links"><a href="#/legal/terms">${esc(L.title.terms)}</a> · <a href="#/legal/privacy">${esc(L.title.privacy)}</a> · <a href="#/legal/cookies">${esc(L.title.cookies)}</a></p></div>
-    <div class="consent-btns"><button class="btn btn-ghost" data-consent-min>${esc(L.consentNecessary || 'Necessary only')}</button><button class="btn btn-buy" data-consent-ok>${esc(L.consentOk)}</button></div></div>`;
+  box.className = 'consent'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', C.title);
+  box.innerHTML = `<div class="consent-in"><div class="consent-main"><b>${esc(C.title)}</b><p>${esc(C.text)}</p>
+      <p class="consent-links"><a href="#/legal/terms">${esc(C.terms)}</a> · <a href="#/legal/privacy">${esc(C.privacy)}</a> · <a href="#/legal/cookies">${esc(C.cookies)}</a></p>
+      <div class="consent-panel" hidden>
+        <div class="cc-row"><span><b>${esc(C.catN)}</b><small>${esc(C.catNd)}</small></span><span class="cc-always">${esc(C.always)}</span></div>
+        ${row('analytics', C.catA, C.catAd, on('analytics'))}
+        ${row('ads', C.catP, C.catPd, on('ads'))}
+        <button class="btn btn-ghost cc-save" data-consent-save>${esc(C.save)}</button>
+      </div></div>
+    <div class="consent-btns"><button class="btn btn-buy" data-consent-ok>${esc(C.ok)}</button>
+      <p class="consent-alt"><a href="#" data-consent-min>${esc(C.necessary)}</a><span aria-hidden="true">·</span><a href="#" data-consent-manage>${esc(C.manage)}</a></p></div></div>`;
   document.body.appendChild(box);
-  const save = choice => { store.set('consent', LEGAL_VERSION); store.set('consent_at', new Date().toISOString()); store.set('analytics', choice); box.remove(); };
-  box.querySelector('[data-consent-ok]').onclick = () => { save('granted'); initGA(); trackPage(true); };
-  box.querySelector('[data-consent-min]').onclick = () => { save('denied'); stopGA(); };
+  const save = (analytics, ads) => {
+    store.set('consent', LEGAL_VERSION); store.set('consent_at', new Date().toISOString());
+    store.set('analytics', analytics ? 'granted' : 'denied'); store.set('ads', ads ? 'granted' : 'denied');
+    box.remove(); applyConsent(); if (analytics || ads) trackPage(true);
+  };
+  const q = s => box.querySelector(s);
+  q('[data-consent-ok]').onclick = () => save(true, true);
+  q('[data-consent-min]').onclick = e => { e.preventDefault(); save(false, false); };
+  q('[data-consent-save]').onclick = () => save(q('[data-cc="analytics"]').checked, q('[data-cc="ads"]').checked);
+  q('[data-consent-manage]').onclick = e => { e.preventDefault(); q('.consent-panel').hidden = false; const alt = e.target.closest('.consent-alt'); alt.querySelector('[data-consent-manage]').hidden = true; alt.querySelector('span').hidden = true; q('.consent-panel').scrollIntoView({ block: 'nearest' }); };
+  if (had) q('[data-consent-manage]').click();
 }
 
 // ---------------------------------------------------------------- notifications from Librava (bell in the header)

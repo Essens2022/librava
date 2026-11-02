@@ -2225,3 +2225,22 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 /* static offer rows: one clean line of text, highlight stays inline (no stacked bars) */
 .offer-box:not(.is-smart) > .offer-row .offer-main, .offer-box .o-static > .offer-row .offer-main { display: block; line-height: 1.5 }
 .offer-box:not(.is-smart) > .offer-row .nudge-hot, .offer-box .o-static > .offer-row .nudge-hot { padding: 1px 7px; margin: 0 1px }
+
+/* cookie notice: Accept all is the main button; the other choices are quiet links; "Customize" opens the per-category switches */
+.consent { max-height: 92vh; overflow-y: auto; }
+.consent-btns { flex-direction: column; align-items: stretch; gap: 8px; min-width: 190px; }
+.consent-alt { margin: 0 !important; display: flex; gap: 8px; justify-content: center; font-size: 13px !important; color: var(--muted); }
+.consent-alt a { color: var(--muted); text-decoration: underline; }
+.consent-alt a:hover { color: var(--text, inherit); }
+.consent-panel { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.consent-panel .cc-row { display: flex; gap: 14px; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.consent-panel .cc-row b { font-size: 14px; display: block; }
+.consent-panel .cc-row small { display: block; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.cc-always { flex: none; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.cc-sw { flex: none; appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 12px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; }
+.cc-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.cc-sw:checked { background: #2e9e5b; }
+.cc-sw:checked::after { transform: translateX(18px); }
+.cc-sw:focus-visible { outline: 2px solid #2e9e5b; outline-offset: 2px; }
+.cc-save { margin: 10px 14px 12px; }
+@media (max-width: 640px) { .consent-btns { flex-direction: column; min-width: 0; } }
