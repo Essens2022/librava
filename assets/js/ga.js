@@ -1,11 +1,11 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261102075217';
+import { store } from './util.js?v=20261102075726';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
 // Google Ads tag + purchase conversion label: public identifiers (visible on every page that uses Google Ads)
 const ADS_ID = 'AW-18550229876';
-const ADS_PURCHASE_LABEL = ''; // filled in after the Purchase conversion is created in Google Ads
+const ADS_PURCHASE_LABEL = 'kI85CKHBt7AdEPSWuI1F'; // filled in after the Purchase conversion is created in Google Ads
 // Meta Pixel ID: also a public identifier (visible in every page that uses it), not a secret
 const META_PIXEL_ID = '2177981823134602';
 let ready = false, fbReady = false;
