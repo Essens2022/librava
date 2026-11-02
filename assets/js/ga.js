@@ -1,6 +1,6 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261102075726';
+import { store } from './util.js?v=20261102163958';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
 // Google Ads tag + purchase conversion label: public identifiers (visible on every page that uses Google Ads)
@@ -28,9 +28,9 @@ export function initGA() {
   window.gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   window.gtag('js', new Date());
   window.gtag('config', GA_ID, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
-  // Google Ads: only after "Accept all"; measures sales, no ad personalization
-  window.gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'denied' });
-  window.gtag('config', ADS_ID, { allow_ad_personalization_signals: false });
+  // Google Ads: only after "Accept all"; measures sales and builds the visitor list for remarketing
+  window.gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' });
+  window.gtag('config', ADS_ID, { allow_ad_personalization_signals: true });
   const s = document.createElement('script');
   s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
   document.head.appendChild(s);
