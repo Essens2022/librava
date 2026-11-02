@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102172038';
-import { CONFIG } from './config.js?v=20261102172038';
-import { store } from './util.js?v=20261102172038';
+import { localize, loadRates } from './localprice.js?v=20261102183657';
+import { CONFIG } from './config.js?v=20261102183657';
+import { store } from './util.js?v=20261102183657';
 
 const D = {
   ro: {
@@ -1225,6 +1225,7 @@ const D = {
     "admin.act2.ev.add_cart": "A pus în coș «{b}»",
     "admin.act2.ev.checkout": "A început plata",
     "admin.act2.ev.leave": "A părăsit pagina (a închis sau a plecat din aplicație)",
+    "admin.act2.ev.return": "S-a întors pe pagină",
     "admin.act2.ev.remove_cart": "A scos din coș",
     "admin.act2.ev.pay_redirect": "A fost trimis la pagina de plată",
     "admin.act2.ev.pay_error": "Eroare la plată",
@@ -2647,6 +2648,7 @@ const D = {
     "admin.act2.ev.add_cart": "Ha messo nel carrello «{b}»",
     "admin.act2.ev.checkout": "Ha iniziato il pagamento",
     "admin.act2.ev.leave": "Ha lasciato la pagina",
+    "admin.act2.ev.return": "È tornato sulla pagina",
     "admin.act2.ev.remove_cart": "Ha tolto dal carrello",
     "admin.act2.ev.pay_redirect": "Mandato alla pagina di pagamento",
     "admin.act2.ev.pay_error": "Errore nel pagamento",
@@ -4069,6 +4071,7 @@ const D = {
     "admin.act2.ev.add_cart": "Added to cart “{b}”",
     "admin.act2.ev.checkout": "Started checkout",
     "admin.act2.ev.leave": "Left the page (closed it or switched away)",
+    "admin.act2.ev.return": "Came back to the page",
     "admin.act2.ev.remove_cart": "Removed from cart",
     "admin.act2.ev.pay_redirect": "Sent to the payment page",
     "admin.act2.ev.pay_error": "Payment error",
@@ -4306,7 +4309,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102172038`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102183657`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102172038';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102172038';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102172038';
-import { resetCompanyCache } from './views.js?v=20261102172038';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102172038';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102172038';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102172038';
-import { optimizeBook } from './optimize.js?v=20261102172038';
-import { api } from './api.js?v=20261102172038';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102172038';
+import { CONFIG } from './config.js?v=20261102183657';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102183657';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102183657';
+import { resetCompanyCache } from './views.js?v=20261102183657';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102183657';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102183657';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102183657';
+import { optimizeBook } from './optimize.js?v=20261102183657';
+import { api } from './api.js?v=20261102183657';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102183657';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -509,6 +509,7 @@ const evLine = e => {
     case 'book_view': return t('admin.act2.ev.book_view', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
     case 'add_cart': return t('admin.act2.ev.add_cart', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
     case 'search': return esc(t('admin.act2.ev.search', { q: e.q || '', n: e.results ?? 0 }));
+    case 'return': return esc(t('admin.act2.ev.return'));
     case 'error': case 'pay_error': case 'auth_error': return esc(t('admin.act2.ev.' + e.type)) + (e.note ? ': <i>' + esc(e.note) + '</i>' : '');
     case 'remove_cart': return e.book_title ? esc(t('admin.act2.ev.remove_cart')) + ' «' + esc(e.book_title) + '»' : esc(t('admin.act2.ev.remove_cart'));
     default: return esc(t('admin.act2.ev.' + e.type));
@@ -596,6 +597,7 @@ const srcLabel = s => ({ ig: 'Instagram', fb: 'Facebook', 'google-ads': 'Google 
 const srcBadge = s => { const k = String(s || 'direct').toLowerCase(), [g, bg] = SRC_LOGO[k] || [k[0]?.toUpperCase() || '?', '#6B7280']; return `<span class="vi-src" title="${esc(srcLabel(k))}"><i style="background:${bg}">${esc(g)}</i>${esc(srcLabel(k))}</span>`; };
 const devIcon = d => d === 'mobile' ? '📱' : d === 'tablet' ? '📟' : '💻';
 async function visitorsAdmin(body) {
+  const evCache = new Map();
   const r = cuRange();
   body.innerHTML = `<div class="panel">${rangeBarHTML(r)}<div id="vi-sum"></div><div id="vi-list"><div class="spinner"></div></div></div>`;
   bindRange(body, () => visitorsAdmin(body));
@@ -632,11 +634,14 @@ async function visitorsAdmin(body) {
         ${chips ? `<div class="vi-chips">${chips}</div>` : ''}
         <div class="vi-who">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
     }).join('') : `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
-    $$('details[data-sid]', body).forEach(d => { const load = async () => { const ul = $('[data-ev]', d); if (ul.dataset.done) return; ul.dataset.done = 1;
-      try { const E = await api.adminVisitEvents(d.dataset.sid); let last = '';
-        ul.innerHTML = E.map(e => { const txt = evLine(e); if (!txt || txt === last) return ''; last = txt;
+    $$('details[data-sid]', body).forEach(d => { const ul = $('[data-ev]', d), sid = d.dataset.sid;
+      const paint = E => { let last = '';
+        const html = E.map(e => { const txt = evLine(e); if (!txt || txt === last) return ''; last = txt;
           return `<li class="tl-ev tl-${esc(e.type)}"><time>${esc(new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${txt}</span></li>`; }).join('') || `<li class="muted">—</li>`;
-      } catch (x) { ul.innerHTML = `<li class="muted">${esc(errText(x))}</li>`; } };
+        if (ul.innerHTML !== html) ul.innerHTML = html; };
+      const cached = evCache.get(sid); if (cached) paint(cached.E);
+      const load = async () => { try { const E = await api.adminVisitEvents(sid); evCache.set(sid, { E }); if (ul.isConnected) paint(E); }
+        catch (x) { if (!evCache.has(sid)) ul.innerHTML = `<li class="muted">${esc(errText(x))}</li>`; } };
       d.addEventListener('toggle', () => { if (d.open) load(); }); if (d.open) load(); });
   };
   await draw();
