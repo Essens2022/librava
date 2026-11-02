@@ -3216,3 +3216,5 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 }
 .sp .promo-by{color:inherit!important;opacity:.82!important}
 .sp .promo-text{justify-content:center}
+.foot .soc { gap: 30px !important; }
+@media (max-width: 760px) { .foot .soc { gap: 28px !important; } }
