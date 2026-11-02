@@ -3218,3 +3218,10 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 .sp .promo-text{justify-content:center}
 .foot .soc { gap: 30px !important; }
 @media (max-width: 760px) { .foot .soc { gap: 28px !important; } }
+/* old (struck) prices: red and clearly visible */
+.price-old, .qp-show s, .ntf-price s, .buy-sticky .bs-price s, .bp-table s { color: #d32f2f !important; font-weight: 700 !important; opacity: 1 !important; text-decoration-thickness: 2px; }
+.price-old { font-size: 14px !important; }
+:root[data-theme="dark"] .price-old, :root[data-theme="dark"] .qp-show s, :root[data-theme="dark"] .buy-sticky .bs-price s { color: #ff6b6b !important; }
+/* on banners: red on a small white chip so it reads on any background */
+.promo-price s, .tp .promo-price s, .sp .promo-price s { color: #c62020 !important; background: rgba(255,255,255,.94); padding: 1px 6px; border-radius: 6px; font-weight: 800 !important; opacity: 1 !important; font-size: 14px !important; text-decoration-thickness: 2px; text-shadow: none !important; }
+.sp .promo-price s { font-size: 13px !important; }
