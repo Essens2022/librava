@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102171125';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102171125';
-import { esc, store, $, $$ } from './util.js?v=20261102171125';
+import { CONFIG } from './config.js?v=20261102172036';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102172036';
+import { esc, store, $, $$ } from './util.js?v=20261102172036';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102171125';
-import { suggest, highlight } from './search.js?v=20261102171125';
-import { track, trackPage } from './track.js?v=20261102171125';
-import { initGA, applyConsent } from './ga.js?v=20261102171125';
-import { consentStrings } from './consent-i18n.js?v=20261102171125';
-import { api } from './api.js?v=20261102171125';
-import { describeOffer, offersForBook } from './offers.js?v=20261102171125';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102172036';
+import { suggest, highlight } from './search.js?v=20261102172036';
+import { track, trackPage } from './track.js?v=20261102172036';
+import { initGA, applyConsent } from './ga.js?v=20261102172036';
+import { consentStrings } from './consent-i18n.js?v=20261102172036';
+import { api } from './api.js?v=20261102172036';
+import { describeOffer, offersForBook } from './offers.js?v=20261102172036';
 
 // ---------------- icons ----------------
 const P = {
@@ -141,7 +141,7 @@ export const cart = {
   get() { return store.get('cart', []); },
   has(id) { return this.get().includes(id); },
   add(id) { const c = this.get(); if (!c.includes(id)) { c.push(id); store.set('cart', c); track('add_cart', { book_id: id }); } updateCartCount(); },
-  remove(id) { store.set('cart', this.get().filter(x => x !== id)); updateCartCount(); },
+  remove(id) { store.set('cart', this.get().filter(x => x !== id)); track('remove_cart', { book_id: id }); updateCartCount(); },
   set(ids) { store.set('cart', ids); updateCartCount(); },
   clear() { store.set('cart', []); updateCartCount(); },
 };

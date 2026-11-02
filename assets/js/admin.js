@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102171125';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102171125';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102171125';
-import { resetCompanyCache } from './views.js?v=20261102171125';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102171125';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102171125';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102171125';
-import { optimizeBook } from './optimize.js?v=20261102171125';
-import { api } from './api.js?v=20261102171125';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102171125';
+import { CONFIG } from './config.js?v=20261102172036';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102172036';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102172036';
+import { resetCompanyCache } from './views.js?v=20261102172036';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102172036';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102172036';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102172036';
+import { optimizeBook } from './optimize.js?v=20261102172036';
+import { api } from './api.js?v=20261102172036';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102172036';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -509,6 +509,8 @@ const evLine = e => {
     case 'book_view': return t('admin.act2.ev.book_view', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
     case 'add_cart': return t('admin.act2.ev.add_cart', { b: '\u0001' }).split('\u0001').map(esc).join(bookLink(e));
     case 'search': return esc(t('admin.act2.ev.search', { q: e.q || '', n: e.results ?? 0 }));
+    case 'error': case 'pay_error': case 'auth_error': return esc(t('admin.act2.ev.' + e.type)) + (e.note ? ': <i>' + esc(e.note) + '</i>' : '');
+    case 'remove_cart': return e.book_title ? esc(t('admin.act2.ev.remove_cart')) + ' «' + esc(e.book_title) + '»' : esc(t('admin.act2.ev.remove_cart'));
     default: return esc(t('admin.act2.ev.' + e.type));
   }
 };
@@ -603,7 +605,7 @@ async function visitorsAdmin(body) {
     let L = []; try { L = await api.adminVisits(cuISO(cuRange())); } catch (x) { $('#vi-list', body).innerHTML = `<p class="muted">${esc(errText(x))}</p>`; return; }
     // a visit that lasted 2 seconds or less with nothing done is almost always automatic (link preview, ad check): kept apart
     // "live" = a sign of life in the last 35 seconds (the site sends one every 15 s while the person is really there)
-    const isLiveV = v => Date.now() - new Date(v.ended) < 35e3;
+    const isLiveV = v => !v.left_site && Date.now() - new Date(v.ended) < 35e3;
     const instant = v => v.seconds <= 2 && !v.searches && !v.carts && !v.checkouts && !v.purchases && !v.user_id && !isLiveV(v);
     const showInst = sessionStorage.getItem('librava:viInst') === '1';
     const real = L.filter(v => !instant(v)), nInst = L.length - real.length, shown = showInst ? L : real;

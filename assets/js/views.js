@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102171125';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102171125';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102171125';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102171125';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102171125';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102171125';
-import { track } from './track.js?v=20261102171125';
-import { gaEvent } from './ga.js?v=20261102171125';
-import { guessLang } from './langdetect.js?v=20261102171125';
-import { didYouMean } from './search.js?v=20261102171125';
-import { api, editionsOf } from './api.js?v=20261102171125';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102171125';
+import { CONFIG } from './config.js?v=20261102172036';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102172036';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102172036';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102172036';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102172036';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102172036';
+import { track } from './track.js?v=20261102172036';
+import { gaEvent } from './ga.js?v=20261102172036';
+import { guessLang } from './langdetect.js?v=20261102172036';
+import { didYouMean } from './search.js?v=20261102172036';
+import { api, editionsOf } from './api.js?v=20261102172036';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102172036';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -546,7 +546,7 @@ export async function startCheckout(ids) {
     toast(t('cart.ownedRemoved'));
     if (!ids.length) { go('/library'); return; }
   }
-  if (!await waiverConfirm()) return;
+  if (!await waiverConfirm()) { track('waiver_no'); return; }
   track('checkout', { value_cents: null });
   const gaBooks = (await Promise.all(ids.map(id => api.getBook(id).catch(() => null)))).filter(Boolean);
   gaEvent('checkout', { books: gaBooks });
@@ -555,7 +555,7 @@ export async function startCheckout(ids) {
     // remembered for the Analytics "purchase" event when the visitor comes back from the payment page
     try { sessionStorage.setItem('librava:ga-pending', JSON.stringify({ id: 'LIB-' + Date.now().toString(36).toUpperCase(), books: gaBooks.map(b => ({ id: b.id, title: b.title, category: b.category, price_cents: b.price_cents, currency: b.currency })), value: res.total ?? null })); } catch { }
     if (res.mode === 'done') { sessionStorage.removeItem(COUPON); cart.set(cart.get().filter(id => !ids.includes(id))); toast(t('pay.freeAdded')); go('/library'); return; }
-    if (res.mode === 'redirect') { sessionStorage.removeItem(COUPON); toast(t('cart.redirecting')); location.href = res.url; return; }
+    if (res.mode === 'redirect') { sessionStorage.removeItem(COUPON); toast(t('cart.redirecting')); track('pay_redirect'); location.href = res.url; return; }
     if (res.mode === 'bank') { cart.set(cart.get().filter(id => !ids.includes(id))); showBankOrder(res); return; }
     // demo payment sheet
     const books = (await Promise.all(res.paid.map(id => api.getBook(id)))).filter(Boolean);
@@ -575,7 +575,7 @@ export async function startCheckout(ids) {
         };
       }
     });
-  } catch (e) { toast(t('pay.error', { msg: errText(e) }), { error: true, ms: 6000 }); }
+  } catch (e) { track('pay_error', { note: errText(e) }); toast(t('pay.error', { msg: errText(e) }), { error: true, ms: 6000 }); }
 }
 
 // =====================================================================
@@ -1121,7 +1121,7 @@ function viewAuth(el, mode) {
         toast(t('acc.welcome', { name: api.user().name }));
       } else await api.signIn({ email, password });
       after();
-    } catch (x) { show(errText(x)); btn.disabled = false; }
+    } catch (x) { track('auth_error', { note: errText(x) }); show(errText(x)); btn.disabled = false; }
   };
   $('[data-forgot]', el)?.addEventListener('click', async () => {
     const email = $('#a-email', el).value.trim();

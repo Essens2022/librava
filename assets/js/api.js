@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102171125';
-import { applyOffers, offerRunning } from './offers.js?v=20261102171125';
-import { scoreBook } from './search.js?v=20261102171125';
-import { getLang } from './i18n.js?v=20261102171125';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261102171125';
+import { CONFIG } from './config.js?v=20261102172036';
+import { applyOffers, offerRunning } from './offers.js?v=20261102172036';
+import { scoreBook } from './search.js?v=20261102172036';
+import { getLang } from './i18n.js?v=20261102172036';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261102172036';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261102171125')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261102172036')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -783,6 +783,10 @@ class SupabaseAPI {
   }
   async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
   track(e) { this.sb.rpc('track', { e }).then(() => { }, () => { }); }
+  // sent while the page is closing/hiding: keepalive lets the request finish after the page is gone
+  trackLeave(e) {
+    try { const k = this.sb.supabaseKey; fetch(this.sb.supabaseUrl + '/rest/v1/rpc/track', { method: 'POST', keepalive: true, headers: { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' }, body: JSON.stringify({ e }) }).catch(() => { }); } catch { }
+  }
   heartbeat(p) { if (this._user) this.sb.rpc('heartbeat', p).then(() => { }, () => { }); }
   async analytics(days) { const { data, error } = await this.sb.rpc('analytics_summary', { days }); this._err(error); return data; }
   // ---- shop settings (company details for the legal pages) and announcements ----

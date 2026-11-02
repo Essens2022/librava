@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102171125';
-import { CONFIG } from './config.js?v=20261102171125';
-import { store } from './util.js?v=20261102171125';
+import { localize, loadRates } from './localprice.js?v=20261102172036';
+import { CONFIG } from './config.js?v=20261102172036';
+import { store } from './util.js?v=20261102172036';
 
 const D = {
   ro: {
@@ -1224,6 +1224,13 @@ const D = {
     "admin.act2.ev.search": "A căutat «{q}» ({n} rezultate)",
     "admin.act2.ev.add_cart": "A pus în coș «{b}»",
     "admin.act2.ev.checkout": "A început plata",
+    "admin.act2.ev.leave": "A părăsit pagina (a închis sau a plecat din aplicație)",
+    "admin.act2.ev.remove_cart": "A scos din coș",
+    "admin.act2.ev.pay_redirect": "A fost trimis la pagina de plată",
+    "admin.act2.ev.pay_error": "Eroare la plată",
+    "admin.act2.ev.waiver_no": "S-a oprit la confirmarea renunțării (nu a bifat)",
+    "admin.act2.ev.auth_error": "Eroare la cont/autentificare",
+    "admin.act2.ev.error": "Eroare pe pagină",
     "admin.act2.ev.purchase": "A cumpărat",
     "admin.act2.ev.read": "A citit în bibliotecă",
     "admin.act2.ev.sample": "A deschis mostra",
@@ -2639,6 +2646,13 @@ const D = {
     "admin.act2.ev.search": "Ha cercato «{q}» ({n} risultati)",
     "admin.act2.ev.add_cart": "Ha messo nel carrello «{b}»",
     "admin.act2.ev.checkout": "Ha iniziato il pagamento",
+    "admin.act2.ev.leave": "Ha lasciato la pagina",
+    "admin.act2.ev.remove_cart": "Ha tolto dal carrello",
+    "admin.act2.ev.pay_redirect": "Mandato alla pagina di pagamento",
+    "admin.act2.ev.pay_error": "Errore nel pagamento",
+    "admin.act2.ev.waiver_no": "Si è fermato alla conferma di rinuncia",
+    "admin.act2.ev.auth_error": "Errore di accesso",
+    "admin.act2.ev.error": "Errore nella pagina",
     "admin.act2.ev.purchase": "Ha acquistato",
     "admin.act2.ev.read": "Ha letto in biblioteca",
     "admin.act2.ev.sample": "Ha aperto l'anteprima",
@@ -4054,6 +4068,13 @@ const D = {
     "admin.act2.ev.search": "Searched “{q}” ({n} results)",
     "admin.act2.ev.add_cart": "Added to cart “{b}”",
     "admin.act2.ev.checkout": "Started checkout",
+    "admin.act2.ev.leave": "Left the page (closed it or switched away)",
+    "admin.act2.ev.remove_cart": "Removed from cart",
+    "admin.act2.ev.pay_redirect": "Sent to the payment page",
+    "admin.act2.ev.pay_error": "Payment error",
+    "admin.act2.ev.waiver_no": "Stopped at the withdrawal confirmation",
+    "admin.act2.ev.auth_error": "Sign-in / account error",
+    "admin.act2.ev.error": "Page error",
     "admin.act2.ev.purchase": "Purchased",
     "admin.act2.ev.read": "Read in the library",
     "admin.act2.ev.sample": "Opened the sample",
@@ -4285,7 +4306,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102171125`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102172036`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
