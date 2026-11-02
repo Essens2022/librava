@@ -2244,3 +2244,14 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .cc-sw:focus-visible { outline: 2px solid #2e9e5b; outline-offset: 2px; }
 .cc-save { margin: 10px 14px 12px; }
 @media (max-width: 640px) { .consent-btns { flex-direction: column; min-width: 0; } }
+/* cookie notice, compact on phones: smaller text, less height, details stay one tap away */
+@media (max-width: 640px) {
+  .consent { padding-top: 10px; }
+  .consent-in { gap: 8px; }
+  .consent-in b { font-size: 15px; }
+  .consent-in p { font-size: 13px; line-height: 1.4; margin-top: 2px; }
+  .consent-links { font-size: 12px !important; margin-top: 4px !important; }
+  .consent-btns { gap: 4px; }
+  .consent-btns .btn-buy { padding-top: 9px; padding-bottom: 9px; }
+  .consent-panel .cc-row { padding: 8px 12px; }
+}
