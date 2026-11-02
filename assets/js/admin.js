@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102165706';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102165706';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102165706';
-import { resetCompanyCache } from './views.js?v=20261102165706';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102165706';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102165706';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102165706';
-import { optimizeBook } from './optimize.js?v=20261102165706';
-import { api } from './api.js?v=20261102165706';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102165706';
+import { CONFIG } from './config.js?v=20261102165710';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102165710';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102165710';
+import { resetCompanyCache } from './views.js?v=20261102165710';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102165710';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102165710';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102165710';
+import { optimizeBook } from './optimize.js?v=20261102165710';
+import { api } from './api.js?v=20261102165710';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102165710';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
