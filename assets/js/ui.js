@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102193819';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102193819';
-import { esc, store, $, $$ } from './util.js?v=20261102193819';
+import { CONFIG } from './config.js?v=20261102194441';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102194441';
+import { esc, store, $, $$ } from './util.js?v=20261102194441';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102193819';
-import { suggest, highlight } from './search.js?v=20261102193819';
-import { track, trackPage } from './track.js?v=20261102193819';
-import { initGA, applyConsent } from './ga.js?v=20261102193819';
-import { consentStrings } from './consent-i18n.js?v=20261102193819';
-import { api } from './api.js?v=20261102193819';
-import { describeOffer, offersForBook } from './offers.js?v=20261102193819';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102194441';
+import { suggest, highlight } from './search.js?v=20261102194441';
+import { track, trackPage } from './track.js?v=20261102194441';
+import { initGA, applyConsent } from './ga.js?v=20261102194441';
+import { consentStrings } from './consent-i18n.js?v=20261102194441';
+import { api } from './api.js?v=20261102194441';
+import { describeOffer, offersForBook } from './offers.js?v=20261102194441';
 
 // ---------------- icons ----------------
 const P = {
@@ -693,6 +693,7 @@ export async function openBell() {
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
 export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
+export const PROMO_STYLES = ['classic', 'split', 'poster', 'centered', 'card', 'sale', 'minimal', 'magazine', 'bubbles', 'stripes', 'neon', 'ribbon', 'mirror'];
 export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
@@ -701,14 +702,15 @@ export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtre
 const hexOk = c => /^#[0-9a-f]{6}$/i.test(c || '');
 const lum = c => { const n = parseInt(c.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); };
 // class + inline style for a banner: a ready theme, or two colours chosen by the owner, plus the title font
+const stCls = p => (p.kind === 'book' || !p.kind) && PROMO_STYLES.includes(p.style) && p.style !== 'classic' ? 'st-' + p.style : '';
 export function promoLook(p) {
   const font = PROMO_FONTS.find(f => f[0] === p.font);
   if (p.theme === 'custom' && hexOk(p.bg_from) && hexOk(p.bg_to)) {
     const light = (lum(p.bg_from) + lum(p.bg_to)) / 2 > 0.45;
-    return { cls: `theme-custom ${light ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''}`, style: `--bg:linear-gradient(115deg,${p.bg_from},${p.bg_to});${font ? `--pfont:${font[1]};` : ''}` };
+    return { cls: `theme-custom ${light ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''} ${stCls(p)}`, style: `--bg:linear-gradient(115deg,${p.bg_from},${p.bg_to});${font ? `--pfont:${font[1]};` : ''}` };
   }
   const th = PROMO_THEMES.includes(p.theme) ? p.theme : 'forest';
-  return { cls: `theme-${th} ${LIGHT_THEMES.includes(th) ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''}`, style: font ? `--pfont:${font[1]};` : '' };
+  return { cls: `theme-${th} ${LIGHT_THEMES.includes(th) ? 'theme-light' : ''} ${font ? 'font-' + font[0] : ''} ${stCls(p)}`, style: font ? `--pfont:${font[1]};` : '' };
 }
 export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
 const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');

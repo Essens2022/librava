@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102193819';
-import { CONFIG } from './config.js?v=20261102193819';
-import { store } from './util.js?v=20261102193819';
+import { localize, loadRates } from './localprice.js?v=20261102194441';
+import { CONFIG } from './config.js?v=20261102194441';
+import { store } from './util.js?v=20261102194441';
 
 const D = {
   ro: {
@@ -304,6 +304,20 @@ const D = {
     'pr.whatHelp': 'O carte (bannerul se face automat din copertă, titlu și preț) sau o imagine creată de tine (Canva etc.).',
     'pr.book': 'Cartea',
     'pr.bookOtherLang': 'Atenție: cartea e în {a}, bannerul e pentru clienții {b}.',
+    'pr.style': 'Design banner',
+    'pr.st.classic': 'Clasic',
+    'pr.st.split': 'Împărțit',
+    'pr.st.poster': 'Poster',
+    'pr.st.centered': 'Centrat',
+    'pr.st.card': 'Card sticlă',
+    'pr.st.sale': 'Reducere',
+    'pr.st.minimal': 'Minimal',
+    'pr.st.magazine': 'Revistă',
+    'pr.st.bubbles': 'Bule',
+    'pr.st.stripes': 'Dungi',
+    'pr.st.neon': 'Neon',
+    'pr.st.ribbon': 'Panglică',
+    'pr.st.mirror': 'Oglindă',
     'pr.theme': 'Culoarea fundalului',
     'pr.imgWide': 'Încarcă imaginea pentru computer',
     'pr.imgMobile': 'Imagine pentru telefon (opțional)',
@@ -1767,6 +1781,20 @@ const D = {
     'pr.whatHelp': 'Un libro (il banner si crea da solo da copertina, titolo e prezzo) o un’immagine creata da te (Canva ecc.).',
     'pr.book': 'Il libro',
     'pr.bookOtherLang': 'Attenzione: il libro è in {a}, il banner è per i clienti {b}.',
+    'pr.style': 'Design banner',
+    'pr.st.classic': 'Classico',
+    'pr.st.split': 'Diviso',
+    'pr.st.poster': 'Poster',
+    'pr.st.centered': 'Centrato',
+    'pr.st.card': 'Card vetro',
+    'pr.st.sale': 'Saldi',
+    'pr.st.minimal': 'Minimal',
+    'pr.st.magazine': 'Rivista',
+    'pr.st.bubbles': 'Bolle',
+    'pr.st.stripes': 'Righe',
+    'pr.st.neon': 'Neon',
+    'pr.st.ribbon': 'Nastro',
+    'pr.st.mirror': 'Specchio',
     'pr.theme': 'Colore di sfondo',
     'pr.imgWide': 'Carica l’immagine per computer',
     'pr.imgMobile': 'Immagine per telefono (facoltativa)',
@@ -3230,6 +3258,20 @@ const D = {
     'pr.whatHelp': 'A book (the banner is built from its cover, title and price) or an image you made (Canva etc.).',
     'pr.book': 'Book',
     'pr.bookOtherLang': 'Note: the book is in {a}, the banner is for {b} customers.',
+    'pr.style': 'Banner design',
+    'pr.st.classic': 'Classic',
+    'pr.st.split': 'Split',
+    'pr.st.poster': 'Poster',
+    'pr.st.centered': 'Centered',
+    'pr.st.card': 'Glass card',
+    'pr.st.sale': 'Sale',
+    'pr.st.minimal': 'Minimal',
+    'pr.st.magazine': 'Magazine',
+    'pr.st.bubbles': 'Bubbles',
+    'pr.st.stripes': 'Stripes',
+    'pr.st.neon': 'Neon',
+    'pr.st.ribbon': 'Ribbon',
+    'pr.st.mirror': 'Mirror',
     'pr.theme': 'Background colour',
     'pr.imgWide': 'Upload the computer image',
     'pr.imgMobile': 'Phone image (optional)',
@@ -4429,7 +4471,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102193819`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102194441`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
