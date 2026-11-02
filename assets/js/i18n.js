@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102192603';
-import { CONFIG } from './config.js?v=20261102192603';
-import { store } from './util.js?v=20261102192603';
+import { localize, loadRates } from './localprice.js?v=20261102193140';
+import { CONFIG } from './config.js?v=20261102193140';
+import { store } from './util.js?v=20261102193140';
 
 const D = {
   ro: {
@@ -1049,6 +1049,10 @@ const D = {
     'pr.tr.slide': 'Glisare',
     'pr.tr.zoom': 'Zoom',
     'pr.tr.flip': 'Întoarcere',
+    'pr.tr.blur': 'Estompare',
+    'pr.tr.rise': 'Ridicare',
+    'pr.tr.cube': 'Cub',
+    'pr.tr.kenburns': 'Zoom lent',
     'pr.motionHelp': 'Fiecare banner stă cât spui tu, apoi vine următorul cu stilul lui. Contează doar când ai mai multe bannere mari.',
     'set.catOrder': 'Ordinea categoriilor',
     'set.catOrderHelp': 'Mută categoriile în sus sau în jos. Prima apare prima pe pagina principală și în bara de sus. ⇈ o pune pe prima poziție.',
@@ -2508,6 +2512,10 @@ const D = {
     'pr.tr.slide': 'Scorrimento',
     'pr.tr.zoom': 'Zoom',
     'pr.tr.flip': 'Rotazione',
+    'pr.tr.blur': 'Sfocatura',
+    'pr.tr.rise': 'Salita',
+    'pr.tr.cube': 'Cubo',
+    'pr.tr.kenburns': 'Zoom lento',
     'pr.motionHelp': 'Ogni banner resta il tempo indicato, poi arriva il successivo con il suo stile. Conta solo con più banner grandi.',
     'set.catOrder': 'Ordine delle categorie',
     'set.catOrderHelp': 'Sposta le categorie su o giù. La prima compare per prima nella home e nella barra in alto. ⇈ la porta in cima.',
@@ -3967,6 +3975,10 @@ const D = {
     'pr.tr.slide': 'Slide',
     'pr.tr.zoom': 'Zoom',
     'pr.tr.flip': 'Flip',
+    'pr.tr.blur': 'Blur',
+    'pr.tr.rise': 'Rise',
+    'pr.tr.cube': 'Cube',
+    'pr.tr.kenburns': 'Slow zoom',
     'pr.motionHelp': 'Each banner stays as long as you set, then the next one comes in with its own style. Matters only with several large banners.',
     'set.catOrder': 'Category order',
     'set.catOrderHelp': 'Move categories up or down. The first one is shown first on the home page and in the top bar. ⇈ puts it on top.',
@@ -4417,7 +4429,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102192603`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102193140`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

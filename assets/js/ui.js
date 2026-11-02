@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102192603';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102192603';
-import { esc, store, $, $$ } from './util.js?v=20261102192603';
+import { CONFIG } from './config.js?v=20261102193140';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102193140';
+import { esc, store, $, $$ } from './util.js?v=20261102193140';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102192603';
-import { suggest, highlight } from './search.js?v=20261102192603';
-import { track, trackPage } from './track.js?v=20261102192603';
-import { initGA, applyConsent } from './ga.js?v=20261102192603';
-import { consentStrings } from './consent-i18n.js?v=20261102192603';
-import { api } from './api.js?v=20261102192603';
-import { describeOffer, offersForBook } from './offers.js?v=20261102192603';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102193140';
+import { suggest, highlight } from './search.js?v=20261102193140';
+import { track, trackPage } from './track.js?v=20261102193140';
+import { initGA, applyConsent } from './ga.js?v=20261102193140';
+import { consentStrings } from './consent-i18n.js?v=20261102193140';
+import { api } from './api.js?v=20261102193140';
+import { describeOffer, offersForBook } from './offers.js?v=20261102193140';
 
 // ---------------- icons ----------------
 const P = {
@@ -691,9 +691,9 @@ export async function openBell() {
 }
 
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
-export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream'];
+export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
-export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream'];
+export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
   ['oswald', "'Oswald', 'Arial Narrow', sans-serif"], ['bebas', "'Bebas Neue', 'Oswald', sans-serif"], ['playfair', "'Playfair Display', Georgia, serif"], ['merriweather', "'Merriweather', Georgia, serif"],
@@ -787,6 +787,7 @@ export function mountPromos(root) {
       i = (n + slides.length) % slides.length;
       slides.forEach((s, k) => { s.classList.toggle('on', k === i); s.toggleAttribute('inert', k !== i); s.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
       dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      c.style.setProperty('--psec', ((+slides[i].querySelector('[data-sec]')?.dataset.sec || 7)) + 's');
       view(slides[i]);
     };
     slides.forEach(sl => { sl.dataset.tr = sl.querySelector('[data-tr]')?.dataset.tr || 'fade'; });
@@ -799,8 +800,8 @@ export function mountPromos(root) {
     dots.forEach((d, k) => d.onclick = () => { go(k); play(); });
     // pause under a real mouse or keyboard focus only: on a phone a tap leaves "hover" stuck and the banners would stop
     const mouse = matchMedia('(hover: hover) and (pointer: fine)');
-    c.addEventListener('mouseenter', () => { if (!mouse.matches) return; paused = true; clearTimeout(timer); });
-    c.addEventListener('mouseleave', () => { paused = false; play(); });
+    c.addEventListener('mouseenter', () => { if (!mouse.matches) return; paused = true; clearTimeout(timer); c.querySelector('.promo-dots')?.classList.add('paused'); });
+    c.addEventListener('mouseleave', () => { paused = false; c.querySelector('.promo-dots')?.classList.remove('paused'); go(i); play(); });
     c.addEventListener('focusin', e => { if (!e.target.matches?.(':focus-visible')) return; paused = true; clearTimeout(timer); });
     c.addEventListener('focusout', () => { paused = false; play(); });
     let x0 = null, moved = false;
@@ -808,6 +809,7 @@ export function mountPromos(root) {
     c.addEventListener('touchmove', e => { if (x0 != null && Math.abs(e.touches[0].clientX - x0) > 10) moved = true; }, { passive: true });
     c.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 45) { go(i + (dx < 0 ? 1 : -1)); play(); } });
     c.addEventListener('click', e => { if (moved) { e.preventDefault(); moved = false; } }, true);
+    c.style.setProperty('--psec', ((+slides[0].querySelector('[data-sec]')?.dataset.sec || 7)) + 's');
     view(slides[0]); play();
   });
 }
