@@ -1,20 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102211445';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102211445';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102211445';
-import { resetCompanyCache } from './views.js?v=20261102211445';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102211445';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102211445';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102211445';
-import { optimizeBook } from './optimize.js?v=20261102211445';
-import { api } from './api.js?v=20261102211445';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102211445';
+import { CONFIG } from './config.js?v=20261102211908';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102211908';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102211908';
+import { resetCompanyCache } from './views.js?v=20261102211908';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102211908';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102211908';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102211908';
+import { optimizeBook } from './optimize.js?v=20261102211908';
+import { api } from './api.js?v=20261102211908';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102211908';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
-  ['overview', '/admin', 'chart', 'admin.tab.overview'],
+  ['overview', '/admin/overview', 'chart', 'admin.tab.overview'],
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
   ['prices', '/admin/prices', 'tag', 'bp.tab'],
@@ -70,7 +70,7 @@ export async function viewAdmin(el, parts) {
     if (!u) sessionStorage.setItem('librava:after', '/admin');
     return;
   }
-  let tab = parts[0] || 'overview';
+  let tab = parts[0] || 'visitors';
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
