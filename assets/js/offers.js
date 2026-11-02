@@ -133,7 +133,7 @@ export function describeOffer(o, t, catName = c => c) {
   const c = o.config || {};
   if (o.kind === 'bundle') return t('of.d.bundle', { p: c.percent, n: (c.book_ids || []).length });
   if (o.kind === 'qty') { const best = (c.tiers || []).slice().sort((a, b) => a.min - b.min); return best.map(x => t('of.d.qty', { n: x.min, p: x.percent })).join(' · ') + (c.category ? ' · ' + catName(c.category) : ''); }
-  if (o.kind === 'bxgy') return ((c.percent ?? 100) >= 100 ? t('of.d.bxgyFree', { a: (+c.buy || 2) + (+c.get || 1), b: +c.buy || 2 }) : t('of.d.bxgy', { buy: c.buy, get: c.get, p: c.percent })) + (c.category ? ' · ' + catName(c.category) : '');
+  if (o.kind === 'bxgy') return ((c.percent ?? 100) >= 100 ? t('of.d.bxgyFree', { a: (+c.buy || 2) + (+c.get || 1), b: +c.buy || 2, n: +c.get || 1 }) : t('of.d.bxgy', { buy: c.buy, get: c.get, p: c.percent })) + (c.category ? ' · ' + catName(c.category) : '');
   if (o.kind === 'category') return t('of.d.category', { p: c.percent, cat: catName(c.category) });
   if (o.kind === 'coupon') return c.percent ? t('of.d.couponP', { code: c.code, p: c.percent }) : t('of.d.couponA', { code: c.code, a: ((c.amount_cents || 0) / 100).toFixed(2).replace('.', ',') + ' €' });
   return o.name || '';
