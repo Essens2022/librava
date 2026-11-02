@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102021926';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102021926';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102021926';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102021926';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102021926';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102021926';
-import { track } from './track.js?v=20261102021926';
-import { gaEvent } from './ga.js?v=20261102021926';
-import { guessLang } from './langdetect.js?v=20261102021926';
-import { didYouMean } from './search.js?v=20261102021926';
-import { api, editionsOf } from './api.js?v=20261102021926';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102021926';
+import { CONFIG } from './config.js?v=20261102022356';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102022356';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102022356';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102022356';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102022356';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102022356';
+import { track } from './track.js?v=20261102022356';
+import { gaEvent } from './ga.js?v=20261102022356';
+import { guessLang } from './langdetect.js?v=20261102022356';
+import { didYouMean } from './search.js?v=20261102022356';
+import { api, editionsOf } from './api.js?v=20261102022356';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102022356';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -230,7 +230,8 @@ export async function viewBook(el, id) {
     eds.length > 1 ? Promise.all(eds.filter(x => x.id !== b.id).map(x => api.owns(x.id).then(o => o ? x : null).catch(() => null))).then(l => l.filter(Boolean)) : [],
   ]);
   const offers = api.offers ? await api.offers().catch(() => []) : [];
-  const badges = offersForBook(b, offers).filter(o => o.show_badge !== false);
+  const offerRank = o => { const c = o.config || {}; if (o.kind === 'qty') return Math.min(...(c.tiers || [{ percent: 0 }]).map(x => +x.percent || 0)); return +(c.percent ?? 100); };
+  const badges = offersForBook(b, offers).filter(o => o.show_badge !== false).sort((x, y) => offerRank(x) - offerRank(y));
   const canPreview = !owned && (b.sample_path || api.isDemo);
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? b.list_price_cents - b.price_cents : 0;
   const inCart = cart.has(b.id);

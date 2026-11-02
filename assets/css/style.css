@@ -2140,6 +2140,8 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .book-cover-col .cover { max-width: 160px }
 
   body:has(.buy-sticky:not([hidden])) .site-foot, body:has(.buy-sticky:not([hidden])) footer { padding-bottom: 70px }
+  body:has(.buy-sticky) main { padding-bottom: calc(84px + env(safe-area-inset-bottom)) }
+  .buy-sticky { transition: transform .25s ease, opacity .2s ease }
 }
 
 /* ---- offer card (book page) ---- */
