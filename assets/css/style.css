@@ -2249,3 +2249,6 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .tl-diag { list-style: none; padding: 8px 12px; margin: 0 0 6px; border-radius: 10px; background: var(--card, #f4f6ef); font-size: 14px; border-left: 4px solid var(--line, #d9ddd2); }
 .tl-diag.buy { border-left-color: #2e9d57; } .tl-diag.hot { border-left-color: #e0a030; } .tl-diag.bad { border-left-color: #d0453b; }
 .tl-ev.tl-click, .tl-ev.tl-scroll { opacity: .78; font-size: 13px; } .tl-ev.tl-click span::before { content: "👆 "; } .tl-ev.tl-scroll span::before { content: "📜 "; }
+
+.deliv-note { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--card, #f4f6ef); border: 1px solid var(--line, #d9ddd2); font-size: 13px; line-height: 1.4; }
+.deliv-note svg { flex: none; width: 18px; height: 18px; color: var(--pista-strong, #4a7c2a); margin-top: 1px; }

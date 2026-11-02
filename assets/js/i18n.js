@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102184808';
-import { CONFIG } from './config.js?v=20261102184808';
-import { store } from './util.js?v=20261102184808';
+import { localize, loadRates } from './localprice.js?v=20261102185903';
+import { CONFIG } from './config.js?v=20261102185903';
+import { store } from './util.js?v=20261102185903';
 
 const D = {
   ro: {
@@ -516,8 +516,10 @@ const D = {
     'book.vat': 'TVA inclus',
     'book.addToCart': 'Adaugă în coș',
     'book.offersHead': 'Oferte pentru tine',
-    'book.trust1': 'Acces instant',
-    'book.trust2': 'Citești pe orice dispozitiv',
+    'book.trust1': 'Livrare instant în biblioteca ta',
+    'book.delivHead': 'Livrare instantă.',
+    'book.delivText': 'Imediat după plată cartea apare direct în biblioteca ta Librava. O citești chiar pe dispozitivul pe care îl ai deja: telefon, tabletă, computer sau Kindle. Nu ai nevoie de Kindle.',
+    'book.trust2': 'Citești pe telefon, tabletă, PC sau Kindle',
     'book.trust3': 'Plată securizată',
     'book.offerAdd': 'ADAUGĂ',
     'book.offerUnlocked': 'ACTIVĂ',
@@ -1960,8 +1962,10 @@ const D = {
     'book.vat': 'IVA inclusa',
     'book.addToCart': 'Aggiungi al carrello',
     'book.offersHead': 'Offerte per te',
-    'book.trust1': 'Accesso immediato',
-    'book.trust2': 'Leggi su ogni dispositivo',
+    'book.trust1': 'Consegna immediata nella tua libreria',
+    'book.delivHead': 'Consegna immediata.',
+    'book.delivText': 'Subito dopo il pagamento il libro appare nella tua libreria Librava. Lo leggi sul dispositivo che hai già: telefono, tablet, computer o Kindle. Non serve un Kindle.',
+    'book.trust2': 'Leggi su telefono, tablet, PC o Kindle',
     'book.trust3': 'Pagamento sicuro',
     'book.offerAdd': 'AGGIUNGI',
     'book.offerUnlocked': 'ATTIVA',
@@ -3404,8 +3408,10 @@ const D = {
     'book.vat': 'VAT included',
     'book.addToCart': 'Add to cart',
     'book.offersHead': 'Offers for you',
-    'book.trust1': 'Instant access',
-    'book.trust2': 'Read on any device',
+    'book.trust1': 'Instant delivery to your library',
+    'book.delivHead': 'Delivered instantly.',
+    'book.delivText': 'Right after payment the book appears in your Librava library. Read it on the device you already have: phone, tablet, computer or Kindle. No Kindle needed.',
+    'book.trust2': 'Read on phone, tablet, PC or Kindle',
     'book.trust3': 'Secure payment',
     'book.offerAdd': 'ADD',
     'book.offerUnlocked': 'UNLOCKED',
@@ -3572,7 +3578,7 @@ const D = {
     'cart.ownedRemoved': 'We removed books you already own from your cart.',
     'cart.owned': 'You already own this book.',
     'cart.added': 'Added to cart',
-    'cart.digital': 'Instant digital delivery',
+    'cart.digital': 'Instant delivery to your library',
     'cart.redirecting': 'Taking you to secure payment…',
     'pay.demoTitle': 'Demo payment',
     'pay.demoText': 'You are in demo mode. No money is charged and no card is needed. In the live version, the Stripe payment page opens here.',
@@ -4372,7 +4378,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102184808`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102185903`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102184808';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102184808';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102184808';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102184808';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102184808';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102184808';
-import { track } from './track.js?v=20261102184808';
-import { gaEvent } from './ga.js?v=20261102184808';
-import { guessLang } from './langdetect.js?v=20261102184808';
-import { didYouMean } from './search.js?v=20261102184808';
-import { api, editionsOf } from './api.js?v=20261102184808';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102184808';
+import { CONFIG } from './config.js?v=20261102185903';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102185903';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102185903';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102185903';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102185903';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102185903';
+import { track } from './track.js?v=20261102185903';
+import { gaEvent } from './ga.js?v=20261102185903';
+import { guessLang } from './langdetect.js?v=20261102185903';
+import { didYouMean } from './search.js?v=20261102185903';
+import { api, editionsOf } from './api.js?v=20261102185903';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102185903';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -251,7 +251,8 @@ export async function viewBook(el, id) {
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
       ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map((o, oi) => `<div class="offer-row${oi ? ' rot-hide' : ''}"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
-      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`);
+      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>
+      <div class="deliv-note">${icon('bolt')} <span><b>${esc(t('book.delivHead'))}</b> ${esc(t('book.delivText'))}</span></div>`);
 
   el.innerHTML = `<div class="wrap page">
     <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › <a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a></nav>

@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102184808';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102184808';
-import { esc, store, $, $$ } from './util.js?v=20261102184808';
+import { CONFIG } from './config.js?v=20261102185903';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102185903';
+import { esc, store, $, $$ } from './util.js?v=20261102185903';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102184808';
-import { suggest, highlight } from './search.js?v=20261102184808';
-import { track, trackPage } from './track.js?v=20261102184808';
-import { initGA, applyConsent } from './ga.js?v=20261102184808';
-import { consentStrings } from './consent-i18n.js?v=20261102184808';
-import { api } from './api.js?v=20261102184808';
-import { describeOffer, offersForBook } from './offers.js?v=20261102184808';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102185903';
+import { suggest, highlight } from './search.js?v=20261102185903';
+import { track, trackPage } from './track.js?v=20261102185903';
+import { initGA, applyConsent } from './ga.js?v=20261102185903';
+import { consentStrings } from './consent-i18n.js?v=20261102185903';
+import { api } from './api.js?v=20261102185903';
+import { describeOffer, offersForBook } from './offers.js?v=20261102185903';
 
 // ---------------- icons ----------------
 const P = {
@@ -745,7 +745,7 @@ function promoBooksHTML(p, list, placement) {
     <div class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${p.title ? `<span class="promo-title">${esc(p.title)}</span>` : ''}
       ${p.subtitle ? `<span class="promo-sub">${esc(p.subtitle)}</span>` : ''}<a class="btn btn-buy promo-cta" href="${esc(link)}"${ext}>${esc(p.cta || t('promo.ctaBooks'))}</a></div>
     <div class="promo-shelf n${books.length}">${books.map(b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
-      return `<a class="pb" href="#/book/${encodeURIComponent(b.id)}" title="${esc(b.title)} · ${esc(b.price_cents ? money(b.price_cents) : t('book.free'))}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`}${d ? `<span class="badge">-${d}%</span>` : ''}</a>`; }).join('')}</div>
+      return `<a class="pb" href="#/book/${encodeURIComponent(b.id)}" title="${esc(b.title)} · ${esc(b.price_cents ? money(b.price_cents) : t('book.free'))}">${b.cover_url ? `<img src="/book/${esc(b.id)}/thumb.webp" data-full="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : `<span class="ph">${esc(b.title)}</span>`}${d ? `<span class="badge">-${d}%</span>` : ''}</a>`; }).join('')}</div>
   </div></div>`;
 }
 // several slides: fade carousel with arrows, dots, swipe and auto-play (paused on hover, focus or reduced motion)
