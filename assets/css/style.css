@@ -2280,7 +2280,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .trust-tiles { max-width: 560px; }
 
 /* ===== Modern compact banners (v2): smaller, glassy, animated ===== */
-.hero-promos { padding-bottom: 0; }
+.hero-promos { padding-bottom: 58px; }
 .hero-promos .hero-fade { height: 36px; }
 .hero-promos .promo-dots { bottom: 14px; gap: 6px; }
 .hero-promos .promo-dots button { width: 22px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.28); position: relative; overflow: hidden; }
@@ -2358,6 +2358,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .promo-hero .pb, .promo-strip .pb { width: 84px; }
   .promo-hero .promo-shelf.n2, .promo-hero .promo-shelf.n3, .promo-hero .promo-shelf.n4, .promo-hero .promo-shelf.n5, .promo-hero .promo-shelf.n6, .promo-hero .promo-shelf.n7, .promo-hero .promo-shelf.n8 { --h: 125px; }
   .hero-promos .promo-dots { bottom: 10px; }
+  .hero-promos { padding-bottom: 40px; }
   .hero-promos .hero-fade { height: 24px; }
   .promo-hero.promo-image img { max-height: none; }
 }
