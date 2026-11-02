@@ -2470,3 +2470,28 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .pr-g-box i { position: absolute; inset: 10%; border: 2px dashed #1d7a3a; background: rgba(29,122,58,.12); border-radius: 4px; }
 .pr-g-box span { position: absolute; inset: 10%; display: grid; place-items: center; text-align: center; font-size: 11px; font-weight: 700; color: #14602d; padding: 2px; }
 @media (max-width: 560px) { .pr-guide { grid-template-columns: 1fr; } }
+
+/* Phone: compact home blocks, no overlap with banner */
+.hero-promos + .lift { margin-top: -14px; }
+@media (max-width: 760px) {
+  .hero-promos { padding-bottom: 34px; }
+  .hero-promos + .lift { margin-top: -10px; }
+  .home-stack { gap: 12px; }
+  .home-stack .panel { padding: 12px; }
+  .panel.trust { gap: 4px; padding: 7px 4px; }
+  .trust div { font-size: 10.5px; gap: 2px; line-height: 1.2; }
+  .trust .ico { width: 16px; height: 16px; }
+  .section-title { font-size: 18px; gap: 10px; }
+  .guide-home { padding: 12px; }
+  .guide-home .section-title { font-size: 16px; }
+  .guide-home > p.muted { font-size: 13px; margin-bottom: 8px !important; }
+  .guide-card { flex-basis: 92px; padding: 6px; gap: 3px; border-radius: 12px; }
+  .guide-card b { font-size: 12px; } .guide-card small { font-size: 11px; }
+  .guide-card .gc-tag { font-size: 9px; padding: 2px 6px; }
+  .guide-rail { gap: 8px; padding-bottom: 6px; }
+  .guide-btns { gap: 8px; margin-top: 8px; }
+  .guide-btns .btn { padding: 9px 12px; font-size: 14px; min-height: 0; }
+  .shelf-track { gap: 10px; padding-top: 8px; }
+  .card { width: 112px; }
+  .card-title { font-size: 13px; }
+}
