@@ -2365,7 +2365,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 /* phone: the multi-book slide as compact as the single-book slide, so the whole banner stays short */
 @media (max-width: 760px) {
   .promo-hero.promo-books .promo-in { grid-template-columns: 1fr; gap: 6px; padding: 12px var(--gutter-r, 16px) 28px var(--gutter-l, 16px); min-height: 0; }
-  .promo-hero.promo-books .promo-text { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .promo-hero.promo-books .promo-text { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
   .promo-hero.promo-books .promo-offer { flex: 1 0 100%; width: fit-content; }
   .promo-hero.promo-books .promo-kicker, .promo-hero.promo-books .promo-sub { display: none; }
   .promo-hero.promo-books .promo-title { font-size: 18px; flex: 1 1 0; min-width: 0; margin: 0; -webkit-line-clamp: 2; }
