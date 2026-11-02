@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102194443';
-import { CONFIG } from './config.js?v=20261102194443';
-import { store } from './util.js?v=20261102194443';
+import { localize, loadRates } from './localprice.js?v=20261102194918';
+import { CONFIG } from './config.js?v=20261102194918';
+import { store } from './util.js?v=20261102194918';
 
 const D = {
   ro: {
@@ -318,6 +318,10 @@ const D = {
     'pr.st.neon': 'Neon',
     'pr.st.ribbon': 'Panglică',
     'pr.st.mirror': 'Oglindă',
+    'pr.gDesk': 'Calculator',
+    'pr.gMob': 'Telefon',
+    'pr.gSafe': 'ZONĂ SIGURĂ – pune aici textul, prețul, fața cărții',
+    'pr.gRule': 'Tot ce e important (text, preț, logo, față) rămâne în zona punctată. Marginea de 10% din jur poate fi tăiată sau acoperită de butoane. Fără text mic: pe telefon se vede micșorat. Imaginea mobilă se încarcă separat; dacă lipsește, se folosește cea de calculator.',
     'pr.theme': 'Culoarea fundalului',
     'pr.imgWide': 'Încarcă imaginea pentru computer',
     'pr.imgMobile': 'Imagine pentru telefon (opțional)',
@@ -1795,6 +1799,10 @@ const D = {
     'pr.st.neon': 'Neon',
     'pr.st.ribbon': 'Nastro',
     'pr.st.mirror': 'Specchio',
+    'pr.gDesk': 'Computer',
+    'pr.gMob': 'Telefono',
+    'pr.gSafe': 'ZONA SICURA – metti qui testo, prezzo, copertina',
+    'pr.gRule': 'Tutto ciò che conta (testo, prezzo, logo, copertina) resta nella zona tratteggiata. Il 10% di margine intorno può essere tagliato o coperto da pulsanti. Niente testo piccolo: sul telefono appare ridotto. L’immagine mobile si carica a parte; se manca si usa quella per computer.',
     'pr.theme': 'Colore di sfondo',
     'pr.imgWide': 'Carica l’immagine per computer',
     'pr.imgMobile': 'Immagine per telefono (facoltativa)',
@@ -3272,6 +3280,10 @@ const D = {
     'pr.st.neon': 'Neon',
     'pr.st.ribbon': 'Ribbon',
     'pr.st.mirror': 'Mirror',
+    'pr.gDesk': 'Computer',
+    'pr.gMob': 'Phone',
+    'pr.gSafe': 'SAFE ZONE – keep text, price, cover here',
+    'pr.gRule': 'Everything important (text, price, logo, cover) stays inside the dotted zone. The 10% margin around may be cropped or covered by buttons. No small text: it shrinks on phones. The phone image is uploaded separately; if missing, the computer one is used.',
     'pr.theme': 'Background colour',
     'pr.imgWide': 'Upload the computer image',
     'pr.imgMobile': 'Phone image (optional)',
@@ -4471,7 +4483,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102194443`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102194918`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

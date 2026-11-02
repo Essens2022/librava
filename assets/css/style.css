@@ -2461,3 +2461,12 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .st-neon::after { inset: 6px; border-radius: 16px; } .st-neon .promo-in { padding-inline: 22px !important; }
   .st-stripes .promo-cover::before { width: 96px; height: 96px; margin: -48px 0 0 -48px; left: 50%; top: 50%; }
 }
+
+/* Banner upload guide */
+.pr-guide { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 4px 0 12px; padding: 14px; border-radius: 14px; background: #fff7e0; border: 1px solid #f0d58a; color: #3a2e00; }
+.pr-guide p { grid-column: 1 / -1; margin: 0; font-size: 14px; line-height: 1.45; }
+.pr-g b { display: block; font-size: 15px; margin-bottom: 6px; }
+.pr-g-box { position: relative; width: 100%; max-height: 190px; background: #e9eef5; border: 2px solid #7a8aa3; border-radius: 6px; margin-inline: auto; }
+.pr-g-box i { position: absolute; inset: 10%; border: 2px dashed #1d7a3a; background: rgba(29,122,58,.12); border-radius: 4px; }
+.pr-g-box span { position: absolute; inset: 10%; display: grid; place-items: center; text-align: center; font-size: 11px; font-weight: 700; color: #14602d; padding: 2px; }
+@media (max-width: 560px) { .pr-guide { grid-template-columns: 1fr; } }

@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102194443';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102194443';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102194443';
-import { resetCompanyCache } from './views.js?v=20261102194443';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102194443';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102194443';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102194443';
-import { optimizeBook } from './optimize.js?v=20261102194443';
-import { api } from './api.js?v=20261102194443';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102194443';
+import { CONFIG } from './config.js?v=20261102194918';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102194918';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102194918';
+import { resetCompanyCache } from './views.js?v=20261102194918';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102194918';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102194918';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102194918';
+import { optimizeBook } from './optimize.js?v=20261102194918';
+import { api } from './api.js?v=20261102194918';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102194918';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2266,6 +2266,7 @@ async function promoForm(body, id) {
         <div id="pr-stylebox"><span class="muted" style="font-size:14px">${esc(t('pr.style'))}</span><div class="pr-fonts">${PROMO_STYLES.map(k => `<label class="pr-font"><input type="radio" name="st" value="${k}" ${(p.style || 'classic') === k ? 'checked' : ''}><b>${esc(t('pr.st.' + k))}</b></label>`).join('')}</div></div>
         <div id="pr-fontbox"><span class="muted" style="font-size:14px">${esc(t('pr.font'))}</span><div class="pr-fonts">${[['', "'Literata', Georgia, serif"], ...PROMO_FONTS.filter(f => f[0] !== 'literata')].map(([k, fam]) => `<label class="pr-font"><input type="radio" name="pf" value="${k}" ${(p.font || '') === k ? 'checked' : ''}><b style="font-family:${fam};${k === 'bebas' || k === 'dmserif' ? 'font-weight:400' : ''}">Aa Librava</b><small>${esc(k ? t('pr.f.' + k) : t('pr.f.default'))}</small></label>`).join('')}</div></div>
         <div id="pr-imgbox">
+          <div class="pr-guide" id="pr-guide"></div>
           <label class="drop" data-drop="image">${icon('image')}<span><span class="fname" id="n-image">${p.image_url ? '✓ ' + esc(t('pr.imgKept')) : esc(t('pr.imgWide'))}</span><br><small id="spec-wide"></small></span><input type="file" id="pr-image" accept="image/jpeg,image/png,image/webp"></label>
           <div class="kdp-warn" id="w-image" hidden></div>
           <label class="drop" data-drop="mobile">${icon('devices')}<span><span class="fname" id="n-mobile">${p.image_mobile_url ? '✓ ' + esc(t('pr.imgKept')) : esc(t('pr.imgMobile'))}</span><br><small id="spec-mobile"></small></span><input type="file" id="pr-mobile" accept="image/jpeg,image/png,image/webp"></label>
@@ -2309,6 +2310,7 @@ async function promoForm(body, id) {
     $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
     $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image'; $('#pr-stylebox', f).hidden = c.kind !== 'book';
     drawPick();
+    $('#pr-guide', f).innerHTML = ['desk', 'mob'].map(k => { const w = k === 'desk' ? spec.w : spec.mw, h = k === 'desk' ? spec.h : spec.mh; return `<div class="pr-g"><b>${esc(t(k === 'desk' ? 'pr.gDesk' : 'pr.gMob'))}: ${w} × ${h} px</b><div class="pr-g-box" style="aspect-ratio:${w}/${h}"><i></i><span>${esc(t('pr.gSafe'))}</span></div></div>`; }).join('') + `<p>${esc(t('pr.gRule'))}</p>`;
     $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
     $('#spec-mobile', f).textContent = t('pr.specMobile', { w: spec.mw, h: spec.mh });
     const b = pub.find(x => x.id === c.book_id);
