@@ -1,8 +1,11 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261102025229';
+import { store } from './util.js?v=20261102075208';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
+// Google Ads tag + purchase conversion label: public identifiers (visible on every page that uses Google Ads)
+const ADS_ID = 'AW-18550229876';
+const ADS_PURCHASE_LABEL = ''; // filled in after the Purchase conversion is created in Google Ads
 // Meta Pixel ID: also a public identifier (visible in every page that uses it), not a secret
 const META_PIXEL_ID = '2177981823134602';
 let ready = false, fbReady = false;
@@ -25,6 +28,9 @@ export function initGA() {
   window.gtag('consent', 'default', { analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
   window.gtag('js', new Date());
   window.gtag('config', GA_ID, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
+  // Google Ads: only after "Accept all"; measures sales, no ad personalization
+  window.gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'denied' });
+  window.gtag('config', ADS_ID, { allow_ad_personalization_signals: false });
   const s = document.createElement('script');
   s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
   document.head.appendChild(s);
@@ -70,7 +76,7 @@ export function gaEvent(type, data = {}) {
       case 'book_view': if (data.book) { g('event', 'view_item', { currency: cur(data.book), value: (data.book.price_cents || 0) / 100, items: [item(data.book)] }); fb('track', 'ViewContent', fbData([data.book])); } break;
       case 'add_cart': if (data.book) { g('event', 'add_to_cart', { currency: cur(data.book), value: (data.book.price_cents || 0) / 100, items: [item(data.book)] }); fb('track', 'AddToCart', fbData([data.book])); } break;
       case 'checkout': if (data.books) { g('event', 'begin_checkout', { currency: cur(data.books[0]), value: data.books.reduce((a, b) => a + (b.price_cents || 0), 0) / 100, items: data.books.map(item) }); fb('track', 'InitiateCheckout', { ...fbData(data.books), num_items: data.books.length }); } break;
-      case 'purchase': if (data.books) { const value = data.value != null ? data.value / 100 : data.books.reduce((a, b) => a + (b.price_cents || 0), 0) / 100; g('event', 'purchase', { transaction_id: data.id, currency: cur(data.books[0]), value, items: data.books.map(item) }); fb('track', 'Purchase', { ...fbData(data.books), value, num_items: data.books.length }, data.id ? { eventID: 'order-' + data.id } : undefined); } break;
+      case 'purchase': if (data.books) { const value = data.value != null ? data.value / 100 : data.books.reduce((a, b) => a + (b.price_cents || 0), 0) / 100; if (ADS_PURCHASE_LABEL) g('event', 'conversion', { send_to: ADS_ID + '/' + ADS_PURCHASE_LABEL, value, currency: cur(data.books[0]), transaction_id: data.id }); g('event', 'purchase', { transaction_id: data.id, currency: cur(data.books[0]), value, items: data.books.map(item) }); fb('track', 'Purchase', { ...fbData(data.books), value, num_items: data.books.length }, data.id ? { eventID: 'order-' + data.id } : undefined); } break;
       case 'search': g('event', 'search', { search_term: data.q }); fb('track', 'Search', { search_string: data.q }); break;
       case 'signup': g('event', 'sign_up', { method: data.method || 'email' }); fb('track', 'CompleteRegistration'); break;
       case 'share': g('event', 'share', { item_id: data.book_id, content_type: 'book' }); break;
