@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102201702';
-import { CONFIG } from './config.js?v=20261102201702';
-import { store } from './util.js?v=20261102201702';
+import { localize, loadRates } from './localprice.js?v=20261102202250';
+import { CONFIG } from './config.js?v=20261102202250';
+import { store } from './util.js?v=20261102202250';
 
 const D = {
   ro: {
@@ -306,6 +306,23 @@ const D = {
     'pr.bookOtherLang': 'Atenție: cartea e în {a}, bannerul e pentru clienții {b}.',
     'pr.style': 'Design banner',
     'pr.styleHelp': 'alege un model; vezi cum arată cu cartea ta',
+    'pr.st.steps': 'Pași simpli',
+    'pr.st.savings': 'Economie mare',
+    'pr.st.devices': 'Pe orice dispozitiv',
+    'pr.st.bookshelf': 'Raft de bibliotecă',
+    'pr.st.stars': 'Recenzii',
+    'pr.st.book3d': 'Copertă 3D',
+    'pr.st.pastel': 'Pastel vesel',
+    'pr.st.retro': 'Retro',
+    'pr.st.comic': 'Benzi desenate',
+    'pr.st.blueprint': 'Schiță tehnică',
+    'pr.st.paper': 'Colaj de hârtie',
+    'pr.st.cinema': 'Cinema',
+    'pr.st.wave': 'Valuri',
+    'pr.st.circle': 'Cerc',
+    'pr.st.bold': 'Culori aprinse',
+    'pr.styleOpen': 'Vezi toate modelele ({n})',
+    'pr.styleClose': 'Închide',
     'pr.st.classic': 'Clasic',
     'pr.st.flash': 'Ofertă fulger',
     'pr.st.spotlight': 'Reflector',
@@ -1791,6 +1808,23 @@ const D = {
     'pr.bookOtherLang': 'Attenzione: il libro è in {a}, il banner è per i clienti {b}.',
     'pr.style': 'Design banner',
     'pr.styleHelp': 'scegli un modello; lo vedi con il tuo libro',
+    'pr.st.steps': 'Passi semplici',
+    'pr.st.savings': 'Grande risparmio',
+    'pr.st.devices': 'Su ogni dispositivo',
+    'pr.st.bookshelf': 'Scaffale',
+    'pr.st.stars': 'Recensioni',
+    'pr.st.book3d': 'Copertina 3D',
+    'pr.st.pastel': 'Pastello',
+    'pr.st.retro': 'Retro',
+    'pr.st.comic': 'Fumetto',
+    'pr.st.blueprint': 'Disegno tecnico',
+    'pr.st.paper': 'Collage di carta',
+    'pr.st.cinema': 'Cinema',
+    'pr.st.wave': 'Onde',
+    'pr.st.circle': 'Cerchio',
+    'pr.st.bold': 'Colori vivi',
+    'pr.styleOpen': 'Vedi tutti i modelli ({n})',
+    'pr.styleClose': 'Chiudi',
     'pr.st.classic': 'Classico',
     'pr.st.flash': 'Offerta lampo',
     'pr.st.spotlight': 'Riflettore',
@@ -3276,6 +3310,23 @@ const D = {
     'pr.bookOtherLang': 'Note: the book is in {a}, the banner is for {b} customers.',
     'pr.style': 'Banner design',
     'pr.styleHelp': 'pick a model; see it with your book',
+    'pr.st.steps': 'Simple steps',
+    'pr.st.savings': 'Big savings',
+    'pr.st.devices': 'Any device',
+    'pr.st.bookshelf': 'Bookshelf',
+    'pr.st.stars': 'Reviews',
+    'pr.st.book3d': '3D cover',
+    'pr.st.pastel': 'Pastel fun',
+    'pr.st.retro': 'Retro',
+    'pr.st.comic': 'Comic',
+    'pr.st.blueprint': 'Blueprint',
+    'pr.st.paper': 'Paper collage',
+    'pr.st.cinema': 'Cinema',
+    'pr.st.wave': 'Waves',
+    'pr.st.circle': 'Circle',
+    'pr.st.bold': 'Bold colours',
+    'pr.styleOpen': 'See all designs ({n})',
+    'pr.styleClose': 'Close',
     'pr.st.classic': 'Classic',
     'pr.st.flash': 'Flash sale',
     'pr.st.spotlight': 'Spotlight',
@@ -4495,7 +4546,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102201702`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102202250`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

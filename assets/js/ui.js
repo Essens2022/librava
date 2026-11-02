@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102201702';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102201702';
-import { esc, store, $, $$ } from './util.js?v=20261102201702';
+import { CONFIG } from './config.js?v=20261102202250';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102202250';
+import { esc, store, $, $$ } from './util.js?v=20261102202250';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102201702';
-import { suggest, highlight } from './search.js?v=20261102201702';
-import { track, trackPage } from './track.js?v=20261102201702';
-import { initGA, applyConsent } from './ga.js?v=20261102201702';
-import { consentStrings } from './consent-i18n.js?v=20261102201702';
-import { api } from './api.js?v=20261102201702';
-import { describeOffer, offersForBook } from './offers.js?v=20261102201702';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102202250';
+import { suggest, highlight } from './search.js?v=20261102202250';
+import { track, trackPage } from './track.js?v=20261102202250';
+import { initGA, applyConsent } from './ga.js?v=20261102202250';
+import { consentStrings } from './consent-i18n.js?v=20261102202250';
+import { api } from './api.js?v=20261102202250';
+import { describeOffer, offersForBook } from './offers.js?v=20261102202250';
 
 // ---------------- icons ----------------
 const P = {
@@ -693,7 +693,7 @@ export async function openBell() {
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
 export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
-export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal'];
+export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal', 'steps', 'savings', 'devices', 'bookshelf', 'stars', 'book3d', 'pastel', 'retro', 'comic', 'blueprint', 'paper', 'cinema', 'wave', 'circle', 'bold'];
 export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
@@ -734,6 +734,18 @@ function tpExtras(sty, p, b, disc, rating) {
     case 'sticker': return { cover: '', tail: `${off ? `<span class="tp-x tp-st1">${off}</span>` : ''}<span class="tp-x tp-st2">★ ${word}</span>` };
     case 'gold': return { cover: '', tail: `<span class="tp-x tp-medal">${b && b.rating_count ? `<b>${(+b.rating_avg).toFixed(1)}</b><i>★★★★★</i>` : `<b>${off || '★'}</b><i>${esc(t('book.instant'))}</i>`}</span>` };
     case 'duo': return { cover: '', tail: disc ? `<span class="tp-x tp-big">${disc}%</span>` : '' };
+    case 'steps': return { cover: '', tail: `<span class="tp-x tp-steps"><span><b>1</b>${esc(t('book.tile3'))}</span><span><b>2</b>${esc(t('book.tile1'))}</span><span><b>3</b>${esc(t('book.tile2'))}</span></span>` };
+    case 'savings': return { cover: '', tail: b && disc ? `<span class="tp-x tp-save"><i>${esc(t('book.save', { amount: '', pct: disc }).replace(/\(.*\)/, '').trim())}</i><b>${money(b.list_price_cents - b.price_cents)}</b></span>` : '' };
+    case 'devices': return { cover: '', tail: `<span class="tp-x tp-dev" style="--c:url('${cov}')"><span class="d-pc"><i></i></span><span class="d-tab"><i></i></span><span class="d-ph"><i></i></span></span>` };
+    case 'bookshelf': return { cover: '', tail: '<span class="tp-x tp-plank"></span><span class="tp-x tp-plant"></span>' };
+    case 'stars': return { cover: '', tail: `<span class="tp-x tp-rate">${b && b.rating_count ? `<b>${(+b.rating_avg).toFixed(1)}</b><i>★★★★★</i><em>${b.rating_count}</em>` : `<b>${off || '★'}</b><i>★★★★★</i>`}</span>` };
+    case 'pastel': return { cover: '', tail: `${blob(2)}${chip('c1', 'bolt', t('book.tile1'))}${chip('c2', 'shield', t('book.tile3'))}` };
+    case 'retro': return { cover: '', tail: '<span class="tp-x tp-sun"></span><span class="tp-x tp-grid"></span>' };
+    case 'comic': return { cover: '', tail: `<span class="tp-x tp-pow">${off ? esc(off) : '★'}!</span>` };
+    case 'blueprint': return { cover: '', tail: `<span class="tp-x tp-call a">${esc(t('book.tile1'))}</span><span class="tp-x tp-call b">${esc(t('book.tile2'))}</span>` };
+    case 'paper': return { cover: '', tail: '<span class="tp-x tp-tape t1"></span><span class="tp-x tp-tape t2"></span>' };
+    case 'cinema': return { cover: '', tail: `<span class="tp-x tp-now">${word}</span>` };
+    case 'wave': return { cover: '', tail: '<svg class="tp-x tp-sea" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 C200 0 400 120 600 60 S1000 0 1200 60 V120 H0Z"/></svg><svg class="tp-x tp-sea w2" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 70 C200 120 400 10 600 70 S1000 120 1200 70 V120 H0Z"/></svg>' };
     default: return { cover: '', tail: '' };
   }
 }

@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102201702';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102201702';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102201702';
-import { resetCompanyCache } from './views.js?v=20261102201702';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102201702';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102201702';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102201702';
-import { optimizeBook } from './optimize.js?v=20261102201702';
-import { api } from './api.js?v=20261102201702';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102201702';
+import { CONFIG } from './config.js?v=20261102202250';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102202250';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102202250';
+import { resetCompanyCache } from './views.js?v=20261102202250';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102202250';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102202250';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102202250';
+import { optimizeBook } from './optimize.js?v=20261102202250';
+import { api } from './api.js?v=20261102202250';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102202250';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2263,7 +2263,9 @@ async function promoForm(body, id) {
         <div id="pr-themebox"><span class="muted" style="font-size:14px">${esc(t('pr.theme'))}</span><div class="pr-themes">${PROMO_THEMES.map(th => `<label class="pr-theme theme-${th}" title="${th}"><input type="radio" name="th" value="${th}" ${p.theme === th ? 'checked' : ''}><span></span></label>`).join('')}</div>
           <div class="pr-custom"><label class="pr-theme theme-custom" id="pr-cswatch" style="--bg:linear-gradient(115deg,${esc(p.bg_from || '#1F3A93')},${esc(p.bg_to || '#D9485F')})" title="${esc(t('pr.custom'))}"><input type="radio" name="th" value="custom" ${p.theme === 'custom' ? 'checked' : ''}><span></span></label>
             <span>${esc(t('pr.custom'))}:</span><input type="color" id="pr-c1" value="${esc(p.bg_from || '#1F3A93')}" aria-label="${esc(t('pr.color1'))}"><input type="color" id="pr-c2" value="${esc(p.bg_to || '#D9485F')}" aria-label="${esc(t('pr.color2'))}"></div></div>
-        <div id="pr-stylebox"><span class="muted" style="font-size:14px">${esc(t('pr.style'))} – ${esc(t('pr.styleHelp'))}</span><div class="st-gallery" id="pr-stylegrid"></div></div>
+        <div id="pr-stylebox"><span class="muted" style="font-size:14px">${esc(t('pr.style'))}</span>
+          <button type="button" class="btn st-open" id="pr-styleopen"><b id="pr-stylename"></b><span>${esc(t('pr.styleOpen', { n: PROMO_STYLES.length }))}</span></button>
+          <div class="st-pop" id="pr-stylepop" hidden><div class="st-pop-in"><div class="st-pop-h"><b>${esc(t('pr.style'))} (${PROMO_STYLES.length})</b><span class="muted">${esc(t('pr.styleHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="pr-styleclose">✕ ${esc(t('pr.styleClose'))}</button></div><div class="st-gallery" id="pr-stylegrid"></div></div></div></div>
         <div id="pr-fontbox"><span class="muted" style="font-size:14px">${esc(t('pr.font'))}</span><div class="pr-fonts">${[['', "'Literata', Georgia, serif"], ...PROMO_FONTS.filter(f => f[0] !== 'literata')].map(([k, fam]) => `<label class="pr-font"><input type="radio" name="pf" value="${k}" ${(p.font || '') === k ? 'checked' : ''}><b style="font-family:${fam};${k === 'bebas' || k === 'dmserif' ? 'font-weight:400' : ''}">Aa Librava</b><small>${esc(k ? t('pr.f.' + k) : t('pr.f.default'))}</small></label>`).join('')}</div></div>
         <div id="pr-imgbox">
           <div class="pr-guide" id="pr-guide"></div>
@@ -2297,6 +2299,7 @@ async function promoForm(body, id) {
   if (p.link && known.includes(p.link)) pick.value = p.link; else if (p.link) { pick.value = 'custom'; $('#pr-linkbox', f).hidden = false; }
   pick.onchange = () => { $('#pr-linkbox', f).hidden = pick.value !== 'custom'; draw(); };
   let stSel = p.style || 'classic', stKey = '';
+  setTimeout(() => { const pop = $('#pr-stylepop', f); $('#pr-styleopen', f).onclick = () => { pop.hidden = false; document.body.classList.add('st-lock'); stKey = ''; draw(); }; $('#pr-styleclose', f).onclick = () => { pop.hidden = true; document.body.classList.remove('st-lock'); }; }, 0);
   const current = () => ({
     ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null, book_ids: rad('kd') === 'books' ? chosen.slice() : [],
     theme: rad('th') || 'forest', bg_from: $('#pr-c1', f).value, bg_to: $('#pr-c2', f).value, font: rad('pf') || null, style: stSel, kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
@@ -2317,8 +2320,9 @@ async function promoForm(body, id) {
     const b = pub.find(x => x.id === c.book_id);
     $('#pr-title-ph', f).textContent = c.kind === 'book' ? t('pr.titleAuto') : '';
     const bl = $('#pr-booklang', f); bl.textContent = b && c.lang && b.language && b.language !== c.lang ? t('pr.bookOtherLang', { a: (b.language || '').toUpperCase(), b: c.lang.toUpperCase() }) : '';
-    const grid = $('#pr-stylegrid', f);
-    if (c.kind === 'book') {
+    const grid = $('#pr-stylegrid', f), pop = $('#pr-stylepop', f);
+    $('#pr-stylename', f).textContent = t('pr.st.' + stSel);
+    if (c.kind === 'book' && !pop.hidden) {
       const gb = b || pub[0], key = JSON.stringify([gb && gb.id, c.theme, c.bg_from, c.bg_to, c.font, c.kicker, c.title, c.subtitle, c.cta, c.placement, c.lang]);
       if (key !== stKey && gb) {
         stKey = key;
@@ -2354,7 +2358,7 @@ async function promoForm(body, id) {
   });
   $('#pr-bfind', f).addEventListener('input', e => { e.stopPropagation(); drawPick(); });
   ['#pr-c1', '#pr-c2'].forEach(sel => $(sel, f).addEventListener('input', () => { $('#pr-cswatch', f).style.setProperty('--bg', `linear-gradient(115deg,${$('#pr-c1', f).value},${$('#pr-c2', f).value})`); f.querySelector('input[name=th][value=custom]').checked = true; }));
-  f.addEventListener('input', draw); f.addEventListener('change', e => { if (e.target.name === 'st') stSel = e.target.value; draw(); });
+  f.addEventListener('input', draw); f.addEventListener('change', e => { if (e.target.name === 'st') { stSel = e.target.value; const pop = $('#pr-stylepop', f); pop.hidden = true; document.body.classList.remove('st-lock'); } draw(); });
   $$('[data-pv]', f).forEach(b => b.onclick = () => { dev = b.dataset.pv; $$('[data-pv]', f).forEach(x => x.classList.toggle('on', x === b)); draw(); });
   $('#pr-rm-mobile', f)?.addEventListener('click', e => { files.removeMobile = true; files.mobile = null; e.target.remove(); $('#n-mobile', f).textContent = t('pr.imgMobile'); draw(); });
   const take = async (kind, file) => {
