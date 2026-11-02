@@ -1,18 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102205155';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102205155';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102205155';
-import { resetCompanyCache } from './views.js?v=20261102205155';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102205155';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102205155';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102205155';
-import { optimizeBook } from './optimize.js?v=20261102205155';
-import { api } from './api.js?v=20261102205155';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102205155';
+import { CONFIG } from './config.js?v=20261102205251';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102205251';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102205251';
+import { resetCompanyCache } from './views.js?v=20261102205251';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102205251';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102205251';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102205251';
+import { optimizeBook } from './optimize.js?v=20261102205251';
+import { api } from './api.js?v=20261102205251';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102205251';
 
 const TABS = [
+  ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
@@ -22,7 +23,6 @@ const TABS = [
   ['kdp', '/admin/kdp', 'file', 'kdp.tab'],
   ['orders', '/admin/orders', 'box', 'admin.tab.orders'],
   ['customers', '/admin/customers', 'user', 'admin.tab.customers'],
-  ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
   ['reviews', '/admin/reviews', 'eye', 'admin.tab.reviews'],
   ['offers', '/admin/offers', 'tag', 'of.title'],
   ['promos', '/admin/promos', 'bolt', 'pr.title'],
