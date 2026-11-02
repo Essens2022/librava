@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102195753';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102195753';
-import { esc, store, $, $$ } from './util.js?v=20261102195753';
+import { CONFIG } from './config.js?v=20261102201042';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102201042';
+import { esc, store, $, $$ } from './util.js?v=20261102201042';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102195753';
-import { suggest, highlight } from './search.js?v=20261102195753';
-import { track, trackPage } from './track.js?v=20261102195753';
-import { initGA, applyConsent } from './ga.js?v=20261102195753';
-import { consentStrings } from './consent-i18n.js?v=20261102195753';
-import { api } from './api.js?v=20261102195753';
-import { describeOffer, offersForBook } from './offers.js?v=20261102195753';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102201042';
+import { suggest, highlight } from './search.js?v=20261102201042';
+import { track, trackPage } from './track.js?v=20261102201042';
+import { initGA, applyConsent } from './ga.js?v=20261102201042';
+import { consentStrings } from './consent-i18n.js?v=20261102201042';
+import { api } from './api.js?v=20261102201042';
+import { describeOffer, offersForBook } from './offers.js?v=20261102201042';
 
 // ---------------- icons ----------------
 const P = {
@@ -693,7 +693,7 @@ export async function openBell() {
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
 export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
-export const PROMO_STYLES = ['classic', 'split', 'poster', 'centered', 'card', 'sale', 'minimal', 'magazine', 'bubbles', 'stripes', 'neon', 'ribbon', 'mirror'];
+export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal'];
 export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
@@ -702,7 +702,8 @@ export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtre
 const hexOk = c => /^#[0-9a-f]{6}$/i.test(c || '');
 const lum = c => { const n = parseInt(c.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); };
 // class + inline style for a banner: a ready theme, or two colours chosen by the owner, plus the title font
-const stCls = p => (p.kind === 'book' || !p.kind) && PROMO_STYLES.includes(p.style) && p.style !== 'classic' ? 'st-' + p.style : '';
+const styleOf = p => { const x = String(p.theme || '').split('~')[1] || p.style; return PROMO_STYLES.includes(x) && x !== 'classic' ? x : ''; };
+const stCls = p => (p.kind === 'book' || !p.kind) && styleOf(p) ? 'tp tp-' + styleOf(p) : '';
 export function promoLook(p0) {
   const [thB, stB] = String(p0.theme || '').split('~'), p = { ...p0, theme: thB, style: p0.style || stB };
   const font = PROMO_FONTS.find(f => f[0] === p.font);
@@ -716,12 +717,34 @@ export function promoLook(p0) {
 export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
 const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');
 // one slide; `b` is the book when the banner promotes a book
+// extra pieces that make each ready-made design different (timer, stickers, ticker, floating chips…)
+const cdLeft = end => { let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); s %= 60; return [h, m, s].map(n => String(n).padStart(2, '0')); };
+const endOf = p => { const e = p.ends_at ? new Date(p.ends_at) : null; if (e && e > new Date()) return e; const d = new Date(); d.setHours(23, 59, 59, 999); return d; };
+function tpExtras(sty, p, b, disc, rating) {
+  const off = disc ? `-${disc}%` : '', cov = b && b.cover_url ? esc(b.cover_url) : '';
+  const chip = (cl, ic, tx) => `<span class="tp-x tp-chip ${cl}">${icon(ic)} ${esc(tx)}</span>`;
+  const word = esc(p.kicker || t('book.instant'));
+  const blob = n => Array.from({ length: n }, (_, i) => `<span class="tp-x tp-blob b${i + 1}"></span>`).join('');
+  switch (sty) {
+    case 'flash': { const e = endOf(p), c = cdLeft(e); return { cover: '', tail: `${off ? `<span class="tp-x tp-burst"><b>${off}</b></span>` : ''}<span class="tp-x tp-count" data-end="${e.getTime()}"><em>${esc(t('promo.endsIn'))}</em><i>${c[0]}</i>:<i>${c[1]}</i>:<i>${c[2]}</i></span>` }; }
+    case 'spotlight': return { cover: '', tail: chip('c1', 'bolt', t('book.instant')) + chip('c2', 'devices', t('home.trust3')) };
+    case 'ticker': { const it = `<span>${word}</span><span>${off || '★'}</span><span>${esc(t('book.instant'))}</span><span>${esc(p.title || (b ? b.title : ''))}</span>`; return { cover: '', tail: `<span class="tp-x tp-band"><span class="tp-run">${it.repeat(8)}</span></span>` }; }
+    case 'fan': return { cover: cov ? `<img class="tp-f1" src="${cov}" alt=""><img class="tp-f2" src="${cov}" alt="">` : '', tail: '' };
+    case 'glass': case 'mesh': return { cover: '', tail: blob(3) };
+    case 'sticker': return { cover: '', tail: `${off ? `<span class="tp-x tp-st1">${off}</span>` : ''}<span class="tp-x tp-st2">★ ${word}</span>` };
+    case 'gold': return { cover: '', tail: `<span class="tp-x tp-medal">${b && b.rating_count ? `<b>${(+b.rating_avg).toFixed(1)}</b><i>★★★★★</i>` : `<b>${off || '★'}</b><i>${esc(t('book.instant'))}</i>`}</span>` };
+    case 'duo': return { cover: '', tail: disc ? `<span class="tp-x tp-big">${disc}%</span>` : '' };
+    default: return { cover: '', tail: '' };
+  }
+}
+if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('.tp-count').forEach(el => { const c = cdLeft(+el.dataset.end), n = el.querySelectorAll('i'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }), 1000);
 export function promoHTML(p, b, placement = p.placement, list = []) {
   if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
   const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
-  const look = promoLook(p);
+  const look = promoLook(p), sty = placement === 'hero' && p.kind !== 'image' ? styleOf(p) : '';
+  if (!sty) look.cls = look.cls.replace(/\btp(-\w+)?\b/g, '');
   const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}" href="${esc(link)}"${ext}`;
   if (p.kind === 'image' && p.image_url) {
     return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
@@ -731,11 +754,12 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const price = b ? (b.price_cents ? `<span class="promo-price"><b>${money(b.price_cents)}</b>${disc ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${disc}%</span>` : ''}</span>` : `<span class="promo-price"><b>${esc(t('book.free'))}</b></span>`) : '';
   const save = b && disc ? `<span class="promo-save">${esc(t('book.save', { amount: money(b.list_price_cents - b.price_cents), pct: disc }))}</span>` : '';
   const rating = b?.rating_count ? `<span class="promo-rating">${stars(b.rating_avg)} <span>${b.rating_count}</span></span>` : '';
+  const X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
   return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('${esc(b.cover_url)}')"></span>` : ''}<span class="wrap promo-in">
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
         ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>
-      ${b?.cover_url ? `<span class="promo-cover"><img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
-      <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>
+      ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
+      <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>${X.tail}
     </span></a>`;
 }
 // several books in one banner (like Amazon's "Deals in…" cards): each cover opens its book

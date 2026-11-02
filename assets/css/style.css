@@ -2376,90 +2376,242 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .hero-promos .promo-dots { bottom: 8px; }
 }
 
-/* ===== Ready-made designs (Admin → Banners → Design). Single-book banners; all work on phone too ===== */
-.promo-hero.promo-book[class*="st-"] .promo-in { position: relative; }
+/* ===== Ready-made designs v2 (Admin → Banners → Design): each one has its own layout, buttons, labels and extras ===== */
+.tp { position: relative; overflow: hidden; isolation: isolate; }
+.tp .promo-in { position: relative; z-index: 2; }
+.tp .tp-x { position: absolute; pointer-events: none; z-index: 1; }
+.tp .promo-text, .tp .promo-cover, .tp .promo-act { position: relative; z-index: 2; }
+.tp .promo-cta::after { content: " →"; font-weight: 800; }
+.tp .promo-note { opacity: .85; }
+@keyframes tpFloat { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--r, 0deg)); } }
+@keyframes tpSpin { to { transform: rotate(360deg); } }
+@keyframes tpRun { to { transform: translateX(-50%); } }
+@keyframes tpPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,45,70,.55); } 50% { box-shadow: 0 0 0 14px rgba(255,45,70,0); } }
+@keyframes tpShine { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(260%) skewX(-20deg); } }
+@keyframes tpMesh { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes tpWob { 0%, 100% { transform: rotate(-4deg) scale(1); } 50% { transform: rotate(4deg) scale(1.06); } }
+@keyframes tpBlink { 50% { opacity: .25; } }
+
+/* 1 FLASH – dark red, countdown, burst, rectangular pulsing button */
+.tp-flash { background: radial-gradient(circle at 20% 0, #5c1020, transparent 55%), linear-gradient(120deg, #0f0709, #2a0b14) !important; color: #fff; }
+.tp-flash .promo-bg { opacity: .12; }
+.tp-flash .promo-kicker { background: #ff2d46; color: #fff !important; padding: 4px 10px 4px 22px; border-radius: 4px; position: relative; letter-spacing: .12em; }
+.tp-flash .promo-kicker::before { content: ""; position: absolute; left: 8px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #fff; animation: tpBlink 1s infinite; }
+.tp-flash .promo-title { text-transform: uppercase; font-weight: 900; letter-spacing: -.01em; }
+.tp-flash .promo-price b { color: #ffe14d; }
+.tp-flash .promo-cta { background: #ff2d46 !important; color: #fff !important; border-radius: 6px; text-transform: uppercase; letter-spacing: .06em; animation: tpPulse 1.6s infinite; }
+.tp-flash .tp-count { top: 14px; right: 24px; display: flex; align-items: center; gap: 4px; font-weight: 800; color: #ff8a98; z-index: 3; }
+.tp-flash .tp-count em { font-style: normal; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-right: 6px; color: #ffc2c9; }
+.tp-flash .tp-count i { font-style: normal; background: #000; color: #fff; border: 1px solid #ff2d46; border-radius: 5px; padding: 4px 7px; font-size: 18px; font-variant-numeric: tabular-nums; min-width: 34px; text-align: center; }
+.tp-flash .tp-burst { left: 38%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 0; border-radius: 50%; background: radial-gradient(circle, rgba(255,45,70,.5), transparent 65%); z-index: 0; animation: tpFloat 5s ease-in-out infinite; }
+.tp-flash .tp-burst b { display: none; }
 @media (min-width: 761px) {
-  .promo-hero.promo-book[class*="st-"] .promo-in { display: grid; align-items: center; }
-  /* mirror: cover left, text right */
-  .st-mirror .promo-in { grid-template-columns: minmax(180px, .6fr) minmax(0, 1.4fr) auto; grid-template-areas: "cover text act"; }
-  .st-mirror .promo-cover { grid-area: cover; } .st-mirror .promo-text { grid-area: text; } .st-mirror .promo-act { grid-area: act; }
-  /* split: dark text panel with a diagonal edge, big cover bleeding out */
-  .st-split .promo-in { grid-template-columns: minmax(0, 1.1fr) minmax(220px, .8fr) auto; grid-template-areas: "text cover act"; }
-  .st-split .promo-text { grid-area: text; padding: 16px 28px 16px 0; } .st-split .promo-cover { grid-area: cover; } .st-split .promo-act { grid-area: act; }
-  .st-split::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 46%; background: rgba(255,255,255,.07); clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%); z-index: 0; pointer-events: none; }
-  .st-split .promo-cover img { height: 250px; }
-  /* poster: giant caps title, tilted cover, price as a round stamp */
-  .st-poster .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
-  .st-poster .promo-text { grid-area: text; } .st-poster .promo-cover { grid-area: cover; } .st-poster .promo-act { grid-area: act; align-items: center; text-align: center; }
-  .st-poster .promo-title { font-size: clamp(30px, 4.6vw, 58px); text-transform: uppercase; font-weight: 900; line-height: 1; letter-spacing: -.03em; max-width: 14ch; }
-  .st-poster .promo-cover img { transform: rotate(-7deg); animation: none; }
-  .st-poster .promo-price { flex-direction: column; width: 124px; height: 124px; border-radius: 50%; justify-content: center; background: #ffd23f; color: #1b1b1b; text-align: center; transform: rotate(8deg); box-shadow: 0 10px 28px rgba(0,0,0,.35); gap: 0; padding: 0; }
-  .st-poster .promo-price b { font-size: 26px; } .st-poster .promo-price s { font-size: 13px; opacity: .6; } .st-poster .promo-price .badge { font-size: 12px; margin-top: 2px; }
-  /* centered */
-  .st-centered .promo-in { grid-template-columns: minmax(160px, .5fr) minmax(0, 1.6fr) minmax(160px, .6fr); grid-template-areas: "cover text act"; text-align: center; }
-  .st-centered .promo-text { grid-area: text; align-items: center; } .st-centered .promo-cover { grid-area: cover; } .st-centered .promo-act { grid-area: act; align-items: center; }
-  .st-centered .promo-title, .st-centered .promo-sub { margin-inline: auto; text-align: center; }
-  /* card: frosted glass card, the cover hangs over its corner */
-  .st-card .promo-in { grid-template-columns: minmax(0, 1.5fr) minmax(200px, .6fr); grid-template-areas: "text cover"; }
-  .st-card .promo-text { grid-area: text; padding: 22px 28px; border-radius: 26px; background: rgba(255,255,255,.1); backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 0 20px 50px rgba(0,0,0,.25); }
-  .st-card .promo-cover { grid-area: cover; } .st-card .promo-act { position: absolute; right: 26px; bottom: 18px; flex-direction: row; align-items: center; z-index: 3; }
-  .st-card .promo-save, .st-card .promo-note { display: none; }
-.st-card .promo-cta, .st-card .promo-price { white-space: nowrap; }
-.st-card .promo-act { flex-wrap: nowrap; }
-.st-centered .promo-offer { align-self: center; }
-  /* sale: giant discount burst */
-  .st-sale .promo-in { grid-template-columns: minmax(150px, .5fr) minmax(0, 1.4fr) minmax(200px, .6fr); grid-template-areas: "act text cover"; }
-  .st-sale .promo-act { grid-area: act; align-items: center; } .st-sale .promo-text { grid-area: text; } .st-sale .promo-cover { grid-area: cover; }
-  .st-sale .promo-price { flex-direction: column; background: none; box-shadow: none; backdrop-filter: none; padding: 0; gap: 4px; align-items: center; }
-  .st-sale .promo-price .badge { order: -1; width: 128px; height: 128px; display: grid; place-items: center; font-size: 34px; font-weight: 900; color: #fff; background: #e1251b; clip-path: polygon(50% 0, 61% 14%, 79% 8%, 80% 27%, 98% 31%, 88% 48%, 100% 64%, 82% 70%, 80% 90%, 62% 84%, 50% 100%, 38% 84%, 20% 90%, 18% 70%, 0 64%, 12% 48%, 2% 31%, 20% 27%, 21% 8%, 39% 14%); animation: burstPulse 2.2s ease-in-out infinite; }
-  @keyframes burstPulse { 50% { transform: scale(1.06) rotate(3deg); } }
-  /* magazine */
-  .st-magazine .promo-in { grid-template-columns: minmax(0, 1.4fr) minmax(190px, .6fr) auto; grid-template-areas: "text cover act"; }
-  .st-magazine .promo-text { grid-area: text; padding-block: 14px; border-block: 3px double rgba(255,255,255,.55); } .st-magazine .promo-cover { grid-area: cover; } .st-magazine .promo-act { grid-area: act; }
-  .st-magazine .promo-title { font-style: italic; font-weight: 600; font-size: clamp(28px, 3.8vw, 46px); }
-  .st-magazine .promo-cover img { animation: none; transform: none; border-radius: 0; box-shadow: 8px 8px 0 rgba(0,0,0,.35); }
-  /* ribbon */
-  .st-ribbon .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
-  .st-ribbon .promo-text { grid-area: text; } .st-ribbon .promo-cover { grid-area: cover; } .st-ribbon .promo-act { grid-area: act; }
-  /* neon frame */
-  .st-neon .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; margin-block: 14px; }
-  .st-neon .promo-text { grid-area: text; } .st-neon .promo-cover { grid-area: cover; } .st-neon .promo-act { grid-area: act; }
-  /* stripes / bubbles / minimal keep the default arrangement */
-  .st-stripes .promo-in, .st-bubbles .promo-in, .st-minimal .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
-  .st-stripes .promo-text, .st-bubbles .promo-text, .st-minimal .promo-text { grid-area: text; } .st-stripes .promo-cover, .st-bubbles .promo-cover, .st-minimal .promo-cover { grid-area: cover; } .st-stripes .promo-act, .st-bubbles .promo-act, .st-minimal .promo-act { grid-area: act; }
+  .promo-hero.tp-flash .promo-in { grid-template-columns: minmax(0, 1.25fr) minmax(190px, .6fr) auto; grid-template-areas: "text cover act"; padding-top: 60px; }
+  .promo-hero.tp-flash .promo-text { grid-area: text; } .promo-hero.tp-flash .promo-cover { grid-area: cover; } .promo-hero.tp-flash .promo-act { grid-area: act; align-items: flex-start; }
+  .tp-flash .promo-price { font-size: 38px; }
 }
-/* ribbon: the small heading becomes a diagonal corner ribbon */
-.st-ribbon .promo-kicker { position: absolute; top: 22px; left: -46px; transform: rotate(-35deg); background: #e1251b; color: #fff !important; padding: 6px 54px; font-size: 12px; letter-spacing: .18em; z-index: 4; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
-.st-ribbon .promo-text { padding-left: 28px; padding-top: 34px; }
-/* neon frame */
-.st-neon { background: #07080d !important; }
-.st-neon::after { content: ""; position: absolute; inset: 10px; border-radius: 22px; border: 2px solid #19f0b4; box-shadow: 0 0 18px #19f0b4, inset 0 0 18px rgba(25,240,180,.35); pointer-events: none; z-index: 2; }
-.st-neon .promo-title { text-shadow: 0 0 20px rgba(25,240,180,.65); } .st-neon .promo-kicker { color: #ff4fd8 !important; text-shadow: 0 0 10px #ff4fd8; }
-.st-neon .promo-in { padding-inline: 34px; }
-/* stripes */
-.st-stripes::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, transparent 0 34px, rgba(255,255,255,.06) 34px 68px); pointer-events: none; z-index: 0; }
-.st-stripes .promo-cover::before { content: ""; position: absolute; width: 150px; height: 150px; left: 50%; top: 50%; margin: -75px 0 0 -75px; background: #ffd23f; transform: rotate(14deg); border-radius: 18px; z-index: -1; }
-.st-stripes .promo-cover { position: relative; z-index: 1; }
-/* bubbles */
-.st-bubbles::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 12% 85%, rgba(255,255,255,.16) 0 70px, transparent 71px), radial-gradient(circle at 92% 18%, rgba(255,210,63,.35) 0 110px, transparent 111px), radial-gradient(circle at 70% 90%, rgba(255,120,180,.28) 0 54px, transparent 55px); pointer-events: none; z-index: 0; }
-.st-bubbles .promo-title { font-weight: 800; } .st-bubbles .promo-cover img { border-radius: 18px; border: 5px solid #fff; }
-/* minimal: light, clean */
-.st-minimal { background: #fbf8f1 !important; color: #1c1c1c !important; }
-.st-minimal .promo-bg { opacity: .1; } .st-minimal::before { display: none; }
-.st-minimal .promo-title { font-weight: 600; letter-spacing: -.01em; color: #1c1c1c; } .st-minimal .promo-sub, .st-minimal .promo-by { color: #5a5a5a !important; } .st-minimal .promo-kicker { color: #b26a00 !important; }
-.st-minimal .promo-price { background: #fff; color: #1c1c1c; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1); } .st-minimal .promo-price s { color: #888; } .st-minimal .promo-save { color: #1d7a3a !important; } .st-minimal .promo-note { color: #666 !important; }
-.st-minimal .promo-cta { background: #1c1c1c !important; color: #fff !important; box-shadow: none; } .st-minimal .promo-cover img { animation: none; transform: none; border-radius: 3px; box-shadow: 0 14px 30px rgba(0,0,0,.18); }
-/* phone: the designs keep the compact layout, with their own decoration */
+
+/* 2 SPOTLIGHT – light beam, big cover with orbit ring, floating chips, glass outline button */
+.tp-spotlight::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 72% 50%, rgba(255,255,255,.4), transparent 48%); z-index: 0; }
+.tp-spotlight .promo-cover { position: relative; }
+.tp-spotlight .promo-cover::after { content: ""; position: absolute; inset: -22px; border: 2px dashed rgba(255,255,255,.45); border-radius: 50%; animation: tpSpin 30s linear infinite; z-index: -1; }
+.tp-spotlight .promo-cover img { box-shadow: 0 0 60px rgba(255,255,255,.35), 0 24px 50px rgba(0,0,0,.4); }
+.tp-spotlight .promo-title { font-size: clamp(28px, 3.6vw, 46px); letter-spacing: -.02em; }
+.tp-spotlight .promo-cta { background: rgba(255,255,255,.14) !important; color: #fff !important; border: 1.5px solid #fff; backdrop-filter: blur(10px); border-radius: 999px; }
+.tp-spotlight .tp-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.92); color: #1b2a22; font-size: 13px; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,.25); animation: tpFloat 4s ease-in-out infinite; z-index: 3; }
+.tp-spotlight .tp-chip svg { width: 15px; height: 15px; color: #2f8f4e; }
+.tp-spotlight .c1 { left: 52%; top: 16%; } .tp-spotlight .c2 { left: 64%; bottom: 14%; animation-delay: -2s; }
+@media (min-width: 761px) {
+  .promo-hero.tp-spotlight .promo-in { grid-template-columns: minmax(0, 1.2fr) minmax(220px, .7fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-spotlight .promo-text { grid-area: text; } .promo-hero.tp-spotlight .promo-cover { grid-area: cover; } .promo-hero.tp-spotlight .promo-act { grid-area: act; }
+  .promo-hero.tp-spotlight .promo-cover img { height: 290px; }
+}
+
+/* 3 TICKER – yellow running band, black square button, big plain price */
+.tp-ticker { background: linear-gradient(135deg, #0d1a14, #173528) !important; color: #fff; }
+.tp-ticker .tp-band { top: 0; left: 0; right: 0; height: 32px; background: #ffd23f; color: #111; overflow: hidden; display: flex; align-items: center; white-space: nowrap; font-weight: 800; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; z-index: 3; }
+.tp-ticker .tp-run { display: inline-flex; gap: 28px; padding-left: 28px; animation: tpRun 26s linear infinite; }
+.tp-ticker .tp-run > span::after { content: "✦"; margin-left: 28px; }
+.tp-ticker .promo-in { padding-top: 52px !important; }
+.tp-ticker .promo-price { background: none !important; box-shadow: none !important; padding: 0 !important; font-size: 40px; }
+.tp-ticker .promo-cta { background: #ffd23f !important; color: #111 !important; border-radius: 0; text-transform: uppercase; letter-spacing: .06em; box-shadow: 6px 6px 0 rgba(255,255,255,.2); }
+.tp-ticker .promo-kicker { color: #ffd23f !important; }
+@media (min-width: 761px) {
+  .promo-hero.tp-ticker .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(190px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-ticker .promo-text { grid-area: text; } .promo-hero.tp-ticker .promo-cover { grid-area: cover; } .promo-hero.tp-ticker .promo-act { grid-area: act; align-items: flex-start; }
+}
+
+/* 4 FAN – cream, three covers fanned out, black pill button with arrow */
+.tp-fan { background: linear-gradient(120deg, #f6eede, #efe2cc) !important; color: #2b2118; }
+.tp-fan .promo-bg { display: none; } .tp-fan .promo-title { color: #2b2118; font-weight: 800; } .tp-fan .promo-sub, .tp-fan .promo-by, .tp-fan .promo-note { color: #6a5b49 !important; }
+.tp-fan .promo-kicker { color: #b4531d !important; }
+.tp-fan .promo-cover { position: relative; overflow: visible !important; }
+.tp-fan .promo-cover .tp-f1, .tp-fan .promo-cover .tp-f2 { position: absolute; left: 50%; top: 50%; height: 88%; width: auto; border-radius: 3px; box-shadow: 0 12px 26px rgba(0,0,0,.28); transition: transform .5s; z-index: 0; opacity: 1 !important; animation: none !important; max-height: none; }
+.tp-fan .promo-cover .tp-f1 { transform: translate(-50%, -50%) rotate(-14deg) translateX(-62px); filter: brightness(.94); }
+.tp-fan .promo-cover .tp-f2 { transform: translate(-50%, -50%) rotate(14deg) translateX(62px); filter: brightness(.9); }
+.tp-fan:hover .tp-f1 { transform: translate(-50%, -50%) rotate(-20deg) translateX(-84px); } .tp-fan:hover .tp-f2 { transform: translate(-50%, -50%) rotate(20deg) translateX(84px); }
+.tp-fan .promo-cover > img:last-child { position: relative; z-index: 2; }
+.tp-fan .promo-price { background: #fff !important; color: #2b2118 !important; box-shadow: 0 6px 16px rgba(60,40,10,.12) !important; }
+.tp-fan .promo-save { color: #1d7a3a !important; }
+.tp-fan .promo-cta { background: #1d1813 !important; color: #fff !important; border-radius: 999px; }
+@media (min-width: 761px) {
+  .promo-hero.tp-fan .promo-in { grid-template-columns: minmax(280px, .75fr) minmax(0, 1.2fr) auto; grid-template-areas: "cover text act"; }
+  .promo-hero.tp-fan .promo-text { grid-area: text; } .promo-hero.tp-fan .promo-cover { grid-area: cover; } .promo-hero.tp-fan .promo-act { grid-area: act; }
+}
+
+/* 5 POSTER – giant caps, spinning price stamp, underlined text button */
+.tp-poster .promo-title { text-transform: uppercase; font-weight: 900; line-height: .96; letter-spacing: -.03em; font-size: clamp(32px, 5vw, 64px); }
+.tp-poster .promo-cover img { transform: rotate(-6deg); }
+.tp-poster .promo-price { background: #ffd23f !important; color: #1b1b1b !important; border-radius: 50%; width: 128px; height: 128px; flex-direction: column; justify-content: center; text-align: center; gap: 0; padding: 0 !important; animation: tpWob 5s ease-in-out infinite; box-shadow: 0 10px 28px rgba(0,0,0,.35) !important; }
+.tp-poster .promo-price b { font-size: 27px; } .tp-poster .promo-price s { font-size: 13px; opacity: .6; } .tp-poster .promo-price .badge { font-size: 12px; }
+.tp-poster .promo-cta { background: none !important; color: #fff !important; box-shadow: none !important; border-radius: 0; padding: 4px 0 !important; border-bottom: 3px solid #ffd23f; font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+@media (min-width: 761px) {
+  .promo-hero.tp-poster .promo-in { grid-template-columns: minmax(0, 1.4fr) minmax(190px, .55fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-poster .promo-text { grid-area: text; } .promo-hero.tp-poster .promo-cover { grid-area: cover; } .promo-hero.tp-poster .promo-act { grid-area: act; align-items: center; text-align: center; }
+}
+
+/* 6 SPLIT – diagonal dark panel, ticket price, white button */
+.tp-split::before { content: ""; position: absolute; inset: 0 40% 0 0; background: rgba(0,0,0,.34); clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); z-index: 0; }
+.tp-split .promo-price { background: #fff !important; color: #14201a !important; border-radius: 10px; box-shadow: none !important; padding: 10px 20px !important; -webkit-mask: radial-gradient(circle at left center, transparent 8px, #000 9px) left / 51% 100% no-repeat, radial-gradient(circle at right center, transparent 8px, #000 9px) right / 51% 100% no-repeat; mask: radial-gradient(circle at left center, transparent 8px, #000 9px) left / 51% 100% no-repeat, radial-gradient(circle at right center, transparent 8px, #000 9px) right / 51% 100% no-repeat; }
+.tp-split .promo-price s { color: #7a8780; }
+.tp-split .promo-cta { background: #fff !important; color: #14201a !important; border-radius: 999px; }
+.tp-split .promo-title { font-weight: 800; }
+@media (min-width: 761px) {
+  .promo-hero.tp-split .promo-in { grid-template-columns: minmax(0, 1.1fr) minmax(220px, .8fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-split .promo-text { grid-area: text; } .promo-hero.tp-split .promo-cover { grid-area: cover; } .promo-hero.tp-split .promo-act { grid-area: act; }
+  .promo-hero.tp-split .promo-cover img { height: 280px; transform: rotate(3deg); }
+}
+
+/* 7 GLASS – glass card over moving colour blobs, gradient button */
+.tp-glass .promo-bg { opacity: .25; filter: blur(30px); }
+.tp-glass .tp-blob { border-radius: 50%; filter: blur(46px); opacity: .75; animation: tpFloat 9s ease-in-out infinite; z-index: 0; }
+.tp-glass .b1 { width: 320px; height: 320px; background: #ff7ab8; left: -60px; top: -80px; } .tp-glass .b2 { width: 300px; height: 300px; background: #ffb347; right: 10%; bottom: -120px; animation-delay: -3s; } .tp-glass .b3 { width: 240px; height: 240px; background: #4cc9f0; right: -40px; top: -60px; animation-delay: -6s; }
+.tp-glass .promo-text { padding: 24px 30px; border-radius: 28px; background: rgba(255,255,255,.14); backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 24px 50px rgba(0,0,0,.2); }
+.tp-glass .promo-kicker { color: #fff !important; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.tp-glass .promo-price { background: rgba(0,0,0,.3) !important; }
+.tp-glass .promo-cta { font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,.25); background: linear-gradient(90deg, #ff4f9a, #ff9a3c) !important; color: #fff !important; border-radius: 999px; box-shadow: 0 10px 26px rgba(255,79,154,.45); }
+@media (min-width: 761px) {
+  .promo-hero.tp-glass .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-glass .promo-text { grid-area: text; } .promo-hero.tp-glass .promo-cover { grid-area: cover; } .promo-hero.tp-glass .promo-act { grid-area: act; }
+}
+
+/* 8 NEON – black, glowing frame, outline button */
+.tp-neon { background: radial-gradient(circle at 80% 20%, #1a0b3d, transparent 55%), #070910 !important; color: #fff; }
+.tp-neon .promo-bg { opacity: .1; }
+.tp-neon::after { content: ""; position: absolute; inset: 10px; border: 2px solid #19f0b4; border-radius: 22px; box-shadow: 0 0 22px rgba(25,240,180,.6), inset 0 0 22px rgba(25,240,180,.25); z-index: 3; pointer-events: none; }
+.tp-neon .promo-title { text-shadow: 0 0 22px rgba(25,240,180,.7); font-weight: 800; } .tp-neon .promo-kicker { color: #ff4fd8 !important; text-shadow: 0 0 10px #ff4fd8; }
+.tp-neon .promo-cover img { box-shadow: 0 0 0 2px #ff4fd8, 0 0 34px rgba(255,79,216,.7); }
+.tp-neon .promo-price { background: none !important; box-shadow: inset 0 0 0 2px #ff4fd8, 0 0 18px rgba(255,79,216,.5) !important; }
+.tp-neon .promo-cta { background: transparent !important; color: #19f0b4 !important; border: 2px solid #19f0b4; border-radius: 10px; box-shadow: 0 0 18px rgba(25,240,180,.55), inset 0 0 14px rgba(25,240,180,.25); text-shadow: 0 0 10px #19f0b4; text-transform: uppercase; letter-spacing: .08em; }
+@media (min-width: 761px) {
+  .promo-hero.tp-neon .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; padding-inline: 44px; }
+  .promo-hero.tp-neon .promo-text { grid-area: text; } .promo-hero.tp-neon .promo-cover { grid-area: cover; } .promo-hero.tp-neon .promo-act { grid-area: act; }
+}
+
+/* 9 EDITORIAL – paper, italic serif, thin rules, sharp black button */
+.tp-editorial { background: #f2eee4 !important; color: #181818; }
+.tp-editorial .promo-bg { display: none; }
+.tp-editorial .promo-text { border-top: 2px solid #181818; border-bottom: 1px solid #181818; padding: 14px 0; }
+.tp-editorial .promo-kicker { color: #181818 !important; letter-spacing: .3em; font-size: 12px; }
+.tp-editorial .promo-title { font-style: italic; font-weight: 600; letter-spacing: -.01em; color: #181818; font-size: clamp(30px, 4vw, 54px); }
+.tp-editorial .promo-sub, .tp-editorial .promo-by, .tp-editorial .promo-note { color: #4a4a4a !important; }
+.tp-editorial .promo-cover img { border-radius: 0; box-shadow: 10px 10px 0 #181818; transform: none; animation: none; }
+.tp-editorial .promo-price { background: none !important; color: #181818 !important; box-shadow: none !important; padding: 0 !important; font-family: var(--font-book, Georgia, serif); font-size: 36px; }
+.tp-editorial .promo-price s { color: #888; } .tp-editorial .promo-save { color: #8a1c1c !important; }
+.tp-editorial .promo-cta { background: #181818 !important; color: #fff !important; border-radius: 0; text-transform: uppercase; letter-spacing: .18em; font-size: 13px; padding: 14px 22px !important; }
+@media (min-width: 761px) {
+  .promo-hero.tp-editorial .promo-in { grid-template-columns: minmax(0, 1.4fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-editorial .promo-text { grid-area: text; } .promo-hero.tp-editorial .promo-cover { grid-area: cover; } .promo-hero.tp-editorial .promo-act { grid-area: act; align-items: flex-start; }
+}
+
+/* 10 STICKER – playful, thick outlines, offset shadows, tilted stickers */
+.tp-sticker { background: #ffe14d !important; color: #111; }
+.tp-sticker .promo-bg { display: none; }
+.tp-sticker::after { content: ""; position: absolute; inset: 10px; border: 3px solid #111; border-radius: 18px; z-index: 3; pointer-events: none; }
+.tp-sticker .promo-title { color: #111; font-weight: 900; text-decoration: underline; text-decoration-color: #ff4f9a; text-decoration-thickness: 7px; text-underline-offset: 3px; }
+.tp-sticker .promo-sub, .tp-sticker .promo-by, .tp-sticker .promo-note { color: #222 !important; }
+.tp-sticker .promo-kicker { color: #111 !important; background: #fff; border: 2.5px solid #111; border-radius: 99px; padding: 3px 12px; }
+.tp-sticker .promo-cover img { border: 3px solid #111; border-radius: 6px; box-shadow: 8px 8px 0 #111; transform: rotate(-3deg); animation: none; }
+.tp-sticker .promo-price { background: #fff !important; color: #111 !important; border: 3px solid #111; border-radius: 12px; box-shadow: 5px 5px 0 #111 !important; transform: rotate(-2deg); }
+.tp-sticker .promo-save { color: #0a6b2e !important; }
+.tp-sticker .promo-cta { background: #6c5ce7 !important; color: #fff !important; border: 3px solid #111; border-radius: 12px; box-shadow: 5px 5px 0 #111; }
+.tp-sticker .tp-st1 { left: 44%; top: 22px; width: 92px; height: 92px; border-radius: 50%; background: #ff3b57; color: #fff; border: 3px solid #111; display: grid; place-items: center; font-weight: 900; font-size: 24px; transform: rotate(12deg); box-shadow: 4px 4px 0 #111; z-index: 4; animation: tpWob 4s ease-in-out infinite; }
+.tp-sticker .tp-st2 { left: 46%; bottom: 24px; background: #ff7ab8; border: 3px solid #111; border-radius: 99px; padding: 6px 16px; font-weight: 900; transform: rotate(-5deg); z-index: 4; }
+@media (min-width: 761px) {
+  .promo-hero.tp-sticker .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; padding-inline: 40px; }
+  .promo-hero.tp-sticker .promo-text { grid-area: text; } .promo-hero.tp-sticker .promo-cover { grid-area: cover; } .promo-hero.tp-sticker .promo-act { grid-area: act; }
+}
+
+/* 11 GOLD – premium black and gold, rating medal, shining button */
+.tp-gold { background: radial-gradient(circle at 80% 30%, #3a2c0f, transparent 60%), linear-gradient(135deg, #0f0c06, #1f1809) !important; color: #f7e7b5; }
+.tp-gold .promo-bg { opacity: .1; }
+.tp-gold .promo-kicker { color: #e8c15a !important; letter-spacing: .3em; } .tp-gold .promo-title { color: #fff3cf; font-weight: 700; } .tp-gold .promo-sub, .tp-gold .promo-by, .tp-gold .promo-note { color: #d8c791 !important; }
+.tp-gold .promo-cover img { box-shadow: 0 0 0 2px #e8c15a, 0 22px 50px rgba(0,0,0,.6), 0 0 40px rgba(232,193,90,.3); }
+.tp-gold .promo-price { background: none !important; box-shadow: inset 0 0 0 1.5px #e8c15a !important; color: #f6d365 !important; }
+.tp-gold .promo-price b { color: #f6d365; }
+.tp-gold .promo-cta { background: linear-gradient(135deg, #f6d365, #e0a53a) !important; color: #1a1306 !important; border-radius: 6px; position: relative; overflow: hidden; text-transform: uppercase; letter-spacing: .1em; }
+.tp-gold .promo-cta::before { content: ""; position: absolute; top: 0; bottom: 0; width: 40px; background: rgba(255,255,255,.55); animation: tpShine 3.4s infinite; }
+.tp-gold .tp-medal { left: 52%; top: 22px; width: 104px; height: 104px; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #fff3b0, #e0a53a 70%); color: #2a1d05; display: grid; place-content: center; text-align: center; box-shadow: 0 0 0 4px #1a1306, 0 0 0 6px #e8c15a, 0 10px 26px rgba(0,0,0,.5); z-index: 4; animation: tpWob 6s ease-in-out infinite; }
+.tp-gold .tp-medal b { font-size: 27px; line-height: 1; } .tp-gold .tp-medal i { font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+@media (min-width: 761px) {
+  .promo-hero.tp-gold .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-gold .promo-text { grid-area: text; } .promo-hero.tp-gold .promo-cover { grid-area: cover; } .promo-hero.tp-gold .promo-act { grid-area: act; }
+}
+
+/* 12 DUO – giant outlined discount number behind a cover that bleeds off the bottom */
+.tp-duo .tp-big { right: 22%; top: 50%; transform: translateY(-50%); font-size: 360px; font-weight: 900; line-height: 1; color: transparent; -webkit-text-stroke: 3px rgba(255,255,255,.28); letter-spacing: -.04em; z-index: 0; white-space: nowrap; }
+.tp-duo .promo-cta { background: #fff !important; color: #111 !important; border-radius: 999px; }
+.tp-duo .promo-title { font-weight: 800; letter-spacing: -.02em; }
+@media (min-width: 761px) {
+  .promo-hero.tp-duo .promo-in { grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); grid-template-areas: "text cover" "act cover"; align-content: center; }
+  .promo-hero.tp-duo .promo-text { grid-area: text; } .promo-hero.tp-duo .promo-cover { grid-area: cover; justify-self: center; align-self: end; margin-bottom: -60px; } .promo-hero.tp-duo .promo-act { grid-area: act; flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .promo-hero.tp-duo .promo-cover img { height: 360px; transform: rotate(5deg); }
+}
+
+/* 13 MESH – moving gradient with floating shapes, white shining button */
+.tp-mesh { background: linear-gradient(120deg, #6a11cb, #2575fc, #ff5e98, #ffb347) !important; background-size: 300% 300% !important; animation: tpMesh 16s ease infinite; color: #fff; }
+.tp-mesh .promo-bg { display: none; }
+.tp-mesh .tp-blob { border-radius: 50%; background: rgba(255,255,255,.16); animation: tpFloat 8s ease-in-out infinite; }
+.tp-mesh .b1 { width: 220px; height: 220px; left: 38%; top: -70px; } .tp-mesh .b2 { width: 120px; height: 120px; right: 6%; bottom: 16%; animation-delay: -3s; } .tp-mesh .b3 { width: 70px; height: 70px; left: 6%; bottom: 10%; animation-delay: -5s; }
+.tp-mesh .promo-kicker { color: #fff !important; }
+.tp-mesh .promo-cta { background: #fff !important; color: #4b21b8 !important; border-radius: 999px; position: relative; overflow: hidden; }
+.tp-mesh .promo-cta::before { content: ""; position: absolute; top: 0; bottom: 0; width: 36px; background: rgba(110,60,255,.22); animation: tpShine 3s infinite; }
+.tp-mesh .promo-title { font-weight: 800; }
+@media (min-width: 761px) {
+  .promo-hero.tp-mesh .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-mesh .promo-text { grid-area: text; } .promo-hero.tp-mesh .promo-cover { grid-area: cover; } .promo-hero.tp-mesh .promo-act { grid-area: act; }
+}
+
+/* 14 MINIMAL – light and quiet */
+.tp-minimal { background: #fbf8f1 !important; color: #1c1c1c; }
+.tp-minimal .promo-bg { opacity: .08; }
+.tp-minimal .promo-title { color: #1c1c1c; font-weight: 600; letter-spacing: -.01em; } .tp-minimal .promo-sub, .tp-minimal .promo-by, .tp-minimal .promo-note { color: #5a5a5a !important; } .tp-minimal .promo-kicker { color: #b26a00 !important; }
+.tp-minimal .promo-price { background: #fff !important; color: #1c1c1c !important; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1) !important; } .tp-minimal .promo-price s { color: #888; } .tp-minimal .promo-save { color: #1d7a3a !important; }
+.tp-minimal .promo-cta { background: #1c1c1c !important; color: #fff !important; border-radius: 999px; box-shadow: none; }
+.tp-minimal .promo-cover img { animation: none; transform: none; border-radius: 3px; box-shadow: 0 14px 30px rgba(0,0,0,.18); }
+@media (min-width: 761px) {
+  .promo-hero.tp-minimal .promo-in { grid-template-columns: minmax(0, 1.3fr) minmax(200px, .6fr) auto; grid-template-areas: "text cover act"; }
+  .promo-hero.tp-minimal .promo-text { grid-area: text; } .promo-hero.tp-minimal .promo-cover { grid-area: cover; } .promo-hero.tp-minimal .promo-act { grid-area: act; }
+}
+
+/* phone: same designs, compact, heavy decorations simplified */
 @media (max-width: 760px) {
-  .st-poster .promo-title { text-transform: uppercase; font-weight: 900; letter-spacing: -.02em; }
-  .st-poster .promo-price { background: #ffd23f; color: #1b1b1b; transform: rotate(-3deg); }
-  .st-sale .promo-price .badge { background: #e1251b; color: #fff; font-size: 16px; padding: 4px 10px; border-radius: 8px; }
-  .st-card .promo-text { padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.1); backdrop-filter: blur(12px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
-  .st-ribbon .promo-kicker { position: static; transform: none; padding: 3px 10px; border-radius: 99px; font-size: 10px; box-shadow: none; }
-  .st-ribbon .promo-text { padding-left: 0; padding-top: 0; }
-  .st-mirror .promo-in { grid-template-columns: minmax(0, 1fr) 96px !important; grid-template-areas: "text cover" "act act" !important; }
-  .st-neon::after { inset: 6px; border-radius: 16px; } .st-neon .promo-in { padding-inline: 22px !important; }
-  .st-stripes .promo-cover::before { width: 96px; height: 96px; margin: -48px 0 0 -48px; left: 50%; top: 50%; }
+  .tp .promo-cta::after { content: " →"; }
+  .tp-flash .tp-burst, .tp-duo .tp-big, .tp-spotlight .c2, .tp-sticker .tp-st2 { display: none; }
+  .tp-flash .tp-count { top: 8px; right: 10px; } .tp-flash .tp-count em { display: none; } .tp-flash .tp-count i { font-size: 13px; padding: 2px 5px; min-width: 26px; }
+  .tp-flash .promo-in { padding-top: 40px !important; }
+  .tp-ticker .tp-band { height: 24px; font-size: 10px; } .tp-ticker .promo-in { padding-top: 44px !important; }
+  .tp-ticker .promo-price { font-size: 26px; }
+  .tp-spotlight .c1 { left: auto; right: 10px; top: 10px; padding: 4px 8px; font-size: 11px; }
+  .tp-fan .promo-cover .tp-f1 { transform: translate(-50%, -50%) rotate(-12deg) translateX(-30px); } .tp-fan .promo-cover .tp-f2 { transform: translate(-50%, -50%) rotate(12deg) translateX(30px); }
+  .tp-poster .promo-title { font-size: 28px; } .tp-poster .promo-price { width: auto; height: auto; border-radius: 12px; flex-direction: row; padding: 6px 12px !important; animation: none; }
+  .tp-split::before { inset: 0; clip-path: none; background: rgba(0,0,0,.22); }
+  .tp-glass .promo-text { padding: 12px 14px; border-radius: 18px; }
+  .tp-neon::after, .tp-sticker::after { inset: 5px; border-radius: 14px; }
+  .tp-editorial .promo-title { font-size: 26px; } .tp-editorial .promo-price { font-size: 26px; }
+  .tp-sticker .tp-st1 { width: 50px; height: 50px; font-size: 13px; right: 8px; left: auto; top: 6px; }
+  .tp-gold .tp-medal { width: 54px; height: 54px; right: 8px; left: auto; top: 6px; } .tp-gold .tp-medal b { font-size: 15px; } .tp-gold .tp-medal i { display: none; }
+  .tp-mesh .b1 { width: 120px; height: 120px; }
 }
 
 /* Banner upload guide */
@@ -2508,3 +2660,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .st-view > * { width: var(--iw, 1100px); transform: scale(var(--sc, .2)); transform-origin: 0 0; position: absolute; left: 0; top: 0; }
 .st-view .promo-dots, .st-view .promo-arrow { display: none !important; }
 @media (max-width: 560px) { .st-gallery { grid-template-columns: repeat(2, 1fr); } }
+
+/* cart number sits in the middle of the basket */
+.cart-count { top: calc(50% + 1px) !important; left: 26px !important; transform: translate(-50%, -50%); min-width: 0 !important; font-size: 15px !important; line-height: 1; }
+@media (max-width: 760px) { .cart-count { left: 24px !important; font-size: 14px !important; } }
