@@ -1,13 +1,13 @@
-import { CONFIG } from './config.js?v=20261102170447';
-import { t, getLang, setLang } from './i18n.js?v=20261102170447';
-import { esc, $, $$ } from './util.js?v=20261102170447';
-import { api, chooseBackend } from './api.js?v=20261102170447';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261102170447';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261102170447';
-import { trackPage } from './track.js?v=20261102170447';
-import { offline } from './offline.js?v=20261102170447';
-import { viewReader } from './reader.js?v=20261102170447';
-import { viewAdmin } from './admin.js?v=20261102170447';
+import { CONFIG } from './config.js?v=20261102170518';
+import { t, getLang, setLang } from './i18n.js?v=20261102170518';
+import { esc, $, $$ } from './util.js?v=20261102170518';
+import { api, chooseBackend } from './api.js?v=20261102170518';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261102170518';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261102170518';
+import { trackPage } from './track.js?v=20261102170518';
+import { offline } from './offline.js?v=20261102170518';
+import { viewReader } from './reader.js?v=20261102170518';
+import { viewAdmin } from './admin.js?v=20261102170518';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
