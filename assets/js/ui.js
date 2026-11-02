@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102193752';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102193752';
-import { esc, store, $, $$ } from './util.js?v=20261102193752';
+import { CONFIG } from './config.js?v=20261102193754';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102193754';
+import { esc, store, $, $$ } from './util.js?v=20261102193754';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102193752';
-import { suggest, highlight } from './search.js?v=20261102193752';
-import { track, trackPage } from './track.js?v=20261102193752';
-import { initGA, applyConsent } from './ga.js?v=20261102193752';
-import { consentStrings } from './consent-i18n.js?v=20261102193752';
-import { api } from './api.js?v=20261102193752';
-import { describeOffer, offersForBook } from './offers.js?v=20261102193752';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102193754';
+import { suggest, highlight } from './search.js?v=20261102193754';
+import { track, trackPage } from './track.js?v=20261102193754';
+import { initGA, applyConsent } from './ga.js?v=20261102193754';
+import { consentStrings } from './consent-i18n.js?v=20261102193754';
+import { api } from './api.js?v=20261102193754';
+import { describeOffer, offersForBook } from './offers.js?v=20261102193754';
 
 // ---------------- icons ----------------
 const P = {
