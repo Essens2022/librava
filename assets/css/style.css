@@ -2214,8 +2214,8 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .offer-box { transition: opacity .3s ease }
 .offer-box.o-pending { opacity: 0; min-height: 96px; max-height: 96px; overflow: hidden }
 
-.offer-box .offer-row.rot-hide { visibility: hidden; opacity: 0; pointer-events: none }
+.offer-box .offer-row.rot-hide { opacity: 0; pointer-events: none }
 /* rotating offers share one cell: box height never changes while they alternate */
 .offer-box:not(.is-smart), .offer-box .o-static { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 8px; align-content: start }
-.offer-box:not(.is-smart) > .offer-row, .offer-box .o-static > .offer-row { grid-area: auto; transition: opacity .35s ease }
+.offer-box:not(.is-smart) > .offer-row, .offer-box .o-static > .offer-row { grid-area: 2 / 1; transition: opacity .7s ease-in-out }
 .offer-box:not(.is-smart) > .offer-head, .offer-box .o-static > .offer-head { grid-area: 1 / 1 }
