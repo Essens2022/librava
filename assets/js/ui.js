@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261102205254';
-import { SOCIAL_PATHS } from './social.js?v=20261102205254';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102205254';
-import { esc, store, $, $$ } from './util.js?v=20261102205254';
+import { CONFIG } from './config.js?v=20261102205415';
+import { SOCIAL_PATHS } from './social.js?v=20261102205415';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102205415';
+import { esc, store, $, $$ } from './util.js?v=20261102205415';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102205254';
-import { suggest, highlight } from './search.js?v=20261102205254';
-import { track, trackPage } from './track.js?v=20261102205254';
-import { initGA, applyConsent } from './ga.js?v=20261102205254';
-import { consentStrings } from './consent-i18n.js?v=20261102205254';
-import { api } from './api.js?v=20261102205254';
-import { describeOffer, offersForBook } from './offers.js?v=20261102205254';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102205415';
+import { suggest, highlight } from './search.js?v=20261102205415';
+import { track, trackPage } from './track.js?v=20261102205415';
+import { initGA, applyConsent } from './ga.js?v=20261102205415';
+import { consentStrings } from './consent-i18n.js?v=20261102205415';
+import { api } from './api.js?v=20261102205415';
+import { describeOffer, offersForBook } from './offers.js?v=20261102205415';
 
 // ---------------- icons ----------------
 const P = {

@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102205254';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102205254';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102205254';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102205254';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102205254';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102205254';
-import { track } from './track.js?v=20261102205254';
-import { gaEvent } from './ga.js?v=20261102205254';
-import { guessLang } from './langdetect.js?v=20261102205254';
-import { didYouMean } from './search.js?v=20261102205254';
-import { api, editionsOf } from './api.js?v=20261102205254';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102205254';
+import { CONFIG } from './config.js?v=20261102205415';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102205415';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102205415';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102205415';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102205415';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102205415';
+import { track } from './track.js?v=20261102205415';
+import { gaEvent } from './ga.js?v=20261102205415';
+import { guessLang } from './langdetect.js?v=20261102205415';
+import { didYouMean } from './search.js?v=20261102205415';
+import { api, editionsOf } from './api.js?v=20261102205415';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102205415';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -933,12 +933,12 @@ async function accHome(el, u) {
       ${pending.map(o => `<div class="pending-order"><span>${esc(t('acc.pendingItem', { ref: o.reference, amount: money(o.amount_cents, cur(o)) }))}</span>
         <span class="muted" style="font-size:13px">${(o.items || []).map(i => esc(i.title)).join(' · ')}</span></div>`).join('')}</section>` : ''}
     <div class="acc-cards">
+      ${u.isAdmin ? tile('#/admin', 'chart', t('nav.admin'), t('acc.tile.adminDesc')) : ''}
       ${tile('#/account/orders', 'box', t('acc.tile.orders'), t('acc.tile.ordersDesc'))}
       ${tile('#/library', 'library', t('nav.library'), t('acc.tile.libraryDesc'))}
       ${tile('#/account/security', 'shield', t('acc.tile.security'), t('acc.tile.securityDesc'))}
       ${tile('#/account/preferences', 'palette', t('acc.tile.prefs'), t('acc.tile.prefsDesc'))}
       ${tile('#/help', 'help', t('acc.tile.help'), t('acc.tile.helpDesc'))}
-      ${u.isAdmin ? tile('#/admin', 'chart', t('nav.admin'), t('acc.tile.adminDesc')) : ''}
     </div>
     <section class="panel acc-recent">
       <div class="acc-sec-head"><h2>${esc(t('acc.recentOrders'))}</h2>${orders.length ? `<a href="#/account/orders">${esc(t('acc.seeAllOrders'))}</a>` : ''}</div>
