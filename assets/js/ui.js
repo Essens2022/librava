@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261102210437';
-import { SOCIAL_PATHS } from './social.js?v=20261102210437';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102210437';
-import { esc, store, $, $$ } from './util.js?v=20261102210437';
+import { CONFIG } from './config.js?v=20261102210825';
+import { SOCIAL_PATHS } from './social.js?v=20261102210825';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102210825';
+import { esc, store, $, $$ } from './util.js?v=20261102210825';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102210437';
-import { suggest, highlight } from './search.js?v=20261102210437';
-import { track, trackPage } from './track.js?v=20261102210437';
-import { initGA, applyConsent } from './ga.js?v=20261102210437';
-import { consentStrings } from './consent-i18n.js?v=20261102210437';
-import { api } from './api.js?v=20261102210437';
-import { describeOffer, offersForBook } from './offers.js?v=20261102210437';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102210825';
+import { suggest, highlight } from './search.js?v=20261102210825';
+import { track, trackPage } from './track.js?v=20261102210825';
+import { initGA, applyConsent } from './ga.js?v=20261102210825';
+import { consentStrings } from './consent-i18n.js?v=20261102210825';
+import { api } from './api.js?v=20261102210825';
+import { describeOffer, offersForBook } from './offers.js?v=20261102210825';
 
 // ---------------- icons ----------------
 const P = {
@@ -720,6 +720,7 @@ export async function openBell() {
 export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
 export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal', 'steps', 'savings', 'devices', 'bookshelf', 'stars', 'book3d', 'pastel', 'retro', 'comic', 'blueprint', 'paper', 'cinema', 'wave', 'circle', 'bold'];
+export const STRIP_STYLES = ["s_aurora", "s_mint", "s_sunset", "s_midnight", "s_candy", "s_lime", "s_ocean", "s_coral", "s_slate", "s_cream", "s_gold", "s_royal", "s_forest", "s_rose", "s_sky", "s_ember", "s_mono", "s_neon_pink", "s_neon_cyan", "s_sticker", "s_comic", "s_stripes", "s_ticker", "s_countdown", "s_sale_tag", "s_ribbon", "s_split2", "s_glass", "s_spotlight", "s_duotone", "s_retro", "s_blueprint", "s_paper", "s_cinema", "s_wave", "s_bubbles", "s_confetti", "s_gradborder", "s_shine", "s_emerald", "s_sand", "s_lavender", "s_peach", "s_charcoal", "s_teal", "s_burgundy", "s_ice", "s_progress", "s_arrows", "s_gift"];
 export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
@@ -729,6 +730,7 @@ const hexOk = c => /^#[0-9a-f]{6}$/i.test(c || '');
 const lum = c => { const n = parseInt(c.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); };
 // class + inline style for a banner: a ready theme, or two colours chosen by the owner, plus the title font
 const styleOf = p => { const x = String(p.theme || '').split('~')[1] || p.style; return PROMO_STYLES.includes(x) && x !== 'classic' ? x : ''; };
+const stripOf = p => { const x = String(p.theme || '').split('~')[1] || p.style; return STRIP_STYLES.includes(x) ? x : ''; };
 const stCls = p => (p.kind === 'book' || !p.kind) && styleOf(p) ? 'tp tp-' + styleOf(p) : '';
 export function promoLook(p0) {
   const [thB, stB] = String(p0.theme || '').split('~'), p = { ...p0, theme: thB, style: p0.style || stB };
@@ -775,7 +777,7 @@ function tpExtras(sty, p, b, disc, rating) {
     default: return { cover: '', tail: '' };
   }
 }
-if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('.tp-count').forEach(el => { const c = cdLeft(+el.dataset.end), n = el.querySelectorAll('i'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }), 1000);
+if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('.tp-count,.sp-count').forEach(el => { const c = cdLeft(+el.dataset.end), n = el.querySelectorAll('i'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }), 1000);
 export function promoHTML(p, b, placement = p.placement, list = []) {
   if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
@@ -783,6 +785,8 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
   const look = promoLook(p), sty = placement === 'hero' && p.kind !== 'image' ? styleOf(p) : '';
   if (!sty) look.cls = look.cls.replace(/\btp(-\w+)?\b/g, '');
+  const ssty = placement === 'strip' && p.kind !== 'image' && (b || p.kind === 'book') ? stripOf(p) : '';
+  if (ssty) look.cls += ' sp sp-' + ssty.slice(2);
   const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}" href="${esc(link)}"${ext}`;
   if (p.kind === 'image' && p.image_url) {
     return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
@@ -792,7 +796,9 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const price = b ? (b.price_cents ? `<span class="promo-price"><b>${money(b.price_cents)}</b>${disc ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${disc}%</span>` : ''}</span>` : `<span class="promo-price"><b>${esc(t('book.free'))}</b></span>`) : '';
   const save = b && disc ? `<span class="promo-save">${esc(t('book.save', { amount: money(b.list_price_cents - b.price_cents), pct: disc }))}</span>` : '';
   const rating = b?.rating_count ? `<span class="promo-rating">${stars(b.rating_avg)} <span>${b.rating_count}</span></span>` : '';
-  const X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
+  let X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
+  if (ssty) { const e = endOf(p), c = cdLeft(e), w = esc(p.kicker || t('book.instant')), it = `<span>${w}</span><span>${disc ? '-' + disc + '%' : '★'}</span><span>${esc(t('book.instant'))}</span><span>${esc(title)}</span>`;
+    X = { cover: '', tail: `<span class="tp-x sp-d1"></span><span class="tp-x sp-d2"></span>${disc ? `<span class="tp-x sp-off">-${disc}%</span>` : ''}<span class="tp-x sp-count" data-end="${e.getTime()}"><i>${c[0]}</i>:<i>${c[1]}</i>:<i>${c[2]}</i></span><span class="tp-x sp-run"><span>${it.repeat(10)}</span></span>` }; }
   return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('${esc(b.cover_url)}')"></span>` : ''}<span class="wrap promo-in">
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
         ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>

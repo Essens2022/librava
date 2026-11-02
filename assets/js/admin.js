@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102210437';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102210437';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102210437';
-import { resetCompanyCache } from './views.js?v=20261102210437';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102210437';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102210437';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102210437';
-import { optimizeBook } from './optimize.js?v=20261102210437';
-import { api } from './api.js?v=20261102210437';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102210437';
+import { CONFIG } from './config.js?v=20261102210825';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102210825';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102210825';
+import { resetCompanyCache } from './views.js?v=20261102210825';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102210825';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102210825';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102210825';
+import { optimizeBook } from './optimize.js?v=20261102210825';
+import { api } from './api.js?v=20261102210825';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102210825';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2188,7 +2188,7 @@ async function notificationsAdmin(body) {
 }
 
 // ---------------------------------------------------------------- advertising: home page banners per language
-const PROMO_SPEC = { hero: { w: 2400, h: 400, mw: 1200, mh: 750 }, strip: { w: 1500, h: 300, mw: 900, mh: 300 } };
+const PROMO_SPEC = { hero: { w: 2400, h: 400, mw: 1200, mh: 750 }, strip: { w: 1940, h: 300, mw: 900, mh: 300 } };
 const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at) > new Date() ? 'soon' : p.ends_at && new Date(p.ends_at) <= new Date() ? 'ended' : 'live';
 const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
 async function promosAdmin(body) {
@@ -2267,8 +2267,8 @@ async function promoForm(body, id) {
           <div class="pr-custom"><label class="pr-theme theme-custom" id="pr-cswatch" style="--bg:linear-gradient(115deg,${esc(p.bg_from || '#1F3A93')},${esc(p.bg_to || '#D9485F')})" title="${esc(t('pr.custom'))}"><input type="radio" name="th" value="custom" ${p.theme === 'custom' ? 'checked' : ''}><span></span></label>
             <span>${esc(t('pr.custom'))}:</span><input type="color" id="pr-c1" value="${esc(p.bg_from || '#1F3A93')}" aria-label="${esc(t('pr.color1'))}"><input type="color" id="pr-c2" value="${esc(p.bg_to || '#D9485F')}" aria-label="${esc(t('pr.color2'))}"></div></div>
         <div id="pr-stylebox"><span class="muted" style="font-size:14px">${esc(t('pr.style'))}</span>
-          <button type="button" class="btn st-open" id="pr-styleopen"><b id="pr-stylename"></b><span>${esc(t('pr.styleOpen', { n: PROMO_STYLES.length }))}</span></button>
-          <div class="st-pop" id="pr-stylepop" hidden><div class="st-pop-in"><div class="st-pop-h"><b>${esc(t('pr.style'))} (${PROMO_STYLES.length})</b><span class="muted">${esc(t('pr.styleHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="pr-styleclose">✕ ${esc(t('pr.styleClose'))}</button></div><div class="st-gallery" id="pr-stylegrid"></div></div></div></div>
+          <button type="button" class="btn st-open" id="pr-styleopen"><b id="pr-stylename"></b><span>${esc(t('pr.styleOpen', { n: 30 }))}</span></button>
+          <div class="st-pop" id="pr-stylepop" hidden><div class="st-pop-in"><div class="st-pop-h"><b>${esc(t('pr.style'))}</b><span class="muted">${esc(t('pr.styleHelp'))}</span><button type="button" class="btn btn-ghost btn-sm" id="pr-styleclose">✕ ${esc(t('pr.styleClose'))}</button></div><div class="st-gallery" id="pr-stylegrid"></div></div></div></div>
         <div id="pr-fontbox"><span class="muted" style="font-size:14px">${esc(t('pr.font'))}</span><div class="pr-fonts">${[['', "'Literata', Georgia, serif"], ...PROMO_FONTS.filter(f => f[0] !== 'literata')].map(([k, fam]) => `<label class="pr-font"><input type="radio" name="pf" value="${k}" ${(p.font || '') === k ? 'checked' : ''}><b style="font-family:${fam};${k === 'bebas' || k === 'dmserif' ? 'font-weight:400' : ''}">Aa Librava</b><small>${esc(k ? t('pr.f.' + k) : t('pr.f.default'))}</small></label>`).join('')}</div></div>
         <div id="pr-imgbox">
           <div class="pr-guide" id="pr-guide"></div>
@@ -2301,6 +2301,7 @@ async function promoForm(body, id) {
   const pick = $('#pr-linkpick', f), known = [...pick.options].map(o => o.value);
   if (p.link && known.includes(p.link)) pick.value = p.link; else if (p.link) { pick.value = 'custom'; $('#pr-linkbox', f).hidden = false; }
   pick.onchange = () => { $('#pr-linkbox', f).hidden = pick.value !== 'custom'; draw(); };
+  const stList = pl => pl === 'strip' ? STRIP_STYLES : PROMO_STYLES;
   let stSel = p.style || 'classic', stKey = '';
   setTimeout(() => { const pop = $('#pr-stylepop', f); $('#pr-styleopen', f).onclick = () => { pop.hidden = false; document.body.classList.add('st-lock'); stKey = ''; draw(); }; $('#pr-styleclose', f).onclick = () => { pop.hidden = true; document.body.classList.remove('st-lock'); }; }, 0);
   const current = () => ({
@@ -2324,12 +2325,13 @@ async function promoForm(body, id) {
     $('#pr-title-ph', f).textContent = c.kind === 'book' ? t('pr.titleAuto') : '';
     const bl = $('#pr-booklang', f); bl.textContent = b && c.lang && b.language && b.language !== c.lang ? t('pr.bookOtherLang', { a: (b.language || '').toUpperCase(), b: c.lang.toUpperCase() }) : '';
     const grid = $('#pr-stylegrid', f), pop = $('#pr-stylepop', f);
+    if (!stList(c.placement).includes(stSel)) stSel = stList(c.placement)[0];
     $('#pr-stylename', f).textContent = t('pr.st.' + stSel);
     if (c.kind === 'book' && !pop.hidden) {
       const gb = b || pub[0], key = JSON.stringify([gb && gb.id, c.theme, c.bg_from, c.bg_to, c.font, c.kicker, c.title, c.subtitle, c.cta, c.placement, c.lang]);
       if (key !== stKey && gb) {
         stKey = key;
-        grid.innerHTML = PROMO_STYLES.map(k => `<label class="st-tile"><input type="radio" name="st" value="${k}"><span class="st-view" aria-hidden="true"><span class="${c.placement === 'hero' ? 'hero hero-promos' : 'promo-strip-wrap'}" style="padding:0;display:block">${promoHTML({ ...c, kind: 'book', style: k }, gb, c.placement, [])}</span></span><b>${esc(t('pr.st.' + k))}</b></label>`).join('');
+        grid.innerHTML = stList(c.placement).map(k => `<label class="st-tile"><input type="radio" name="st" value="${k}"><span class="st-view" aria-hidden="true"><span class="${c.placement === 'hero' ? 'hero hero-promos' : 'promo-strip-wrap'}" style="padding:0;display:block">${promoHTML({ ...c, kind: 'book', style: k }, gb, c.placement, [])}</span></span><b>${esc(t('pr.st.' + k))}</b></label>`).join('');
         const iw = window.innerWidth > 760 ? 1100 : 390;
         requestAnimationFrame(() => grid.querySelectorAll('.st-view').forEach(v => { const sc = v.clientWidth / iw; v.style.setProperty('--iw', iw + 'px'); v.style.setProperty('--sc', sc); v.style.height = Math.round(v.firstElementChild.offsetHeight * sc) + 'px'; }));
       }
