@@ -2859,3 +2859,6 @@ body.st-lock { overflow: hidden; }
 .lbl-opt input { position: absolute; opacity: 0; pointer-events: none; }
 .lbl-opt .lbl { font-size: 12px; box-shadow: none; } .lbl-none { padding: 4px 10px; font-weight: 700; color: #5a6a62; }
 .lbl-opt .lbl { max-width: none; overflow: visible; text-overflow: clip; }
+.promo-cover, .promo-books .pb { position: relative; }
+.promo-cover > .lbl { top: 10px; left: -6px; font-size: 11px; }
+.promo-books .pb > .lbl { top: 8px; left: 0; font-size: 9.5px; padding: 4px 10px 4px 6px; }
