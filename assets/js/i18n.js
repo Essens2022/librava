@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102185906';
-import { CONFIG } from './config.js?v=20261102185906';
-import { store } from './util.js?v=20261102185906';
+import { localize, loadRates } from './localprice.js?v=20261102192333';
+import { CONFIG } from './config.js?v=20261102192333';
+import { store } from './util.js?v=20261102192333';
 
 const D = {
   ro: {
@@ -517,6 +517,19 @@ const D = {
     'book.addToCart': 'Adaugă în coș',
     'book.offersHead': 'Oferte pentru tine',
     'book.trust1': 'Livrare instant în biblioteca ta',
+    'book.tile1': 'Livrare instant',
+    'book.tile2': 'Citești pe orice dispozitiv',
+    'book.tile3': 'Plată sigură',
+    'book.dcHead': 'Al tău în câteva secunde',
+    'book.dcSub': 'Fără așteptare, fără curier, fără descărcări complicate.',
+    'book.dcS1': 'Plătești',
+    'book.dcS2': 'Apare direct în biblioteca ta',
+    'book.dcS3': 'Citești oriunde',
+    'book.dcDev': 'Dispozitive',
+    'book.dPhone': 'Telefon',
+    'book.dTablet': 'Tabletă',
+    'book.dPc': 'Computer',
+    'book.dcFoot': 'Nu ai nevoie de Kindle: citești pe dispozitivul pe care îl ai deja.',
     'book.delivHead': 'Livrare instantă.',
     'book.delivText': 'Imediat după plată cartea apare direct în biblioteca ta Librava. O citești chiar pe dispozitivul pe care îl ai deja: telefon, tabletă, computer sau Kindle. Nu ai nevoie de Kindle.',
     'book.trust2': 'Citești pe telefon, tabletă, PC sau Kindle',
@@ -1963,6 +1976,19 @@ const D = {
     'book.addToCart': 'Aggiungi al carrello',
     'book.offersHead': 'Offerte per te',
     'book.trust1': 'Consegna immediata nella tua libreria',
+    'book.tile1': 'Consegna immediata',
+    'book.tile2': 'Leggi su ogni dispositivo',
+    'book.tile3': 'Pagamento sicuro',
+    'book.dcHead': 'Tuo in pochi secondi',
+    'book.dcSub': 'Nessuna attesa, nessun corriere, nessun download complicato.',
+    'book.dcS1': 'Paghi',
+    'book.dcS2': 'Appare subito nella tua libreria',
+    'book.dcS3': 'Leggi ovunque',
+    'book.dcDev': 'Dispositivi',
+    'book.dPhone': 'Telefono',
+    'book.dTablet': 'Tablet',
+    'book.dPc': 'Computer',
+    'book.dcFoot': 'Non serve un Kindle: leggi sul dispositivo che hai già.',
     'book.delivHead': 'Consegna immediata.',
     'book.delivText': 'Subito dopo il pagamento il libro appare nella tua libreria Librava. Lo leggi sul dispositivo che hai già: telefono, tablet, computer o Kindle. Non serve un Kindle.',
     'book.trust2': 'Leggi su telefono, tablet, PC o Kindle',
@@ -3409,6 +3435,19 @@ const D = {
     'book.addToCart': 'Add to cart',
     'book.offersHead': 'Offers for you',
     'book.trust1': 'Instant delivery to your library',
+    'book.tile1': 'Instant delivery',
+    'book.tile2': 'Read on any device',
+    'book.tile3': 'Secure payment',
+    'book.dcHead': 'Yours in seconds',
+    'book.dcSub': 'No waiting, no courier, no complicated downloads.',
+    'book.dcS1': 'You pay',
+    'book.dcS2': 'It appears in your library',
+    'book.dcS3': 'Read anywhere',
+    'book.dcDev': 'Devices',
+    'book.dPhone': 'Phone',
+    'book.dTablet': 'Tablet',
+    'book.dPc': 'Computer',
+    'book.dcFoot': 'No Kindle needed: read on the device you already have.',
     'book.delivHead': 'Delivered instantly.',
     'book.delivText': 'Right after payment the book appears in your Librava library. Read it on the device you already have: phone, tablet, computer or Kindle. No Kindle needed.',
     'book.trust2': 'Read on phone, tablet, PC or Kindle',
@@ -4378,7 +4417,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102185906`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102192333`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

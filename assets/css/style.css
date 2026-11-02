@@ -2252,3 +2252,28 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 
 .deliv-note { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--card, #f4f6ef); border: 1px solid var(--line, #d9ddd2); font-size: 13px; line-height: 1.4; }
 .deliv-note svg { flex: none; width: 18px; height: 18px; color: var(--pista-strong, #4a7c2a); margin-top: 1px; }
+
+/* delivery: tiles under the title + a dark "yours in seconds" card in the buy box */
+.trust-tiles { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 0; padding: 0; }
+.trust-tiles li { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 10px 6px; border-radius: 14px; background: #fff; border: 1px solid var(--line, #dfe5d6); box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+.trust-tiles .tt-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #e6f4d9, #cfe9b8); color: #2f6f1f; }
+.trust-tiles .tt-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.trust-tiles b { font-size: 12.5px; line-height: 1.25; font-weight: 600; color: var(--ink, #1c2a22); }
+.deliv-card { margin-top: 14px; padding: 16px; border-radius: 18px; color: #fff; background: radial-gradient(120% 140% at 0% 0%, #3d7a2a 0%, #234d27 55%, #19331f 100%); box-shadow: 0 10px 28px rgba(35,77,39,.28); position: relative; overflow: hidden; }
+.deliv-card::after { content: ""; position: absolute; right: -40px; top: -40px; width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle, rgba(255,214,102,.28), transparent 70%); pointer-events: none; }
+.dc-head { display: flex; gap: 12px; align-items: center; }
+.dc-head b { display: block; font-size: 17px; letter-spacing: -.01em; }
+.dc-head span:not(.dc-bolt) { display: block; font-size: 12.5px; opacity: .82; margin-top: 2px; line-height: 1.35; }
+.dc-bolt { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #ffd35c, #f0a22e); color: #3a2600; animation: dcPulse 2.4s ease-in-out infinite; }
+.dc-bolt svg { width: 22px; height: 22px; fill: currentColor; stroke: none; }
+@keyframes dcPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,211,92,.55); } 50% { box-shadow: 0 0 0 10px rgba(255,211,92,0); } }
+.dc-steps { list-style: none; margin: 14px 0 12px; padding: 0; display: grid; gap: 8px; position: relative; }
+.dc-steps li { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+.dc-steps i { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 12.5px; font-weight: 700; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); }
+.dc-dev { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px 6px; border-radius: 12px; background: rgba(255,255,255,.09); }
+.dc-dev span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dc-dev svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.dc-dev em { font-style: normal; font-size: 11px; opacity: .85; }
+.dc-foot { display: flex; gap: 6px; align-items: flex-start; margin-top: 10px; font-size: 12.5px; opacity: .9; line-height: 1.35; }
+.dc-foot svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #bfe9a0; stroke-width: 1.8; margin-top: 1px; }
+@media (prefers-reduced-motion: reduce) { .dc-bolt { animation: none; } }
