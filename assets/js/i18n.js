@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102202252';
-import { CONFIG } from './config.js?v=20261102202252';
-import { store } from './util.js?v=20261102202252';
+import { localize, loadRates } from './localprice.js?v=20261102202824';
+import { CONFIG } from './config.js?v=20261102202824';
+import { store } from './util.js?v=20261102202824';
 
 const D = {
   ro: {
@@ -306,6 +306,21 @@ const D = {
     'pr.bookOtherLang': 'Atenție: cartea e în {a}, bannerul e pentru clienții {b}.',
     'pr.style': 'Design banner',
     'pr.styleHelp': 'alege un model; vezi cum arată cu cartea ta',
+    'lbl.bestseller': 'Bestseller',
+    'lbl.new': 'Nou',
+    'lbl.editor': 'Alegerea editorului',
+    'lbl.deal': 'Ofertă limitată',
+    'lbl.top': 'Cel mai bine cotat',
+    'lbl.trending': 'În trend',
+    'lbl.mustread': 'De citit neapărat',
+    'lbl.gift': 'Idee de cadou',
+    'lbl.quick': 'Lectură rapidă',
+    'lbl.popular': 'Popular',
+    'lbl.title': 'Etichetă pe copertă',
+    'lbl.help': 'Alege o etichetă care apare pe copertă în rafturi, pe pagina cărții și în bannere (ca pe Amazon).',
+    'lbl.none': 'Fără etichetă',
+    'lbl.saveFirst': 'Salvează cartea mai întâi, apoi poți alege eticheta.',
+    'lbl.saved': 'Etichetă salvată',
     'pr.st.steps': 'Pași simpli',
     'pr.st.savings': 'Economie mare',
     'pr.st.devices': 'Pe orice dispozitiv',
@@ -1808,6 +1823,21 @@ const D = {
     'pr.bookOtherLang': 'Attenzione: il libro è in {a}, il banner è per i clienti {b}.',
     'pr.style': 'Design banner',
     'pr.styleHelp': 'scegli un modello; lo vedi con il tuo libro',
+    'lbl.bestseller': 'Bestseller',
+    'lbl.new': 'Novità',
+    'lbl.editor': 'Scelta della redazione',
+    'lbl.deal': 'Offerta a tempo',
+    'lbl.top': 'Più votato',
+    'lbl.trending': 'Di tendenza',
+    'lbl.mustread': 'Da leggere',
+    'lbl.gift': 'Idea regalo',
+    'lbl.quick': 'Lettura veloce',
+    'lbl.popular': 'Popolare',
+    'lbl.title': 'Etichetta sulla copertina',
+    'lbl.help': 'Scegli un’etichetta che appare sulla copertina negli scaffali, nella pagina del libro e nei banner.',
+    'lbl.none': 'Nessuna etichetta',
+    'lbl.saveFirst': 'Salva prima il libro, poi scegli l’etichetta.',
+    'lbl.saved': 'Etichetta salvata',
     'pr.st.steps': 'Passi semplici',
     'pr.st.savings': 'Grande risparmio',
     'pr.st.devices': 'Su ogni dispositivo',
@@ -3310,6 +3340,21 @@ const D = {
     'pr.bookOtherLang': 'Note: the book is in {a}, the banner is for {b} customers.',
     'pr.style': 'Banner design',
     'pr.styleHelp': 'pick a model; see it with your book',
+    'lbl.bestseller': 'Best Seller',
+    'lbl.new': 'New release',
+    'lbl.editor': 'Staff pick',
+    'lbl.deal': 'Limited-time deal',
+    'lbl.top': 'Top rated',
+    'lbl.trending': 'Trending',
+    'lbl.mustread': 'Must read',
+    'lbl.gift': 'Gift idea',
+    'lbl.quick': 'Quick read',
+    'lbl.popular': 'Popular',
+    'lbl.title': 'Cover label',
+    'lbl.help': 'Pick a label shown on the cover in shelves, on the book page and in banners (like Amazon).',
+    'lbl.none': 'No label',
+    'lbl.saveFirst': 'Save the book first, then pick the label.',
+    'lbl.saved': 'Label saved',
     'pr.st.steps': 'Simple steps',
     'pr.st.savings': 'Big savings',
     'pr.st.devices': 'Any device',
@@ -4546,7 +4591,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102202252`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102202824`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

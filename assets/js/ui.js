@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102202252';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102202252';
-import { esc, store, $, $$ } from './util.js?v=20261102202252';
+import { CONFIG } from './config.js?v=20261102202824';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102202824';
+import { esc, store, $, $$ } from './util.js?v=20261102202824';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102202252';
-import { suggest, highlight } from './search.js?v=20261102202252';
-import { track, trackPage } from './track.js?v=20261102202252';
-import { initGA, applyConsent } from './ga.js?v=20261102202252';
-import { consentStrings } from './consent-i18n.js?v=20261102202252';
-import { api } from './api.js?v=20261102202252';
-import { describeOffer, offersForBook } from './offers.js?v=20261102202252';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102202824';
+import { suggest, highlight } from './search.js?v=20261102202824';
+import { track, trackPage } from './track.js?v=20261102202824';
+import { initGA, applyConsent } from './ga.js?v=20261102202824';
+import { consentStrings } from './consent-i18n.js?v=20261102202824';
+import { api } from './api.js?v=20261102202824';
+import { describeOffer, offersForBook } from './offers.js?v=20261102202824';
 
 // ---------------- icons ----------------
 const P = {
@@ -122,7 +122,7 @@ function topCats() {
   return applyCatOrder(topCatsCache || MAIN_CATS);
 }
 function refreshTopCats() {
-  loadCatOrder();
+  loadCatOrder(); loadLabels();
   api.listBooks({ limit: 1 }).then(() => {
     const all = api._catalog || [], seen = new Map();
     for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }
@@ -318,11 +318,32 @@ export function aplusHTML(mods = []) {
     return '';
   }).join('')}</div>`;
 }
+// Amazon-style labels the owner puts on books by hand (Best Seller, New release, Staff pick…): stored in site_settings → book_labels
+export const BOOK_LABELS = ['bestseller', 'new', 'editor', 'deal', 'top', 'trending', 'mustread', 'gift', 'quick', 'popular'];
+let LABELS = (() => { try { return JSON.parse(localStorage.getItem('librava:labels') || '{}') || {}; } catch { return {}; } })(), lblObs = false;
+export const labelOf = id => BOOK_LABELS.includes(LABELS[id]) ? LABELS[id] : '';
+const lblHTML = id => { const l = labelOf(id); return l ? `<span class="lbl lbl-${l}">${esc(t('lbl.' + l))}</span>` : ''; };
+export function applyLabels(root = document) {
+  root.querySelectorAll('.cover[data-b]').forEach(c => {
+    const l = labelOf(c.dataset.b), old = c.querySelector(':scope > .lbl');
+    if (!l) { old && old.remove(); return; }
+    if (old && old.classList.contains('lbl-' + l)) return;
+    old && old.remove(); c.insertAdjacentHTML('afterbegin', lblHTML(c.dataset.b));
+  });
+}
+export function setLabels(map) { LABELS = map || {}; try { localStorage.setItem('librava:labels', JSON.stringify(LABELS)); } catch { } applyLabels(document); }
+export async function loadLabels() {
+  try {
+    if (!lblObs && typeof MutationObserver !== 'undefined') { lblObs = true; let q = false; new MutationObserver(() => { if (q) return; q = true; requestAnimationFrame(() => { q = false; applyLabels(document); }); }).observe(document.body, { childList: true, subtree: true }); }
+    const v = await api.getSetting('book_labels'), m = v && typeof v === 'object' && v.map && typeof v.map === 'object' ? v.map : {};
+    if (JSON.stringify(m) !== JSON.stringify(LABELS)) setLabels(m); else applyLabels(document);
+  } catch { }
+}
 export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
-  return `<div class="cover">${bd}${img}</div>`;
+  return `<div class="cover"${badge ? ` data-b="${esc(b.id)}"` : ''}>${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
 }
 export function priceHTML(b) {
   if (!b.price_cents) return `<span class="price price-free">${esc(t('book.free'))}</span>`;
@@ -768,7 +789,7 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const rating = b?.rating_count ? `<span class="promo-rating">${stars(b.rating_avg)} <span>${b.rating_count}</span></span>` : '';
   const X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
   return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('${esc(b.cover_url)}')"></span>` : ''}<span class="wrap promo-in">
-      <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
+      <span class="promo-text">${b && labelOf(b.id) ? `<span class="lbl lbl-${labelOf(b.id)}">${esc(t('lbl.' + labelOf(b.id)))}</span>` : ''}${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
         ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>
       ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
       <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>${X.tail}

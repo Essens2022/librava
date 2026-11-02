@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102202252';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102202252';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102202252';
-import { resetCompanyCache } from './views.js?v=20261102202252';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102202252';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102202252';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102202252';
-import { optimizeBook } from './optimize.js?v=20261102202252';
-import { api } from './api.js?v=20261102202252';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102202252';
+import { CONFIG } from './config.js?v=20261102202824';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102202824';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102202824';
+import { resetCompanyCache } from './views.js?v=20261102202824';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102202824';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102202824';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102202824';
+import { optimizeBook } from './optimize.js?v=20261102202824';
+import { api } from './api.js?v=20261102202824';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102202824';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -1461,6 +1461,9 @@ async function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.release'))}</h3><p>${esc(t('kdp.releaseHelp'))}</p></div>
         <div class="kdp-fields"><label class="field" style="max-width:220px"><span>${esc(t('admin.f.published'))}</span><input id="f-date" type="date" value="${esc(String(v.published_at || '').slice(0, 10))}"></label>
           <label class="check"><input type="checkbox" id="f-featured" ${v.is_featured ? 'checked' : ''}> ${esc(t('admin.f.featured'))}</label></div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('lbl.title'))}</h3><p>${esc(t('lbl.help'))}</p></div>
+        <div class="kdp-fields"><div class="lbl-pick" id="lbl-pick" data-id="${esc(v.id || '')}" ${v.id ? '' : 'hidden'}>${['', ...BOOK_LABELS].map(k => `<label class="lbl-opt ${(v.id && labelOf(v.id) || '') === k ? 'on' : ''}"><input type="radio" name="lbl" value="${k}" ${(v.id && labelOf(v.id) || '') === k ? 'checked' : ''}>${k ? `<span class="lbl lbl-${k}" style="position:static">${esc(t('lbl.' + k))}</span>` : `<span class="lbl-none">${esc(t('lbl.none'))}</span>`}</label>`).join('')}</div>
+          ${v.id ? '' : `<p class="muted">${esc(t('lbl.saveFirst'))}</p>`}</div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.checklist'))}</h3><p>${esc(t('kdp.checklistHelp'))}</p></div>
         <div class="kdp-fields"><ul class="checklist" id="checklist"></ul>
           <button type="button" class="btn btn-ghost" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button></div></div>
@@ -2673,3 +2676,15 @@ async function settingsAdmin(body) {
     try { await api.saveSetting('company', v); resetCompanyCache(); toast(t('acc.saved')); } catch (x) { toast(errText(x), { error: true }); }
   };
 }
+
+document.addEventListener('change', async e => {
+  const r = e.target.closest && e.target.closest('#lbl-pick input[name=lbl]'); if (!r) return;
+  const id = r.closest('#lbl-pick').dataset.id; if (!id) return;
+  try {
+    const cur = (await api.getSetting('book_labels')) || {}, map = { ...(cur.map || {}) };
+    if (r.value) map[id] = r.value; else delete map[id];
+    await api.saveSetting('book_labels', { map }); setLabels(map);
+    document.querySelectorAll('#lbl-pick .lbl-opt').forEach(l => l.classList.toggle('on', l.contains(r)));
+    toast(t('lbl.saved'));
+  } catch (err) { toast(errText(err), { error: true }); }
+});
