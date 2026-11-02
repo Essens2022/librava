@@ -2495,3 +2495,16 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .card { width: 112px; }
   .card-title { font-size: 13px; }
 }
+
+/* Banner design gallery (live previews, like Canva templates) */
+.st-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-top: 8px; }
+.st-tile { cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 6px; border-radius: 12px; border: 2px solid var(--line, #dfe5d6); background: #fff; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.st-tile:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+.st-tile.on { border-color: #2f8f4e; box-shadow: 0 0 0 3px rgba(47,143,78,.25); }
+.st-tile input { position: absolute; opacity: 0; pointer-events: none; }
+.st-tile b { font-size: 14px; text-align: center; }
+.st-tile.on b::before { content: "✓ "; color: #2f8f4e; }
+.st-view { display: block; position: relative; overflow: hidden; border-radius: 8px; pointer-events: none; }
+.st-view > * { width: var(--iw, 1100px); transform: scale(var(--sc, .2)); transform-origin: 0 0; position: absolute; left: 0; top: 0; }
+.st-view .promo-dots, .st-view .promo-arrow { display: none !important; }
+@media (max-width: 560px) { .st-gallery { grid-template-columns: repeat(2, 1fr); } }

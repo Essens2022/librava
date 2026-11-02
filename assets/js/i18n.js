@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102195454';
-import { CONFIG } from './config.js?v=20261102195454';
-import { store } from './util.js?v=20261102195454';
+import { localize, loadRates } from './localprice.js?v=20261102195751';
+import { CONFIG } from './config.js?v=20261102195751';
+import { store } from './util.js?v=20261102195751';
 
 const D = {
   ro: {
@@ -305,6 +305,7 @@ const D = {
     'pr.book': 'Cartea',
     'pr.bookOtherLang': 'Atenție: cartea e în {a}, bannerul e pentru clienții {b}.',
     'pr.style': 'Design banner',
+    'pr.styleHelp': 'alege un model; vezi cum arată cu cartea ta',
     'pr.st.classic': 'Clasic',
     'pr.st.split': 'Împărțit',
     'pr.st.poster': 'Poster',
@@ -1786,6 +1787,7 @@ const D = {
     'pr.book': 'Il libro',
     'pr.bookOtherLang': 'Attenzione: il libro è in {a}, il banner è per i clienti {b}.',
     'pr.style': 'Design banner',
+    'pr.styleHelp': 'scegli un modello; lo vedi con il tuo libro',
     'pr.st.classic': 'Classico',
     'pr.st.split': 'Diviso',
     'pr.st.poster': 'Poster',
@@ -3267,6 +3269,7 @@ const D = {
     'pr.book': 'Book',
     'pr.bookOtherLang': 'Note: the book is in {a}, the banner is for {b} customers.',
     'pr.style': 'Banner design',
+    'pr.styleHelp': 'pick a model; see it with your book',
     'pr.st.classic': 'Classic',
     'pr.st.split': 'Split',
     'pr.st.poster': 'Poster',
@@ -4483,7 +4486,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102195454`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102195751`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
