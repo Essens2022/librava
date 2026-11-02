@@ -2277,3 +2277,4 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 .dc-foot { display: flex; gap: 6px; align-items: flex-start; margin-top: 10px; font-size: 12.5px; opacity: .9; line-height: 1.35; }
 .dc-foot svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #bfe9a0; stroke-width: 1.8; margin-top: 1px; }
 @media (prefers-reduced-motion: reduce) { .dc-bolt { animation: none; } }
+.trust-tiles { max-width: 560px; }
