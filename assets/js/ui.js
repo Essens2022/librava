@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js?v=20261102195416';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102195416';
-import { esc, store, $, $$ } from './util.js?v=20261102195416';
+import { CONFIG } from './config.js?v=20261102195452';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102195452';
+import { esc, store, $, $$ } from './util.js?v=20261102195452';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +12,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102195416';
-import { suggest, highlight } from './search.js?v=20261102195416';
-import { track, trackPage } from './track.js?v=20261102195416';
-import { initGA, applyConsent } from './ga.js?v=20261102195416';
-import { consentStrings } from './consent-i18n.js?v=20261102195416';
-import { api } from './api.js?v=20261102195416';
-import { describeOffer, offersForBook } from './offers.js?v=20261102195416';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102195452';
+import { suggest, highlight } from './search.js?v=20261102195452';
+import { track, trackPage } from './track.js?v=20261102195452';
+import { initGA, applyConsent } from './ga.js?v=20261102195452';
+import { consentStrings } from './consent-i18n.js?v=20261102195452';
+import { api } from './api.js?v=20261102195452';
+import { describeOffer, offersForBook } from './offers.js?v=20261102195452';
 
 // ---------------- icons ----------------
 const P = {
@@ -703,7 +703,8 @@ const hexOk = c => /^#[0-9a-f]{6}$/i.test(c || '');
 const lum = c => { const n = parseInt(c.slice(1), 16), f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(n >> 16) + .7152 * f((n >> 8) & 255) + .0722 * f(n & 255); };
 // class + inline style for a banner: a ready theme, or two colours chosen by the owner, plus the title font
 const stCls = p => (p.kind === 'book' || !p.kind) && PROMO_STYLES.includes(p.style) && p.style !== 'classic' ? 'st-' + p.style : '';
-export function promoLook(p) {
+export function promoLook(p0) {
+  const [thB, stB] = String(p0.theme || '').split('~'), p = { ...p0, theme: thB, style: p0.style || stB };
   const font = PROMO_FONTS.find(f => f[0] === p.font);
   if (p.theme === 'custom' && hexOk(p.bg_from) && hexOk(p.bg_to)) {
     const light = (lum(p.bg_from) + lum(p.bg_to)) / 2 > 0.45;

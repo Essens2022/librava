@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102195416';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102195416';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102195416';
-import { resetCompanyCache } from './views.js?v=20261102195416';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102195416';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102195416';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102195416';
-import { optimizeBook } from './optimize.js?v=20261102195416';
-import { api } from './api.js?v=20261102195416';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102195416';
+import { CONFIG } from './config.js?v=20261102195452';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102195452';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102195452';
+import { resetCompanyCache } from './views.js?v=20261102195452';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102195452';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102195452';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102195452';
+import { optimizeBook } from './optimize.js?v=20261102195452';
+import { api } from './api.js?v=20261102195452';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261102195452';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -2239,7 +2239,7 @@ async function promoForm(body, id) {
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
   const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
   const prItems = pub.map(b => ({ id: b.id, label: b.title + ' · ' + (b.language || '').toUpperCase() + (b.format ? ' · ' + String(b.format).toUpperCase() : '') }));
-  const p = all.find(x => x.id === id) || { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
+  const p0 = all.find(x => x.id === id), p = p0 ? { ...p0, theme: String(p0.theme || '').split('~')[0], style: String(p0.theme || '').split('~')[1] || p0.style } : { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
   const files = {};
   let chosen = (p.book_ids || []).filter(id => pub.some(b => b.id === id));
   const local = iso => { if (!iso) return ''; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
@@ -2371,7 +2371,7 @@ async function promoForm(body, id) {
     if (c.kind === 'books' && c.book_ids.length < 2) return fail(t('pr.needBooks'));
     if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
     if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
-    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.theme, bg_from: c.theme === 'custom' ? c.bg_from : null, bg_to: c.theme === 'custom' ? c.bg_to : null, font: c.font, ...(c.style && c.style !== 'classic' ? { style: c.style } : {}), kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
+    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.style && c.style !== 'classic' ? c.theme + '~' + c.style : c.theme, bg_from: c.theme === 'custom' ? c.bg_from : null, bg_to: c.theme === 'custom' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
     if (!row.id) delete row.id;
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
     try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }
