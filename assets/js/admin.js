@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261102170520';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102170520';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102170520';
-import { resetCompanyCache } from './views.js?v=20261102170520';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102170520';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102170520';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102170520';
-import { optimizeBook } from './optimize.js?v=20261102170520';
-import { api } from './api.js?v=20261102170520';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102170520';
+import { CONFIG } from './config.js?v=20261102171122';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102171122';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261102171122';
+import { resetCompanyCache } from './views.js?v=20261102171122';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261102171122';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261102171122';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261102171122';
+import { optimizeBook } from './optimize.js?v=20261102171122';
+import { api } from './api.js?v=20261102171122';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, PROMO_THEMES, PROMO_FONTS, safeLink, ntfCardHTML } from './ui.js?v=20261102171122';
 
 const TABS = [
   ['overview', '/admin', 'chart', 'admin.tab.overview'],
@@ -448,6 +448,12 @@ function durText(sec) {
   const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
   return h ? t('admin.act.hm', { h, m }) : t('admin.act.min', { n: m });
 }
+// exact time for one visit: seconds, then "3 min 12 sec" (long visits: hours and minutes)
+function durExact(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  if (sec < 60 || sec >= 3600) return durText(sec);
+  return t('admin.act.min', { n: Math.floor(sec / 60) }) + ' ' + t('admin.act.sec', { n: sec % 60 });
+}
 function agoText(iso) {
   const s = (Date.now() - new Date(iso)) / 1000;
   if (s < 120) return t('admin.act.now');
@@ -596,10 +602,12 @@ async function visitorsAdmin(body) {
     if (!body.isConnected || !$('#vi-list', body)) return;
     let L = []; try { L = await api.adminVisits(cuISO(cuRange())); } catch (x) { $('#vi-list', body).innerHTML = `<p class="muted">${esc(errText(x))}</p>`; return; }
     // a visit that lasted 2 seconds or less with nothing done is almost always automatic (link preview, ad check): kept apart
-    const instant = v => v.seconds <= 2 && !v.searches && !v.carts && !v.checkouts && !v.purchases && !v.user_id;
+    // "live" = a sign of life in the last 35 seconds (the site sends one every 15 s while the person is really there)
+    const isLiveV = v => Date.now() - new Date(v.ended) < 35e3;
+    const instant = v => v.seconds <= 2 && !v.searches && !v.carts && !v.checkouts && !v.purchases && !v.user_id && !isLiveV(v);
     const showInst = sessionStorage.getItem('librava:viInst') === '1';
     const real = L.filter(v => !instant(v)), nInst = L.length - real.length, shown = showInst ? L : real;
-    const live = real.filter(v => Date.now() - new Date(v.ended) < 5 * 60e3);
+    const live = real.filter(isLiveV);
     const sum = (f) => real.filter(f).length;
     $('#vi-sum', body).innerHTML = `<div class="cu-kpis" style="margin-bottom:14px">
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.live'))}</small><b style="color:#2f8f4e">${live.length}</b></div>
@@ -612,13 +620,13 @@ async function visitorsAdmin(body) {
     $('#vi-inst', body)?.addEventListener('click', () => { sessionStorage.setItem('librava:viInst', showInst ? '0' : '1'); draw(); });
     const open = new Set($$('details[open][data-sid]', body).map(d => d.dataset.sid));
     $('#vi-list', body).innerHTML = shown.length ? shown.map(v => {
-      const isLive = Date.now() - new Date(v.ended) < 5 * 60e3, inst = instant(v);
+      const isLive = isLiveV(v), inst = instant(v);
       const chips = [v.books ? `<span class="vi-chip">📖 ${esc(t('admin.vis.nBooks', { n: v.books }))}</span>` : '', v.searches ? `<span class="vi-chip">🔎 ${esc(t('admin.vis.nSearch', { n: v.searches }))}</span>` : '',
         v.carts ? `<span class="vi-chip hot">🛒 ${esc(t('admin.vis.inCart'))}</span>` : '', v.checkouts ? `<span class="vi-chip hot">💳 ${esc(t('admin.vis.checkout'))}</span>` : '', v.purchases ? `<span class="vi-chip buy">✔ ${esc(t('admin.vis.bought'))}</span>` : '',
         inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : ''].filter(Boolean).join('');
-      const dur = inst ? '<1 s' : durText(v.seconds);
+      const dur = inst ? '<1 s' : durExact(v.seconds);
       return `<details class="tl-visit${inst ? ' vi-inst' : ''}" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
-        <div class="vi-row">${isLive ? '<span class="vi-live" style="margin:0 -7px 0 0;flex:none"></span>' : ''}${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur">⏱ ${esc(dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
+        <div class="vi-row">${isLive ? '<span class="vi-live" style="margin:0 -7px 0 0;flex:none"></span>' : ''}${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur"${isLive ? ` data-base="${v.seconds}" data-end="${new Date(v.ended).getTime()}"` : ''}>⏱ ${esc(isLive ? durExact(v.seconds + (Date.now() - new Date(v.ended)) / 1000) : dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
         ${chips ? `<div class="vi-chips">${chips}</div>` : ''}
         <div class="vi-who">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
     }).join('') : `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
@@ -630,7 +638,16 @@ async function visitorsAdmin(body) {
       d.addEventListener('toggle', () => { if (d.open) load(); }); if (d.open) load(); });
   };
   await draw();
-  const timer = setInterval(() => { if (!body.isConnected || !$('#vi-list', body)) return clearInterval(timer); draw(); }, 30000);
+  const timer = setInterval(() => { if (!body.isConnected || !$('#vi-list', body)) { clearInterval(timer); clearInterval(tick); return; } draw(); }, 8000);
+  // the time of a person who is on the site right now runs second by second; when they leave it stops at that moment
+  const tick = setInterval(() => {
+    if (!body.isConnected) return clearInterval(tick);
+    $$('.vi-dur[data-end]', body).forEach(el => {
+      const end = +el.dataset.end, base = +el.dataset.base, gone = Date.now() - end >= 35e3;
+      el.textContent = '⏱ ' + durExact(gone ? base : base + (Date.now() - end) / 1000);
+      if (gone) { el.closest('.vi-row')?.querySelector('.vi-live')?.remove(); el.removeAttribute('data-end'); }
+    });
+  }, 1000);
 }
 
 // ---------------------------------------------------------------- customers
