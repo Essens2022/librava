@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261102021628';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102021628';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102021628';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102021628';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102021628';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102021628';
-import { track } from './track.js?v=20261102021628';
-import { gaEvent } from './ga.js?v=20261102021628';
-import { guessLang } from './langdetect.js?v=20261102021628';
-import { didYouMean } from './search.js?v=20261102021628';
-import { api, editionsOf } from './api.js?v=20261102021628';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102021628';
+import { CONFIG } from './config.js?v=20261102021659';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261102021659';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261102021659';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261102021659';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261102021659';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261102021659';
+import { track } from './track.js?v=20261102021659';
+import { gaEvent } from './ga.js?v=20261102021659';
+import { guessLang } from './langdetect.js?v=20261102021659';
+import { didYouMean } from './search.js?v=20261102021659';
+import { api, editionsOf } from './api.js?v=20261102021659';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261102021659';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -407,7 +407,7 @@ export async function viewBook(el, id) {
   // contents change, with soft transitions, so the box never jumps. Redraws on every cart change.
   const buyBox = $('.buybox', el);
   let offerBox = $('.offer-badges', el); const staticOffers = offerBox ? offerBox.innerHTML : '';
-  if (offerBox) { let ri = 0; const tick = () => { if (!offerBox.isConnected) return clearInterval(rt); const rows = [...offerBox.querySelectorAll('.o-static > .offer-row, :scope:not(.is-smart) > .offer-row')]; if (rows.length < 2) { rows.forEach(r => r.classList.remove('rot-hide')); return; } ri = (ri + 1) % rows.length; rows.forEach((r, i) => r.classList.toggle('rot-hide', i !== ri)); }; const rt = setInterval(tick, 2000); tick(); }
+  if (offerBox) { let ri = 0; const tick = () => { if (!offerBox.isConnected) return clearInterval(rt); const rows = [...offerBox.querySelectorAll('.o-static > .offer-row, :scope:not(.is-smart) > .offer-row')]; if (rows.length < 2) { rows.forEach(r => r.classList.remove('rot-hide')); return; } ri = (ri + 1) % rows.length; rows.forEach((r, i) => r.classList.toggle('rot-hide', i !== ri)); }; const rt = setInterval(tick, 1200); tick(); }
   let offerSeq = 0, ui = null; const bookCache = new Map();
   // generic (static) offers show one at a time, rotating, instead of the whole list at once
   const swap = (node, html) => {
