@@ -2862,3 +2862,13 @@ body.st-lock { overflow: hidden; }
 .promo-cover, .promo-books .pb { position: relative; }
 .promo-cover > .lbl { top: 10px; left: -6px; font-size: 11px; }
 .promo-books .pb > .lbl { top: 8px; left: 0; font-size: 9.5px; padding: 4px 10px 4px 6px; }
+
+/* social buttons in the footer */
+.foot .foot-follow { margin-top: 16px; }
+.foot .soc { display: flex; flex-wrap: wrap; gap: 10px; }
+.foot .soc-b { display: grid; place-items: center; width: 44px; height: 44px; margin: 0; border-radius: 14px; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.3); transition: transform .18s ease, box-shadow .18s ease; }
+.foot .soc-b svg { width: 22px; height: 22px; fill: currentColor; }
+.foot .soc-b:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 10px 20px rgba(0,0,0,.4); }
+.soc-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
+.soc-facebook { background: #0866FF; } .soc-youtube { background: #FF0000; } .soc-pinterest { background: #E60023; }
+.soc-tiktok { background: #000; box-shadow: 2px 2px 0 #25f4ee, -2px -2px 0 #fe2c55, 0 4px 12px rgba(0,0,0,.3) !important; }

@@ -1,6 +1,7 @@
-import { CONFIG } from './config.js?v=20261102204332';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102204332';
-import { esc, store, $, $$ } from './util.js?v=20261102204332';
+import { CONFIG } from './config.js?v=20261102205139';
+import { SOCIAL_PATHS } from './social.js?v=20261102205139';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261102205139';
+import { esc, store, $, $$ } from './util.js?v=20261102205139';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -12,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261102204332';
-import { suggest, highlight } from './search.js?v=20261102204332';
-import { track, trackPage } from './track.js?v=20261102204332';
-import { initGA, applyConsent } from './ga.js?v=20261102204332';
-import { consentStrings } from './consent-i18n.js?v=20261102204332';
-import { api } from './api.js?v=20261102204332';
-import { describeOffer, offersForBook } from './offers.js?v=20261102204332';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261102205139';
+import { suggest, highlight } from './search.js?v=20261102205139';
+import { track, trackPage } from './track.js?v=20261102205139';
+import { initGA, applyConsent } from './ga.js?v=20261102205139';
+import { consentStrings } from './consent-i18n.js?v=20261102205139';
+import { api } from './api.js?v=20261102205139';
+import { describeOffer, offersForBook } from './offers.js?v=20261102205139';
 
 // ---------------- icons ----------------
 const P = {
@@ -269,7 +270,8 @@ export function renderChrome() {
         <div><h4>${esc(t('foot.help'))}</h4><a href="#/help">${esc(t('foot.howRead'))}</a><a href="#/help">${esc(t('foot.payments'))}</a><a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></div>
         <div><h4>${esc(t('foot.legal'))}</h4>${['terms', 'privacy', 'cookies', 'imprint'].map(p => `<a href="#/legal/${p}">${esc(['ro', 'it'].includes(getLang()) || p === 'imprint' ? legalText(getLang()).title[p] : consentStrings(getLang())[p])}</a>`).join('')}<a href="javascript:void 0" data-cookie-settings>${esc(['ro', 'it'].includes(getLang()) ? legalText(getLang()).consentSettings : consentStrings(getLang()).cookies + ': ' + consentStrings(getLang()).manage)}</a></div>
         <div><h4>${esc(t('nav.browse'))}</h4>${CATS.slice(0, 5).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join('')}</div>
-        <div><h4>${esc(t('foot.contact'))}</h4><p style="user-select:all">${esc(CONFIG.supportEmail)}</p>${(CONFIG.social || []).map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener me">${esc(n)}</a>`).join('')}</div>
+        <div><h4>${esc(t('foot.contact'))}</h4><p style="user-select:all">${esc(CONFIG.supportEmail)}</p>
+          <h4 class="foot-follow">${esc(t('foot.follow'))}</h4><div class="soc">${(CONFIG.social || []).map(([n, u]) => { const k = n.toLowerCase(); return SOCIAL_PATHS[k] ? `<a class="soc-b soc-${k}" href="${esc(u)}" target="_blank" rel="noopener me" aria-label="${esc(n)}" title="${esc(n)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${SOCIAL_PATHS[k]}"/></svg></a>` : `<a href="${esc(u)}" target="_blank" rel="noopener me">${esc(n)}</a>`; }).join('')}</div></div>
       </div>
       <div class="foot-bottom">
         ${langBtn('foot-lang')}

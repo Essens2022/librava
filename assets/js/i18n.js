@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261102204332';
-import { CONFIG } from './config.js?v=20261102204332';
-import { store } from './util.js?v=20261102204332';
+import { localize, loadRates } from './localprice.js?v=20261102205139';
+import { CONFIG } from './config.js?v=20261102205139';
+import { store } from './util.js?v=20261102205139';
 
 const D = {
   ro: {
@@ -1503,6 +1503,7 @@ const D = {
     'foot.payments': 'Plăți și facturi',
     'foot.legal': 'Termeni și confidențialitate',
     'foot.contact': 'Contact',
+    'foot.follow': 'Urmărește-ne',
     'foot.rights': '© {year} {site}. Toate drepturile rezervate.',
     'help.title': 'Ajutor',
     'help.q1': 'Cum citesc o carte cumpărată?',
@@ -3020,6 +3021,7 @@ const D = {
     'foot.payments': 'Pagamenti e fatture',
     'foot.legal': 'Termini e privacy',
     'foot.contact': 'Contatti',
+    'foot.follow': 'Seguici',
     'foot.rights': '© {year} {site}. Tutti i diritti riservati.',
     'help.title': 'Aiuto',
     'help.q1': 'Come leggo un libro acquistato?',
@@ -4537,6 +4539,7 @@ const D = {
     'foot.payments': 'Payments & invoices',
     'foot.legal': 'Terms & privacy',
     'foot.contact': 'Contact',
+    'foot.follow': 'Follow us',
     'foot.rights': '© {year} {site}. All rights reserved.',
     'help.title': 'Help',
     'help.q1': 'How do I read a book I bought?',
@@ -4591,7 +4594,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261102204332`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261102205139`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
