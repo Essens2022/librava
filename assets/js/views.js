@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103175303';
-import { askWhy } from './why.js?v=20261103175303';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103175303';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103175303';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103175303';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103175303';
-import { couponLive } from './welcome.js?v=20261103175303';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103175303';
-import { track } from './track.js?v=20261103175303';
-import { gaEvent } from './ga.js?v=20261103175303';
-import { guessLang } from './langdetect.js?v=20261103175303';
-import { didYouMean } from './search.js?v=20261103175303';
-import { api, editionsOf } from './api.js?v=20261103175303';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103175303';
+import { CONFIG } from './config.js?v=20261103180949';
+import { askWhy } from './why.js?v=20261103180949';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103180949';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103180949';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103180949';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103180949';
+import { couponLive } from './welcome.js?v=20261103180949';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103180949';
+import { track } from './track.js?v=20261103180949';
+import { gaEvent } from './ga.js?v=20261103180949';
+import { guessLang } from './langdetect.js?v=20261103180949';
+import { didYouMean } from './search.js?v=20261103180949';
+import { api, editionsOf } from './api.js?v=20261103180949';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103180949';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 

@@ -1,8 +1,8 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103175303';
-import { store, esc } from './util.js?v=20261103175303';
-import { getLang } from './i18n.js?v=20261103175303';
-import { modal, GIFT_SVG, currentPath } from './ui.js?v=20261103175303';
+import { api } from './api.js?v=20261103180949';
+import { store, esc } from './util.js?v=20261103180949';
+import { getLang } from './i18n.js?v=20261103180949';
+import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103180949';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -20,16 +20,27 @@ export function couponLive(code) {
 let tick = null;
 function pill(pct) {
   const until = store.get('welcome-until', 0);
-  let el = document.getElementById('wl-pill');
+  let el = document.getElementById('wl-box');
   if (!until || Date.now() >= until) {
     el?.remove(); clearInterval(tick); tick = null;
     try { if (sessionStorage.getItem('librava:coupon') === CODE) sessionStorage.removeItem('librava:coupon'); } catch { }
     return;
   }
-  if (!el) { el = document.createElement('a'); el.id = 'wl-pill'; el.href = '#/cart'; document.body.appendChild(el); }
   const left = Math.max(0, Math.round((until - Date.now()) / 1000)), m = Math.floor(left / 60), sec = String(left % 60).padStart(2, '0');
-  el.classList.toggle('low', left < 120);
-  el.innerHTML = `<span class="wl-g">${GIFT_SVG.replace('width="20" height="20"', 'width="18" height="18"')}</span><b>−${+pct}%</b><span class="wl-t">${m}:${sec}</span>`;
+  const collapsed = !!store.get('welcome-collapsed');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'wl-box'; document.body.appendChild(el);
+    el.addEventListener('click', e => {
+      if (e.target.closest('.wl-x')) { store.set('welcome-collapsed', 1); pill(pct); return; }
+      if (el.classList.contains('min')) { store.set('welcome-collapsed', 0); pill(pct); return; }
+      go('/cart');
+    });
+  }
+  el.classList.toggle('min', collapsed); el.classList.toggle('low', left < 120);
+  el.style.setProperty('--p', Math.round(100 * left / (MIN * 60)) + '%');
+  el.innerHTML = collapsed
+    ? `<span class="wl-ring"><span class="wl-t">${m}:${sec}</span></span>`
+    : `<span class="wl-g">${GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"')}</span><b>−${+pct}%</b><span class="wl-t">${m}:${sec}</span><button type="button" class="wl-x" aria-label="Close">×</button><i class="wl-bar"><i></i></i>`;
 }
 export function resumePill() {
   try {
