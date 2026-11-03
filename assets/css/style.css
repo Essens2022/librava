@@ -3316,3 +3316,15 @@ body:has(.buy-sticky:not([hidden])):has(#goal-bar) #wl-pill { bottom: 128px; }
 .coupon-open { align-self: flex-start; background: none; border: 0; padding: 4px 0; color: var(--link, #1b6b4f); font: 600 14px/1.2 var(--font-ui, inherit); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .coupon[hidden] { display: none; }
 .wrap.page > .ladder { margin-bottom: 14px; }
+
+/* survey: compact so it never covers the buy bar or the content */
+#why-box { padding: 10px 12px 10px; border-radius: 14px; }
+#why-box p { font-size: 14px; margin: 0 22px 8px 0; }
+#why-box .why-opts { gap: 6px; }
+#why-box .why-opts button { font-size: 13px; padding: 6px 10px; }
+@media (max-width: 760px) {
+  #why-box { left: 10px; right: 10px; width: auto; bottom: 14px; }
+  body:has(.buy-sticky:not([hidden])) #why-box { bottom: 84px; }
+  body:has(#goal-bar) #why-box { bottom: 66px; }
+  body:has(.buy-sticky:not([hidden])):has(#goal-bar) #why-box { bottom: 138px; }
+}
