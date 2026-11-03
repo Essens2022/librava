@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261103173322';
-import { SOCIAL_PATHS } from './social.js?v=20261103173322';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103173322';
-import { esc, store, $, $$ } from './util.js?v=20261103173322';
+import { CONFIG } from './config.js?v=20261103173514';
+import { SOCIAL_PATHS } from './social.js?v=20261103173514';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103173514';
+import { esc, store, $, $$ } from './util.js?v=20261103173514';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103173322';
-import { suggest, highlight } from './search.js?v=20261103173322';
-import { track, trackPage } from './track.js?v=20261103173322';
-import { initGA, applyConsent } from './ga.js?v=20261103173322';
-import { consentStrings } from './consent-i18n.js?v=20261103173322';
-import { api } from './api.js?v=20261103173322';
-import { describeOffer, offersForBook } from './offers.js?v=20261103173322';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103173514';
+import { suggest, highlight } from './search.js?v=20261103173514';
+import { track, trackPage } from './track.js?v=20261103173514';
+import { initGA, applyConsent } from './ga.js?v=20261103173514';
+import { consentStrings } from './consent-i18n.js?v=20261103173514';
+import { api } from './api.js?v=20261103173514';
+import { describeOffer, offersForBook } from './offers.js?v=20261103173514';
 
 // ---------------- icons ----------------
 const P = {
@@ -799,10 +799,10 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   let X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
   if (ssty) { const e = endOf(p), c = cdLeft(e), w = esc(p.kicker || t('book.instant')), it = `<span>${w}</span><span>${disc ? '-' + disc + '%' : '★'}</span><span>${esc(t('book.instant'))}</span><span>${esc(title)}</span>`;
     X = { cover: '', tail: `<span class="tp-x sp-d1"></span><span class="tp-x sp-d2"></span>${disc ? `<span class="tp-x sp-off">-${disc}%</span>` : ''}<span class="tp-x sp-count" data-end="${e.getTime()}"><i>${c[0]}</i>:<i>${c[1]}</i>:<i>${c[2]}</i></span><span class="tp-x sp-run"><span>${it.repeat(10)}</span></span>` }; }
-  return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('${esc(b.cover_url)}')"></span>` : ''}<span class="wrap promo-in">
+  return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('/book/${esc(b.id)}/thumb.webp')"></span>` : ''}<span class="wrap promo-in">
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
         ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>
-      ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
+      ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="/book/${esc(b.id)}/thumb.webp" srcset="/book/${esc(b.id)}/thumb.webp 320w, ${esc(b.cover_url)} 640w" sizes="(max-width: 760px) 170px, 260px" onerror="this.onerror=null;this.removeAttribute('srcset');this.src='${esc(b.cover_url)}'" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
       <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>${X.tail}
     </span></a>`;
 }

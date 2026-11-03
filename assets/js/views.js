@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103173322';
-import { askWhy } from './why.js?v=20261103173322';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103173322';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103173322';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103173322';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103173322';
-import { couponLive } from './welcome.js?v=20261103173322';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103173322';
-import { track } from './track.js?v=20261103173322';
-import { gaEvent } from './ga.js?v=20261103173322';
-import { guessLang } from './langdetect.js?v=20261103173322';
-import { didYouMean } from './search.js?v=20261103173322';
-import { api, editionsOf } from './api.js?v=20261103173322';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103173322';
+import { CONFIG } from './config.js?v=20261103173514';
+import { askWhy } from './why.js?v=20261103173514';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103173514';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103173514';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103173514';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103173514';
+import { couponLive } from './welcome.js?v=20261103173514';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103173514';
+import { track } from './track.js?v=20261103173514';
+import { gaEvent } from './ga.js?v=20261103173514';
+import { guessLang } from './langdetect.js?v=20261103173514';
+import { didYouMean } from './search.js?v=20261103173514';
+import { api, editionsOf } from './api.js?v=20261103173514';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103173514';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -39,7 +39,7 @@ export async function viewHome(el) {
   const shown = id => { const b = byId[id] || anyEd[id]; return b ? (b.work_id && byWork[b.work_id]) || b : null; };
   const many = p => [...new Set((p.book_ids || []).map(shown).filter(Boolean))];
   const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!shown(p.book_id);
-  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map(p => promoHTML(p, shown(p.book_id), 'hero', many(p)));
+  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', many(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
   const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', many(p))}</div>`);
   const noBooks = !all.length;
   let cont = null;
