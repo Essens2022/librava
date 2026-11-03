@@ -1,8 +1,9 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103192529';
-import { store, esc } from './util.js?v=20261103192529';
-import { getLang, t } from './i18n.js?v=20261103192529';
-import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261103192529';
+import { api } from './api.js?v=20261103193215';
+import { store, esc } from './util.js?v=20261103193215';
+import { describeOffer } from './offers.js?v=20261103193215';
+import { getLang, t } from './i18n.js?v=20261103193215';
+import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261103193215';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -53,7 +54,7 @@ function pill(pct) {
   if (left <= 120 && left > 0 && lastLeftFlag !== 120) { lastLeftFlag = 120; peek(el, 6000); }
   if (left <= 30 && lastLeftFlag !== 30) { lastLeftFlag = 30; peek(el, 6000); }
   el.style.setProperty('--p', Math.round(100 * left / (winMin() * 60)) + '%');
-  const bonus = store.get('welcome-bonus', ''); el.querySelector('.wl-open b').textContent = bonus ? '🎁 ' + bonus.split('+')[1] : '−' + (+pct) + '%';
+  const bonus = store.get('welcome-bonus', ''); el.querySelector('.wl-open b').textContent = bonus || '−' + (+pct) + '%';
   bonusPanel(el);
   el.querySelector('.wl-t').textContent = time; el.querySelector('.wl-t2').textContent = time;
 }
@@ -65,7 +66,7 @@ let bonusOffer = null;
 const BOOK_I = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg>';
 const GIFT_I = GIFT_SVG.replace('width="20" height="20"', 'width="13" height="13"');
 function bonusPanel(el) {
-  const on = !!store.get('welcome-bonus', '') && bonusOffer;
+  const on = !!store.get('welcome-bonus', '') && bonusOffer && bonusOffer.kind === 'bxgy';
   el.classList.toggle('has-b', !!on);
   let box = el.querySelector('.wl-bonus');
   if (!on) { box?.remove(); return; }
@@ -74,9 +75,23 @@ function bonusPanel(el) {
   const slots = Array.from({ length: size }, (_, i) => i < b ? `<i class="${i < n ? 'on' : ''}">${BOOK_I}</i>` : `<i class="gf ${done ? 'on' : ''}">${GIFT_I}</i>`).join('');
   const key = n + '|' + getLang(); if (box.dataset.k === key) return; box.dataset.k = key;
   box.className = 'wl-bonus' + (done ? ' done' : '');
-  box.innerHTML = `<div class="wl-bt">${esc(done ? g + ' × ' + t('book.free') : t('of.d.bxgyFree', { a: size, b, n: g }))}</div><div class="wl-bs">${slots}${done ? '' : `<span class="wl-more">+${more}</span>`}</div>`;
+  box.innerHTML = `<div class="wl-bt">${esc(done && isFree(bonusOffer) ? g + ' × ' + t('book.free') : offerTxt(bonusOffer))}</div><div class="wl-bs">${slots}${done ? '' : `<span class="wl-more">+${more}</span>`}</div>`;
 }
-async function welOffer() { try { bonusOffer = (await api.offers()).find(o => o.kind === 'bxgy' && o.config?.welcome) || null; } catch { bonusOffer = null; } return bonusOffer; }
+// everything below adapts to the timed offer chosen in the admin panel (any kind; buy X get Y, % off, ...)
+async function welOffer() { try { const all = (await api.offers()).filter(o => o.config?.welcome); bonusOffer = all.find(o => o.kind === 'bxgy') || all[0] || null; } catch { bonusOffer = null; } return bonusOffer; }
+const offerPct = o => { const c = o.config || {}; return o.kind === 'qty' ? Math.max(0, ...(c.tiers || []).map(x => +x.percent || 0)) : +c.percent || 0; };
+const isFree = o => o.kind === 'bxgy' && (o.config?.percent ?? 100) >= 100;
+const offerTxt = o => describeOffer(o, t, c => t('cat.' + c));
+// short label for the clock: "🎁 3" (free books) or "−25%"
+const offerTag = o => o.kind === 'bxgy' ? (isFree(o) ? '🎁 ' + (+o.config.get || 1) : '−' + (+o.config.percent || 0) + '%') : '−' + offerPct(o) + '%';
+// the big picture in the pop-up: books to buy → gifts, drawn from the numbers set in the panel
+function offerVisual(o) {
+  if (o.kind !== 'bxgy') return `<div class="welcome-big">−${offerPct(o)}%</div>`;
+  const b = +o.config.buy || 1, g = +o.config.get || 1, free = isFree(o);
+  const big = x => x.replace('width="13" height="13"', 'width="20" height="20"');
+  if (b + g > 10) return `<div class="wl-flow big">${b} ${big(BOOK_I)} <b>→</b> ${g} ${big(GIFT_I)}</div>${free ? '' : `<div class="welcome-big">−${+o.config.percent || 0}%</div>`}`;
+  return `<div class="wl-flow" style="--n:${b + g}">${Array.from({ length: b }, () => `<i>${big(BOOK_I)}</i>`).join('')}<b>→</b>${Array.from({ length: g }, () => `<i class="gf">${big(GIFT_I)}</i>`).join('')}</div>${free ? '' : `<div class="welcome-big">−${+o.config.percent || 0}%</div>`}`;
+}
 async function takeGift(c) {
   const wo = await welOffer();
   const m = Math.min(60, Math.max(1, Math.max(+c?.config?.minutes || 0, +wo?.config?.minutes || 0) || 15));
@@ -86,14 +101,13 @@ async function takeGift(c) {
     const until = store.get('welcome-until', 0);
     if (!until || Date.now() >= until - 20000 || store.get('welcome-bonus')) return;
     if (document.querySelector('.modal, .gift-modal, #why-wrap') || /(^|\/)(read|admin|cart)\b/.test(currentPath())) { if (n < 12) setTimeout(() => show(n + 1), 1500); return; }
-    const b = +wo.config.buy || 3, g = +wo.config.get || 3, tag = b + '+' + g;
-    store.set('welcome-bonus', tag);
+    store.set('welcome-bonus', offerTag(wo));
     const conf = Array.from({ length: 28 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 7) * .18}s;--c:${['#F4A340', '#E85D75', '#4FA3D9', '#7BC47F', '#B48CE0'][i % 5]}"></i>`).join('');
     const [, btn] = T[getLang()] || T.en;
     modal(`<div class="gift-confetti" aria-hidden="true">${conf}</div>
       <div class="gift-hero">${GIFT_SVG.replace('width="20" height="20"', 'width="44" height="44"')}</div>
-      <div class="welcome-big">${g} × 🎁</div>
-      <h2>${esc(t('of.d.bxgyFree', { a: b + g, b, n: g }))}</h2>
+      ${offerVisual(wo)}
+      <h2>${esc(offerTxt(wo))}</h2>
       <div class="actions" style="justify-content:center"><button class="btn btn-buy" data-close>${esc(btn)}</button></div>`,
       { onMount: m2 => { m2.classList.add('gift-modal'); } });
     resumePill(); const el = document.getElementById('wl-box'); if (el) peek(el, 6000);

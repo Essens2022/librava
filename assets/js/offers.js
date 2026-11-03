@@ -143,7 +143,8 @@ export function describeOffer(o, t, catName = c => c) {
 }
 // which offers mention this book (for the badges on the book page)
 export function offersForBook(b, offers) {
-  return (offers || []).filter(o => offerRunning(o) && o.kind !== 'coupon' && (
+  let wl = false; try { wl = Number(localStorage.getItem('librava:welcome-until')) > Date.now(); } catch { }
+  return (offers || []).filter(o => offerRunning(o) && o.kind !== 'coupon' && (!o.config?.welcome || wl) && (
     (o.kind === 'bundle' && (o.config?.book_ids || []).includes(b.id)) ||
     ((o.kind === 'qty') && inCat(b, o.config?.category) && (!o.config?.book_ids?.length || o.config.book_ids.includes(b.id))) ||
     ((o.kind === 'bxgy' || o.kind === 'category') && inCat(b, o.config?.category))));
