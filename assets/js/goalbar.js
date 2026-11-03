@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103203022';
-import { t, money } from './i18n.js?v=20261103203022';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103203022';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103203022';
-import { esc, store } from './util.js?v=20261103203022';
+import { api } from './api.js?v=20261103203705';
+import { t, money } from './i18n.js?v=20261103203705';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103203705';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103203705';
+import { esc, store } from './util.js?v=20261103203705';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -26,7 +26,10 @@ async function draw() {
   if (!ids.length || onCart || guided) { bar?.remove(); return; }
   try {
     if (!offersC) offersC = api.offers ? await api.offers().catch(() => []) : [];
-    await Promise.all(ids.filter(id => !bookC.has(id)).map(id => api.getBook(id).then(b => bookC.set(id, b)).catch(() => null)));
+    // instant: the light catalogue the page already holds has the price and category; only a book missing from it is fetched
+    for (const id of ids) if (!bookC.has(id)) { const l = api.__cat?.find(x => x.id === id); if (l) bookC.set(id, l); }
+    const need = ids.filter(id => !bookC.has(id));
+    if (need.length) await Promise.all(need.map(id => api.getBook(id).then(b => { if (b) bookC.set(id, b); }).catch(() => null)));
     if (my !== seq) return;
     const books = ids.map(id => bookC.get(id)).filter(b => b && b.price_cents > 0);
     if (!books.length) { bar?.remove(); return; }
@@ -42,7 +45,7 @@ async function draw() {
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     const total = Math.min(books.length + n.more, 8);
     const pct = Math.round(100 * books.length / total);
-    const html = `<span class="gb-g">${GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"')}</span><span class="gb-t">${esc(txt).replace(/(\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em>$1</em>')}</span><span class="gb-p"><i style="width:${pct}%"></i></span><span class="gb-go">${esc(t('nav.cart'))} (${books.length}) →</span>`;
+    const html = `<span class="gb-g">${GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"')}</span><span class="gb-t">${esc(txt).replace(/(\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em>$1</em>')}</span><span class="gb-p"><i style="width:${pct}%"></i></span><span class="gb-go">${esc(t('nav.cart'))} (${ids.length}) →</span>`;
     if (!bar) { bar = document.createElement('a'); bar.id = 'goal-bar'; bar.href = '#/cart'; bar.onclick = e => { e.preventDefault(); go('/cart'); }; document.body.appendChild(bar); }
     const changed = bar.innerHTML && bar.innerHTML !== html;
     bar.innerHTML = html;
