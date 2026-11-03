@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103235336';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103235336';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103235336';
-import { resetCompanyCache } from './views.js?v=20261103235336';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103235336';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103235336';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103235336';
-import { optimizeBook } from './optimize.js?v=20261103235336';
-import { api } from './api.js?v=20261103235336';
-import { OF_STYLES } from './offerstyles.js?v=20261103235336';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103235336';
+import { CONFIG } from './config.js?v=20261104002256';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104002256';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261104002256';
+import { resetCompanyCache } from './views.js?v=20261104002256';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261104002256';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261104002256';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261104002256';
+import { optimizeBook } from './optimize.js?v=20261104002256';
+import { api } from './api.js?v=20261104002256';
+import { OF_STYLES } from './offerstyles.js?v=20261104002256';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261104002256';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -648,7 +648,7 @@ async function visitorsAdmin(body) {
   const WHY = { price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar se uitau', trust: 'Nu au încredere să plătească aici', amazon: 'Preferă tipărit / Amazon', format: 'Nu pot citi formatul', other: 'Altceva', text: 'Au scris singuri' };
   const drawWhy = async () => {
     try {
-      const rows = await api.adminWhy(), box = $('#vi-why', body); if (!box) return;
+      const rows = await api.adminWhy(cuISO(cuRange())), box = $('#vi-why', body); if (!box) return;
       const n = {}; rows.forEach(r => { const k = /why=(\w+)/.exec(r.meta?.note || '')?.[1]; if (k) n[k] = (n[k] || 0) + 1; });
       const written = rows.map(r => /why=text: (.+)/.exec(r.meta?.note || '')?.[1]).filter(Boolean);
       const tot = Object.values(n).reduce((a, b) => a + b, 0);
@@ -718,7 +718,7 @@ async function visitorsAdmin(body) {
       catch (x) { if (!evCache.has(sid)) ul.innerHTML = `<li class="muted">${esc(errText(x))}</li>`; } };
     d._load = load; d.addEventListener('toggle', () => { if (d.open) load(); }); if (d.open) load(); };
   await draw(); drawWhy();
-  const timer = setInterval(() => { if (!body.isConnected || !$('#vi-list', body)) { clearInterval(timer); clearInterval(tick); return; } draw(); }, 8000);
+  const timer = setInterval(() => { if (!body.isConnected || !$('#vi-list', body)) { clearInterval(timer); clearInterval(tick); return; } draw(); drawWhy(); }, 8000);
   // the time of a person who is on the site right now runs second by second; when they leave it stops at that moment
   const tick = setInterval(() => {
     if (!body.isConnected) return clearInterval(tick);

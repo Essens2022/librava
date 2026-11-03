@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103235336';
-import { applyOffers, offerRunning } from './offers.js?v=20261103235336';
-import { scoreBook } from './search.js?v=20261103235336';
-import { getLang } from './i18n.js?v=20261103235336';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261103235336';
+import { CONFIG } from './config.js?v=20261104002256';
+import { applyOffers, offerRunning } from './offers.js?v=20261104002256';
+import { scoreBook } from './search.js?v=20261104002256';
+import { getLang } from './i18n.js?v=20261104002256';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261104002256';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261103235336')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261104002256')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -1006,7 +1006,7 @@ class SupabaseAPI {
   async cancelOrder(id) { const { error } = await this.sb.rpc('admin_set_order', { p_order: id, p_status: 'cancelled' }); this._err(error); }
   async adminVisits(r) { const { data, error } = await this.sb.rpc('admin_visits', { p_from: r.from, p_to: r.to }); this._err(error); return data || []; }
   async adminVisitEvents(sid) { const { data, error } = await this.sb.rpc('admin_visit_events', { p_sid: sid }); this._err(error); return data || []; }
-  async adminWhy() { const { data } = await this.sb.from('events').select('meta,book_id,created_at,source').eq('type', 'survey').order('created_at', { ascending: false }).limit(1000); return data || []; }
+  async adminWhy(r) { let q = this.sb.from('events').select('meta,book_id,created_at,source').eq('type', 'survey'); if (r?.from) q = q.gte('created_at', r.from); if (r?.to) q = q.lt('created_at', r.to); const { data } = await q.order('created_at', { ascending: false }).limit(1000); return data || []; }
   async adminCustomers(q = '', range) {
     const r = range || { from: new Date(Date.now() - 30 * 864e5).toISOString(), to: new Date(Date.now() + 864e5).toISOString() };
     const [users, P, S] = await Promise.all([this._all('profiles', '*', x => x.order('created_at', { ascending: false })), this._all('purchases', 'user_id,price_cents,created_at', q => q.eq('test', false)),
