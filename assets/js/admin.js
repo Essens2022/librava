@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103023355';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103023355';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103023355';
-import { resetCompanyCache } from './views.js?v=20261103023355';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103023355';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103023355';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103023355';
-import { optimizeBook } from './optimize.js?v=20261103023355';
-import { api } from './api.js?v=20261103023355';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103023355';
+import { CONFIG } from './config.js?v=20261103104552';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103104552';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103104552';
+import { resetCompanyCache } from './views.js?v=20261103104552';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103104552';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103104552';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103104552';
+import { optimizeBook } from './optimize.js?v=20261103104552';
+import { api } from './api.js?v=20261103104552';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103104552';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -655,7 +655,7 @@ async function visitorsAdmin(body) {
     const real = L.filter(v => !instant(v)), nInst = L.length - real.length, shown = showInst ? L : real;
     const live = real.filter(isLiveV);
     const sum = (f) => real.filter(f).length;
-    $('#vi-sum', body).innerHTML = `<div class="cu-kpis" style="margin-bottom:14px">
+    const sumHTML = `<div class="cu-kpis" style="margin-bottom:14px">
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.live'))}</small><b style="color:#2f8f4e">${live.length}</b></div>
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kVisits'))}</small><b>${real.length}</b></div>
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.act2.kSearch'))}</small><b>${real.reduce((a, v) => a + v.searches, 0)}</b></div>
@@ -663,28 +663,49 @@ async function visitorsAdmin(body) {
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.checkout'))}</small><b>${sum(v => v.checkouts > 0)}</b></div>
       <div class="panel kpi" style="margin:0"><small>${esc(t('admin.vis.accounts'))}</small><b>${sum(v => v.user_id)}</b></div></div>
       ${nInst ? `<button type="button" class="btn btn-ghost btn-sm" id="vi-inst" style="margin-bottom:12px">⚡ ${esc(t(showInst ? 'vi.hideInst' : 'vi.showInst', { n: nInst }))}</button>` : ''}`;
-    $('#vi-inst', body)?.addEventListener('click', () => { sessionStorage.setItem('librava:viInst', showInst ? '0' : '1'); draw(); });
+    const sumEl = $('#vi-sum', body); if (sumEl._h !== sumHTML) { sumEl.innerHTML = sumHTML; sumEl._h = sumHTML; }
+    const instBtn = $('#vi-inst', body); if (instBtn) instBtn.onclick = () => { sessionStorage.setItem('librava:viInst', showInst ? '0' : '1'); draw(); };
     const open = new Set($$('details[open][data-sid]', body).map(d => d.dataset.sid));
-    $('#vi-list', body).innerHTML = shown.length ? shown.map(v => {
+    const cards = shown.map(v => {
       const isLive = isLiveV(v), inst = instant(v);
       const chips = [v.books ? `<span class="vi-chip">📖 ${esc(t('admin.vis.nBooks', { n: v.books }))}</span>` : '', v.searches ? `<span class="vi-chip">🔎 ${esc(t('admin.vis.nSearch', { n: v.searches }))}</span>` : '',
         v.carts ? `<span class="vi-chip hot">🛒 ${esc(t('admin.vis.inCart'))}</span>` : '', v.checkouts ? `<span class="vi-chip hot">💳 ${esc(t('admin.vis.checkout'))}</span>` : '', v.purchases ? `<span class="vi-chip buy">✔ ${esc(t('admin.vis.bought'))}</span>` : '',
         inst ? `<span class="vi-chip dim">⚡ ${esc(t('vi.instant'))}</span>` : '',
         !inst && !v.purchases ? `<span class="vi-chip dim">⏹ ${esc(v.checkouts ? t('admin.diag.sChk') : v.carts ? t('admin.diag.sCart') : v.books ? t('admin.diag.sBook') : t('admin.diag.sHome'))}</span>` : ''].filter(Boolean).join('');
       const dur = inst ? '<1 s' : durExact(v.seconds);
-      return `<details class="tl-visit${inst ? ' vi-inst' : ''}" data-sid="${esc(v.sid)}"${open.has(v.sid) ? ' open' : ''}><summary>
+      return { sid: v.sid, cls: 'tl-visit' + (inst ? ' vi-inst' : ''), sum: `
         <div class="vi-row">${isLive ? '<span class="vi-live" style="margin:0 -7px 0 0;flex:none"></span>' : ''}${srcBadge(v.source)}<span class="vi-flag" title="${esc(v.country || '')}">${FLAG(v.country)} <b>${esc(v.country || '')}</b></span><span class="vi-dev" title="${esc(t('admin.act.dev.' + (v.device || 'desktop')))}">${devIcon(v.device)} ${esc(v.os && v.os !== 'other' ? v.os : '')}</span><span class="vi-dur"${isLive ? ` data-base="${v.seconds}" data-end="${new Date(v.ended).getTime()}"` : ''}>⏱ ${esc(isLive ? durExact(v.seconds + (Date.now() - new Date(v.ended)) / 1000) : dur)}</span><span class="vi-time">${esc(fmtDate(v.started))} ${esc(new Date(v.started).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span></div>
         ${chips ? `<div class="vi-chips">${chips}</div>` : ''}
-        <div class="vi-who">${who(v)}</div></summary><ul class="tl-list" data-ev="${esc(v.sid)}"></ul></details>`;
-    }).join('') : `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
-    $$('details[data-sid]', body).forEach(d => { const ul = $('[data-ev]', d), sid = d.dataset.sid;
-      const paint = E => { const html = tlHTML(E) || `<li class="muted">—</li>`;
-        if (ul.innerHTML !== html) ul.innerHTML = html; };
-      const cached = evCache.get(sid); if (cached) paint(cached.E);
-      const load = async () => { try { const E = await api.adminVisitEvents(sid); evCache.set(sid, { E }); if (ul.isConnected) paint(E); }
-        catch (x) { if (!evCache.has(sid)) ul.innerHTML = `<li class="muted">${esc(errText(x))}</li>`; } };
-      d.addEventListener('toggle', () => { if (d.open) load(); }); if (d.open) load(); });
+        <div class="vi-who">${who(v)}</div>` };
+    });
+    // update only what changed (no full rebuild every 8 s): the list stays steady, open cards and their events stay put
+    const listEl = $('#vi-list', body);
+    if (!cards.length) listEl.innerHTML = `<p class="muted" style="margin:0">${esc(t('admin.vis.none'))}</p>`;
+    else {
+      [...listEl.children].filter(n => n.tagName !== 'DETAILS').forEach(n => n.remove());
+      const have = new Map($$('details[data-sid]', listEl).map(d => [d.dataset.sid, d]));
+      const want = new Set(cards.map(c => c.sid));
+      have.forEach((d, sid) => { if (!want.has(sid)) d.remove(); });
+      let prev = null;
+      for (const c of cards) {
+        let d = have.get(c.sid), isNew = false;
+        if (!d) { d = document.createElement('details'); d.dataset.sid = c.sid; d.innerHTML = `<summary></summary><ul class="tl-list" data-ev="${esc(c.sid)}"></ul>`; isNew = true; }
+        if (d.className !== c.cls) d.className = c.cls;
+        const sm = d.firstElementChild; if (sm._h !== c.sum) { sm.innerHTML = c.sum; sm._h = c.sum; }
+        const at = prev ? prev.nextSibling : listEl.firstChild;
+        if (at !== d) listEl.insertBefore(d, at);
+        prev = d;
+        if (isNew) bindCard(d); else if (d.open && d._load) d._load();
+      }
+    }
   };
+  const bindCard = d => { const ul = $('[data-ev]', d), sid = d.dataset.sid;
+    const paint = E => { const html = tlHTML(E) || `<li class="muted">—</li>`;
+      if (ul.innerHTML !== html) ul.innerHTML = html; };
+    const cached = evCache.get(sid); if (cached) paint(cached.E);
+    const load = async () => { try { const E = await api.adminVisitEvents(sid); evCache.set(sid, { E }); if (ul.isConnected) paint(E); }
+      catch (x) { if (!evCache.has(sid)) ul.innerHTML = `<li class="muted">${esc(errText(x))}</li>`; } };
+    d._load = load; d.addEventListener('toggle', () => { if (d.open) load(); }); if (d.open) load(); };
   await draw();
   const timer = setInterval(() => { if (!body.isConnected || !$('#vi-list', body)) { clearInterval(timer); clearInterval(tick); return; } draw(); }, 8000);
   // the time of a person who is on the site right now runs second by second; when they leave it stops at that moment

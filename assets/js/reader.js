@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103023355';
-import { t } from './i18n.js?v=20261103023355';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261103023355';
-import { offline } from './offline.js?v=20261103023355';
-import { api } from './api.js?v=20261103023355';
-import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261103023355';
-import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261103023355';
+import { CONFIG } from './config.js?v=20261103104552';
+import { t } from './i18n.js?v=20261103104552';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261103104552';
+import { offline } from './offline.js?v=20261103104552';
+import { api } from './api.js?v=20261103104552';
+import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261103104552';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261103104552';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
