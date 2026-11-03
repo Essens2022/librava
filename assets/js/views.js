@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103195720';
-import { askWhy } from './why.js?v=20261103195720';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103195720';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103195720';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103195720';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103195720';
-import { couponLive } from './welcome.js?v=20261103195720';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103195720';
-import { track } from './track.js?v=20261103195720';
-import { gaEvent } from './ga.js?v=20261103195720';
-import { guessLang } from './langdetect.js?v=20261103195720';
-import { didYouMean } from './search.js?v=20261103195720';
-import { api, editionsOf } from './api.js?v=20261103195720';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103195720';
+import { CONFIG } from './config.js?v=20261103202000';
+import { askWhy } from './why.js?v=20261103202000';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103202000';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103202000';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103202000';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103202000';
+import { couponLive } from './welcome.js?v=20261103202000';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103202000';
+import { track } from './track.js?v=20261103202000';
+import { gaEvent } from './ga.js?v=20261103202000';
+import { guessLang } from './langdetect.js?v=20261103202000';
+import { didYouMean } from './search.js?v=20261103202000';
+import { api, editionsOf } from './api.js?v=20261103202000';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103202000';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -879,7 +879,7 @@ export async function viewCart(el) {
   el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
       ${r.nudges.length ? `<div class="nudges nudges-main">${r.nudges.map(nudge).join('')}</div>` : ''}
-      ${books.map(b => `<div class="cart-item">
+      ${[...books].sort((a, b) => (r.final[a.id] === 0 ? 0 : 1) - (r.final[b.id] === 0 ? 0 : 1)).map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
           <h3><a href="#/book/${encodeURIComponent(b.id)}" style="color:var(--fg)">${esc(b.title)}</a></h3>
