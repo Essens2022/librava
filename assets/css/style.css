@@ -3382,3 +3382,29 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 
 /* ladder: the timed gift is just one more step in the same colours (a gift icon + "3 × Free") */
 .ladder-s.wow b svg { width: 18px; height: 18px; }
+
+/* ladder: livelier circles (green glow, pop-in), a moving light on the bar, and a gold gift step that pulses */
+.ladder-bar { position: relative; }
+.ladder-bar i { position: relative; overflow: hidden; }
+.ladder-bar i::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%); background-size: 260% 100%; animation: ladLight 2.6s ease-in-out infinite; }
+@keyframes ladLight { 0% { background-position: 160% 0; } 100% { background-position: -100% 0; } }
+.ladder-s b { transition: transform .3s ease, box-shadow .3s ease; }
+.ladder-s.on b { animation: ladPop .55s cubic-bezier(.2,1.6,.4,1) both, ladGlow 2.8s ease-in-out .6s infinite; }
+.ladder-s.on:nth-child(2) b { animation-delay: .08s, .7s; } .ladder-s.on:nth-child(3) b { animation-delay: .16s, .8s; } .ladder-s.on:nth-child(4) b { animation-delay: .24s, .9s; } .ladder-s.on:nth-child(5) b { animation-delay: .32s, 1s; }
+@keyframes ladPop { 0% { transform: scale(.4); } 100% { transform: scale(1); } }
+@keyframes ladGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(79,127,51,.45); } 50% { box-shadow: 0 0 0 7px rgba(79,127,51,0); } }
+.ladder-s.next b { animation: ladPulse 1.2s infinite !important; transform: scale(1.08); }
+/* gift step: gold, different from the rest */
+.ladder-s.wow { color: #B7791F; opacity: 1; }
+.ladder-s.wow b { border-color: #E0A21A; color: #B7791F; background: rgba(240,180,40,.14); }
+.ladder-s.wow span { color: #B7791F; }
+.ladder-s.wow b svg { width: 18px; height: 18px; }
+.ladder-s.wow.next b { animation: ladGold 1.2s infinite !important; }
+.ladder-s.wow.on { color: #B7791F; }
+.ladder .ladder-s.wow.on b { position: relative; background: linear-gradient(135deg, #FFE08A, #F2B230 50%, #E39A0E) !important; background-size: 200% 200%; color: #3d2a00 !important; border-color: #FFF0B8 !important; animation: ladPop .55s cubic-bezier(.2,1.6,.4,1) both, ladGold 1.6s ease-in-out .6s infinite, ladShineG 2.6s linear infinite !important; }
+.ladder .ladder-s.wow.on b::after { content: '✦'; position: absolute; top: -8px; right: -6px; font-size: 12px; color: #F2B230; animation: ladTw 1.5s ease-in-out infinite; }
+.ladder-s.wow.on span { font-weight: 800; }
+@keyframes ladGold { 0%,100% { box-shadow: 0 0 0 0 rgba(242,178,48,.65), 0 0 10px rgba(242,178,48,.55); } 50% { box-shadow: 0 0 0 9px rgba(242,178,48,0), 0 0 18px rgba(242,178,48,.85); } }
+@keyframes ladShineG { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes ladTw { 0%,100% { opacity: .25; transform: scale(.6) rotate(0); } 50% { opacity: 1; transform: scale(1.1) rotate(20deg); } }
+@media (prefers-reduced-motion: reduce) { .ladder * { animation: none !important; } }
