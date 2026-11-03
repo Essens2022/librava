@@ -1,13 +1,14 @@
-import { CONFIG } from './config.js?v=20261103113134';
-import { t, getLang, setLang } from './i18n.js?v=20261103113134';
-import { esc, $, $$ } from './util.js?v=20261103113134';
-import { api, chooseBackend } from './api.js?v=20261103113134';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261103113134';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261103113134';
-import { trackPage } from './track.js?v=20261103113134';
-import { offline } from './offline.js?v=20261103113134';
-import { viewReader } from './reader.js?v=20261103113134';
-import { viewAdmin } from './admin.js?v=20261103113134';
+import { CONFIG } from './config.js?v=20261103162901';
+import { t, getLang, setLang } from './i18n.js?v=20261103162901';
+import { esc, $, $$ } from './util.js?v=20261103162901';
+import { api, chooseBackend } from './api.js?v=20261103162901';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261103162901';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261103162901';
+import { cartBack } from './cartback.js?v=20261103162901';
+import { trackPage } from './track.js?v=20261103162901';
+import { offline } from './offline.js?v=20261103162901';
+import { viewReader } from './reader.js?v=20261103162901';
+import { viewAdmin } from './admin.js?v=20261103162901';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -141,7 +142,7 @@ async function route() {
     if (goPage) { const u = pretty; if (location.pathname + location.search !== u || location.hash) try { history.replaceState(history.state, '', u); } catch { } }
     else if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
   }
-  trackPage();
+  trackPage(); cartBack();
   // highlight current strip link
   const navKey = parts[0] === 'search' ? (q.get('cat') ? 'cat-' + q.get('cat') : q.get('price') === 'free' ? 'free' : q.get('deals') ? 'deals' : q.get('sort') === 'newest' ? 'new' : '') : parts[0] || '';
   $$('.subnav [data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === navKey));
