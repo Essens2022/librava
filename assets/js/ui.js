@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261103230136';
-import { CONFIG } from './config.js?v=20261103230136';
-import { SOCIAL_PATHS } from './social.js?v=20261103230136';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103230136';
-import { esc, store, $, $$ } from './util.js?v=20261103230136';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261103230939';
+import { CONFIG } from './config.js?v=20261103230939';
+import { SOCIAL_PATHS } from './social.js?v=20261103230939';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103230939';
+import { esc, store, $, $$ } from './util.js?v=20261103230939';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103230136';
-import { suggest, highlight } from './search.js?v=20261103230136';
-import { track, trackPage } from './track.js?v=20261103230136';
-import { initGA, applyConsent } from './ga.js?v=20261103230136';
-import { consentStrings } from './consent-i18n.js?v=20261103230136';
-import { api } from './api.js?v=20261103230136';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103230136';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103230939';
+import { suggest, highlight } from './search.js?v=20261103230939';
+import { track, trackPage } from './track.js?v=20261103230939';
+import { initGA, applyConsent } from './ga.js?v=20261103230939';
+import { consentStrings } from './consent-i18n.js?v=20261103230939';
+import { api } from './api.js?v=20261103230939';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103230939';
 
 // ---------------- icons ----------------
 const P = {
@@ -826,8 +826,8 @@ function promoOffersHTML(p, data, placement) {
   const link = safeLink(p.link) || '#/search', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const cat = c => t('cat.' + c), sec = still ? Math.min(30, Math.max(5, +p.seconds || 8)) : Math.min(30, Math.max(6, Math.round(n * 3.4) + 1));
   const idx = Math.max(0, OF_STYLES.indexOf(st));
-  const catF = (/c-([\w-]+)/.exec(flags) || [])[1];
-  const covers = (o, i) => { const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 3 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
+  const catF = (/c-([\w-]+)/.exec(flags) || [])[1], pickIds = (String(p.theme || '').split('~')[3] || '').split(',').filter(Boolean);
+  const covers = (o, i) => { const mine = pickIds.map(id => books.find(b => b.id === id && b.cover_url)).filter(Boolean); if (mine.length) return mine.slice(0, 3); const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 3 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
   const parts = (i) => { if (!st.pt && st.dc !== 'D7') return ''; const cf = st.dc === 'D7', cols = ['#fff', '#ffd23f', '#ff4fa3', '#22d3ee'], N = cf ? 22 : 12, em = st.pt || []; return `<span class="of-pt ${cf ? 'cf' : st.mode || 'fall'}" aria-hidden="true">${Array.from({ length: N }, (_, k) => `<b style="--x:${(k * 37 + i * 11) % 96}%;--y:${(k * 53 + 8) % 76}%;--sz:${18 + (k * 7) % 22}px;--dur:${5 + (k * 3) % 5}s;--dl:-${(k * 7) % 9}s;--c:${cols[k % 4]}">${cf ? '' : em[k % em.length]}</b>`).join('')}</span>`; };
   const shapes = '<i class="of-sh a"></i><i class="of-sh b"></i><i class="of-sh c"></i><i class="of-sh d"></i>';
   const slide = (x, i) => {

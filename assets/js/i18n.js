@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261103230136';
-import { CONFIG } from './config.js?v=20261103230136';
-import { store } from './util.js?v=20261103230136';
+import { localize, loadRates } from './localprice.js?v=20261103230939';
+import { CONFIG } from './config.js?v=20261103230939';
+import { store } from './util.js?v=20261103230939';
 
 const D = {
   ro: {
@@ -258,6 +258,8 @@ const D = {
     'pr.of.books': 'Arată și coperți de cărți (cu efecte 3D)',
     'pr.of.topic': 'Tema cărților',
     'pr.of.topicAuto': 'Automat (cărți care au oferta)',
+    'pr.of.pick': "Cărțile afișate (max. 3)",
+    'pr.of.pickAuto': "Alese automat",
     'pr.of.ad': 'Pentru publicitate',
     'pr.of.hol': 'Pentru sărbători',
     'pr.books': 'Cărțile din banner',
@@ -1840,6 +1842,8 @@ const D = {
     'pr.of.books': 'Mostra anche le copertine dei libri (effetti 3D)',
     'pr.of.topic': 'Tema dei libri',
     'pr.of.topicAuto': "Automatico (libri con l'offerta)",
+    'pr.of.pick': "Libri mostrati (max. 3)",
+    'pr.of.pickAuto': "Scelti automaticamente",
     'pr.of.ad': 'Per la pubblicità',
     'pr.of.hol': 'Per le feste',
     'pr.books': 'Libri nel banner',
@@ -3422,6 +3426,8 @@ const D = {
     'pr.of.books': 'Also show book covers (3D effects)',
     'pr.of.topic': 'Book topic',
     'pr.of.topicAuto': 'Automatic (books the offer applies to)',
+    'pr.of.pick': "Books shown (max. 3)",
+    'pr.of.pickAuto': "Chosen automatically",
     'pr.of.ad': 'For advertising',
     'pr.of.hol': 'For holidays',
     'pr.books': 'Books in the banner',
@@ -4786,7 +4792,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261103230136`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261103230939`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
