@@ -3481,3 +3481,15 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .cart-item .cprice .price { font-size: 20px; font-weight: 800; }
   .cart-item .cprice .price-old { font-size: 14px; }
 }
+
+/* cart ladder: a small pulsing box with three gold chevrons from the step that applies now to the next one */
+.ladder-s { position: relative; }
+.ladder-s.on::after { content: ""; position: absolute; top: 5px; left: 100%; transform: translateX(-50%); width: 32px; height: 20px; box-sizing: border-box; border: 1.5px solid #d99a00; border-radius: 7px; background: rgba(255,200,61,.2); z-index: 3; animation: ladBox 1.5s ease-in-out infinite; pointer-events: none; }
+.ladder-s.on::before { content: ""; position: absolute; top: 10px; left: 100%; transform: translateX(-50%); width: 20px; height: 10px; z-index: 4; pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'><path d='M1.5 1l3.5 4-3.5 4M8.2 1l3.5 4-3.5 4M14.9 1l3.5 4-3.5 4' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 10'><path d='M1.5 1l3.5 4-3.5 4M8.2 1l3.5 4-3.5 4M14.9 1l3.5 4-3.5 4' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat;
+  background: linear-gradient(90deg, #b87400 0, #b87400 25%, #ffe27a 40%, #b87400 55%, #b87400 100%) 0 0 / 300% 100%; animation: ladSweep 1.2s linear infinite; }
+.ladder-s.on:last-child::after, .ladder-s.on:last-child::before { display: none; }
+@keyframes ladSweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes ladBox { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,200,61,.65); background: rgba(255,200,61,.18); } 50% { box-shadow: 0 0 0 6px rgba(255,200,61,0); background: rgba(255,200,61,.38); } }
+@media (prefers-reduced-motion: reduce) { .ladder-s.on::after, .ladder-s.on::before { animation: none; } }
