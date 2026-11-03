@@ -1,16 +1,16 @@
-import { CONFIG } from './config.js?v=20261103162901';
-import { askWhy } from './why.js?v=20261103162901';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103162901';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103162901';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103162901';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103162901';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103162901';
-import { track } from './track.js?v=20261103162901';
-import { gaEvent } from './ga.js?v=20261103162901';
-import { guessLang } from './langdetect.js?v=20261103162901';
-import { didYouMean } from './search.js?v=20261103162901';
-import { api, editionsOf } from './api.js?v=20261103162901';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103162901';
+import { CONFIG } from './config.js?v=20261103164208';
+import { askWhy } from './why.js?v=20261103164208';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103164208';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103164208';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103164208';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103164208';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103164208';
+import { track } from './track.js?v=20261103164208';
+import { gaEvent } from './ga.js?v=20261103164208';
+import { guessLang } from './langdetect.js?v=20261103164208';
+import { didYouMean } from './search.js?v=20261103164208';
+import { api, editionsOf } from './api.js?v=20261103164208';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103164208';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -856,9 +856,19 @@ export async function viewCart(el) {
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     return `<a class="nudge" href="${where}">${icon('tag')} <span>${esc(txt).replace(/(\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em class="nudge-hot">$1</em>')}${n.category ? ' · ' + esc(t('cat.' + n.category)) : ''}</span> <b>→</b></a>`;
   };
+  // reward ladder: each step = a number of books in the cart and what the last one costs (numbers + "free" only, no extra text to translate)
+  const ladder = () => {
+    const steps = offers.filter(o => o.kind === 'bxgy' && !o.config?.category && (+o.config.get || 1) === 1 && o.active !== false)
+      .map(o => ({ n: (+o.config.buy || 1) + 1, p: +o.config.percent || 100 })).sort((a, b) => a.n - b.n);
+    if (steps.length < 2) return '';
+    const have = books.length, top = steps[steps.length - 1].n, reached = steps.filter(x => have >= x.n).length;
+    const fill = Math.min(100, Math.round(100 * (have - 1) / (top - 1)));
+    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}"><b>${x.n}</b><span>${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
+  };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page"><div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
+      ${ladder()}
       ${r.nudges.length ? `<div class="nudges nudges-main">${r.nudges.map(nudge).join('')}</div>` : ''}
       ${books.map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
