@@ -3390,3 +3390,21 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .ladder-s.wow.next b { animation: ladWow 1.4s infinite; }
 .ladder-s.wow.on b { background: linear-gradient(135deg, #b04dff, #e04dff); color: #fff; border-color: #b04dff; box-shadow: 0 0 14px rgba(176,77,255,.7); animation: ladWow 1.6s infinite; }
 @keyframes ladWow { 0%,100% { box-shadow: 0 0 0 0 rgba(176,77,255,.65); } 50% { box-shadow: 0 0 0 9px rgba(176,77,255,0); } }
+
+/* ladder colours show the value of each step: yellow → orange → green → emerald → premium violet */
+.ladder .ladder-bar i { background-image: linear-gradient(90deg, #F2B90F 0%, #F4821F 28%, #6DBE2A 52%, #10B27D 74%, #a63df0 100%) !important; background-repeat: no-repeat; }
+.ladder.wow-on .ladder-bar { box-shadow: 0 0 14px 2px rgba(166,61,240,.55); }
+.ladder .ladder-s { color: var(--c); opacity: .85; }
+.ladder .ladder-s b { border-color: var(--c); color: var(--c); background: transparent; }
+.ladder .ladder-s span { color: var(--c); font-weight: 800; }
+.ladder .ladder-s.on { opacity: 1; }
+.ladder .ladder-s.on b { background: var(--c) !important; color: var(--t) !important; border-color: var(--c) !important; box-shadow: 0 2px 8px color-mix(in srgb, var(--c) 55%, transparent); }
+.ladder .ladder-s.next { opacity: 1; } .ladder .ladder-s.next b { animation: ladNext 1.5s infinite; }
+@keyframes ladNext { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 60%, transparent); } 50% { box-shadow: 0 0 0 9px transparent; } }
+/* higher steps look more precious: emerald gets a shine, the gift gets a gold-violet gem look */
+.ladder .ladder-s:nth-child(4).on b { background: linear-gradient(135deg, #10B27D, #5fe3b4 50%, #10B27D) !important; background-size: 200% 200% !important; animation: ladShine 2.4s linear infinite; }
+.ladder .ladder-s.wow b { background: rgba(166,61,240,.12); }
+.ladder .ladder-s.wow.on b { background: linear-gradient(135deg, #7c3aed, #d946ef 55%, #f5c15d) !important; background-size: 200% 200% !important; color: #fff !important; box-shadow: 0 0 16px rgba(166,61,240,.8), 0 0 0 2px #f5c15d !important; animation: ladShine 2s linear infinite; }
+.ladder .ladder-s.wow span { background: linear-gradient(90deg, #7c3aed, #d946ef, #c9962b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes ladShine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+.ladder .ladder-s:not(.wow) span { color: color-mix(in srgb, var(--c) 78%, #000); }
