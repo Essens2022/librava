@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261103220449';
-import { SOCIAL_PATHS } from './social.js?v=20261103220449';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103220449';
-import { esc, store, $, $$ } from './util.js?v=20261103220449';
+import { CONFIG } from './config.js?v=20261103223331';
+import { SOCIAL_PATHS } from './social.js?v=20261103223331';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103223331';
+import { esc, store, $, $$ } from './util.js?v=20261103223331';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103220449';
-import { suggest, highlight } from './search.js?v=20261103220449';
-import { track, trackPage } from './track.js?v=20261103220449';
-import { initGA, applyConsent } from './ga.js?v=20261103220449';
-import { consentStrings } from './consent-i18n.js?v=20261103220449';
-import { api } from './api.js?v=20261103220449';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103220449';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103223331';
+import { suggest, highlight } from './search.js?v=20261103223331';
+import { track, trackPage } from './track.js?v=20261103223331';
+import { initGA, applyConsent } from './ga.js?v=20261103223331';
+import { consentStrings } from './consent-i18n.js?v=20261103223331';
+import { api } from './api.js?v=20261103223331';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103223331';
 
 // ---------------- icons ----------------
 const P = {
@@ -545,7 +545,7 @@ export function bindGlobal() {
     e.preventDefault();
     openDrawer(false);
     const cur = document.querySelector('#app > .route')?.dataset.route;
-    if (cur === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (cur === '/') { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => { if (window.scrollY > 4) window.scrollTo(0, 0); }, 450); return; }   // if the smooth scroll gets interrupted (images loading), jump to the top
     if (!pathMode && location.hash === '#/') window.dispatchEvent(new Event('librava:navigate'));
     else go('/');
   });

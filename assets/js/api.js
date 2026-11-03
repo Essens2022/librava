@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103220449';
-import { applyOffers, offerRunning } from './offers.js?v=20261103220449';
-import { scoreBook } from './search.js?v=20261103220449';
-import { getLang } from './i18n.js?v=20261103220449';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261103220449';
+import { CONFIG } from './config.js?v=20261103223331';
+import { applyOffers, offerRunning } from './offers.js?v=20261103223331';
+import { scoreBook } from './search.js?v=20261103223331';
+import { getLang } from './i18n.js?v=20261103223331';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261103223331';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261103220449')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261103223331')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -357,6 +357,7 @@ class DemoAPI {
     store.set('demo:promos', all); return id;
   }
   async deletePromo(p) { store.set('demo:promos', store.get('demo:promos', []).filter(x => x.id !== p.id)); }
+  async setPromoSort(id, sort) { const all = store.get('demo:promos', []); const x = all.find(y => y.id === id); if (x) { x.sort = sort; store.set('demo:promos', all); } }
   async promoHit(id, kind) { const all = store.get('demo:promos', []); const x = all.find(y => y.id === id); if (x) { x[kind === 'click' ? 'clicks' : 'views'] = (x[kind === 'click' ? 'clicks' : 'views'] || 0) + 1; store.set('demo:promos', all); } }
   async myGifts() { if (!this._user) return []; return store.get('demo:purchases', []).filter(p => p.user_id === this._user.id && p.gift).map(p => ({ id: p.id, book_id: p.book_id, created_at: p.created_at })); }
   async notifications() { return store.get('demo:notifications', []).filter(n => n.published !== false); }
@@ -782,6 +783,7 @@ class SupabaseAPI {
     const files = [p.image_path, p.image_mobile_path].filter(Boolean);
     if (files.length) await this.sb.storage.from('covers').remove(files).catch(() => { });
   }
+  async setPromoSort(id, sort) { const { error } = await this.sb.from('promos').update({ sort, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); }
   async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
   track(e) { this.sb.rpc('track', { e }).then(() => { }, () => { }); }
   // sent while the page is closing/hiding: keepalive lets the request finish after the page is gone

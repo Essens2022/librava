@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103220449';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103220449';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103220449';
-import { resetCompanyCache } from './views.js?v=20261103220449';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103220449';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103220449';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103220449';
-import { optimizeBook } from './optimize.js?v=20261103220449';
-import { api } from './api.js?v=20261103220449';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103220449';
+import { CONFIG } from './config.js?v=20261103223331';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103223331';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103223331';
+import { resetCompanyCache } from './views.js?v=20261103223331';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103223331';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103223331';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103223331';
+import { optimizeBook } from './optimize.js?v=20261103223331';
+import { api } from './api.js?v=20261103223331';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103223331';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2255,11 +2255,13 @@ async function promosAdmin(body) {
     ${['hero', 'strip'].map(pl => { const items = list.filter(p => p.placement === pl); return `<section class="panel"><h3 style="margin:0 0 4px">${esc(t('pr.place.' + pl))}</h3><p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t('pr.placeHelp.' + pl))}</p>
       ${items.length ? `<div class="pr-list">${items.map(row).join('')}</div>` : `<p class="muted">${esc(t('pr.none'))}</p>`}</section>`; }).join('')}`;
   $('#pr-lang', body).onchange = e => { sessionStorage.setItem('librava:prLang', e.target.value); promosAdmin(body); };
+  // moves a banner one place up/down among the banners you SEE (the language filter hides others); then every banner of that row is renumbered 0..n-1
   const move = async (id, dir) => {
-    const p = all.find(x => x.id === id); const group = all.filter(x => x.placement === p.placement);
-    const i = group.indexOf(p), j = i + dir; if (j < 0 || j >= group.length) return;
-    [group[i], group[j]] = [group[j], group[i]];
-    try { await Promise.all(group.map((x, k) => x.sort === k ? null : api.savePromo({ id: x.id, sort: k }))); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); }
+    const p = all.find(x => x.id === id); const group = all.filter(x => x.placement === p.placement), seen = list.filter(x => x.placement === p.placement);
+    const a = seen.indexOf(p), b = a + dir; if (a < 0 || b < 0 || b >= seen.length) return;
+    const ga = group.indexOf(seen[a]), gb = group.indexOf(seen[b]);
+    [group[ga], group[gb]] = [group[gb], group[ga]];
+    try { for (let k = 0; k < group.length; k++) await api.setPromoSort(group[k].id, k); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); }
   };
   $$('[data-up]', body).forEach(b => b.onclick = () => move(b.dataset.up, -1));
   $$('[data-down]', body).forEach(b => b.onclick = () => move(b.dataset.down, 1));
