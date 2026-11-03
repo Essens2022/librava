@@ -3428,3 +3428,16 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .gift-modal .wl-flow.big { flex-wrap: wrap; }
 .gift-modal .wl-flow { width: 100%; }
 .gift-modal .wl-flow i { flex: 0 0 auto; width: clamp(24px, calc((100% - 44px) / var(--n, 8)), 38px); }
+
+/* admin panel on a computer: the menu is a column on the left (phones and small tablets keep the top tabs) */
+@media (min-width: 1000px) {
+  .wrap.page.adm { display: grid; grid-template-columns: 240px minmax(0, 1fr); column-gap: 28px; align-items: start; }
+  .wrap.page.adm > .adm-head, .wrap.page.adm > .demo-note { grid-column: 1 / -1; }
+  .wrap.page.adm > .adm-tabs { grid-column: 1; grid-row: 3; position: sticky; top: 130px; max-height: calc(100vh - 150px); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 8px; background: var(--surface, #fff); border: 1px solid var(--line, #dfe3d6); border-radius: 14px; }
+  .wrap.page.adm > #adm-body { grid-column: 2; grid-row: 3; min-width: 0; }
+  .adm-tabs a { border-bottom: 0; border-radius: 10px; padding: 11px 14px; gap: 12px; justify-content: flex-start; }
+  .adm-tabs a:hover { background: var(--surface-2, #f2f6ec); }
+  .adm-tabs a.on { background: #e8f1de; color: #2f5a2a; box-shadow: inset 3px 0 0 #4F7F33; }
+}
+@media (min-width: 1000px) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .adm-tabs a.on { background: #243a1e; color: #bfe6a3; } }
+:root[data-theme="dark"] .adm-tabs a.on { background: #243a1e; color: #bfe6a3; }
