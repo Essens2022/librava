@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103185942';
-import { askWhy } from './why.js?v=20261103185942';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103185942';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103185942';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103185942';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103185942';
-import { couponLive } from './welcome.js?v=20261103185942';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103185942';
-import { track } from './track.js?v=20261103185942';
-import { gaEvent } from './ga.js?v=20261103185942';
-import { guessLang } from './langdetect.js?v=20261103185942';
-import { didYouMean } from './search.js?v=20261103185942';
-import { api, editionsOf } from './api.js?v=20261103185942';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103185942';
+import { CONFIG } from './config.js?v=20261103190642';
+import { askWhy } from './why.js?v=20261103190642';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103190642';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103190642';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103190642';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103190642';
+import { couponLive } from './welcome.js?v=20261103190642';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103190642';
+import { track } from './track.js?v=20261103190642';
+import { gaEvent } from './ga.js?v=20261103190642';
+import { guessLang } from './langdetect.js?v=20261103190642';
+import { didYouMean } from './search.js?v=20261103190642';
+import { api, editionsOf } from './api.js?v=20261103190642';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103190642';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -873,7 +873,7 @@ export async function viewCart(el) {
     const have = books.length, top = steps[steps.length - 1].n, reached = steps.filter(x => have >= x.n).length;
     const fill = Math.min(100, Math.round(100 * (have - 1) / (top - 1)));
     const hasWow = steps.some(x => x.wow);
-    return `<div class="ladder${hasWow ? ' has-wow' : ''}${hasWow && have >= top ? ' wow-on' : ''}" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%;background-size:${fill ? Math.round(10000 / fill) : 100}% 100%"></i></div><div class="ladder-steps">${steps.map((x, i) => `<div style="--c:${x.wow ? '#D9960B' : ['#F2B90F', '#F4821F', '#6DBE2A', '#10B27D'][Math.min(i, 3)]};--t:${!x.wow && i < 3 ? '#2b1d00' : '#fff'}" class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
+    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
