@@ -1,8 +1,8 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103181253';
-import { store, esc } from './util.js?v=20261103181253';
-import { getLang } from './i18n.js?v=20261103181253';
-import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103181253';
+import { api } from './api.js?v=20261103181500';
+import { store, esc } from './util.js?v=20261103181500';
+import { getLang } from './i18n.js?v=20261103181500';
+import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103181500';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -26,21 +26,22 @@ function pill(pct) {
     try { if (sessionStorage.getItem('librava:coupon') === CODE) sessionStorage.removeItem('librava:coupon'); } catch { }
     return;
   }
-  const left = Math.max(0, Math.round((until - Date.now()) / 1000)), m = Math.floor(left / 60), sec = String(left % 60).padStart(2, '0');
-  const collapsed = !!store.get('welcome-collapsed');
+  const left = Math.max(0, Math.round((until - Date.now()) / 1000)), time = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
   if (!el) {
-    el = document.createElement('div'); el.id = 'wl-box'; document.body.appendChild(el);
+    el = document.createElement('div'); el.id = 'wl-box';
+    el.innerHTML = `<span class="wl-open"><button type="button" class="wl-c" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><span class="wl-g">${GIFT_SVG.replace('width="20" height="20"', 'width="14" height="14"')}</span><b>−${+pct}%</b><span class="wl-t"></span></span><span class="wl-ring"><span class="wl-t2"></span></span>`;
+    el.classList.toggle('min', !!store.get('welcome-collapsed'));
+    document.body.appendChild(el);
     el.addEventListener('click', e => {
-      if (e.target.closest('.wl-x')) { store.set('welcome-collapsed', 1); pill(pct); return; }
-      if (el.classList.contains('min')) { store.set('welcome-collapsed', 0); pill(pct); return; }
+      const min = el.classList.contains('min');
+      if (e.target.closest('.wl-c')) { el.classList.add('min'); store.set('welcome-collapsed', 1); return; }
+      if (min) { el.classList.remove('min'); store.set('welcome-collapsed', 0); return; }
       go('/cart');
     });
   }
-  el.classList.toggle('min', collapsed); el.classList.toggle('low', left < 120);
+  el.classList.toggle('low', left < 120);
   el.style.setProperty('--p', Math.round(100 * left / (MIN * 60)) + '%');
-  el.innerHTML = collapsed
-    ? `<span class="wl-ring"><span class="wl-t">${m}:${sec}</span></span>`
-    : `<span class="wl-g">${GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"')}</span><b>−${+pct}%</b><span class="wl-t">${m}:${sec}</span><button type="button" class="wl-x" aria-label="Close">×</button><i class="wl-bar"><i></i></i>`;
+  el.querySelector('.wl-t').textContent = time; el.querySelector('.wl-t2').textContent = time;
 }
 export function resumePill() {
   try {
