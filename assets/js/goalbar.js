@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103210200';
-import { t, money, getLang } from './i18n.js?v=20261103210200';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103210200';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103210200';
-import { esc, store } from './util.js?v=20261103210200';
+import { api } from './api.js?v=20261103210528';
+import { t, money, getLang } from './i18n.js?v=20261103210528';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103210528';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103210528';
+import { esc, store } from './util.js?v=20261103210528';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -13,8 +13,11 @@ function pop(label, saving, next) {
   const el = document.createElement('a'); el.id = 'goal-pop'; el.href = '#/cart';
   el.innerHTML = `<div class="gift-confetti" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 5) * .15}s;--c:${['#F4A340', '#E85D75', '#4FA3D9', '#7BC47F', '#B48CE0'][i % 5]}"></i>`).join('')}</div><span class="gp-i"><i></i><i></i><i></i></span><span class="gp-b"><b>${esc(UN[getLang()] || UN.en)} <u>−${esc(money(saving))}</u></b><small>${esc(label)}</small>${next ? `<small class="gp-n">${esc(next)}</small>` : ''}</span><button type="button" aria-label="Close">×</button>`;
   el.onclick = e => { e.preventDefault(); el.remove(); if (!e.target.closest('button')) go('/cart'); };
+  // like a chat notification: right under the goal bar (or the header), about 3 seconds, then a soft fade
+  const anchor = document.getElementById('goal-bar') || document.getElementById('hdr');
+  el.style.top = Math.round((anchor ? anchor.getBoundingClientRect().bottom : 0) + 8) + 'px';
   document.body.appendChild(el);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 6500);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 700); }, 3200);
 }
 let seq = 0, offersC = null; const bookC = new Map();
 async function draw() {

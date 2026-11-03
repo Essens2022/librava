@@ -3493,3 +3493,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @keyframes ladSweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
 @keyframes ladBox { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,200,61,.65); background: rgba(255,200,61,.18); } 50% { box-shadow: 0 0 0 6px rgba(255,200,61,0); background: rgba(255,200,61,.38); } }
 @media (prefers-reduced-motion: reduce) { .ladder-s.on::after, .ladder-s.on::before { animation: none; } }
+
+/* the unlock notice fades out softly */
+#goal-pop.out { opacity: 0; transform: translate(-50%, -10px); transition: opacity .7s ease, transform .7s ease; }
