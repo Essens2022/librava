@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261103214348';
-import { SOCIAL_PATHS } from './social.js?v=20261103214348';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103214348';
-import { esc, store, $, $$ } from './util.js?v=20261103214348';
+import { CONFIG } from './config.js?v=20261103220449';
+import { SOCIAL_PATHS } from './social.js?v=20261103220449';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103220449';
+import { esc, store, $, $$ } from './util.js?v=20261103220449';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103214348';
-import { suggest, highlight } from './search.js?v=20261103214348';
-import { track, trackPage } from './track.js?v=20261103214348';
-import { initGA, applyConsent } from './ga.js?v=20261103214348';
-import { consentStrings } from './consent-i18n.js?v=20261103214348';
-import { api } from './api.js?v=20261103214348';
-import { describeOffer, offersForBook } from './offers.js?v=20261103214348';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103220449';
+import { suggest, highlight } from './search.js?v=20261103220449';
+import { track, trackPage } from './track.js?v=20261103220449';
+import { initGA, applyConsent } from './ga.js?v=20261103220449';
+import { consentStrings } from './consent-i18n.js?v=20261103220449';
+import { api } from './api.js?v=20261103220449';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103220449';
 
 // ---------------- icons ----------------
 const P = {
@@ -779,6 +779,7 @@ function tpExtras(sty, p, b, disc, rating) {
 }
 if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('.tp-count,.sp-count').forEach(el => { const c = cdLeft(+el.dataset.end), n = el.querySelectorAll('i'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }), 1000);
 export function promoHTML(p, b, placement = p.placement, list = []) {
+  if (p.kind === 'offers') return promoOffersHTML(p, list, placement);
   if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
@@ -805,6 +806,44 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
       ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="/book/${esc(b.id)}/thumb.webp" srcset="/book/${esc(b.id)}/thumb.webp 320w, ${esc(b.cover_url)} 640w" sizes="(max-width: 760px) 170px, 260px" onerror="this.onerror=null;this.removeAttribute('srcset');this.src='${esc(b.cover_url)}'" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
       <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>${X.tail}
     </span></a>`;
+}
+
+// ---- one banner that plays every live offer in turn (small to big) and ends on the biggest one
+export function offerSlides(offers) {
+  let wl = false; try { wl = Number(localStorage.getItem('librava:welcome-until')) > Date.now(); } catch { }
+  const score = o => { const c = o.config || {}; if (o.kind === 'bxgy') return c.percent == null || +c.percent >= 100 ? 100 : +c.percent; if (o.kind === 'qty') return Math.max(0, ...(c.tiers || []).map(x => +x.percent || 0)); return +c.percent || 0; };
+  return (offers || []).filter(o => offerRunning(o) && o.kind !== 'coupon' && o.show_badge !== false && (!o.config?.welcome || wl))
+    .map(o => ({ o, s: score(o) })).filter(x => x.s > 0).sort((a, b) => a.s - b.s).slice(-8);
+}
+function promoOffersHTML(p, offers, placement) {
+  const sl = offerSlides(offers), n = sl.length;
+  const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const cat = c => t('cat.' + c), sec = Math.min(30, Math.max(6, Math.round(n * 3.4) + 1));
+  const shapes = '<i class="of-sh a"></i><i class="of-sh b"></i><i class="of-sh c"></i><i class="of-sh d"></i>';
+  return `<a class="promo promo-${placement} promo-offers" data-promo="${esc(p.id)}" data-bk="" data-sec="${sec}" data-tr="${esc(p.transition || 'fade')}" data-n="${n}" href="${esc(link)}"${ext}>
+    ${sl.map((x, i) => `<span class="of-s of-c${i % 6}${i === n - 1 ? ' of-top' : ''}${i ? '' : ' cur'}" aria-hidden="${i ? 'true' : 'false'}">${shapes}
+      <span class="wrap of-in"><span class="of-k"><i></i>${esc((p.kicker || t('nav.deals')).toUpperCase())}${n > 1 ? ` <small>${i + 1}/${n}</small>` : ''}</span>
+        <span class="of-big">${x.s >= 100 ? esc(t('book.free')).toUpperCase() : '−' + x.s + '%'}</span>
+        <span class="of-t">${esc(describeOffer(x.o, t, cat))}</span>
+        <span class="of-cta">${esc(p.cta || t('promo.cta'))} →</span></span></span>`).join('')}
+    <span class="of-dots" aria-hidden="true">${sl.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</span></a>`;
+}
+// steps through the offers while the banner is on screen; restarts from the first one each time it comes back
+export function offersBanners(root) {
+  root.querySelectorAll('.promo-offers').forEach(el => {
+    if (el._of) return; el._of = 1;
+    const ss = [...el.querySelectorAll('.of-s')], ds = [...el.querySelectorAll('.of-dots i')]; if (ss.length < 1) return;
+    let idx = 0, was = false, next = 0;
+    const show = i => { idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); };
+    const tick = () => {
+      if (!el.isConnected) return clearInterval(iv);
+      const host = el.closest('.promo-slide'), on = !host || host.classList.contains('on');
+      if (!on) { was = false; return; }
+      if (!was) { was = true; show(0); return; }
+      if (ss.length > 1 && Date.now() >= next) show((idx + 1) % ss.length);
+    };
+    const iv = setInterval(tick, 250); tick();
+  });
 }
 // several books in one banner (like Amazon's "Deals in…" cards): each cover opens its book
 function promoBooksHTML(p, list, placement) {
@@ -845,7 +884,7 @@ async function offerChips(root) {
   } catch { }
 }
 export function mountPromos(root) {
-  offerChips(root);
+  offerChips(root); offersBanners(root);
   const seen = new Set(JSON.parse(sessionStorage.getItem('librava:promoSeen') || '[]'));
   const view = el => { const id = el?.querySelector('[data-promo]')?.dataset.promo || el?.dataset?.promo; if (!id || seen.has(id)) return; seen.add(id); try { sessionStorage.setItem('librava:promoSeen', JSON.stringify([...seen])); } catch { } api.promoHit?.(id, 'view'); };
   root.querySelectorAll('[data-promo]').forEach(a => a.addEventListener('click', () => api.promoHit?.(a.dataset.promo, 'click')));

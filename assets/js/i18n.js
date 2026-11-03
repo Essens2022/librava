@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261103214348';
-import { CONFIG } from './config.js?v=20261103214348';
-import { store } from './util.js?v=20261103214348';
+import { localize, loadRates } from './localprice.js?v=20261103220449';
+import { CONFIG } from './config.js?v=20261103220449';
+import { store } from './util.js?v=20261103220449';
 
 const D = {
   ro: {
@@ -249,6 +249,7 @@ const D = {
     'fbt.adminPick': 'Recomandarea {n}',
     'fbt.auto': 'Automat',
     'pr.kind.books': 'Mai multe cărți',
+    'pr.kind.offers': 'Oferte active (animat)',
     'pr.books': 'Cărțile din banner',
     'pr.booksHelp': 'Alege între 2 și 8 cărți, în ordinea în care vrei să apară. Fiecare copertă duce la cartea ei, butonul duce la linkul ales mai jos.',
     'pr.booksNone': 'Nicio carte aleasă încă.',
@@ -1820,6 +1821,7 @@ const D = {
     'fbt.adminPick': 'Consiglio {n}',
     'fbt.auto': 'Automatico',
     'pr.kind.books': 'Più libri',
+    'pr.kind.offers': 'Offerte attive (animato)',
     'pr.books': 'Libri nel banner',
     'pr.booksHelp': 'Scegli da 2 a 8 libri, nell’ordine in cui vuoi mostrarli. Ogni copertina apre il suo libro, il pulsante porta al link scelto sotto.',
     'pr.booksNone': 'Nessun libro scelto.',
@@ -3391,6 +3393,7 @@ const D = {
     'fbt.adminPick': 'Recommendation {n}',
     'fbt.auto': 'Automatic',
     'pr.kind.books': 'Several books',
+    'pr.kind.offers': 'Live offers (animated)',
     'pr.books': 'Books in the banner',
     'pr.booksHelp': 'Choose 2 to 8 books, in the order you want them shown. Each cover opens its book; the button goes to the link chosen below.',
     'pr.booksNone': 'No books chosen yet.',
@@ -4753,7 +4756,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261103214348`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261103220449`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

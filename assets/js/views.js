@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103214348';
-import { askWhy } from './why.js?v=20261103214348';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103214348';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103214348';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103214348';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103214348';
-import { couponLive } from './welcome.js?v=20261103214348';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103214348';
-import { track } from './track.js?v=20261103214348';
-import { gaEvent } from './ga.js?v=20261103214348';
-import { guessLang } from './langdetect.js?v=20261103214348';
-import { didYouMean } from './search.js?v=20261103214348';
-import { api, editionsOf } from './api.js?v=20261103214348';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103214348';
+import { CONFIG } from './config.js?v=20261103220449';
+import { askWhy } from './why.js?v=20261103220449';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103220449';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103220449';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103220449';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103220449';
+import { couponLive } from './welcome.js?v=20261103220449';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103220449';
+import { track } from './track.js?v=20261103220449';
+import { gaEvent } from './ga.js?v=20261103220449';
+import { guessLang } from './langdetect.js?v=20261103220449';
+import { didYouMean } from './search.js?v=20261103220449';
+import { api, editionsOf } from './api.js?v=20261103220449';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103220449';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -38,9 +38,11 @@ export async function viewHome(el) {
   const byWork = Object.fromEntries(everything.filter(b => b.work_id).map(b => [b.work_id, b]));
   const shown = id => { const b = byId[id] || anyEd[id]; return b ? (b.work_id && byWork[b.work_id]) || b : null; };
   const many = p => [...new Set((p.book_ids || []).map(shown).filter(Boolean))];
-  const ok = p => p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!shown(p.book_id);
-  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', many(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
-  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', many(p))}</div>`);
+  const liveOffers = promos.some(p => p.kind === 'offers') ? await (api.offers ? api.offers().catch(() => []) : []) : [];
+  const ok = p => p.kind === 'offers' ? offerSlides(liveOffers).length > 0 : p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!shown(p.book_id);
+  const lst = p => p.kind === 'offers' ? liveOffers : many(p);
+  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', lst(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
+  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', lst(p))}</div>`);
   const noBooks = !all.length;
   let cont = null;
   if (api.user()) {

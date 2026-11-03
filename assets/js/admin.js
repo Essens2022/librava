@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103214348';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103214348';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103214348';
-import { resetCompanyCache } from './views.js?v=20261103214348';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103214348';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103214348';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103214348';
-import { optimizeBook } from './optimize.js?v=20261103214348';
-import { api } from './api.js?v=20261103214348';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103214348';
+import { CONFIG } from './config.js?v=20261103220449';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103220449';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103220449';
+import { resetCompanyCache } from './views.js?v=20261103220449';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103220449';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103220449';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103220449';
+import { optimizeBook } from './optimize.js?v=20261103220449';
+import { api } from './api.js?v=20261103220449';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103220449';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2225,6 +2225,7 @@ const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLang
 async function promosAdmin(body) {
   const filter = sessionStorage.getItem('librava:prLang') || '';
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
+  let ofl = []; try { ofl = await api.offers(); } catch { }
   const byId = Object.fromEntries(books.map(b => [b.id, b]));
   const list = all.filter(p => !filter || p.lang === filter || (filter === '*' && !p.lang));
   const used = [...new Set(all.map(p => p.lang).filter(Boolean))];
@@ -2232,8 +2233,8 @@ async function promosAdmin(body) {
     const st = promoStatus(p), ctr = p.views ? (p.clicks / p.views * 100).toFixed(1).replace('.', ',') + '%' : '—';
     const b = byId[p.book_id];
     return `<div class="pr-row">
-      <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement, (p.book_ids || []).map(id => byId[id]))}</div></div>
-      <div class="pr-info"><b>${esc(p.title || b?.title || (p.kind === 'books' ? t('pr.booksN', { n: (p.book_ids || []).length }) : t('pr.untitled')))}</b>
+      <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement, p.kind === 'offers' ? ofl : (p.book_ids || []).map(id => byId[id]))}</div></div>
+      <div class="pr-info"><b>${esc(p.title || b?.title || (p.kind === 'offers' ? t('pr.kind.offers') : p.kind === 'books' ? t('pr.booksN', { n: (p.book_ids || []).length }) : t('pr.untitled')))}</b>
         <span class="muted">${esc(t('pr.place.' + p.placement))} · ${esc(langLabel(p.lang))} · ${esc(t('pr.kind.' + p.kind))}</span>
         <span><span class="status ${st === 'live' ? 'live' : 'draft'}">${esc(t('pr.st.' + st))}</span>
           ${p.starts_at || p.ends_at ? `<span class="muted" style="font-size:13px">${esc(p.starts_at ? fmtDate(p.starts_at) : '…')} → ${esc(p.ends_at ? fmtDate(p.ends_at) : '…')}</span>` : ''}</span>
@@ -2271,6 +2272,7 @@ async function promosAdmin(body) {
 
 async function promoForm(body, id) {
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
+  let ofl = []; try { ofl = await api.offers(); } catch { }
   const pub = books.filter(b => b.status === 'published' && !b.deleted_at);
   const prItems = pub.map(b => ({ id: b.id, label: b.title + ' · ' + (b.language || '').toUpperCase() + (b.format ? ' · ' + String(b.format).toUpperCase() : '') }));
   const p0 = all.find(x => x.id === id), p = p0 ? { ...p0, theme: String(p0.theme || '').split('~')[0], style: String(p0.theme || '').split('~')[1] || p0.style } : { placement: 'hero', kind: pub.length ? 'book' : 'image', lang: sessionStorage.getItem('librava:prLang')?.replace('*', '') || getLang(), theme: 'forest', active: true, sort: all.length };
@@ -2287,7 +2289,7 @@ async function promoForm(body, id) {
         <label class="field"><span>${esc(t('pr.lang'))} *</span><select id="pr-l"><option value="">${esc(t('pr.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}" ${p.lang === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select><small>${esc(t('pr.langHelp'))}</small></label></div></div>
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
       <div class="kdp-fields">
-        <div class="radios">${['book', 'books', 'image'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
+        <div class="radios">${['book', 'books', 'image', 'offers'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
         <div id="pr-bookbox"><label class="field"><span>${esc(t('pr.book'))} *</span>${bookComboHTML('pr-book', prItems, p.book_id, t('ri.typeBook'))}<small id="pr-booklang" class="muted"></small></label>
         </div>
         <div id="pr-booksbox"><span class="field-l">${esc(t('pr.books'))} *</span><small class="muted">${esc(t('pr.booksHelp'))}</small>
@@ -2347,7 +2349,7 @@ async function promoForm(body, id) {
   const draw = () => {
     const c = current(), spec = PROMO_SPEC[c.placement] || PROMO_SPEC.hero;
     $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
-    $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image'; $('#pr-stylebox', f).hidden = c.kind !== 'book';
+    $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image' || c.kind === 'offers'; $('#pr-stylebox', f).hidden = c.kind !== 'book';
     drawPick();
     $('#pr-guide', f).innerHTML = ['desk', 'mob'].map(k => { const w = k === 'desk' ? spec.w : spec.mw, h = k === 'desk' ? spec.h : spec.mh; return `<div class="pr-g"><b>${esc(t(k === 'desk' ? 'pr.gDesk' : 'pr.gMob'))}: ${w} × ${h} px</b><div class="pr-g-box" style="aspect-ratio:${w}/${h}"><i></i><span>${esc(t('pr.gSafe'))}</span></div></div>`; }).join('') + `<p>${esc(t('pr.gRule'))}</p>`;
     $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
@@ -2371,9 +2373,10 @@ async function promoForm(body, id) {
     const live = $('#pr-live', f);
     live.className = 'pr-live-frame ' + dev;
     const list = c.book_ids.map(id => pub.find(x => x.id === id)).filter(Boolean);
-    const ok = c.kind === 'image' ? c.image_url : c.kind === 'books' ? list.length >= 2 : b;
-    live.innerHTML = ok ? (c.placement === 'hero' ? `<div class="hero hero-promos" style="padding-bottom:0">${promoHTML(c, b, 'hero', list)}</div>` : `<div class="promo-strip-wrap" style="padding:12px">${promoHTML(c, b, 'strip', list)}</div>`) : `<div class="pr-empty">${esc(t(c.kind === 'image' ? 'pr.needImage' : c.kind === 'books' ? 'pr.needBooks' : 'pr.needBook'))}</div>`;
+    const ok = c.kind === 'offers' ? true : c.kind === 'image' ? c.image_url : c.kind === 'books' ? list.length >= 2 : b;
+    live.innerHTML = ok ? (c.placement === 'hero' ? `<div class="hero hero-promos" style="padding-bottom:0">${promoHTML(c, b, 'hero', c.kind === 'offers' ? ofl : list)}</div>` : `<div class="promo-strip-wrap" style="padding:12px">${promoHTML(c, b, 'strip', c.kind === 'offers' ? ofl : list)}</div>`) : `<div class="pr-empty">${esc(t(c.kind === 'image' ? 'pr.needImage' : c.kind === 'books' ? 'pr.needBooks' : 'pr.needBook'))}</div>`;
     live.querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+    offersBanners(live);
   };
   // choosing several books: search, tick up to 8, order = order of choosing (× removes, ‹ › move)
   function drawPick() {
