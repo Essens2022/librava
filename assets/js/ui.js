@@ -818,22 +818,22 @@ export function offerSlides(offers) {
 }
 const hexRgb = h => { const m = /#([0-9a-f]{3,6})\b/i.exec(h || ''); if (!m) return null; let x = m[1]; if (x.length === 3) x = [...x].map(c => c + c).join(''); return [0, 2, 4].map(k => parseInt(x.slice(k, k + 2), 16)); };
 const lumOf = h => { const c = hexRgb(h); return c ? (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 : 0.3; };
-const OF_BK = ['fan', 'orbit', 'zoom', 'tilt', 'fall', 'spin'];
+const OF_BK = ['stack', 'hero', 'row'];
 function promoOffersHTML(p, data, placement) {
   const offers = Array.isArray(data) ? data : (data && data.offers) || [], books = Array.isArray(data) ? [] : (data && data.books) || [];
   const only = p.book_ids || []; let sl = offerSlides(offers); if (only.length) sl = sl.filter(x => only.includes(x.o.id));
   const n = sl.length, st = ofStyleOf(p), flags = String(p.theme || '').split('~')[2] || '', withBooks = !/nb/.test(flags) && books.length > 0, still = n === 1;
-  const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const link = safeLink(p.link) || '#/search', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const cat = c => t('cat.' + c), sec = still ? Math.min(30, Math.max(5, +p.seconds || 8)) : Math.min(30, Math.max(6, Math.round(n * 3.4) + 1));
   const idx = Math.max(0, OF_STYLES.indexOf(st));
   const catF = (/c-([\w-]+)/.exec(flags) || [])[1];
-  const covers = (o, i) => { const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 4 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
+  const covers = (o, i) => { const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 3 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
   const parts = (i) => { if (!st.pt && st.dc !== 'D7') return ''; const cf = st.dc === 'D7', cols = ['#fff', '#ffd23f', '#ff4fa3', '#22d3ee'], N = cf ? 22 : 12, em = st.pt || []; return `<span class="of-pt ${cf ? 'cf' : st.mode || 'fall'}" aria-hidden="true">${Array.from({ length: N }, (_, k) => `<b style="--x:${(k * 37 + i * 11) % 96}%;--y:${(k * 53 + 8) % 76}%;--sz:${18 + (k * 7) % 22}px;--dur:${5 + (k * 3) % 5}s;--dl:-${(k * 7) % 9}s;--c:${cols[k % 4]}">${cf ? '' : em[k % em.length]}</b>`).join('')}</span>`; };
   const shapes = '<i class="of-sh a"></i><i class="of-sh b"></i><i class="of-sh c"></i><i class="of-sh d"></i>';
   const slide = (x, i) => {
     const pal = st.pal[i % st.pal.length], bg = pal[0], solid = /^#/.test(bg), tx = pal[4] || st.tx || (lumOf(bg) > 0.62 ? '#1b1340' : '#fff'), ink = lumOf(pal[1]) > 0.5 ? '#1b1340' : '#ffffff', key = [pal[1], pal[2], bg, pal[3]].find(c => /^#/.test(c) && lumOf(c) < 0.45) || '#1b1340';
     const lay = st.lay[i % st.lay.length], an = (st.an + i) % 8, bkm = withBooks ? OF_BK[(idx + i) % OF_BK.length] : '', cv = bkm ? covers(x.o, i) : [];
-    const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">${bkm === 'orbit' ? '<span class="ring">' : ''}${cv.map(b => `<span class="bk"><img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async"></span>`).join('')}${bkm === 'orbit' ? '</span>' : ''}</span>` : '';
+    const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">${cv.map(b => `<span class="bk"><img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async"></span>`).join('')}</span>` : '';
     return `<span class="of-s lay-${lay} an-${an} dc-${st.dc}${cv.length ? ' has-bk' : ''}${i ? '' : ' cur'}" style="--bgc:${bg};--a:${pal[1]};--s1:${pal[2]};--s2:${pal[3]};--tx:${tx};--ink:${ink};--k:${key}" aria-hidden="${i ? 'true' : 'false'}"><i class="of-bg"></i>${shapes}${parts(i)}${bk}
       <span class="wrap of-in"><span class="of-k"><i></i>${esc((p.kicker || t('nav.deals')).toUpperCase())}${n > 1 ? ` <small>${i + 1}/${n}</small>` : ''}</span>
         <span class="of-big">${x.s >= 100 ? esc(t('book.free')).toUpperCase() : '−' + x.s + '%'}</span>

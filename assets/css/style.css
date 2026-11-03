@@ -3644,3 +3644,51 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .ofs-view > .of-still { position: absolute; left: 0; top: 0; width: var(--iw, 1100px); height: var(--ih, 404px); transform-origin: 0 0; transform: scale(var(--sc, .14)); }
 .of-still .promo-offers { height: var(--ih, 404px); }
 .pr-ofoffers { display: grid; gap: 6px; margin-top: 8px; }
+
+/* ======== professional layout for banners with book covers: text on the left, real-looking books on the right ======== */
+.of-s.has-bk .of-in { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 10px; width: 100%; max-width: 1400px; padding-right: 50%; background: none; box-shadow: none; border-radius: 0; margin-block: 0; height: 100%; color: inherit; }
+.of-s.has-bk .of-k { transform: none; align-self: flex-start; font-size: 12px; letter-spacing: .12em; padding: 6px 12px; border-radius: 999px; }
+.of-s.has-bk .of-big { font-size: clamp(56px, 7.6vw, 112px); line-height: .95; transform: none; background: none; box-shadow: none; padding: 0; color: var(--a); -webkit-text-stroke: 0; text-shadow: 0 4px 24px rgba(0,0,0,.25); display: block; width: auto; aspect-ratio: auto; border-radius: 0; }
+.of-s.has-bk .of-t { font-size: clamp(17px, 2vw, 28px); font-weight: 700; max-width: 20em; text-shadow: none; color: var(--tx); opacity: .96; }
+.of-s.has-bk .of-cta { margin-top: 10px; align-self: flex-start; border-radius: 999px; padding: 12px 24px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.of-s.has-bk.lay-L7 .of-big { color: var(--a); }
+.of-s.has-bk .of-sh.a { opacity: .55; }
+/* the book stage (right half) */
+.of-s.has-bk .of-bk { position: absolute; z-index: 3; right: 0; top: 0; bottom: 0; width: 50%; left: auto; opacity: 1; perspective: 1400px; pointer-events: none; display: block; --bw: clamp(100px, 10.5vw, 160px); }
+.of-bk::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 9%; height: 26px; background: radial-gradient(ellipse at center, rgba(0,0,0,.42), transparent 70%); filter: blur(6px); z-index: 0; }
+.of-bk .bk { position: absolute; width: var(--w, var(--bw)); aspect-ratio: 2 / 3; border-radius: 3px 6px 6px 3px; background: #2a2a2a; overflow: visible; z-index: 1;
+  box-shadow: 0 22px 36px -8px rgba(0,0,0,.55), 0 4px 8px rgba(0,0,0,.3), 2px 0 0 #f1ede2, 3px 0 0 #d8d3c4, 4px 0 0 #f1ede2, 5px 0 0 #c9c4b3; transform-style: preserve-3d; }
+.of-bk .bk img { position: relative; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+.of-bk .bk::before { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.38) 0, rgba(255,255,255,.22) 3.5%, rgba(0,0,0,.12) 6%, transparent 12%), linear-gradient(115deg, rgba(255,255,255,.22) 0, transparent 38%); }
+.of-bk .bk::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+/* 1) stack: one big front-facing book with two behind it */
+.bk-stack .bk:nth-child(1) { --w: calc(var(--bw) * 1.28); left: 30%; bottom: 14%; z-index: 3; transform: rotateY(-12deg); animation: obIn .9s .35s cubic-bezier(.2,1.1,.3,1) both, obFloat 6s 1.4s ease-in-out infinite; }
+.bk-stack .bk:nth-child(2) { --w: calc(var(--bw) * 1); left: 3%; bottom: 14%; z-index: 2; transform: rotateY(18deg); animation: obIn .9s .55s cubic-bezier(.2,1.1,.3,1) both; }
+.bk-stack .bk:nth-child(3) { --w: calc(var(--bw) * 1); right: 2%; bottom: 14%; z-index: 2; transform: rotateY(-22deg); animation: obIn .9s .7s cubic-bezier(.2,1.1,.3,1) both; }
+/* 2) hero: one large book, slow camera sway, two small ones leaning */
+.bk-hero { animation: obCam 9s ease-in-out infinite; transform-style: preserve-3d; }
+.bk-hero .bk:nth-child(1) { --w: calc(var(--bw) * 1.3); left: 33%; bottom: 12%; z-index: 3; transform: rotateY(-16deg) rotateX(2deg); animation: obIn 1s .3s cubic-bezier(.2,1.1,.3,1) both; }
+.bk-hero .bk:nth-child(2) { --w: calc(var(--bw) * .86); left: 4%; bottom: 12%; z-index: 2; transform: rotateY(24deg) rotate(-3deg); animation: obIn 1s .5s cubic-bezier(.2,1.1,.3,1) both; }
+.bk-hero .bk:nth-child(3) { --w: calc(var(--bw) * .86); right: 1%; bottom: 12%; z-index: 2; transform: rotateY(-28deg) rotate(3deg); animation: obIn 1s .65s cubic-bezier(.2,1.1,.3,1) both; }
+/* 3) row: three equal books standing on one line, cascading in */
+.bk-row .bk { --w: calc(var(--bw) * 1.05); bottom: 14%; }
+.bk-row .bk:nth-child(1) { left: 2%; transform: rotateY(14deg); animation: obIn .8s .3s cubic-bezier(.2,1.1,.3,1) both; }
+.bk-row .bk:nth-child(2) { left: 33%; z-index: 2; --w: calc(var(--bw) * 1.2); transform: rotateY(-4deg); animation: obIn .8s .5s cubic-bezier(.2,1.1,.3,1) both, obFloat 6s 1.4s ease-in-out infinite; }
+.bk-row .bk:nth-child(3) { right: 1%; transform: rotateY(-16deg); animation: obIn .8s .7s cubic-bezier(.2,1.1,.3,1) both; }
+@keyframes obIn { from { opacity: 0; translate: 0 34px; } to { opacity: 1; translate: 0 0; } }
+@keyframes obFloat { 50% { translate: 0 -9px; } }
+@keyframes obCam { 50% { transform: rotateY(-7deg) rotateX(2deg); } }
+@media (max-width: 760px) {
+  .of-s.has-bk .of-in { padding-right: 43%; gap: 6px; padding-bottom: 20px; }
+  .of-s.has-bk .of-big { font-size: clamp(40px, 13.5vw, 58px); }
+  .of-s.has-bk .of-t { font-size: 13.5px; max-width: 12em; }
+  .of-s.has-bk .of-k { font-size: 10px; padding: 4px 9px; }
+  .of-s.has-bk .of-cta { padding: 8px 14px; margin-top: 4px; font-size: 13px; }
+  .of-s.has-bk .of-bk { display: block !important; width: 46%; --bw: 54px; }
+  .has-bk.lay-L2 .of-bk, .has-bk.lay-L5 .of-bk, .has-bk.lay-L7 .of-bk { display: block !important; }
+  .of-s.has-bk .of-in, .has-bk.lay-L2 .of-in, .has-bk.lay-L5 .of-in, .has-bk.lay-L7 .of-in { max-width: none; }
+  .has-bk .of-t, .has-bk.lay-L2 .of-t, .has-bk.lay-L5 .of-t, .has-bk.lay-L7 .of-t { max-width: 12em; }
+  .of-bk::after { height: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .of-bk .bk, .of-bk { animation: none !important; } }
+.of-s.has-bk.cur .of-k { animation: oaFade .6s .25s both; }
