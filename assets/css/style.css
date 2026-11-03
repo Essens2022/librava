@@ -3235,3 +3235,6 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 .guide-home .btn-buy { color: #1b1b1b !important; }
 .guide-home .btn-ghost, .guide-home a.btn:not(.btn-buy) { background: #fff !important; color: #1c1f1a !important; border: 1.5px solid #b9b49a !important; }
 .guide-home a.btn.btn-buy { background: #F4A340 !important; color: #1b1b1b !important; border: 0 !important; }
+/* cart number: above the basket, centred on it */
+.cart-count, .cart-count[class] { top: -4px !important; left: 50% !important; transform: translateX(-50%) !important; min-width: 0 !important; font-size: 18px !important; font-weight: 900 !important; line-height: 1 !important; }
+@media (max-width: 760px) { .cart-count, .cart-count[class] { top: -6px !important; left: 50% !important; font-size: 18px !important; } }
