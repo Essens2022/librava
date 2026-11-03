@@ -3300,3 +3300,6 @@ body:has(#goal-bar) #cb-bar { bottom: 70px; } body:has(#goal-bar) #why-box { bot
 #goal-pop .gp-i i:nth-child(1) { --x: -30px; --y: -26px; } #goal-pop .gp-i i:nth-child(2) { --x: 32px; --y: -20px; animation-delay: .2s; } #goal-pop .gp-i i:nth-child(3) { --x: 4px; --y: 34px; animation-delay: .4s; }
 @keyframes gpIn { from { opacity: 0; transform: translate(-50%, -30px) scale(.9); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
 @keyframes gpSpark { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.2); opacity: 0; } }
+.welcome-big { font-size: 64px; font-weight: 900; line-height: 1; color: #c76a00; letter-spacing: -1px; margin: 4px 0 8px; }
+#goal-pop { overflow: hidden; }
+#goal-pop .gp-b, #goal-pop button, #goal-pop .gp-i { position: relative; z-index: 1; }

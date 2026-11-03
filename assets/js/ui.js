@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261103170437';
-import { SOCIAL_PATHS } from './social.js?v=20261103170437';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103170437';
-import { esc, store, $, $$ } from './util.js?v=20261103170437';
+import { CONFIG } from './config.js?v=20261103171040';
+import { SOCIAL_PATHS } from './social.js?v=20261103171040';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103171040';
+import { esc, store, $, $$ } from './util.js?v=20261103171040';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103170437';
-import { suggest, highlight } from './search.js?v=20261103170437';
-import { track, trackPage } from './track.js?v=20261103170437';
-import { initGA, applyConsent } from './ga.js?v=20261103170437';
-import { consentStrings } from './consent-i18n.js?v=20261103170437';
-import { api } from './api.js?v=20261103170437';
-import { describeOffer, offersForBook } from './offers.js?v=20261103170437';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103171040';
+import { suggest, highlight } from './search.js?v=20261103171040';
+import { track, trackPage } from './track.js?v=20261103171040';
+import { initGA, applyConsent } from './ga.js?v=20261103171040';
+import { consentStrings } from './consent-i18n.js?v=20261103171040';
+import { api } from './api.js?v=20261103171040';
+import { describeOffer, offersForBook } from './offers.js?v=20261103171040';
 
 // ---------------- icons ----------------
 const P = {
@@ -626,7 +626,7 @@ export function showConsent(force) {
 
 // ---------------------------------------------------------------- notifications from Librava (bell in the header)
 let notifCache = null;
-const GIFT_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+export const GIFT_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
 // the first time someone sees a book they received as a gift: a festive window with congratulations
 async function celebrateGifts(gn) {
   const seen = new Set(store.get('gift:seen', [])), fresh = gn.filter(g => !seen.has(g.id));

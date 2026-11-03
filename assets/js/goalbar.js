@@ -1,17 +1,17 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103170437';
-import { t, money } from './i18n.js?v=20261103170437';
-import { cart, go, currentPath } from './ui.js?v=20261103170437';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103170437';
-import { esc } from './util.js?v=20261103170437';
+import { api } from './api.js?v=20261103171040';
+import { t, money } from './i18n.js?v=20261103171040';
+import { cart, go, currentPath } from './ui.js?v=20261103171040';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103171040';
+import { esc } from './util.js?v=20261103171040';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
 function pop(label, saving, next) {
   document.getElementById('goal-pop')?.remove();
   const el = document.createElement('a'); el.id = 'goal-pop'; el.href = '#/cart';
-  el.innerHTML = `<span class="gp-i"><i></i><i></i><i></i></span><span class="gp-b"><b>${esc(UN[getLang()] || UN.en)} <u>−${esc(money(saving))}</u></b><small>${esc(label)}</small>${next ? `<small class="gp-n">${esc(next)}</small>` : ''}</span><button type="button" aria-label="Close">×</button>`;
+  el.innerHTML = `<div class="gift-confetti" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 5) * .15}s;--c:${['#F4A340', '#E85D75', '#4FA3D9', '#7BC47F', '#B48CE0'][i % 5]}"></i>`).join('')}</div><span class="gp-i"><i></i><i></i><i></i></span><span class="gp-b"><b>${esc(UN[getLang()] || UN.en)} <u>−${esc(money(saving))}</u></b><small>${esc(label)}</small>${next ? `<small class="gp-n">${esc(next)}</small>` : ''}</span><button type="button" aria-label="Close">×</button>`;
   el.onclick = e => { e.preventDefault(); el.remove(); if (!e.target.closest('button')) go('/cart'); };
   document.body.appendChild(el);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 6500);
