@@ -3313,3 +3313,6 @@ body:has(#goal-bar) #cb-bar { bottom: 70px; } body:has(#goal-bar) #why-box { bot
 body:has(#goal-bar) #wl-pill { bottom: 66px; }
 body:has(.buy-sticky:not([hidden])) #wl-pill { bottom: 76px; }
 body:has(.buy-sticky:not([hidden])):has(#goal-bar) #wl-pill { bottom: 128px; }
+.coupon-open { align-self: flex-start; background: none; border: 0; padding: 4px 0; color: var(--link, #1b6b4f); font: 600 14px/1.2 var(--font-ui, inherit); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.coupon[hidden] { display: none; }
+.wrap.page > .ladder { margin-bottom: 14px; }

@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103172221';
-import { askWhy } from './why.js?v=20261103172221';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103172221';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103172221';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103172221';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103172221';
-import { couponLive } from './welcome.js?v=20261103172221';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103172221';
-import { track } from './track.js?v=20261103172221';
-import { gaEvent } from './ga.js?v=20261103172221';
-import { guessLang } from './langdetect.js?v=20261103172221';
-import { didYouMean } from './search.js?v=20261103172221';
-import { api, editionsOf } from './api.js?v=20261103172221';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103172221';
+import { CONFIG } from './config.js?v=20261103172508';
+import { askWhy } from './why.js?v=20261103172508';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103172508';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103172508';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103172508';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103172508';
+import { couponLive } from './welcome.js?v=20261103172508';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103172508';
+import { track } from './track.js?v=20261103172508';
+import { gaEvent } from './ga.js?v=20261103172508';
+import { guessLang } from './langdetect.js?v=20261103172508';
+import { didYouMean } from './search.js?v=20261103172508';
+import { api, editionsOf } from './api.js?v=20261103172508';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103172508';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -869,9 +869,8 @@ export async function viewCart(el) {
     return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}"><b>${x.n}</b><span>${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
-  el.innerHTML = `<div class="wrap page"><div class="cart-layout">
+  el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
-      ${ladder()}
       ${r.nudges.length ? `<div class="nudges nudges-main">${r.nudges.map(nudge).join('')}</div>` : ''}
       ${books.map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
@@ -897,7 +896,7 @@ export async function viewCart(el) {
       </div>
       <button class="btn btn-buy btn-block" data-checkout>${esc(t('cart.checkout'))}</button>
       ${api.user() || !api.guestInfo ? '' : `<div class="muted" style="font-size:13px;text-align:center">${esc(t('cart.guestNote'))}</div>`}
-      <form class="coupon" id="coupon-form"><label for="cp">${esc(t('cart.haveCode'))}</label>
+      ${code ? '' : `<button type="button" class="coupon-open" id="cp-open">+ ${esc(t('cart.haveCode').replace(/\?$/, ''))}</button>`}<form class="coupon" id="coupon-form"${code ? '' : ' hidden'}><label for="cp">${esc(t('cart.haveCode'))}</label>
         <div class="coupon-row"><input id="cp" class="input" maxlength="40" autocomplete="off" autocapitalize="characters" value="${esc(code)}" placeholder="${esc(t('cart.codePh'))}">
         ${code ? `<button type="button" class="btn btn-ghost btn-sm" id="cp-rm">×</button>` : ''}<button class="btn btn-dark btn-sm" type="submit">${esc(t('cart.apply'))}</button></div>
         ${code && cmsg ? `<small class="${r.couponState === 'ok' ? 'save' : 'muted'}">${esc(t(cmsg))}</small>` : ''}</form>
@@ -907,6 +906,7 @@ export async function viewCart(el) {
   $$('[data-rm]', el).forEach(btn => btn.onclick = () => { cart.remove(btn.dataset.rm); viewCart(el); });
   $('[data-checkout]', el).onclick = () => startCheckout(books.map(b => b.id));
   $('#coupon-form', el).onsubmit = e => { e.preventDefault(); const v = $('#cp', el).value.trim().toUpperCase(); if (v) sessionStorage.setItem(COUPON, v); else sessionStorage.removeItem(COUPON); viewCart(el); };
+  $('#cp-open', el)?.addEventListener('click', e => { e.currentTarget.hidden = true; const f = $('#coupon-form', el); f.hidden = false; $('#cp', el).focus(); });
   $('#cp-rm', el)?.addEventListener('click', () => { sessionStorage.removeItem(COUPON); viewCart(el); });
 }
 
