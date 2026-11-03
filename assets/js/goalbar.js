@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103203705';
-import { t, money } from './i18n.js?v=20261103203705';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103203705';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103203705';
-import { esc, store } from './util.js?v=20261103203705';
+import { api } from './api.js?v=20261103204108';
+import { t, money } from './i18n.js?v=20261103204108';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103204108';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103204108';
+import { esc, store } from './util.js?v=20261103204108';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -63,7 +63,7 @@ function place() {
 }
 export function goalBar() {
   const again = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };
-  window.addEventListener('scroll', again, { passive: true }); window.addEventListener('resize', again);
+  window.addEventListener('scroll', place, { passive: true }); window.addEventListener('resize', again); window.addEventListener('touchmove', place, { passive: true });
   window.addEventListener('librava:cart', draw); window.addEventListener('librava:lang', draw);
   window.addEventListener('hashchange', draw); window.addEventListener('popstate', draw);
   setInterval(() => { const has = !!document.getElementById('goal-bar'); if (has !== cart.get().length > 0) draw(); }, 2500);
