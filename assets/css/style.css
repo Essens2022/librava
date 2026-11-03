@@ -3372,3 +3372,10 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 #wl-box .wl-bs i.gf { background: rgba(255,224,138,.25); color: #ffe08a; } #wl-box .wl-bs i.gf.on { background: #ffe08a; color: #7a4a00; animation: gbNudge 1s ease 2; }
 #wl-box .wl-more { margin-left: auto; font: 800 13px/1 var(--font-ui, inherit); color: #1d3a16; background: #ffe08a; border-radius: 10px; padding: 3px 7px; }
 #wl-box .wl-bonus.done .wl-bt { font-size: 13px; color: #fff; }
+
+/* cart: make it obvious which books are free and which offers were applied */
+.free-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; background: #e6f4d9; color: #2f5a2a; font: 800 12px/1 var(--font-ui, inherit); }
+.free-tag svg { color: #4F7F33; }
+.sum-off > span:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sum-off .sum-sub { flex-basis: 100%; margin-left: 21px; font-weight: 800; color: #2f5a2a; background: #e6f4d9; border-radius: 10px; padding: 2px 8px; width: fit-content; }
+.sum-off.sum-code { opacity: .95; }

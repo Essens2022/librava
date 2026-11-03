@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103184032';
-import { askWhy } from './why.js?v=20261103184032';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103184032';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103184032';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103184032';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103184032';
-import { couponLive } from './welcome.js?v=20261103184032';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103184032';
-import { track } from './track.js?v=20261103184032';
-import { gaEvent } from './ga.js?v=20261103184032';
-import { guessLang } from './langdetect.js?v=20261103184032';
-import { didYouMean } from './search.js?v=20261103184032';
-import { api, editionsOf } from './api.js?v=20261103184032';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103184032';
+import { CONFIG } from './config.js?v=20261103184635';
+import { askWhy } from './why.js?v=20261103184635';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103184635';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103184635';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103184635';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103184635';
+import { couponLive } from './welcome.js?v=20261103184635';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103184635';
+import { track } from './track.js?v=20261103184635';
+import { gaEvent } from './ga.js?v=20261103184635';
+import { guessLang } from './langdetect.js?v=20261103184635';
+import { didYouMean } from './search.js?v=20261103184635';
+import { api, editionsOf } from './api.js?v=20261103184635';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103184635';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -879,6 +879,7 @@ export async function viewCart(el) {
           <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
           <div class="ok">${esc(t('cart.digital'))}</div>
           <div class="muted" style="font-size:13px">${esc(t('book.format.' + b.format))}</div>
+          ${r.final[b.id] === 0 ? `<div><span class="free-tag">${GIFT_SVG.replace('width="20" height="20"', 'width="14" height="14"')} ${esc(t('book.free'))}</span></div>` : ''}
           <div><button class="rm-btn" data-rm="${esc(b.id)}">${icon('trash')} ${esc(t('cart.remove'))}</button></div>
         </div>
         <div class="cprice">${line(b)}</div>
@@ -889,8 +890,9 @@ export async function viewCart(el) {
       ${r.nudges.length ? `<div class="nudges nudges-side">${r.nudges.map(nudge).join('')}</div>` : ''}
       <div class="sum-rows">
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
-        ${r.applied.map(a => `<div class="sum-off"><span>${icon('tag')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}</span><span>−${money(a.saving)}</span></div>`).join('')}
-        ${r.applied.length && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
+        ${r.applied.map(a => { const nf = a.kind === 'bxgy' && (a.offer?.config?.percent ?? 100) >= 100 ? books.filter(b => r.final[b.id] === 0).length : 0;
+          return `<div class="sum-off${a.kind === 'coupon' ? ' sum-code' : ''}"><span>${a.kind === 'coupon' ? icon('tag') : GIFT_SVG.replace('width="20" height="20"', 'width="15" height="15"')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}${nf ? `<small class="sum-sub">${nf} × ${esc(t('book.free'))}</small>` : ''}</span><span>−${money(a.saving)}</span></div>`; }).join('')}
+        ${r.applied.length && !r.applied.some(a => a.kind === 'coupon') && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
         ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
       </div>
