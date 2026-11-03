@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261103173514';
-import { CONFIG } from './config.js?v=20261103173514';
-import { store } from './util.js?v=20261103173514';
+import { localize, loadRates } from './localprice.js?v=20261103173920';
+import { CONFIG } from './config.js?v=20261103173920';
+import { store } from './util.js?v=20261103173920';
 
 const D = {
   ro: {
@@ -4744,7 +4744,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261103173514`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261103173920`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
@@ -4756,6 +4756,7 @@ export async function setLang(l, { remember = true } = {}) {
   document.documentElement.lang = l;
   // "install app" on Android/Chrome shows the app name from the manifest: use the one in this language
   try { const m = document.querySelector('link[rel="manifest"]'); if (m) m.href = '/assets/manifest/' + l + '.webmanifest'; } catch { }
+  try { window.dispatchEvent(new Event('librava:lang')); } catch { }
 }
 
 export function t(key, vars) {

@@ -1,10 +1,10 @@
 // A tiny one-tap question for people who look at a book and do not add it to the cart:
 // "What is stopping you?" Asked once per visitor, anonymous, easy to close. Answers show in Admin → Statistics.
-import { api } from './api.js?v=20261103173514';
-import { track } from './track.js?v=20261103173514';
-import { store, esc } from './util.js?v=20261103173514';
-import { getLang } from './i18n.js?v=20261103173514';
-import { WHY_TEXT } from './why-i18n.js?v=20261103173514';
+import { api } from './api.js?v=20261103173920';
+import { track } from './track.js?v=20261103173920';
+import { store, esc } from './util.js?v=20261103173920';
+import { getLang } from './i18n.js?v=20261103173920';
+import { WHY_TEXT } from './why-i18n.js?v=20261103173920';
 
 const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format', 'other'];
 const TXT = {
@@ -19,31 +19,50 @@ const FU = {
   it: { price: 'Giusto. Guarda il prezzo qui sopra: molti libri costano meno di un caffè e alcuni sono gratis.', value: 'Bene controllare. Leggi prima l’anteprima gratuita, poi decidi.', look: 'Nessuna pressione. Quando vuoi, il libro si apre sul telefono subito dopo il pagamento.', trust: 'Il pagamento è gestito da Stripe, un sistema sicuro. Leggi subito il libro nel tuo account.', amazon: 'Anche il cartaceo va bene. L’ebook è immediato: niente spedizione, lo leggi oggi dal telefono.', format: 'Lo leggi qui nel browser, da telefono o computer. Nessuna app.', other: 'Grazie. Il libro è a un tocco quando vuoi.', buy: 'Prendi questo libro', sample: 'Leggi un’anteprima gratuita' },
 };
 let timer = null;
+let state = null;   // { book, answer }
+const textsFor = () => {
+  const L = getLang(), W = WHY_TEXT[L];
+  const d = TXT[L] || W || TXT.en;
+  const f = FU[L] || (W && { price: W.fp, value: W.fv, look: W.fl, trust: W.ft, amazon: W.fa, format: W.ff, other: W.fo, buy: W.buy, sample: W.sample }) || FU.en;
+  return { d, f };
+};
+function closeAll() { document.getElementById('why-wrap')?.remove(); state = null; }
+// (re)draws the window in the language the visitor has right now
+function paint() {
+  const wrap = document.getElementById('why-wrap'); if (!wrap || !state) return;
+  const { d, f } = textsFor(), box = wrap.querySelector('#why-box'), { book, answer } = state;
+  box.setAttribute('aria-label', d.q);
+  if (!answer) {
+    box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.q)}</p><div class="why-opts">${KEYS.map(k => `<button type="button" data-k="${k}">${esc(d[k])}</button>`).join('')}</div>`;
+    box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
+      track('survey', { book_id: book.id, note: 'why=' + b.dataset.k });
+      state.answer = b.dataset.k; store.set('why-done', 1); paint();
+    });
+  } else {
+    const k = answer, hasSample = !!document.querySelector('.g-preview, .g-shots');
+    box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.thanks)}</p><p style="font-weight:500">${esc(f[k] || f.other)}</p><div class="why-opts">${(k === 'value' && hasSample) ? `<button type="button" data-go="s">${esc(f.sample)}</button>` : ''}<button type="button" data-go="b" class="why-buy">${esc(f.buy)}</button></div>`;
+    box.querySelector('[data-go="b"]').onclick = () => { closeAll(); document.querySelector('[data-buy],[data-free]')?.click(); };
+    box.querySelector('[data-go="s"]')?.addEventListener('click', () => { closeAll(); document.querySelector('.g-preview, .g-shots')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  }
+  box.querySelector('.why-x').onclick = () => { store.set('why-done', 1); closeAll(); };
+}
+window.addEventListener('librava:lang', paint);
+window.addEventListener('hashchange', () => { if (!location.hash.includes('/book/')) closeAll(); });
+window.addEventListener('popstate', () => { if (!location.hash.includes('/book/') && !/^\/book\//.test(location.pathname)) closeAll(); });
 export function askWhy(book) {
-  clearTimeout(timer); document.getElementById('why-box')?.remove();
+  clearTimeout(timer); closeAll();
   try {
     if (store.get('why-done') || store.get('staff') || api.user()?.isAdmin || !book) return;
-    timer = setTimeout(async () => {
+    timer = setTimeout(async function show() {
       try {
-        if (!location.hash.includes('/book/') || document.hidden || document.getElementById('why-box') || store.get('why-done')) return;
-        if (document.querySelector('.modal, dialog[open], .consent')) { timer = setTimeout(() => askWhy(book), 6000); return; }
+        if (!(location.hash.includes('/book/') || /^\/book\//.test(location.pathname)) || document.hidden || document.getElementById('why-wrap') || store.get('why-done')) return;
+        if (document.querySelector('.modal, dialog[open], .consent, .gift-modal')) { timer = setTimeout(show, 3000); return; }
         if (await api.owns?.(book.id)) return;
-        const L = getLang(), W = WHY_TEXT[L], d = TXT[L] || W || TXT.en;
-        const box = document.createElement('div'); box.id = 'why-box'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', d.q);
-        box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.q)}</p><div class="why-opts">${KEYS.map(k => `<button type="button" data-k="${k}">${esc(d[k])}</button>`).join('')}</div>`;
-        const close = () => { box.remove(); store.set('why-done', 1); };
-        box.querySelector('.why-x').onclick = close;
-        box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
-          track('survey', { book_id: book.id, note: 'why=' + b.dataset.k });
-          const f = FU[getLang()] || (W && { price: W.fp, value: W.fv, look: W.fl, trust: W.ft, amazon: W.fa, format: W.ff, other: W.fo, buy: W.buy, sample: W.sample }) || FU.en, k = b.dataset.k;
-          const hasSample = !!document.querySelector('.g-preview, .g-shots');
-          box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.thanks)}</p><p style="font-weight:500">${esc(f[k] || f.other)}</p><div class="why-opts">${(k === 'value' && hasSample) ? `<button type="button" data-go="s">${esc(f.sample)}</button>` : ''}<button type="button" data-go="b" style="background:#F4A340;border-color:#F4A340;color:#1b1b1b">${esc(f.buy)}</button></div>`;
-          store.set('why-done', 1);
-          box.querySelector('.why-x').onclick = () => box.remove();
-          box.querySelector('[data-go="b"]').onclick = () => { box.remove(); document.querySelector('[data-buy],[data-free]')?.click(); };
-          box.querySelector('[data-go="s"]')?.addEventListener('click', () => { box.remove(); document.querySelector('.g-preview, .g-shots')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
-        });
-        document.body.appendChild(box);
+        const wrap = document.createElement('div'); wrap.id = 'why-wrap';
+        wrap.innerHTML = '<div id="why-box" role="dialog"></div>';
+        wrap.addEventListener('click', e => { if (e.target === wrap) { store.set('why-done', 1); closeAll(); } });
+        document.body.appendChild(wrap);
+        state = { book, answer: null }; paint();
       } catch { }
     }, 14000);
   } catch { }
