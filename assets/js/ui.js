@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js?v=20261103191408';
-import { SOCIAL_PATHS } from './social.js?v=20261103191408';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103191408';
-import { esc, store, $, $$ } from './util.js?v=20261103191408';
+import { CONFIG } from './config.js?v=20261103191748';
+import { SOCIAL_PATHS } from './social.js?v=20261103191748';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103191748';
+import { esc, store, $, $$ } from './util.js?v=20261103191748';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -13,13 +13,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103191408';
-import { suggest, highlight } from './search.js?v=20261103191408';
-import { track, trackPage } from './track.js?v=20261103191408';
-import { initGA, applyConsent } from './ga.js?v=20261103191408';
-import { consentStrings } from './consent-i18n.js?v=20261103191408';
-import { api } from './api.js?v=20261103191408';
-import { describeOffer, offersForBook } from './offers.js?v=20261103191408';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103191748';
+import { suggest, highlight } from './search.js?v=20261103191748';
+import { track, trackPage } from './track.js?v=20261103191748';
+import { initGA, applyConsent } from './ga.js?v=20261103191748';
+import { consentStrings } from './consent-i18n.js?v=20261103191748';
+import { api } from './api.js?v=20261103191748';
+import { describeOffer, offersForBook } from './offers.js?v=20261103191748';
 
 // ---------------- icons ----------------
 const P = {
@@ -977,15 +977,21 @@ function moveShelves() {
     sh.addEventListener('touchend', () => setTimeout(() => sh.classList.remove('hold'), 2500), { passive: true });
     sh.addEventListener('mouseenter', () => sh.classList.add('hold')); sh.addEventListener('mouseleave', () => sh.classList.remove('hold'));
     // moved by scrolling the box (not a CSS transform): smooth on iPhones, where a moving layer flickered
-    const speed = matchMedia('(prefers-reduced-motion: reduce)').matches ? 18 : 30; let last = 0, pos = 0, vis = true;
+    const speed = matchMedia('(prefers-reduced-motion: reduce)').matches ? 18 : 30; let last = 0, pos = 0, vis = true, unit = 0, tick = 0;
     try { new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(sh); } catch { }
     const step = now => {
       if (!sh.isConnected) return;
       const dt = last ? Math.min(64, now - last) : 0; last = now;
       const slide = sh.closest('.promo-slide');
       if (vis && !document.hidden && !sh.classList.contains('hold') && (!slide || slide.classList.contains('on'))) {
-        const half = track.scrollWidth / 2;
-        if (half > sh.clientWidth) { pos = (pos + speed * dt / 1000) % half; sh.scrollLeft = pos; }
+        // one "round" = the distance between a book and its first copy; on wide screens a round can be narrower than the shelf, so copies are added until the shelf is always full
+        if (++tick % 30 === 1 || !unit) {
+          const a = track.children[0], c = track.children[pbs.length];
+          unit = a && c ? c.offsetLeft - a.offsetLeft : 0;
+          if (unit > 0) { const need = Math.ceil(sh.clientWidth / unit) + 1; let have = Math.floor(track.children.length / pbs.length);
+            while (have < need && have < 12) { pbs.forEach(pb => { const k = pb.cloneNode(true); k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1; track.appendChild(k); }); have++; } }
+        }
+        if (unit > 0) { pos = (pos + speed * dt / 1000) % unit; sh.scrollLeft = pos; }
       } else pos = sh.scrollLeft;
       requestAnimationFrame(step);
     };
