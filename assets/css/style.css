@@ -3303,3 +3303,13 @@ body:has(#goal-bar) #cb-bar { bottom: 70px; } body:has(#goal-bar) #why-box { bot
 .welcome-big { font-size: 64px; font-weight: 900; line-height: 1; color: #c76a00; letter-spacing: -1px; margin: 4px 0 8px; }
 #goal-pop { overflow: hidden; }
 #goal-pop .gp-b, #goal-pop button, #goal-pop .gp-i { position: relative; z-index: 1; }
+
+/* real 15-minute countdown of the welcome gift */
+#wl-pill { position: fixed; z-index: 86; left: 12px; bottom: 14px; display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 10px; border-radius: 999px; background: #F4A340; color: #1b1b1b; text-decoration: none; font: 800 15px/1 var(--font-ui, inherit); box-shadow: 0 8px 22px rgba(0,0,0,.3); animation: whyIn .35s ease; }
+#wl-pill:hover { text-decoration: none; }
+#wl-pill .wl-g { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #1f2b26; color: #F4A340; }
+#wl-pill .wl-t { font-variant-numeric: tabular-nums; min-width: 42px; }
+#wl-pill.low { background: #e5484d; color: #fff; animation: ladPulse 1s infinite; }
+body:has(#goal-bar) #wl-pill { bottom: 66px; }
+body:has(.buy-sticky:not([hidden])) #wl-pill { bottom: 76px; }
+body:has(.buy-sticky:not([hidden])):has(#goal-bar) #wl-pill { bottom: 128px; }
