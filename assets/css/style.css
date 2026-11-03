@@ -3408,3 +3408,18 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .ladder .ladder-s.wow span { background: linear-gradient(90deg, #7c3aed, #d946ef, #c9962b); -webkit-background-clip: text; background-clip: text; color: transparent; }
 @keyframes ladShine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 .ladder .ladder-s:not(.wow) span { color: color-mix(in srgb, var(--c) 78%, #000); }
+
+/* final step = GOLD (our colours: green + amber), a shining "you won the maximum" look */
+.ladder .ladder-bar i { background-image: linear-gradient(90deg, #F2B90F 0%, #F4821F 26%, #6DBE2A 50%, #0E9F6E 72%, #FFD25A 90%, #FFB400 100%) !important; }
+.ladder.wow-on .ladder-bar { box-shadow: 0 0 14px 3px rgba(255,190,40,.65); position: relative; }
+.ladder.wow-on .ladder-bar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.75) 50%, transparent 70%); background-size: 250% 100%; animation: ladSweep 2.2s linear infinite; }
+@keyframes ladSweep { 0% { background-position: 150% 0; } 100% { background-position: -100% 0; } }
+.ladder .ladder-s.wow { color: #D9960B; }
+.ladder .ladder-s.wow b { border-color: #D9960B; color: #B87A00; background: rgba(255,200,60,.18); }
+.ladder .ladder-s.wow span { background: linear-gradient(90deg, #B87A00, #F2B90F, #B87A00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ladder .ladder-s.wow.on b { background: linear-gradient(135deg, #FFE27A, #FFB400 45%, #E08A00 70%, #FFE27A) !important; background-size: 220% 220% !important; color: #1d3a16 !important; border-color: #FFF1B0 !important; box-shadow: 0 0 18px rgba(255,190,40,.9), 0 0 0 3px rgba(255,210,90,.55) !important; animation: ladShine 1.8s linear infinite, ladGem 1.8s ease-in-out infinite; position: relative; }
+.ladder .ladder-s.wow.on b::before, .ladder .ladder-s.wow.on b::after { content: '✦'; position: absolute; color: #FFD25A; font-size: 12px; animation: ladTwinkle 1.4s ease-in-out infinite; }
+.ladder .ladder-s.wow.on b::before { top: -7px; right: -6px; } .ladder .ladder-s.wow.on b::after { bottom: -6px; left: -7px; font-size: 9px; animation-delay: .7s; }
+.ladder .ladder-s.wow.next b { animation: ladNext 1.4s infinite; }
+@keyframes ladGem { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@keyframes ladTwinkle { 0%,100% { opacity: .2; transform: scale(.6) rotate(0); } 50% { opacity: 1; transform: scale(1.15) rotate(25deg); } }
