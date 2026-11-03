@@ -1,9 +1,9 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103193215';
-import { store, esc } from './util.js?v=20261103193215';
-import { describeOffer } from './offers.js?v=20261103193215';
-import { getLang, t } from './i18n.js?v=20261103193215';
-import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261103193215';
+import { api } from './api.js?v=20261103193556';
+import { store, esc } from './util.js?v=20261103193556';
+import { describeOffer } from './offers.js?v=20261103193556';
+import { getLang, t } from './i18n.js?v=20261103193556';
+import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261103193556';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -84,13 +84,11 @@ const isFree = o => o.kind === 'bxgy' && (o.config?.percent ?? 100) >= 100;
 const offerTxt = o => describeOffer(o, t, c => t('cat.' + c));
 // short label for the clock: "🎁 3" (free books) or "−25%"
 const offerTag = o => o.kind === 'bxgy' ? (isFree(o) ? '🎁 ' + (+o.config.get || 1) : '−' + (+o.config.percent || 0) + '%') : '−' + offerPct(o) + '%';
-// the big picture in the pop-up: books to buy → gifts, drawn from the numbers set in the panel
+// the big number in the pop-up: how many books are a gift (follows the numbers set in the panel)
 function offerVisual(o) {
   if (o.kind !== 'bxgy') return `<div class="welcome-big">−${offerPct(o)}%</div>`;
-  const b = +o.config.buy || 1, g = +o.config.get || 1, free = isFree(o);
-  const big = x => x.replace('width="13" height="13"', 'width="20" height="20"');
-  if (b + g > 10) return `<div class="wl-flow big">${b} ${big(BOOK_I)} <b>→</b> ${g} ${big(GIFT_I)}</div>${free ? '' : `<div class="welcome-big">−${+o.config.percent || 0}%</div>`}`;
-  return `<div class="wl-flow" style="--n:${b + g}">${Array.from({ length: b }, () => `<i>${big(BOOK_I)}</i>`).join('')}<b>→</b>${Array.from({ length: g }, () => `<i class="gf">${big(GIFT_I)}</i>`).join('')}</div>${free ? '' : `<div class="welcome-big">−${+o.config.percent || 0}%</div>`}`;
+  const g = +o.config.get || 1;
+  return isFree(o) ? `<div class="welcome-big">${g} × 🎁</div>` : `<div class="welcome-big">${g} × −${+o.config.percent || 0}%</div>`;
 }
 async function takeGift(c) {
   const wo = await welOffer();
