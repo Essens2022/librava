@@ -1,15 +1,16 @@
-import { CONFIG } from './config.js?v=20261103104552';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103104552';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103104552';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103104552';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103104552';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103104552';
-import { track } from './track.js?v=20261103104552';
-import { gaEvent } from './ga.js?v=20261103104552';
-import { guessLang } from './langdetect.js?v=20261103104552';
-import { didYouMean } from './search.js?v=20261103104552';
-import { api, editionsOf } from './api.js?v=20261103104552';
-import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103104552';
+import { CONFIG } from './config.js?v=20261103110507';
+import { askWhy } from './why.js?v=20261103110507';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103110507';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103110507';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103110507';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103110507';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103110507';
+import { track } from './track.js?v=20261103110507';
+import { gaEvent } from './ga.js?v=20261103110507';
+import { guessLang } from './langdetect.js?v=20261103110507';
+import { didYouMean } from './search.js?v=20261103110507';
+import { api, editionsOf } from './api.js?v=20261103110507';
+import { icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103110507';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -219,6 +220,7 @@ export async function viewBook(el, id) {
   }
   document.title = `${b.title} — ${CONFIG.siteName}`;
   track('book_view', { book_id: b.id });
+  askWhy(b);
   // the other formats of this book (EPUB, PDF…), each with its own price — shown like Amazon's format tiles
   const eds = b.work_id ? editionsOf(await api.listBooks({ allFormats: true }), b) : [b];
   const [owned, reviews, related, myRev, ownedEds] = await Promise.all([
