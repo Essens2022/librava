@@ -1,8 +1,8 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103183649';
-import { store, esc } from './util.js?v=20261103183649';
-import { getLang, t } from './i18n.js?v=20261103183649';
-import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103183649';
+import { api } from './api.js?v=20261103184032';
+import { store, esc } from './util.js?v=20261103184032';
+import { getLang, t } from './i18n.js?v=20261103184032';
+import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261103184032';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -41,7 +41,7 @@ function pill(pct) {
     window.addEventListener('scroll', () => { if (window.scrollY > 90) fold(); }, { passive: true });
     window.addEventListener('hashchange', fold); window.addEventListener('popstate', fold);
     // ...and opens by itself for a moment when it matters: a book was added, or time is running out
-    window.addEventListener('librava:cart', () => { const e = document.getElementById('wl-box'); if (e) peek(e, 4500); });
+    window.addEventListener('librava:cart', () => { const e = document.getElementById('wl-box'); if (e) { bonusPanel(e); peek(e, 4500); } });
     el.addEventListener('click', e => {
       const min = el.classList.contains('min');
       if (e.target.closest('.wl-c')) { clearTimeout(collapseT); el.classList.add('min'); return; }
@@ -53,12 +53,30 @@ function pill(pct) {
   if (left <= 120 && left > 0 && lastLeftFlag !== 120) { lastLeftFlag = 120; peek(el, 6000); }
   if (left <= 30 && lastLeftFlag !== 30) { lastLeftFlag = 30; peek(el, 6000); }
   el.style.setProperty('--p', Math.round(100 * left / (winMin() * 60)) + '%');
-  const bonus = store.get('welcome-bonus', ''); el.querySelector('.wl-open b').textContent = bonus || '−' + (+pct) + '%';
+  const bonus = store.get('welcome-bonus', ''); el.querySelector('.wl-open b').textContent = bonus ? '🎁 ' + bonus.split('+')[1] : '−' + (+pct) + '%';
+  bonusPanel(el);
   el.querySelector('.wl-t').textContent = time; el.querySelector('.wl-t2').textContent = time;
 }
 
 // the timed extra offer (admin: any offer marked "new visitors, welcome countdown")
-async function welOffer() { try { return (await api.offers()).find(o => o.kind === 'bxgy' && o.config?.welcome) || null; } catch { return null; } }
+
+// the guide on the side: shows the timed gift offer as slots (books to buy, then gift books) and how many are still missing
+let bonusOffer = null;
+const BOOK_I = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/></svg>';
+const GIFT_I = GIFT_SVG.replace('width="20" height="20"', 'width="13" height="13"');
+function bonusPanel(el) {
+  const on = !!store.get('welcome-bonus', '') && bonusOffer;
+  el.classList.toggle('has-b', !!on);
+  let box = el.querySelector('.wl-bonus');
+  if (!on) { box?.remove(); return; }
+  const b = +bonusOffer.config.buy || 3, g = +bonusOffer.config.get || 3, size = b + g, n = cart.get().length, done = n >= size, more = Math.max(0, size - n);
+  if (!box) { box = document.createElement('div'); box.className = 'wl-bonus'; el.querySelector('.wl-open').after(box); }
+  const slots = Array.from({ length: size }, (_, i) => i < b ? `<i class="${i < n ? 'on' : ''}">${BOOK_I}</i>` : `<i class="gf ${done ? 'on' : ''}">${GIFT_I}</i>`).join('');
+  const key = n + '|' + getLang(); if (box.dataset.k === key) return; box.dataset.k = key;
+  box.className = 'wl-bonus' + (done ? ' done' : '');
+  box.innerHTML = `<div class="wl-bt">${esc(done ? g + ' × ' + t('book.free') : t('of.d.bxgyFree', { a: size, b, n: g }))}</div><div class="wl-bs">${slots}${done ? '' : `<span class="wl-more">+${more}</span>`}</div>`;
+}
+async function welOffer() { try { bonusOffer = (await api.offers()).find(o => o.kind === 'bxgy' && o.config?.welcome) || null; } catch { bonusOffer = null; } return bonusOffer; }
 async function takeGift(c) {
   const wo = await welOffer();
   const m = Math.min(60, Math.max(1, Math.max(+c?.config?.minutes || 0, +wo?.config?.minutes || 0) || 15));
@@ -74,8 +92,8 @@ async function takeGift(c) {
     const [, btn] = T[getLang()] || T.en;
     modal(`<div class="gift-confetti" aria-hidden="true">${conf}</div>
       <div class="gift-hero">${GIFT_SVG.replace('width="20" height="20"', 'width="44" height="44"')}</div>
-      <div class="welcome-big">${b} + ${g}</div>
-      <h2>${esc(t('book.free'))}</h2>
+      <div class="welcome-big">${g} × 🎁</div>
+      <h2>${esc(t('of.d.bxgyFree', { a: b + g, b, n: g }))}</h2>
       <div class="actions" style="justify-content:center"><button class="btn btn-buy" data-close>${esc(btn)}</button></div>`,
       { onMount: m2 => { m2.classList.add('gift-modal'); } });
     resumePill(); const el = document.getElementById('wl-box'); if (el) peek(el, 6000);
@@ -84,6 +102,7 @@ async function takeGift(c) {
 export function resumePill() {
   try {
     if (!store.get('welcome-until', 0) || tick) return;
+    if (store.get('welcome-bonus')) welOffer();
     api.findCoupon?.(CODE).then(c => { const pct = c?.config?.percent; if (!pct) return; pill(pct); clearInterval(tick); tick = setInterval(() => pill(pct), 1000); }).catch(() => { });
   } catch { }
 }

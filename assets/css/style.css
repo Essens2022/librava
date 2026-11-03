@@ -3359,3 +3359,16 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 @keyframes gbNudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
 @keyframes gbPulse { 0% { opacity: .2; transform: translateY(5px); } 100% { opacity: 1; transform: none; } }
 @media (min-width: 861px) { #wl-box { top: 156px; } }
+
+/* side guide for the timed gift: slots (books to buy → gift books) + how many are missing */
+#wl-box.has-b:not(.min) { height: 100px; width: 196px; border-radius: 18px; }
+#wl-box.has-b .wl-open { bottom: auto; height: 38px; }
+#wl-box .wl-bonus { position: absolute; left: 0; right: 0; top: 38px; padding: 0 12px; display: flex; flex-direction: column; gap: 6px; transition: opacity .25s ease; }
+#wl-box.min .wl-bonus { opacity: 0; pointer-events: none; }
+#wl-box .wl-bt { font: 800 12px/1.1 var(--font-ui, inherit); color: #ffe08a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#wl-box .wl-bs { display: flex; align-items: center; gap: 4px; }
+#wl-box .wl-bs i { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: rgba(255,255,255,.18); color: rgba(255,255,255,.55); transition: background .3s ease, color .3s ease, transform .3s ease; }
+#wl-box .wl-bs i.on { background: #8fd36a; color: #1d3a16; transform: scale(1.06); }
+#wl-box .wl-bs i.gf { background: rgba(255,224,138,.25); color: #ffe08a; } #wl-box .wl-bs i.gf.on { background: #ffe08a; color: #7a4a00; animation: gbNudge 1s ease 2; }
+#wl-box .wl-more { margin-left: auto; font: 800 13px/1 var(--font-ui, inherit); color: #1d3a16; background: #ffe08a; border-radius: 10px; padding: 3px 7px; }
+#wl-box .wl-bonus.done .wl-bt { font-size: 13px; color: #fff; }
