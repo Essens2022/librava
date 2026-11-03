@@ -3231,3 +3231,5 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 .guide-card, .guide-card b { color: #1c1f1a !important; }
 .guide-card small { color: #1f7a3c !important; }
 .guide-home .btn-ghost, .guide-home a:not(.btn):not(.guide-card) { color: #1f6a35; }
+.guide-home .btn-ghost, .guide-home a.btn { color: #fff !important; }
+.guide-home .btn-buy { color: #1b1b1b !important; }
