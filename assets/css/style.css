@@ -3735,3 +3735,19 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @media (prefers-reduced-motion: reduce) { .dvx { animation: none !important; } }
 .dvx-ph { right: 4%; } .dvx-tab { left: 2%; } .bk-d2 .dvx-ph { right: auto; left: 2%; } .bk-d2 .dvx-tab { left: auto; right: 4%; }
 @media (max-width: 760px) { .dvx-ph, .bk-d2 .dvx-ph { right: 2%; left: auto; } }
+
+/* fit: whole covers inside the devices (real covers are 2:3) */
+.dvx-lap .dvx-scr { aspect-ratio: 4 / 3; }
+.dvx-lap { width: calc(var(--dw) * .86); left: 28%; }
+.dvx-lap .pg { background: #f6f1e6; } .dvx-lap .pg img { object-fit: cover; object-position: center top; }
+.dvx-tab .dvx-scr { aspect-ratio: 2 / 3; border-width: 5px; } .dvx-tab { width: calc(var(--dw) * .36); }
+.dvx-ph .th { height: auto; aspect-ratio: 2 / 3; } .dvx-ph .tx { padding-top: 8%; } .dvx-ph .dvx-scr { aspect-ratio: 9 / 19; }
+.bk-d2 .dvx-tab { right: 6%; } .dvx-tab { left: 4%; }
+.dvx-ph { right: 6%; } .bk-d2 .dvx-ph { left: 4%; right: auto; }
+@media (max-width: 760px) {
+  .of-s.has-bk .of-bk { --dw: 150px; width: 54%; } .of-s.has-bk .of-in { padding-right: 52%; }
+  .dvx-tab { display: block; width: calc(var(--dw) * .38); left: 0; } .bk-d2 .dvx-tab { left: auto; right: 0; }
+  .dvx-lap { left: 26%; width: calc(var(--dw) * .88); } .dvx-ph, .bk-d2 .dvx-ph { right: 0; left: auto; width: calc(var(--dw) * .26); }
+  .bk-d2 .dvx-ph { left: 0; right: auto; } .bk-d2 .dvx-lap { left: 26%; }
+}
+@media (max-width: 760px) { .bk-d2 .dvx-tab { right: 5%; } .dvx-tab { left: 1%; } }
