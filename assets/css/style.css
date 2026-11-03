@@ -3379,3 +3379,14 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .sum-off > span:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .sum-off .sum-sub { flex-basis: 100%; margin-left: 21px; font-weight: 800; color: #2f5a2a; background: #e6f4d9; border-radius: 10px; padding: 2px 8px; width: fit-content; }
 .sum-off.sum-code { opacity: .95; }
+
+/* ladder: the timed gift continues the bar in bright violet */
+.ladder.has-wow .ladder-bar i { background: linear-gradient(90deg, #6fb04a 0%, #F4A340 62%, #b04dff 100%); }
+.ladder.wow-on .ladder-bar { box-shadow: 0 0 12px 2px rgba(176,77,255,.55); } .ladder.wow-on .ladder-bar i { background: linear-gradient(90deg, #6fb04a, #b04dff 70%, #e04dff); }
+.ladder-s.wow { color: #a63df0; opacity: 1; }
+.ladder-s.wow b { border-color: #a63df0; background: rgba(176,77,255,.12); color: #a63df0; }
+.ladder-s.wow b svg { width: 18px; height: 18px; }
+.ladder-s.wow span { color: #a63df0; font-weight: 800; }
+.ladder-s.wow.next b { animation: ladWow 1.4s infinite; }
+.ladder-s.wow.on b { background: linear-gradient(135deg, #b04dff, #e04dff); color: #fff; border-color: #b04dff; box-shadow: 0 0 14px rgba(176,77,255,.7); animation: ladWow 1.6s infinite; }
+@keyframes ladWow { 0%,100% { box-shadow: 0 0 0 0 rgba(176,77,255,.65); } 50% { box-shadow: 0 0 0 9px rgba(176,77,255,0); } }

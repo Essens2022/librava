@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103184635';
-import { askWhy } from './why.js?v=20261103184635';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103184635';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103184635';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103184635';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103184635';
-import { couponLive } from './welcome.js?v=20261103184635';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103184635';
-import { track } from './track.js?v=20261103184635';
-import { gaEvent } from './ga.js?v=20261103184635';
-import { guessLang } from './langdetect.js?v=20261103184635';
-import { didYouMean } from './search.js?v=20261103184635';
-import { api, editionsOf } from './api.js?v=20261103184635';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103184635';
+import { CONFIG } from './config.js?v=20261103185339';
+import { askWhy } from './why.js?v=20261103185339';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103185339';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103185339';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103185339';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103185339';
+import { couponLive } from './welcome.js?v=20261103185339';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103185339';
+import { track } from './track.js?v=20261103185339';
+import { gaEvent } from './ga.js?v=20261103185339';
+import { guessLang } from './langdetect.js?v=20261103185339';
+import { didYouMean } from './search.js?v=20261103185339';
+import { api, editionsOf } from './api.js?v=20261103185339';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103185339';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -861,12 +861,19 @@ export async function viewCart(el) {
   };
   // reward ladder: each step = a number of books in the cart and what the last one costs (numbers + "free" only, no extra text to translate)
   const ladder = () => {
-    const steps = offers.filter(o => o.kind === 'bxgy' && !o.config?.category && (+o.config.get || 1) === 1 && o.active !== false)
+    const steps = offers.filter(o => o.kind === 'bxgy' && !o.config?.category && !o.config?.welcome && (+o.config.get || 1) === 1 && o.active !== false)
       .map(o => ({ n: (+o.config.buy || 1) + 1, p: +o.config.percent || 100 })).sort((a, b) => a.n - b.n);
+    // the timed welcome gift (e.g. buy 3, get 3 free) continues the ladder as the last, brightest step
+    let wowTxt = '';
+    try {
+      const w = Number(localStorage.getItem('librava:welcome-until')) > Date.now() && offers.find(o => o.kind === 'bxgy' && o.config?.welcome && !o.config?.category);
+      if (w) { const g = +w.config.get || 3; steps.push({ n: (+w.config.buy || 3) + g, p: +w.config.percent || 100, wow: g }); }
+    } catch { }
     if (steps.length < 2) return '';
     const have = books.length, top = steps[steps.length - 1].n, reached = steps.filter(x => have >= x.n).length;
     const fill = Math.min(100, Math.round(100 * (have - 1) / (top - 1)));
-    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}"><b>${x.n}</b><span>${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
+    const hasWow = steps.some(x => x.wow);
+    return `<div class="ladder${hasWow ? ' has-wow' : ''}${hasWow && have >= top ? ' wow-on' : ''}" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
