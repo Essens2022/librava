@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261103223331';
-import { CONFIG } from './config.js?v=20261103223331';
-import { store } from './util.js?v=20261103223331';
+import { localize, loadRates } from './localprice.js?v=20261103230018';
+import { CONFIG } from './config.js?v=20261103230018';
+import { store } from './util.js?v=20261103230018';
 
 const D = {
   ro: {
@@ -250,6 +250,16 @@ const D = {
     'fbt.auto': 'Automat',
     'pr.kind.books': 'Mai multe cărți',
     'pr.kind.offers': 'Oferte active (animat)',
+    'pr.of.style': 'Alege modelul (stilul) bannerului',
+    'pr.of.btn': 'Modele oferte și sărbători',
+    'pr.of.btnSub': '{n} modele noi · animate',
+    'pr.of.offers': 'Ofertele din banner',
+    'pr.of.offersHelp': 'Nimic bifat = toate ofertele active. O singură ofertă = o singură scenă; mai multe = fiecare cu alt stil și alte mișcări.',
+    'pr.of.books': 'Arată și coperți de cărți (cu efecte 3D)',
+    'pr.of.topic': 'Tema cărților',
+    'pr.of.topicAuto': 'Automat (cărți care au oferta)',
+    'pr.of.ad': 'Pentru publicitate',
+    'pr.of.hol': 'Pentru sărbători',
     'pr.books': 'Cărțile din banner',
     'pr.booksHelp': 'Alege între 2 și 8 cărți, în ordinea în care vrei să apară. Fiecare copertă duce la cartea ei, butonul duce la linkul ales mai jos.',
     'pr.booksNone': 'Nicio carte aleasă încă.',
@@ -1822,6 +1832,16 @@ const D = {
     'fbt.auto': 'Automatico',
     'pr.kind.books': 'Più libri',
     'pr.kind.offers': 'Offerte attive (animato)',
+    'pr.of.style': 'Scegli il modello (stile) del banner',
+    'pr.of.btn': 'Modelli offerte e feste',
+    'pr.of.btnSub': '{n} nuovi modelli · animati',
+    'pr.of.offers': 'Offerte nel banner',
+    'pr.of.offersHelp': 'Nessuna spunta = tutte le offerte attive. Una sola offerta = una sola scena; più offerte = ognuna con stile e movimenti diversi.',
+    'pr.of.books': 'Mostra anche le copertine dei libri (effetti 3D)',
+    'pr.of.topic': 'Tema dei libri',
+    'pr.of.topicAuto': "Automatico (libri con l'offerta)",
+    'pr.of.ad': 'Per la pubblicità',
+    'pr.of.hol': 'Per le feste',
     'pr.books': 'Libri nel banner',
     'pr.booksHelp': 'Scegli da 2 a 8 libri, nell’ordine in cui vuoi mostrarli. Ogni copertina apre il suo libro, il pulsante porta al link scelto sotto.',
     'pr.booksNone': 'Nessun libro scelto.',
@@ -3394,6 +3414,16 @@ const D = {
     'fbt.auto': 'Automatic',
     'pr.kind.books': 'Several books',
     'pr.kind.offers': 'Live offers (animated)',
+    'pr.of.style': 'Choose the banner model (style)',
+    'pr.of.btn': 'Offers & holidays models',
+    'pr.of.btnSub': '{n} new models · animated',
+    'pr.of.offers': 'Offers in the banner',
+    'pr.of.offersHelp': 'Nothing ticked = all live offers. One offer = one scene; several = each with its own style and motion.',
+    'pr.of.books': 'Also show book covers (3D effects)',
+    'pr.of.topic': 'Book topic',
+    'pr.of.topicAuto': 'Automatic (books the offer applies to)',
+    'pr.of.ad': 'For advertising',
+    'pr.of.hol': 'For holidays',
     'pr.books': 'Books in the banner',
     'pr.booksHelp': 'Choose 2 to 8 books, in the order you want them shown. Each cover opens its book; the button goes to the link chosen below.',
     'pr.booksNone': 'No books chosen yet.',
@@ -4756,7 +4786,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261103223331`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261103230018`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
