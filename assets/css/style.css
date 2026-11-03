@@ -3274,3 +3274,15 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 
 /* desktop: the cart number sits centered over the basket icon (not over icon + the word "Cart") */
 @media (min-width: 861px) { .cart-btn .cart-count, .cart-btn .cart-count[class] { left: 26px !important; } }
+
+/* goal bar: the next reward follows the visitor on every page while there are books in the cart */
+#goal-bar { position: fixed; z-index: 70; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 9px 16px calc(9px + env(safe-area-inset-bottom)); background: #1f2b26; color: #fff; text-decoration: none; font: 600 14px/1.25 var(--font-ui, inherit); box-shadow: 0 -6px 20px rgba(0,0,0,.25); animation: whyIn .3s ease; }
+#goal-bar:hover { text-decoration: none; }
+#goal-bar .gb-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #F4A340; color: #1b1b1b; font-weight: 800; flex: none; }
+#goal-bar .gb-t { flex: 1; min-width: 0; } #goal-bar em { font-style: normal; color: #ffc46b; font-weight: 800; }
+#goal-bar .gb-p { display: flex; gap: 4px; flex: none; } #goal-bar .gb-p i { width: 14px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.25); } #goal-bar .gb-p i.f { background: #8fd36a; }
+#goal-bar b { color: #F4A340; font-size: 18px; }
+body:has(.buy-sticky:not([hidden])) #goal-bar { bottom: 64px; }
+body:has(#goal-bar) { padding-bottom: 52px; }
+@media (max-width: 520px) { #goal-bar .gb-p { display: none; } }
+body:has(#goal-bar) #cb-bar { bottom: 70px; } body:has(#goal-bar) #why-box { bottom: 136px; }
