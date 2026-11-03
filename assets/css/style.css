@@ -3225,3 +3225,9 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 /* on banners: red on a small white chip so it reads on any background */
 .promo-price s, .tp .promo-price s, .sp .promo-price s { color: #c62020 !important; background: rgba(255,255,255,.94); padding: 1px 6px; border-radius: 6px; font-weight: 800 !important; opacity: 1 !important; font-size: 14px !important; text-decoration-thickness: 2px; text-shadow: none !important; }
 .sp .promo-price s { font-size: 13px !important; }
+/* free guides block keeps its light look in dark mode: text must stay dark */
+.guide-home, .guide-home h2, .guide-home h3, .guide-home p, .guide-home .muted { color: #2a2a22 !important; }
+.guide-home .muted, .guide-home p { color: #4a4a3e !important; }
+.guide-card, .guide-card b { color: #1c1f1a !important; }
+.guide-card small { color: #1f7a3c !important; }
+.guide-home .btn-ghost, .guide-home a:not(.btn):not(.guide-card) { color: #1f6a35; }
