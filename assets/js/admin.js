@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103191748';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103191748';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103191748';
-import { resetCompanyCache } from './views.js?v=20261103191748';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103191748';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103191748';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103191748';
-import { optimizeBook } from './optimize.js?v=20261103191748';
-import { api } from './api.js?v=20261103191748';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103191748';
+import { CONFIG } from './config.js?v=20261103192529';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103192529';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103192529';
+import { resetCompanyCache } from './views.js?v=20261103192529';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103192529';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103192529';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103192529';
+import { optimizeBook } from './optimize.js?v=20261103192529';
+import { api } from './api.js?v=20261103192529';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103192529';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -644,13 +644,14 @@ async function visitorsAdmin(body) {
   body.innerHTML = `<div class="panel">${rangeBarHTML(r)}<div id="vi-why"></div><div id="vi-sum"></div><div id="vi-list"><div class="spinner"></div></div></div>`;
   bindRange(body, () => visitorsAdmin(body));
   const who = v => v.user_id ? `<b>${esc(v.name || v.email || '')}</b><div class="muted" style="font-size:13px">${esc(v.email || '')}</div>` : `<span class="muted">${esc(t('admin.vis.guest'))}</span>`;
-  const WHY = { price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar se uitau', trust: 'Nu au încredere să plătească aici', amazon: 'Preferă tipărit / Amazon', format: 'Nu pot citi formatul', other: 'Altceva' };
+  const WHY = { price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar se uitau', trust: 'Nu au încredere să plătească aici', amazon: 'Preferă tipărit / Amazon', format: 'Nu pot citi formatul', other: 'Altceva', text: 'Au scris singuri' };
   const drawWhy = async () => {
     try {
       const rows = await api.adminWhy(), box = $('#vi-why', body); if (!box) return;
       const n = {}; rows.forEach(r => { const k = /why=(\w+)/.exec(r.meta?.note || '')?.[1]; if (k) n[k] = (n[k] || 0) + 1; });
+      const written = rows.map(r => /why=text: (.+)/.exec(r.meta?.note || '')?.[1]).filter(Boolean);
       const tot = Object.values(n).reduce((a, b) => a + b, 0);
-      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>Ce îi oprește să cumpere</b> <span class="muted">(răspunsuri ale vizitatorilor: ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : '<p class="muted" style="margin:8px 0 0">Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.</p>'}</section>`;
+      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>Ce îi oprește să cumpere</b> <span class="muted">(răspunsuri ale vizitatorilor: ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : '<p class="muted" style="margin:8px 0 0">Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.</p>'}${written.length ? `<div style="margin-top:12px"><b style="font-size:14px">Ce au scris ei</b>${written.slice(0, 20).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>`;
     } catch { }
   };
   const draw = async () => {

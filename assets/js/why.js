@@ -1,12 +1,20 @@
 // A tiny one-tap question for people who look at a book and do not add it to the cart:
 // "What is stopping you?" Asked once per visitor, anonymous, easy to close. Answers show in Admin → Statistics.
-import { api } from './api.js?v=20261103191748';
-import { track } from './track.js?v=20261103191748';
-import { store, esc } from './util.js?v=20261103191748';
-import { getLang } from './i18n.js?v=20261103191748';
-import { WHY_TEXT } from './why-i18n.js?v=20261103191748';
+import { api } from './api.js?v=20261103192529';
+import { track } from './track.js?v=20261103192529';
+import { store, esc } from './util.js?v=20261103192529';
+import { getLang } from './i18n.js?v=20261103192529';
+import { WHY_TEXT } from './why-i18n.js?v=20261103192529';
 
-const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format', 'other'];
+const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format'];
+// the free-text line under the answers: [placeholder, send button] in every language of the site
+const WT = {
+  en: ['Or write what stops you…', 'Send'], ro: ['Sau scrie ce te oprește…', 'Trimite'], it: ['Oppure scrivi cosa ti frena…', 'Invia'], fr: ['Ou écrivez ce qui vous retient…', 'Envoyer'], de: ['Oder schreiben Sie, was Sie zögern lässt …', 'Senden'],
+  es: ['O escribe qué te frena…', 'Enviar'], pt: ['Ou escreva o que o impede…', 'Enviar'], nl: ['Of schrijf wat je tegenhoudt…', 'Verstuur'], pl: ['Albo napisz, co Cię powstrzymuje…', 'Wyślij'], cs: ['Nebo napište, co vás brzdí…', 'Odeslat'],
+  sk: ['Alebo napíšte, čo vás brzdí…', 'Odoslať'], hu: ['Vagy írd le, mi tart vissza…', 'Küldés'], bg: ['Или напишете какво ви спира…', 'Изпрати'], hr: ['Ili napišite što vas koči…', 'Pošalji'], sl: ['Ali napišite, kaj vas ustavlja…', 'Pošlji'],
+  el: ['Ή γράψτε τι σας εμποδίζει…', 'Αποστολή'], da: ['Eller skriv, hvad der holder dig tilbage…', 'Send'], sv: ['Eller skriv vad som håller dig tillbaka…', 'Skicka'], no: ['Eller skriv hva som holder deg tilbake…', 'Send'], fi: ['Tai kirjoita, mikä estää sinua…', 'Lähetä'],
+  et: ['Või kirjuta, mis sind takistab…', 'Saada'], lv: ['Vai uzraksti, kas tevi attur…', 'Sūtīt'], lt: ['Arba parašykite, kas jus stabdo…', 'Siųsti'], uk: ['Або напишіть, що вас зупиняє…', 'Надіслати'],
+};
 const TXT = {
   en: { q: 'Quick question: what is stopping you from getting this book?', price: 'The price', value: 'Not sure it is worth it', look: 'I was only looking', trust: 'I am not sure about paying here', amazon: 'I prefer a paperback or Amazon', format: 'I cannot read this format', other: 'Something else', thanks: 'Thank you! This helps us a lot.' },
   ro: { q: 'O întrebare rapidă: ce te oprește să iei această carte?', price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar mă uitam', trust: 'Nu sunt sigur să plătesc aici', amazon: 'Prefer cartea tipărită sau Amazon', format: 'Nu pot citi acest format', other: 'Altceva', thanks: 'Mulțumim! Ne ajută foarte mult.' },
@@ -30,10 +38,18 @@ function closeAll() { document.getElementById('why-wrap')?.remove(); state = nul
 // (re)draws the window in the language the visitor has right now
 function paint() {
   const wrap = document.getElementById('why-wrap'); if (!wrap || !state) return;
-  const { d, f } = textsFor(), box = wrap.querySelector('#why-box'), { book, answer } = state;
+  const { d, f } = textsFor(), wt = WT[getLang()] || WT.en, box = wrap.querySelector('#why-box'), { book, answer } = state;
   box.setAttribute('aria-label', d.q);
   if (!answer) {
-    box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.q)}</p><div class="why-opts">${KEYS.map(k => `<button type="button" data-k="${k}">${esc(d[k])}</button>`).join('')}</div>`;
+    box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.q)}</p><div class="why-opts">${KEYS.map(k => `<button type="button" data-k="${k}">${esc(d[k])}</button>`).join('')}</div>
+      <form class="why-w"><input type="text" maxlength="140" autocomplete="off" enterkeyhint="send" placeholder="${esc(wt[0])}" value="${esc(state.draft || '')}" aria-label="${esc(wt[0])}"><button type="submit">${esc(wt[1])}</button></form>`;
+    const inp = box.querySelector('.why-w input');
+    inp.oninput = () => { state.draft = inp.value; };
+    box.querySelector('.why-w').onsubmit = e => {
+      e.preventDefault(); const txt = inp.value.replace(/\s+/g, ' ').trim().slice(0, 140); if (!txt) { inp.focus(); return; }
+      track('survey', { book_id: book.id, note: 'why=text: ' + txt });
+      state.answer = 'other'; store.set('why-done', 1); paint();
+    };
     box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
       track('survey', { book_id: book.id, note: 'why=' + b.dataset.k });
       state.answer = b.dataset.k; store.set('why-done', 1); paint();
