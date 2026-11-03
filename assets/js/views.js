@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261103204108';
-import { askWhy } from './why.js?v=20261103204108';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103204108';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103204108';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103204108';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103204108';
-import { couponLive } from './welcome.js?v=20261103204108';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103204108';
-import { track } from './track.js?v=20261103204108';
-import { gaEvent } from './ga.js?v=20261103204108';
-import { guessLang } from './langdetect.js?v=20261103204108';
-import { didYouMean } from './search.js?v=20261103204108';
-import { api, editionsOf } from './api.js?v=20261103204108';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103204108';
+import { CONFIG } from './config.js?v=20261103204345';
+import { askWhy } from './why.js?v=20261103204345';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103204345';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261103204345';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261103204345';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261103204345';
+import { couponLive } from './welcome.js?v=20261103204345';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261103204345';
+import { track } from './track.js?v=20261103204345';
+import { gaEvent } from './ga.js?v=20261103204345';
+import { guessLang } from './langdetect.js?v=20261103204345';
+import { didYouMean } from './search.js?v=20261103204345';
+import { api, editionsOf } from './api.js?v=20261103204345';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261103204345';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -871,15 +871,17 @@ export async function viewCart(el) {
     } catch { }
     if (steps.length < 2) return '';
     const have = books.length, top = steps[steps.length - 1].n, reached = steps.filter(x => have >= x.n).length;
+    // only ONE automatic offer applies (the best): its step is lit, the other reached steps are shown dimmed
+    const ap = r.applied.find(a => a.kind === 'bxgy'), apN = ap ? (+ap.offer?.config?.buy || 1) + (+ap.offer?.config?.get || 1) : 0;
     const fill = Math.min(100, Math.round(100 * (have - 1) / (top - 1)));
     const hasWow = steps.some(x => x.wow);
-    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? ' on' : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
+    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? (!apN || apN === x.n ? ' on' : ' skip') : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
     <section class="panel"><h1 style="font-size:26px;font-weight:600">${esc(t('cart.title'))}</h1>
       ${r.nudges.length ? `<div class="nudges nudges-main">${r.nudges.map(nudge).join('')}</div>` : ''}
-      ${[...books].sort((a, b) => (r.final[a.id] === 0 ? 0 : 1) - (r.final[b.id] === 0 ? 0 : 1)).map(b => `<div class="cart-item">
+      ${[...books].sort((a, b) => { const rank = x => r.final[x.id] === 0 ? 0 : r.final[x.id] < x.price_cents ? 1 : 2; return rank(a) - rank(b) || (rank(a) === 1 ? (r.final[a.id] - a.price_cents) - (r.final[b.id] - b.price_cents) : 0); }).map(b => `<div class="cart-item">
         <a href="#/book/${encodeURIComponent(b.id)}">${coverHTML(b, { badge: false })}</a>
         <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
           <h3><a href="#/book/${encodeURIComponent(b.id)}" style="color:var(--fg)">${esc(b.title)}</a></h3>
@@ -899,7 +901,7 @@ export async function viewCart(el) {
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
         ${r.applied.map(a => { const nf = a.kind === 'bxgy' && (a.offer?.config?.percent ?? 100) >= 100 ? books.filter(b => r.final[b.id] === 0).length : 0;
           return `<div class="sum-off${a.kind === 'coupon' ? ' sum-code' : ''}"><span>${a.kind === 'coupon' ? icon('tag') : GIFT_SVG.replace('width="20" height="20"', 'width="15" height="15"')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}${nf ? `<small class="sum-sub">${nf} × ${esc(t('book.free'))}</small>` : ''}</span><span>−${money(a.saving)}</span></div>`; }).join('')}
-        ${r.applied.length && !r.applied.some(a => a.kind === 'coupon') && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
+        ${r.applied.some(a => a.kind !== 'coupon') && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>
         ${r.discount ? `<div class="save" style="text-align:right">${esc(t('fbt.save', { amount: money(r.discount) }))}</div>` : ''}
       </div>

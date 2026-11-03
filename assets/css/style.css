@@ -3469,3 +3469,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 
 /* the bar follows the header with no delay (a delayed bar looked like a shadow sliding down at the page end) */
 #goal-bar { transition: none !important; }
+
+/* reached but not applied step (only the best offer applies): outline only */
+.ladder-s.skip { opacity: .5; color: #5b6b5b; } .ladder-s.skip b { background: transparent; color: inherit; border-color: currentColor; animation: none; }
