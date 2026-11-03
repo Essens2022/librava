@@ -1,16 +1,16 @@
-import { CONFIG } from './config.js?v=20261103232036';
-import { t, getLang, setLang } from './i18n.js?v=20261103232036';
-import { esc, $, $$ } from './util.js?v=20261103232036';
-import { api, chooseBackend } from './api.js?v=20261103232036';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261103232036';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261103232036';
-import { cartBack } from './cartback.js?v=20261103232036';
-import { goalBar } from './goalbar.js?v=20261103232036';
-import { welcomeGift } from './welcome.js?v=20261103232036';
-import { trackPage } from './track.js?v=20261103232036';
-import { offline } from './offline.js?v=20261103232036';
-import { viewReader } from './reader.js?v=20261103232036';
-import { viewAdmin } from './admin.js?v=20261103232036';
+import { CONFIG } from './config.js?v=20261103233510';
+import { t, getLang, setLang } from './i18n.js?v=20261103233510';
+import { esc, $, $$ } from './util.js?v=20261103233510';
+import { api, chooseBackend } from './api.js?v=20261103233510';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261103233510';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261103233510';
+import { cartBack } from './cartback.js?v=20261103233510';
+import { goalBar } from './goalbar.js?v=20261103233510';
+import { welcomeGift } from './welcome.js?v=20261103233510';
+import { trackPage } from './track.js?v=20261103233510';
+import { offline } from './offline.js?v=20261103233510';
+import { viewReader } from './reader.js?v=20261103233510';
+import { viewAdmin } from './admin.js?v=20261103233510';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
