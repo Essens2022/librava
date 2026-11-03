@@ -3441,3 +3441,10 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 }
 @media (min-width: 1000px) and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .adm-tabs a.on { background: #243a1e; color: #bfe6a3; } }
 :root[data-theme="dark"] .adm-tabs a.on { background: #243a1e; color: #bfe6a3; }
+
+/* social icons: always on ONE line on every device, a little smaller */
+.foot .soc { flex-wrap: nowrap !important; gap: 10px !important; }
+.foot .soc-b { flex: 0 1 32px; width: 32px; height: 32px; min-width: 22px; border-radius: 10px; }
+.foot .soc-b svg { width: 16px; height: 16px; }
+@media (max-width: 760px) { .foot .soc { gap: 14px !important; } }
+@media (max-width: 340px) { .foot .soc { gap: 8px !important; } }
