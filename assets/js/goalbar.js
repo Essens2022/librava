@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103202000';
-import { t, money } from './i18n.js?v=20261103202000';
-import { cart, go, currentPath } from './ui.js?v=20261103202000';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103202000';
-import { esc, store } from './util.js?v=20261103202000';
+import { api } from './api.js?v=20261103203022';
+import { t, money } from './i18n.js?v=20261103203022';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103203022';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103203022';
+import { esc, store } from './util.js?v=20261103203022';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -41,7 +41,8 @@ async function draw() {
     if (!n) { bar?.remove(); return; }
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     const total = Math.min(books.length + n.more, 8);
-    const html = `<span class="gb-n">${books.length}</span><span class="gb-t">${esc(txt).replace(/(\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em>$1</em>')}</span><span class="gb-p">${Array.from({ length: total }, (_, i) => `<i${i < books.length ? ' class="f"' : ''}></i>`).join('')}</span><b>→</b>`;
+    const pct = Math.round(100 * books.length / total);
+    const html = `<span class="gb-g">${GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"')}</span><span class="gb-t">${esc(txt).replace(/(\d+\s?%|free|gratuit\w*|gratis|€\s?[\d.,]+|[\d.,]+\s?€)/gi, '<em>$1</em>')}</span><span class="gb-p"><i style="width:${pct}%"></i></span><span class="gb-go">${esc(t('nav.cart'))} (${books.length}) →</span>`;
     if (!bar) { bar = document.createElement('a'); bar.id = 'goal-bar'; bar.href = '#/cart'; bar.onclick = e => { e.preventDefault(); go('/cart'); }; document.body.appendChild(bar); }
     const changed = bar.innerHTML && bar.innerHTML !== html;
     bar.innerHTML = html;
@@ -55,6 +56,7 @@ function place() {
   const bar = document.getElementById('goal-bar'); if (!bar) return;
   const h = document.getElementById('hdr');
   bar.style.top = Math.max(0, Math.round(h ? h.getBoundingClientRect().bottom : 0)) + 'px';
+  document.documentElement.style.setProperty('--gb-h', bar.offsetHeight + 'px');   // reserve exactly the bar's height so it never covers the page
 }
 export function goalBar() {
   const again = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };

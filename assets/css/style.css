@@ -3448,3 +3448,21 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .foot .soc-b svg { width: 16px; height: 16px; }
 @media (max-width: 760px) { .foot .soc { gap: 14px !important; } }
 @media (max-width: 340px) { .foot .soc { gap: 8px !important; } }
+
+/* ---- goal bar v2: vivid, readable, nothing overlapped (space is reserved under the header) ---- */
+#goal-bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "g t b" "g p b"; align-items: center; column-gap: 10px; row-gap: 6px; height: auto; min-height: 50px; padding: 8px 12px; background: linear-gradient(100deg, #075a3a, #0f8a4b 60%, #17a85a); border-bottom: 2px solid #FFC83D; box-shadow: 0 4px 14px rgba(0,0,0,.22); font: 600 14px/1.3 var(--font-ui, inherit); overflow: hidden; }
+#goal-bar::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,.22) 50%, transparent 60%); transform: translateX(-120%); animation: gbShine 3.4s ease-in-out infinite; pointer-events: none; }
+@keyframes gbShine { 0%, 50% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+#goal-bar > * { position: relative; }
+#goal-bar .gb-g { grid-area: g; width: 34px; height: 34px; border-radius: 50%; background: #FFC83D; color: #241a00; display: grid; place-items: center; animation: gbRing 1.8s infinite; }
+@keyframes gbRing { 0% { box-shadow: 0 0 0 0 rgba(255,200,61,.7); } 70%, 100% { box-shadow: 0 0 0 10px rgba(255,200,61,0); } }
+#goal-bar .gb-t { grid-area: t; white-space: normal; overflow: visible; text-overflow: clip; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.25); }
+#goal-bar em { font-style: normal; background: #FFC83D; color: #241a00; font-weight: 800; padding: 0 7px; border-radius: 999px; white-space: nowrap; display: inline-block; line-height: 1.35; text-shadow: none; }
+#goal-bar .gb-p { grid-area: p; display: block; height: 7px; border-radius: 4px; background: rgba(0,0,0,.28); overflow: hidden; }
+#goal-bar .gb-p i { display: block; width: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #9cf0b8, #FFC83D); box-shadow: 0 0 8px rgba(255,200,61,.9); transition: width .7s cubic-bezier(.2,1,.3,1); }
+#goal-bar .gb-go { grid-area: b; background: #fff; color: #075a3a; font-weight: 800; font-size: 13px; padding: 8px 13px; border-radius: 999px; box-shadow: 0 3px 10px rgba(0,0,0,.25); white-space: nowrap; }
+#goal-bar.tick .gb-t { animation: gbPulse .6s ease; }
+#goal-bar.tick .gb-g { animation: gbPop .6s ease; }
+@keyframes gbPop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
+@media (prefers-reduced-motion: reduce) { #goal-bar::before, #goal-bar .gb-g, #goal-bar.tick .gb-g, #goal-bar.tick .gb-t { animation: none; } }
