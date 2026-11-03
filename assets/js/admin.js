@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103230136';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103230136';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103230136';
-import { resetCompanyCache } from './views.js?v=20261103230136';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103230136';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103230136';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103230136';
-import { optimizeBook } from './optimize.js?v=20261103230136';
-import { api } from './api.js?v=20261103230136';
-import { OF_STYLES } from './offerstyles.js?v=20261103230136';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103230136';
+import { CONFIG } from './config.js?v=20261103231414';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103231414';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103231414';
+import { resetCompanyCache } from './views.js?v=20261103231414';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103231414';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103231414';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103231414';
+import { optimizeBook } from './optimize.js?v=20261103231414';
+import { api } from './api.js?v=20261103231414';
+import { OF_STYLES } from './offerstyles.js?v=20261103231414';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103231414';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2283,6 +2283,7 @@ async function promoForm(body, id) {
   let chosen = (p.book_ids || []).filter(id => pub.some(b => b.id === id));
   const offList = (ofl || []).filter(o => o.kind !== 'coupon' && o.active !== false);
   let ofStyle = OF_STYLES.some(x => x.id === p.style) ? p.style : 'of01'; const ofCats = Object.fromEntries(CATS.map(c => [c, t('cat.' + c)]));
+  let obk = String((p0 && p0.theme) || '').split('~')[3] ? String(p0.theme).split('~')[3].split(',').filter(id => pub.some(b => b.id === id)).slice(0, 3) : [];
   let ofSel = p.kind === 'offers' ? (p.book_ids || []).filter(i => offList.some(o => o.id === i)) : [];
   const local = iso => { if (!iso) return ''; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
   body.innerHTML = `<form class="panel pr-form" id="pr-form" novalidate>
@@ -2308,6 +2309,7 @@ async function promoForm(body, id) {
           <div class="pr-ofoffers">${offList.map(o => `<label class="check"><input type="checkbox" name="ofo" value="${esc(o.id)}" ${ofSel.includes(o.id) ? 'checked' : ''}> ${esc(o.name ? o.name + ' · ' : '')}${esc(describeOffer(o, t, c => t('cat.' + c)))}</label>`).join('') || `<small class="muted">—</small>`}</div>
           <label class="check" style="margin-top:12px"><input type="checkbox" id="pr-ofbooks" ${/nb/.test(p.flags || '') ? '' : 'checked'}> ${esc(t('pr.of.books'))}</label>
           <label class="field"><span>${esc(t('pr.of.topic'))}</span><select id="pr-ofcat"><option value="">${esc(t('pr.of.topicAuto'))}</option>${CATS.map(c => `<option value="${c}" ${(/c-([\w-]+)/.exec(p.flags || '') || [])[1] === c ? 'selected' : ''}>${esc(t('cat.' + c))}</option>`).join('')}</select></label>
+          <div class="field"><span>${esc(t('pr.of.pick'))}</span><div class="pr-chosen" id="pr-obchosen" style="margin-top:6px"></div><input class="input" id="pr-obfind" type="search" placeholder="${esc(t('nav.searchPlaceholder'))}" style="margin-top:6px"><div class="pr-pick" id="pr-obpick" style="max-height:220px;margin-top:6px"></div></div>
         </div>
         <div id="pr-themebox"><span class="muted" style="font-size:14px">${esc(t('pr.theme'))}</span><div class="pr-themes">${PROMO_THEMES.map(th => `<label class="pr-theme theme-${th}" title="${th}"><input type="radio" name="th" value="${th}" ${p.theme === th ? 'checked' : ''}><span></span></label>`).join('')}</div>
           <div class="pr-custom"><label class="pr-theme theme-custom" id="pr-cswatch" style="--bg:linear-gradient(115deg,${esc(p.bg_from || '#1F3A93')},${esc(p.bg_to || '#D9485F')})" title="${esc(t('pr.custom'))}"><input type="radio" name="th" value="custom" ${p.theme === 'custom' ? 'checked' : ''}><span></span></label>
@@ -2353,14 +2355,14 @@ async function promoForm(body, id) {
   setTimeout(() => { const pop = $('#pr-stylepop', f); $('#pr-styleopen', f).onclick = () => { pop.hidden = false; document.body.classList.add('st-lock'); stKey = ''; draw(); }; $('#pr-styleclose', f).onclick = () => { pop.hidden = true; document.body.classList.remove('st-lock'); }; }, 0);
   const current = () => ({
     ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null, book_ids: rad('kd') === 'books' ? chosen.slice() : [],
-    book_ids: rad('kd') === 'offers' ? [...f.querySelectorAll('input[name=ofo]:checked')].map(x => x.value) : rad('kd') === 'books' ? chosen.slice() : [], ofStyle, ofBooks: !!$('#pr-ofbooks', f)?.checked, ofCat: val('#pr-ofcat') || '',
+    book_ids: rad('kd') === 'offers' ? [...f.querySelectorAll('input[name=ofo]:checked')].map(x => x.value) : rad('kd') === 'books' ? chosen.slice() : [], ofStyle, ofBooks: !!$('#pr-ofbooks', f)?.checked, ofCat: val('#pr-ofcat') || '', ofPick: obk.slice(),
     theme: rad('th') || 'forest', bg_from: $('#pr-c1', f).value, bg_to: $('#pr-c2', f).value, font: rad('pf') || null, style: stSel, kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
     link: pick.value === 'custom' ? val('#pr-link') || null : pick.value || null,
     starts_at: val('#pr-start') ? new Date(val('#pr-start')).toISOString() : null, ends_at: val('#pr-end') ? new Date(val('#pr-end')).toISOString() : null,
     active: $('#pr-active', f).checked, seconds: Math.min(30, Math.max(3, parseInt(val('#pr-sec'), 10) || 7)), transition: val('#pr-tr') || 'fade',
     image_url: files.imageUrl || p.image_url, image_mobile_url: files.removeMobile ? null : files.mobileUrl || p.image_mobile_url,
   });
-  const ofTheme = c => 'forest~' + c.ofStyle + (() => { const fl = [!c.ofBooks && 'nb', c.ofCat && 'c-' + c.ofCat].filter(Boolean).join('-'); return fl ? '~' + fl : ''; })();
+  const ofTheme = c => 'forest~' + c.ofStyle + (() => { const fl = [!c.ofBooks && 'nb', c.ofCat && 'c-' + c.ofCat].filter(Boolean).join('-'); return fl || (c.ofPick || []).length ? '~' + fl : ''; })() + ((c.ofPick || []).length ? '~' + c.ofPick.join(',') : '');
   const drawOfGrid = () => {
     const grid = $('#pr-ofgrid', f);
     if (!grid.dataset.ok) {
@@ -2377,7 +2379,7 @@ async function promoForm(body, id) {
     $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
     $('#pr-offbox', f).hidden = c.kind !== 'offers'; if (c.kind === 'offers') drawOfGrid();
     $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image' || c.kind === 'offers'; $('#pr-stylebox', f).hidden = c.kind !== 'book';
-    drawPick();
+    drawPick(); drawOb();
     $('#pr-guide', f).innerHTML = ['desk', 'mob'].map(k => { const w = k === 'desk' ? spec.w : spec.mw, h = k === 'desk' ? spec.h : spec.mh; return `<div class="pr-g"><b>${esc(t(k === 'desk' ? 'pr.gDesk' : 'pr.gMob'))}: ${w} × ${h} px</b><div class="pr-g-box" style="aspect-ratio:${w}/${h}"><i></i><span>${esc(t('pr.gSafe'))}</span></div></div>`; }).join('') + `<p>${esc(t('pr.gRule'))}</p>`;
     $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
     $('#spec-mobile', f).textContent = t('pr.specMobile', { w: spec.mw, h: spec.mh });
@@ -2405,6 +2407,16 @@ async function promoForm(body, id) {
     live.querySelectorAll('a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
     offersBanners(live);
   };
+  // the books shown next to the offer (up to 3); empty = chosen automatically
+  function drawOb() {
+    const q = norm($('#pr-obfind', f).value || '');
+    $('#pr-obchosen', f).innerHTML = obk.map(id => { const b = pub.find(x => x.id === id); return b ? `<span class="pr-chip">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}<span>${esc(b.title)}</span><button type="button" data-rm="${esc(id)}" aria-label="${esc(t('admin.delete'))}">×</button></span>` : ''; }).join('') || `<span class="muted" style="font-size:14px">${esc(t('pr.of.pickAuto'))}</span>`;
+    $('#pr-obpick', f).innerHTML = pub.filter(b => b.cover_url && (!q || norm(b.title + ' ' + b.author).includes(q))).slice(0, 60).map(b => `<label class="pr-opt ${obk.includes(b.id) ? 'on' : ''}"><input type="checkbox" value="${esc(b.id)}" ${obk.includes(b.id) ? 'checked' : ''} ${!obk.includes(b.id) && obk.length >= 3 ? 'disabled' : ''}><img src="${esc(b.cover_url)}" alt=""><span><b>${esc(b.title)}</b><small class="muted">${esc(b.author)} · ${esc((b.language || '').toUpperCase())}</small></span></label>`).join('');
+  }
+  $('#pr-obpick', f).addEventListener('change', e => e.stopPropagation());
+  $('#pr-obpick', f).addEventListener('input', e => { const cb = e.target.closest('input[type=checkbox]'); if (!cb) return; e.stopPropagation(); obk = cb.checked ? [...obk, cb.value].slice(0, 3) : obk.filter(x => x !== cb.value); draw(); });
+  $('#pr-obchosen', f).addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { obk = obk.filter(x => x !== b.dataset.rm); draw(); } });
+  $('#pr-obfind', f).addEventListener('input', e => { e.stopPropagation(); drawOb(); });
   // choosing several books: search, tick up to 8, order = order of choosing (× removes, ‹ › move)
   function drawPick() {
     const q = norm($('#pr-bfind', f).value || ''), L = val('#pr-l');

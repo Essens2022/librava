@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261103230136';
-import { CONFIG } from './config.js?v=20261103230136';
-import { SOCIAL_PATHS } from './social.js?v=20261103230136';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103230136';
-import { esc, store, $, $$ } from './util.js?v=20261103230136';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261103231414';
+import { CONFIG } from './config.js?v=20261103231414';
+import { SOCIAL_PATHS } from './social.js?v=20261103231414';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261103231414';
+import { esc, store, $, $$ } from './util.js?v=20261103231414';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261103230136';
-import { suggest, highlight } from './search.js?v=20261103230136';
-import { track, trackPage } from './track.js?v=20261103230136';
-import { initGA, applyConsent } from './ga.js?v=20261103230136';
-import { consentStrings } from './consent-i18n.js?v=20261103230136';
-import { api } from './api.js?v=20261103230136';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103230136';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261103231414';
+import { suggest, highlight } from './search.js?v=20261103231414';
+import { track, trackPage } from './track.js?v=20261103231414';
+import { initGA, applyConsent } from './ga.js?v=20261103231414';
+import { consentStrings } from './consent-i18n.js?v=20261103231414';
+import { api } from './api.js?v=20261103231414';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261103231414';
 
 // ---------------- icons ----------------
 const P = {
@@ -818,22 +818,26 @@ export function offerSlides(offers) {
 }
 const hexRgb = h => { const m = /#([0-9a-f]{3,6})\b/i.exec(h || ''); if (!m) return null; let x = m[1]; if (x.length === 3) x = [...x].map(c => c + c).join(''); return [0, 2, 4].map(k => parseInt(x.slice(k, k + 2), 16)); };
 const lumOf = h => { const c = hexRgb(h); return c ? (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 : 0.3; };
-const OF_BK = ['fan', 'orbit', 'zoom', 'tilt', 'fall', 'spin'];
+const OF_BK = ['d1', 'd2'];
 function promoOffersHTML(p, data, placement) {
   const offers = Array.isArray(data) ? data : (data && data.offers) || [], books = Array.isArray(data) ? [] : (data && data.books) || [];
   const only = p.book_ids || []; let sl = offerSlides(offers); if (only.length) sl = sl.filter(x => only.includes(x.o.id));
   const n = sl.length, st = ofStyleOf(p), flags = String(p.theme || '').split('~')[2] || '', withBooks = !/nb/.test(flags) && books.length > 0, still = n === 1;
-  const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const link = safeLink(p.link) || '#/search', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const cat = c => t('cat.' + c), sec = still ? Math.min(30, Math.max(5, +p.seconds || 8)) : Math.min(30, Math.max(6, Math.round(n * 3.4) + 1));
   const idx = Math.max(0, OF_STYLES.indexOf(st));
-  const catF = (/c-([\w-]+)/.exec(flags) || [])[1];
-  const covers = (o, i) => { const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 4 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
+  const catF = (/c-([\w-]+)/.exec(flags) || [])[1], pickIds = (String(p.theme || '').split('~')[3] || '').split(',').filter(Boolean);
+  const covers = (o, i) => { const mine = pickIds.map(id => books.find(b => b.id === id && b.cover_url)).filter(Boolean); if (mine.length) return mine.slice(0, 3); const withCov = books.filter(b => b.cover_url), topic = catF ? withCov.filter(b => b.category === catF || (b.categories || []).includes(catF)) : [], rel = withCov.filter(b => offersForBook(b, [o]).length), pool = topic.length >= 2 ? topic : rel.length >= 3 ? rel : withCov; const out = []; for (let k = 0; k < 3 && pool.length; k++) out.push(pool[(i * 2 + k) % pool.length]); return [...new Set(out)]; };
   const parts = (i) => { if (!st.pt && st.dc !== 'D7') return ''; const cf = st.dc === 'D7', cols = ['#fff', '#ffd23f', '#ff4fa3', '#22d3ee'], N = cf ? 22 : 12, em = st.pt || []; return `<span class="of-pt ${cf ? 'cf' : st.mode || 'fall'}" aria-hidden="true">${Array.from({ length: N }, (_, k) => `<b style="--x:${(k * 37 + i * 11) % 96}%;--y:${(k * 53 + 8) % 76}%;--sz:${18 + (k * 7) % 22}px;--dur:${5 + (k * 3) % 5}s;--dl:-${(k * 7) % 9}s;--c:${cols[k % 4]}">${cf ? '' : em[k % em.length]}</b>`).join('')}</span>`; };
   const shapes = '<i class="of-sh a"></i><i class="of-sh b"></i><i class="of-sh c"></i><i class="of-sh d"></i>';
   const slide = (x, i) => {
     const pal = st.pal[i % st.pal.length], bg = pal[0], solid = /^#/.test(bg), tx = pal[4] || st.tx || (lumOf(bg) > 0.62 ? '#1b1340' : '#fff'), ink = lumOf(pal[1]) > 0.5 ? '#1b1340' : '#ffffff', key = [pal[1], pal[2], bg, pal[3]].find(c => /^#/.test(c) && lumOf(c) < 0.45) || '#1b1340';
     const lay = st.lay[i % st.lay.length], an = (st.an + i) % 8, bkm = withBooks ? OF_BK[(idx + i) % OF_BK.length] : '', cv = bkm ? covers(x.o, i) : [];
-    const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">${bkm === 'orbit' ? '<span class="ring">' : ''}${cv.map(b => `<span class="bk"><img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async"></span>`).join('')}${bkm === 'orbit' ? '</span>' : ''}</span>` : '';
+    const ln = '<u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u>', im = b => `<img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async">`;
+    const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">
+      <span class="dvx dvx-lap"><i class="dvx-scr"><span class="pg">${im(cv[0])}</span><span class="pg tx"><b></b>${ln}</span></i><i class="dvx-base"></i><em class="dvx-tag">PDF</em></span>
+      <span class="dvx dvx-tab"><i class="dvx-scr">${im(cv[1] || cv[0])}</i></span>
+      <span class="dvx dvx-ph"><i class="dvx-scr"><span class="th">${im(cv[2] || cv[0])}</span><span class="tx"><b></b>${ln}</span></i><em class="dvx-tag">EPUB</em></span></span>` : '';
     return `<span class="of-s lay-${lay} an-${an} dc-${st.dc}${cv.length ? ' has-bk' : ''}${i ? '' : ' cur'}" style="--bgc:${bg};--a:${pal[1]};--s1:${pal[2]};--s2:${pal[3]};--tx:${tx};--ink:${ink};--k:${key}" aria-hidden="${i ? 'true' : 'false'}"><i class="of-bg"></i>${shapes}${parts(i)}${bk}
       <span class="wrap of-in"><span class="of-k"><i></i>${esc((p.kicker || t('nav.deals')).toUpperCase())}${n > 1 ? ` <small>${i + 1}/${n}</small>` : ''}</span>
         <span class="of-big">${x.s >= 100 ? esc(t('book.free')).toUpperCase() : '−' + x.s + '%'}</span>
