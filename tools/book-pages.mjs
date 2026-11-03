@@ -126,7 +126,7 @@ const insideOf = {};
 const walk = d => readdirSync(d).flatMap(f => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
 async function sampleImages(main) {
   const eds = books.filter(x => (x.work_id || x.id) === (main.work_id || main.id) && x.sample_path);
-  const meta = `book/${main.id}/inside.json`, ver = eds.map(x => x.updated_at).sort().pop() || '';
+  const meta = `book/${main.id}/inside.json`, ver = 'v2|' + (eds.map(x => x.updated_at).sort().pop() || '');
   try { const m = JSON.parse(readFileSync(meta, 'utf8')); if (m.ver === ver) return m.items; } catch { }
   const work = join(tmpdir(), 'lv-' + main.id); rmSync(work, { recursive: true, force: true }); mkdirSync(work, { recursive: true });
   let cand = [];
@@ -144,9 +144,24 @@ async function sampleImages(main) {
       if (cand.length) break;
     } catch (e) { console.error('sample images', main.id, e.message); }
   }
+  // the PDF sample's own pages (recipes, exercises, layouts) as pictures: the real "free part" of the book
+  const pdfEd = eds.find(x => x.format === 'pdf'); let pages = [];
+  if (pdfEd) try {
+    const r = await fetch(`${URL_}/storage/v1/object/public/samples/${pdfEd.sample_path.split('/').map(encodeURIComponent).join('/')}`);
+    if (r.ok) {
+      const f = join(work, 'pages.pdf'), dir = join(work, 'pg'); mkdirSync(dir, { recursive: true }); writeFileSync(f, Buffer.from(await r.arrayBuffer()));
+      execFileSync('pdftoppm', ['-jpeg', '-r', '100', '-f', '3', '-l', '14', f, join(dir, 'p')], { stdio: 'ignore' });
+      for (const p of readdirSync(dir).filter(x => /\.jpg$/.test(x)).sort()) {
+        try { const st = await sharp(join(dir, p)).stats(), m = await sharp(join(dir, p)).metadata(); const sd = (st.channels[0].stdev + st.channels[1].stdev + st.channels[2].stdev) / 3, mean = (st.channels[0].mean + st.channels[1].mean + st.channels[2].mean) / 3;
+          if (sd > 38 && mean < 245) pages.push({ p: join(dir, p), w: m.width, h: m.height, k: 'pg' + p, sd }); } catch { }
+      }
+    }
+  } catch (e) { console.error('sample pages', main.id, e.message); }
+  pages = pages.sort((a, b) => b.sd - a.sd).slice(0, 3).sort((a, b) => a.p.localeCompare(b.p, 'en', { numeric: true }));
   // unique by size, in book order, up to 4 spread over what was found
   const seen = new Set(); cand = cand.filter(c => { const k = c.k; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.p.localeCompare(b.p, 'en', { numeric: true }));
-  const pick = cand.length <= 4 ? cand : [0, 1, 2, 3].map(i => cand[Math.round(i * (cand.length - 1) / 3)]);
+  const imgs = cand.length <= 2 ? cand : [0, 1].map(i => cand[Math.round(i * (cand.length - 1))]);
+  const pick = [...imgs, ...pages].slice(0, 4);
   const items = [];
   for (const [i, c] of pick.entries()) {
     try { const out = `book/${main.id}/in${i + 1}.webp`; const info = await sharp(c.p).flatten({ background: '#ffffff' }).resize({ width: 900, withoutEnlargement: true }).webp({ quality: 78 }).toFile(out); items.push({ f: `in${i + 1}.webp`, w: info.width, h: info.height }); } catch { }
