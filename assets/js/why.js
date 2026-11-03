@@ -1,9 +1,9 @@
 // A tiny one-tap question for people who look at a book and do not add it to the cart:
 // "What is stopping you?" Asked once per visitor, anonymous, easy to close. Answers show in Admin → Statistics.
-import { api } from './api.js?v=20261103112703';
-import { track } from './track.js?v=20261103112703';
-import { store, esc } from './util.js?v=20261103112703';
-import { getLang } from './i18n.js?v=20261103112703';
+import { api } from './api.js?v=20261103113125';
+import { track } from './track.js?v=20261103113125';
+import { store, esc } from './util.js?v=20261103113125';
+import { getLang } from './i18n.js?v=20261103113125';
 
 const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format', 'other'];
 const TXT = {
@@ -27,14 +27,14 @@ export function askWhy(book) {
         if (!location.hash.includes('/book/') || document.hidden || document.getElementById('why-box') || store.get('why-done')) return;
         if (document.querySelector('.modal, dialog[open], .consent')) { timer = setTimeout(() => askWhy(book), 6000); return; }
         if (await api.owns?.(book.id)) return;
-        const d = TXT[getLang()] || TXT.en;
+        const L = getLang(), W = WHY_TEXT[L], d = TXT[L] || W || TXT.en;
         const box = document.createElement('div'); box.id = 'why-box'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', d.q);
         box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.q)}</p><div class="why-opts">${KEYS.map(k => `<button type="button" data-k="${k}">${esc(d[k])}</button>`).join('')}</div>`;
         const close = () => { box.remove(); store.set('why-done', 1); };
         box.querySelector('.why-x').onclick = close;
         box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
           track('survey', { book_id: book.id, note: 'why=' + b.dataset.k });
-          const f = FU[getLang()] || FU.en, k = b.dataset.k;
+          const f = FU[getLang()] || (W && { price: W.fp, value: W.fv, look: W.fl, trust: W.ft, amazon: W.fa, format: W.ff, other: W.fo, buy: W.buy, sample: W.sample }) || FU.en, k = b.dataset.k;
           const hasSample = !!document.querySelector('.g-preview, .g-shots');
           box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.thanks)}</p><p style="font-weight:500">${esc(f[k] || f.other)}</p><div class="why-opts">${(k === 'value' && hasSample) ? `<button type="button" data-go="s">${esc(f.sample)}</button>` : ''}<button type="button" data-go="b" style="background:#F4A340;border-color:#F4A340;color:#1b1b1b">${esc(f.buy)}</button></div>`;
           store.set('why-done', 1);
