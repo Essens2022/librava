@@ -1,15 +1,21 @@
 // A tiny one-tap question for people who look at a book and do not add it to the cart:
 // "What is stopping you?" Asked once per visitor, anonymous, easy to close. Answers show in Admin → Statistics.
-import { api } from './api.js?v=20261103111948';
-import { track } from './track.js?v=20261103111948';
-import { store, esc } from './util.js?v=20261103111948';
-import { getLang } from './i18n.js?v=20261103111948';
+import { api } from './api.js?v=20261103112703';
+import { track } from './track.js?v=20261103112703';
+import { store, esc } from './util.js?v=20261103112703';
+import { getLang } from './i18n.js?v=20261103112703';
 
 const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format', 'other'];
 const TXT = {
   en: { q: 'Quick question: what is stopping you from getting this book?', price: 'The price', value: 'Not sure it is worth it', look: 'I was only looking', trust: 'I am not sure about paying here', amazon: 'I prefer a paperback or Amazon', format: 'I cannot read this format', other: 'Something else', thanks: 'Thank you! This helps us a lot.' },
   ro: { q: 'O întrebare rapidă: ce te oprește să iei această carte?', price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar mă uitam', trust: 'Nu sunt sigur să plătesc aici', amazon: 'Prefer cartea tipărită sau Amazon', format: 'Nu pot citi acest format', other: 'Altceva', thanks: 'Mulțumim! Ne ajută foarte mult.' },
   it: { q: 'Una domanda veloce: cosa ti frena dall’acquistare questo libro?', price: 'Il prezzo', value: 'Non sono sicuro che valga', look: 'Stavo solo guardando', trust: 'Non mi fido a pagare qui', amazon: 'Preferisco il cartaceo o Amazon', format: 'Non posso leggere questo formato', other: 'Altro', thanks: 'Grazie! Ci aiuta molto.' },
+};
+// Honest follow-up after the answer: real facts only (no fake timers, no invented stock or buyers).
+const FU = {
+  en: { price: 'Fair. Check the price above: many of our books cost less than a coffee, and some are free.', value: 'Smart to check. Read the free sample first, then decide.', look: 'No pressure. When you are ready, the book opens on your phone right after payment.', trust: 'Payment is handled by Stripe, a secure payment provider. You read the book at once in your account.', amazon: 'Paperback is great too. This ebook is instant: no shipping, and you can read it today on your phone.', format: 'You read it right here in your browser, on phone or computer. No app needed.', other: 'Thank you. The book is one tap away whenever you want it.', buy: 'Get this book', sample: 'Read a free sample' },
+  ro: { price: 'Corect. Vezi prețul de mai sus: multe cărți costă mai puțin decât o cafea, iar unele sunt gratuite.', value: 'E înțelept să verifici. Citește mai întâi fragmentul gratuit, apoi alegi.', look: 'Fără presiune. Când ești gata, cartea se deschide pe telefon imediat după plată.', trust: 'Plata se face prin Stripe, un procesator sigur. Citești cartea imediat, în contul tău.', amazon: 'Și cartea tipărită e bună. Ebook-ul e imediat: fără transport, o citești azi pe telefon.', format: 'O citești chiar aici, în browser, pe telefon sau calculator. Nu ai nevoie de aplicație.', other: 'Mulțumim. Cartea e la un singur tap distanță când vrei.', buy: 'Ia această carte', sample: 'Citește un fragment gratuit' },
+  it: { price: 'Giusto. Guarda il prezzo qui sopra: molti libri costano meno di un caffè e alcuni sono gratis.', value: 'Bene controllare. Leggi prima l’anteprima gratuita, poi decidi.', look: 'Nessuna pressione. Quando vuoi, il libro si apre sul telefono subito dopo il pagamento.', trust: 'Il pagamento è gestito da Stripe, un sistema sicuro. Leggi subito il libro nel tuo account.', amazon: 'Anche il cartaceo va bene. L’ebook è immediato: niente spedizione, lo leggi oggi dal telefono.', format: 'Lo leggi qui nel browser, da telefono o computer. Nessuna app.', other: 'Grazie. Il libro è a un tocco quando vuoi.', buy: 'Prendi questo libro', sample: 'Leggi un’anteprima gratuita' },
 };
 let timer = null;
 export function askWhy(book) {
@@ -28,7 +34,13 @@ export function askWhy(book) {
         box.querySelector('.why-x').onclick = close;
         box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
           track('survey', { book_id: book.id, note: 'why=' + b.dataset.k });
-          box.innerHTML = `<p>${esc(d.thanks)}</p>`; store.set('why-done', 1); setTimeout(() => box.remove(), 2200);
+          const f = FU[getLang()] || FU.en, k = b.dataset.k;
+          const hasSample = !!document.querySelector('.g-preview, .g-shots');
+          box.innerHTML = `<button type="button" class="why-x" aria-label="Close">×</button><p>${esc(d.thanks)}</p><p style="font-weight:500">${esc(f[k] || f.other)}</p><div class="why-opts">${(k === 'value' && hasSample) ? `<button type="button" data-go="s">${esc(f.sample)}</button>` : ''}<button type="button" data-go="b" style="background:#F4A340;border-color:#F4A340;color:#1b1b1b">${esc(f.buy)}</button></div>`;
+          store.set('why-done', 1);
+          box.querySelector('.why-x').onclick = () => box.remove();
+          box.querySelector('[data-go="b"]').onclick = () => { box.remove(); document.querySelector('[data-buy],[data-free]')?.click(); };
+          box.querySelector('[data-go="s"]')?.addEventListener('click', () => { box.remove(); document.querySelector('.g-preview, .g-shots')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
         });
         document.body.appendChild(box);
       } catch { }
