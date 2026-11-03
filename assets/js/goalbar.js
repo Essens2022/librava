@@ -17,7 +17,7 @@ function pop(label, saving, next) {
   const anchor = document.getElementById('goal-bar') || document.getElementById('hdr');
   el.style.top = Math.round((anchor ? anchor.getBoundingClientRect().bottom : 0) + 8) + 'px';
   document.body.appendChild(el);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 700); }, 3200);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 700); }, 1400);
 }
 let seq = 0, offersC = null; const bookC = new Map();
 async function draw() {
@@ -41,6 +41,7 @@ async function draw() {
     const top = r.applied.find(a => a.kind !== 'coupon');
     prevSaving = saving; prevCount = books.length;
     if (grew && top) {
+      if (!n && bar) { bar.remove(); bar = null; }   // goal reached: the bar leaves and the notice takes its place
       const nx = n ? (n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent })) : '';
       try { pop(appliedLabel(top, t, c => t('cat.' + c)), saving, nx); } catch { }   // a failing pop-up must never block the bar
     }
