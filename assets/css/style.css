@@ -3751,3 +3751,16 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .bk-d2 .dvx-ph { left: 0; right: auto; } .bk-d2 .dvx-lap { left: 26%; }
 }
 @media (max-width: 760px) { .bk-d2 .dvx-tab { right: 5%; } .dvx-tab { left: 1%; } }
+
+/* phones: the three devices stand side by side (nothing hides behind anything) */
+@media (max-width: 760px) {
+  .of-s.has-bk .of-bk { display: flex !important; align-items: flex-end; justify-content: center; gap: 2.5%; padding-bottom: 13%; box-sizing: border-box; width: 56%; }
+  .of-s.has-bk .of-in { padding-right: 54%; }
+  .of-bk .dvx { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; flex: none; display: block !important; }
+  .of-bk .dvx-tab { width: 27% !important; order: 1; transform: rotate(-3deg); } .of-bk .dvx-lap { width: 49% !important; order: 2; } .of-bk .dvx-ph { width: 18% !important; order: 3; }
+  .bk-d2 .dvx-ph { order: 1; } .bk-d2 .dvx-tab { order: 3; transform: rotate(3deg); }
+  .of-bk .dvx-ph .dvx-tag { left: auto; right: -4px; top: -10px; } .bk-d2 .dvx-ph .dvx-tag { right: -4px; left: auto; }
+  .of-bk .dvx-lap .dvx-tag { right: -4px; top: -10px; }
+  .dvx-tab .dvx-scr { border-width: 3px; border-radius: 7px; } .dvx-lap .dvx-scr { border-width: 3px; border-radius: 6px 6px 2px 2px; } .dvx-base { height: 6px; }
+}
+@media (max-width: 760px) { .of-s.has-bk .of-bk { padding-inline: 3%; } .of-bk .dvx-tab { width: 26% !important; } }
