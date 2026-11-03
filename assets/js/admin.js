@@ -2565,8 +2565,8 @@ function utmMaker(root) {
   const src = $('#utm-src', root), name = $('#utm-name', root), out = $('#utm-link', root), copy = $('#utm-copy', root), page = $('#utm-page', root);
   if (!src) return;
   const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-  const make = () => { const p = new URLSearchParams({ utm_source: src.value === 'other' ? 'altro' : src.value }); const c = slug(name.value); if (c) p.set('utm_campaign', c); const pg = page?.value || ''; out.textContent = 'https://librava.store/' + (pg ? 'book/' + pg + '/' : '') + '?' + p.toString(); };
-  if (page) page.onchange = make;
+  const make = () => { const p = new URLSearchParams({ utm_source: src.value === 'other' ? 'altro' : src.value }); const c = slug(name.value); if (c) p.set('utm_campaign', c); const pg = ([...(document.getElementById('utm-books')?.options || [])].find(o => o.value === (page?.value || '').trim()) || {}).dataset?.id || ''; out.textContent = 'https://librava.store/' + (pg ? 'book/' + pg + '/' : '') + '?' + p.toString(); };
+  if (page) { page.onchange = make; page.oninput = make; }
   src.onchange = make; name.oninput = make; make();
   copy.onclick = async () => { try { await navigator.clipboard.writeText(out.textContent); } catch { const r = document.createRange(); r.selectNodeContents(out); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); } toast(t('st.c.copied')); };
 }
@@ -2615,7 +2615,7 @@ async function statsAdmin(body, days = +(sessionStorage.getItem('librava:stDays'
       <section class="panel"><h3>${esc(t('st.campaigns'))}</h3><p class="muted st-sub">${esc(t('st.campaignsHelp'))}</p>
         <div class="utm-make">
           <label class="field"><span>${esc(t('st.c.source'))}</span><select class="input" id="utm-src">${['instagram', 'facebook', 'tiktok', 'youtube', 'pinterest', 'whatsapp', 'email', 'other'].map(k => `<option value="${k}">${esc(k === 'other' ? t('st.c.other') : k === 'email' ? 'E-mail' : k === 'tiktok' ? 'TikTok' : k === 'youtube' ? 'YouTube' : k === 'whatsapp' ? 'WhatsApp' : k[0].toUpperCase() + k.slice(1))}</option>`).join('')}</select></label>
-          <label class="field"><span>${esc(t('st.c.page'))}</span><select class="input" id="utm-page"><option value="">${esc(t('st.c.home'))}</option>${(utmBooks || []).map(b => `<option value="${esc(b.id)}">${esc(b.title)}</option>`).join('')}</select></label>
+          <label class="field"><span>${esc(t('st.c.page'))}</span><input class="input" id="utm-page" list="utm-books" autocomplete="off" placeholder="${esc(t('st.c.home'))}"><datalist id="utm-books">${(utmBooks || []).map(b => `<option value="${esc(b.title + ' · ' + t('book.formatShort.' + b.format))}" data-id="${esc(b.id)}"></option>`).join('')}</datalist></label>
           <label class="field"><span>${esc(t('st.c.name'))}</span><input class="input" id="utm-name" maxlength="40" placeholder="${esc(t('st.c.namePh'))}"></label>
           <div class="utm-out"><small class="muted">${esc(t('st.c.link'))}</small><div class="utm-link"><code id="utm-link"></code><button type="button" class="btn btn-sm btn-dark" id="utm-copy">${esc(t('st.c.copy'))}</button></div></div>
         </div>
