@@ -1,16 +1,27 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103170025';
-import { t, money } from './i18n.js?v=20261103170025';
-import { cart, go, currentPath } from './ui.js?v=20261103170025';
-import { applyOffers } from './offers.js?v=20261103170025';
-import { esc } from './util.js?v=20261103170025';
+import { api } from './api.js?v=20261103170437';
+import { t, money } from './i18n.js?v=20261103170437';
+import { cart, go, currentPath } from './ui.js?v=20261103170437';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103170437';
+import { esc } from './util.js?v=20261103170437';
 
+const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
+let prevSaving = null, prevCount = 0;
+function pop(label, saving, next) {
+  document.getElementById('goal-pop')?.remove();
+  const el = document.createElement('a'); el.id = 'goal-pop'; el.href = '#/cart';
+  el.innerHTML = `<span class="gp-i"><i></i><i></i><i></i></span><span class="gp-b"><b>${esc(UN[getLang()] || UN.en)} <u>−${esc(money(saving))}</u></b><small>${esc(label)}</small>${next ? `<small class="gp-n">${esc(next)}</small>` : ''}</span><button type="button" aria-label="Close">×</button>`;
+  el.onclick = e => { e.preventDefault(); el.remove(); if (!e.target.closest('button')) go('/cart'); };
+  document.body.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 6500);
+}
 let seq = 0, offersC = null; const bookC = new Map();
 async function draw() {
   const my = ++seq; let bar = document.getElementById('goal-bar');
   const ids = cart.get();
   const onCart = /(^|\/)cart\b/.test(currentPath()) || /^#\/(read|admin)/.test(location.hash) || /^\/(read|admin)/.test(location.pathname);
+  if (!ids.length) { prevSaving = null; prevCount = 0; }
   if (!ids.length || onCart) { bar?.remove(); return; }
   try {
     if (!offersC) offersC = api.offers ? await api.offers().catch(() => []) : [];
@@ -19,6 +30,13 @@ async function draw() {
     const books = ids.map(id => bookC.get(id)).filter(b => b && b.price_cents > 0);
     if (!books.length) { bar?.remove(); return; }
     const r = applyOffers(books, offersC.filter(o => o.kind !== 'coupon'), {}), n = r.nudges[0];
+    const saving = r.discount || 0, grew = prevSaving !== null && books.length > prevCount && saving > prevSaving;
+    const top = r.applied.find(a => a.kind !== 'coupon');
+    prevSaving = saving; prevCount = books.length;
+    if (grew && top) {
+      const nx = n ? (n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent })) : '';
+      pop(appliedLabel(top, t, c => t('cat.' + c)), saving, nx);
+    }
     if (!n) { bar?.remove(); return; }
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     const total = Math.min(books.length + n.more, 8);

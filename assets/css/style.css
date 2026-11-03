@@ -3286,3 +3286,17 @@ body:has(.buy-sticky:not([hidden])) #goal-bar { bottom: 64px; }
 body:has(#goal-bar) { padding-bottom: 52px; }
 @media (max-width: 520px) { #goal-bar .gb-p { display: none; } }
 body:has(#goal-bar) #cb-bar { bottom: 70px; } body:has(#goal-bar) #why-box { bottom: 136px; }
+
+/* reward pop-up */
+#goal-pop { position: fixed; z-index: 95; top: 76px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100vw - 24px)); display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 18px; background: linear-gradient(135deg, #1f2b26, #2f5a2a); color: #fff; text-decoration: none; box-shadow: 0 16px 40px rgba(0,0,0,.4); border: 1px solid rgba(255,196,107,.5); animation: gpIn .5s cubic-bezier(.2,1.4,.4,1); }
+#goal-pop:hover { text-decoration: none; } #goal-pop.out { opacity: 0; transform: translate(-50%, -14px); transition: all .4s ease; }
+#goal-pop .gp-b { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#goal-pop b { font-size: 18px; } #goal-pop u { text-decoration: none; color: #ffc46b; }
+#goal-pop small { font-size: 13px; opacity: .92; } #goal-pop .gp-n { color: #ffc46b; font-weight: 700; }
+#goal-pop button { background: none; border: 0; color: #fff; font-size: 22px; opacity: .7; cursor: pointer; align-self: flex-start; }
+#goal-pop .gp-i { position: relative; width: 44px; height: 44px; flex: none; border-radius: 50%; background: #F4A340; animation: ladPulse 1.4s infinite; }
+#goal-pop .gp-i::after { content: ''; position: absolute; left: 16px; top: 8px; width: 10px; height: 20px; border: solid #1b1b1b; border-width: 0 4px 4px 0; transform: rotate(45deg); }
+#goal-pop .gp-i i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #ffc46b; top: 50%; left: 50%; animation: gpSpark 1.2s ease-out infinite; }
+#goal-pop .gp-i i:nth-child(1) { --x: -30px; --y: -26px; } #goal-pop .gp-i i:nth-child(2) { --x: 32px; --y: -20px; animation-delay: .2s; } #goal-pop .gp-i i:nth-child(3) { --x: 4px; --y: 34px; animation-delay: .4s; }
+@keyframes gpIn { from { opacity: 0; transform: translate(-50%, -30px) scale(.9); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+@keyframes gpSpark { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.2); opacity: 0; } }
