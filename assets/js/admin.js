@@ -1,16 +1,16 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103181533';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103181533';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103181533';
-import { resetCompanyCache } from './views.js?v=20261103181533';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103181533';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103181533';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103181533';
-import { optimizeBook } from './optimize.js?v=20261103181533';
-import { api } from './api.js?v=20261103181533';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103181533';
+import { CONFIG } from './config.js?v=20261103182150';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261103182150';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261103182150';
+import { resetCompanyCache } from './views.js?v=20261103182150';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261103182150';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261103182150';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261103182150';
+import { optimizeBook } from './optimize.js?v=20261103182150';
+import { api } from './api.js?v=20261103182150';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261103182150';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2487,6 +2487,8 @@ async function offerForm(body, id) {
         <label class="field"><span>${esc(t('of.name'))}</span><input id="of-name" maxlength="80" value="${esc(o.name || '')}" placeholder="${esc(t('of.namePh'))}"></label>
         <div class="two"><label class="field"><span>${esc(t('pr.start'))}</span><input type="datetime-local" id="of-start" value="${local(o.starts_at)}"></label><label class="field"><span>${esc(t('pr.end'))}</span><input type="datetime-local" id="of-end" value="${local(o.ends_at)}"></label></div>
         <label class="check" data-for="bundle qty bxgy category"><input type="checkbox" id="of-stack" ${o.stackable ? 'checked' : ''}> ${esc(t('of.stackable'))}</label>
+        <label class="check" data-for="bundle qty bxgy category"><input type="checkbox" id="of-wel" ${c.welcome ? 'checked' : ''}> ${esc(t('of.welcome'))}</label>
+        <label class="field" id="of-min-box"><span>${esc(t('of.minutes'))}</span><input id="of-minutes" type="number" min="1" max="60" value="${esc(c.minutes || '')}" placeholder="15"><small class="muted">${esc(t('of.minutesHelp'))}</small></label>
         <label class="check"><input type="checkbox" id="of-badge" ${o.show_badge !== false ? 'checked' : ''}> ${esc(t('of.badge'))}</label>
         <label class="check"><input type="checkbox" id="of-active" ${o.active !== false ? 'checked' : ''}> ${esc(t('of.active'))}</label></div></div>
     <div class="error" id="of-err" hidden></div>
@@ -2494,6 +2496,11 @@ async function offerForm(body, id) {
   const f = $('#of-form', body), v = sel => ($(sel, f)?.value || '').trim(), kind = () => f.querySelector('input[name=ok]:checked').value;
   const cents = x => Math.round(parseFloat(String(x).replace(',', '.')) * 100) || 0;
   const cfg = () => {
+    const x = cfg0(), w = kind() !== 'coupon' && $('#of-wel', f).checked, m = Math.min(60, Math.max(0, Math.round(+v('#of-minutes')) || 0));
+    if (w) x.welcome = true; if ((w || x.code) && m) x.minutes = m;
+    return x;
+  };
+  const cfg0 = () => {
     const k = kind();
     if (k === 'bundle') return { book_ids: chosen.slice(), percent: +v('#of-pct') };
     if (k === 'qty') return { tiers: tiers.filter(x => x.min > 0 && x.percent > 0), category: v('#of-cat') || null };
@@ -2513,6 +2520,7 @@ async function offerForm(body, id) {
     $$('[data-for]', f).forEach(el => { el.hidden = !el.dataset.for.split(' ').includes(k); });
     const amount = f.querySelector('input[name=ct]:checked')?.value === 'a';
     $('#of-cp-box', f).hidden = amount; $('#of-ca-box', f).hidden = !amount;
+    $('#of-min-box', f).hidden = !(k === 'coupon' || $('#of-wel', f).checked);
     $('#of-example', f).textContent = t('of.exampleLabel') + ' ' + ofDesc({ kind: k, config: cfg() });
     if (k === 'bundle') drawPick();
   };

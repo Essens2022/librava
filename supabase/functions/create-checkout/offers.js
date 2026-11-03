@@ -60,7 +60,10 @@ export function offerSaving(o, items, ctx = {}) {
 // best combination: the single best non-stackable offer + every stackable offer on what is left
 export function applyOffers(items, offers, ctx = {}) {
   const now = ctx.now || new Date();
-  const run = (offers || []).filter(o => offerRunning(o, now));
+  // offers marked config.welcome only run inside the visitor's timed window (ctx.welcome, or the browser's saved window end) and for visitors without paid orders
+  let wl = ctx.welcome;
+  if (wl === undefined) { try { wl = Number(localStorage.getItem('librava:welcome-until')) > Date.now(); } catch { wl = false; } }
+  const run = (offers || []).filter(o => offerRunning(o, now) && (!o.config?.welcome || (wl && !ctx.hasOrders)));
   const paid = items.filter(i => i.price_cents > 0);
   const price = Object.fromEntries(paid.map(i => [i.id, i.price_cents]));
   const subtotal = paid.reduce((s, i) => s + i.price_cents, 0);

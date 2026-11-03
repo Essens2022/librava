@@ -1,8 +1,8 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103181533';
-import { store, esc } from './util.js?v=20261103181533';
-import { getLang } from './i18n.js?v=20261103181533';
-import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103181533';
+import { api } from './api.js?v=20261103182150';
+import { store, esc } from './util.js?v=20261103182150';
+import { getLang, t } from './i18n.js?v=20261103182150';
+import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103182150';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -10,7 +10,8 @@ const T = {
   el: ['Ένα δώρο για σας', 'Το παίρνω'], da: ['En gave til dig', 'Tag den'], sv: ['En present till dig', 'Ta den'], no: ['En gave til deg', 'Ta den'], fi: ['Lahja sinulle', 'Ota'],
   et: ['Kingitus sulle', 'Võta'], lv: ['Dāvana jums', 'Paņemt'], lt: ['Dovana jums', 'Paimti'], uk: ['Подарунок для вас', 'Забрати'],
 };
-const CODE = 'WELCOME10', MIN = 15;
+const CODE = 'WELCOME10';
+const winMin = () => Math.min(60, Math.max(1, +store.get('welcome-min', 15) || 15));
 // the timer is real: after 15 minutes the code stops working in the cart and at payment, and it never restarts by refreshing the page
 export function couponLive(code) {
   if (String(code || '').toUpperCase() !== CODE) return true;
@@ -51,8 +52,34 @@ function pill(pct) {
   el.classList.toggle('low', left < 120);
   if (left <= 120 && left > 0 && lastLeftFlag !== 120) { lastLeftFlag = 120; peek(el, 6000); }
   if (left <= 30 && lastLeftFlag !== 30) { lastLeftFlag = 30; peek(el, 6000); }
-  el.style.setProperty('--p', Math.round(100 * left / (MIN * 60)) + '%');
+  el.style.setProperty('--p', Math.round(100 * left / (winMin() * 60)) + '%');
+  const bonus = store.get('welcome-bonus', ''); el.querySelector('.wl-open b').textContent = bonus || '−' + (+pct) + '%';
   el.querySelector('.wl-t').textContent = time; el.querySelector('.wl-t2').textContent = time;
+}
+
+// the timed extra offer (admin: any offer marked "new visitors, welcome countdown")
+async function welOffer() { try { return (await api.offers()).find(o => o.kind === 'bxgy' && o.config?.welcome) || null; } catch { return null; } }
+async function takeGift(c) {
+  const wo = await welOffer();
+  const m = Math.min(60, Math.max(1, Math.max(+c?.config?.minutes || 0, +wo?.config?.minutes || 0) || 15));
+  store.set('welcome-min', m); store.set('welcome-until', Date.now() + m * 60e3); store.set('welcome-bonus', '');
+  fresh = true; openedBy = 0; resumePill();
+  if (wo) setTimeout(function show(n = 0) {
+    const until = store.get('welcome-until', 0);
+    if (!until || Date.now() >= until - 20000 || store.get('welcome-bonus')) return;
+    if (document.querySelector('.modal, .gift-modal, #why-wrap') || /(^|\/)(read|admin|cart)\b/.test(currentPath())) { if (n < 12) setTimeout(() => show(n + 1), 1500); return; }
+    const b = +wo.config.buy || 3, g = +wo.config.get || 3, tag = b + '+' + g;
+    store.set('welcome-bonus', tag);
+    const conf = Array.from({ length: 28 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 7) * .18}s;--c:${['#F4A340', '#E85D75', '#4FA3D9', '#7BC47F', '#B48CE0'][i % 5]}"></i>`).join('');
+    const [, btn] = T[getLang()] || T.en;
+    modal(`<div class="gift-confetti" aria-hidden="true">${conf}</div>
+      <div class="gift-hero">${GIFT_SVG.replace('width="20" height="20"', 'width="44" height="44"')}</div>
+      <div class="welcome-big">${b} + ${g}</div>
+      <h2>${esc(t('book.free'))}</h2>
+      <div class="actions" style="justify-content:center"><button class="btn btn-buy" data-close>${esc(btn)}</button></div>`,
+      { onMount: m2 => { m2.classList.add('gift-modal'); } });
+    resumePill(); const el = document.getElementById('wl-box'); if (el) peek(el, 6000);
+  }, 10000);
 }
 export function resumePill() {
   try {
@@ -80,7 +107,7 @@ export function welcomeGift() {
           <h2>${esc(title)}</h2>
           <div class="welcome-big">−${+pct}%</div>
           <div class="actions" style="justify-content:center"><button class="btn btn-buy" data-close data-take>${esc(btn)}</button></div>`,
-          { onMount: m => { m.classList.add('gift-modal'); m.querySelector('[data-take]').addEventListener('click', () => { try { sessionStorage.setItem('librava:coupon', CODE); } catch { } store.set('welcome-until', Date.now() + MIN * 60e3); fresh = true; openedBy = 0; resumePill(); }); } });
+          { onMount: m => { m.classList.add('gift-modal'); m.querySelector('[data-take]').addEventListener('click', () => { try { sessionStorage.setItem('librava:coupon', CODE); } catch { } takeGift(c); }); } });
       } catch { }
     }, 2000);
   } catch { }

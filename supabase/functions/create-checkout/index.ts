@@ -64,7 +64,10 @@ Deno.serve(async (req) => {
     const { data: offerRows } = await admin.from('offers').select('*').eq('active', true);
     const offers = (offerRows || []).filter((o) => o.kind !== 'coupon' || (code && String(o.config?.code || '').toUpperCase() === code));
     const { count: paidOrders } = guest ? { count: 0 } : await admin.from('orders').select('id', { count: 'exact', head: true }).eq('user_id', user!.id).eq('status', 'paid');
-    const calc = applyOffers(toBuy, offers, { coupon: code, hasOrders: (paidOrders || 0) > 0 });
+    // timed welcome offers: the browser sends when this visitor's window ends; accepted only if it is a plausible value (not in the past, at most 60 min ahead)
+    const wu = Number(body.welcome_until);
+    const welcome = Number.isFinite(wu) && wu > Date.now() - 15000 && wu <= Date.now() + 61 * 60 * 1000;
+    const calc = applyOffers(toBuy, offers, { coupon: code, hasOrders: (paidOrders || 0) > 0, welcome });
     const amount = calc.total;
     const usedCoupon = calc.applied.find((a) => a.kind === 'coupon');
     const { data: order, error: oErr } = await admin.from('orders').insert({

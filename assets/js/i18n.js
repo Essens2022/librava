@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261103181533';
-import { CONFIG } from './config.js?v=20261103181533';
-import { store } from './util.js?v=20261103181533';
+import { localize, loadRates } from './localprice.js?v=20261103182150';
+import { CONFIG } from './config.js?v=20261103182150';
+import { store } from './util.js?v=20261103182150';
 
 const D = {
   ro: {
@@ -226,6 +226,9 @@ const D = {
     'of.minOrder': 'Comandă minimă (€)',
     'of.maxUses': 'De câte ori poate fi folosit',
     'of.newOnly': 'Doar pentru clienții la prima comandă',
+    'of.welcome': 'Doar pentru vizitatori noi, cât ține cronometrul de bun venit',
+    'of.minutes': 'Durata cronometrului (minute)',
+    'of.minutesHelp': 'Cronometrul pornește când vizitatorul ia cadoul. Dacă setezi mai multe, se ia cel mai mare (maxim 60). Gol = 15.',
     'of.settings': 'Setări',
     'of.settingsHelp': 'Perioada, combinarea cu alte oferte și afișarea pe site.',
     'of.name': 'Nume (apare pe pagina de plată)',
@@ -1794,6 +1797,9 @@ const D = {
     'of.minOrder': 'Ordine minimo (€)',
     'of.maxUses': 'Quante volte si può usare',
     'of.newOnly': 'Solo per clienti al primo ordine',
+    'of.welcome': 'Solo per nuovi visitatori, finché dura il conto alla rovescia di benvenuto',
+    'of.minutes': 'Durata del conto alla rovescia (minuti)',
+    'of.minutesHelp': 'Parte quando il visitatore prende il regalo. Se ne imposti più di uno vale il più grande (max 60). Vuoto = 15.',
     'of.settings': 'Impostazioni',
     'of.settingsHelp': 'Periodo, combinazione con altre offerte e visualizzazione sul sito.',
     'of.name': 'Nome (appare nella pagina di pagamento)',
@@ -3362,6 +3368,9 @@ const D = {
     'of.minOrder': 'Minimum order (€)',
     'of.maxUses': 'How many times it can be used',
     'of.newOnly': 'Only for first-time customers',
+    'of.welcome': 'New visitors only, while the welcome countdown runs',
+    'of.minutes': 'Countdown length (minutes)',
+    'of.minutesHelp': 'Starts when the visitor takes the gift. If several are set, the largest counts (max 60). Empty = 15.',
     'of.settings': 'Settings',
     'of.settingsHelp': 'Period, combining with other offers and display on the site.',
     'of.name': 'Name (shown on the payment page)',
@@ -4744,7 +4753,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261103181533`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261103182150`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

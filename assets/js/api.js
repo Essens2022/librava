@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261103181533';
-import { applyOffers, offerRunning } from './offers.js?v=20261103181533';
-import { scoreBook } from './search.js?v=20261103181533';
-import { getLang } from './i18n.js?v=20261103181533';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261103181533';
+import { CONFIG } from './config.js?v=20261103182150';
+import { applyOffers, offerRunning } from './offers.js?v=20261103182150';
+import { scoreBook } from './search.js?v=20261103182150';
+import { getLang } from './i18n.js?v=20261103182150';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261103182150';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261103181533')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261103182150')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -665,7 +665,7 @@ class SupabaseAPI {
     if (this._user) for (const b of free) await this.claimFree(b.id);
     const paid = books.filter(b => b.price_cents > 0).map(b => b.id);
     if (!paid.length) { if (!this._user) throw new Error('lib.loginNeeded'); return { mode: 'done' }; }
-    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, coupon: coupon || null, return_url: location.origin + location.pathname } });
+    const { data, error } = await this.sb.functions.invoke('create-checkout', { body: { book_ids: paid, waiver: true, coupon: coupon || null, welcome_until: (() => { try { return Number(localStorage.getItem('librava:welcome-until')) || null; } catch { return null; } })(), return_url: location.origin + location.pathname } });
     if (error) {
       let msg = error.message;
       try { const j = await error.context.json(); msg = j.error || msg; } catch { }
