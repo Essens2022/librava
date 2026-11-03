@@ -3377,7 +3377,7 @@ body:has(#goal-bar) #cb-bar { bottom: 12px; }
 .free-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 12px; background: #e6f4d9; color: #2f5a2a; font: 800 12px/1 var(--font-ui, inherit); }
 .free-tag svg { color: #4F7F33; }
 .sum-off > span:first-child { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.sum-off .sum-sub { flex-basis: 100%; margin-left: 21px; font-weight: 800; color: #2f5a2a; background: #e6f4d9; border-radius: 10px; padding: 2px 8px; width: fit-content; }
+.sum-off .sum-sub { display: inline-block; margin-left: 2px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 700; color: #2f5a2a; background: #e6f4d9; }
 .sum-off.sum-code { opacity: .95; }
 
 /* ladder: the timed gift is just one more step in the same colours (a gift icon + "3 × Free") */
