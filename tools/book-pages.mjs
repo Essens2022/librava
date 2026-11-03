@@ -8,6 +8,10 @@
 // Uses only the PUBLIC Supabase address and key that are already in assets/js/config.js.
 import { readFileSync, writeFileSync, mkdirSync, rmSync, readdirSync, existsSync, statSync } from 'node:fs';
 import sharp from 'sharp';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const POP_GUIDES = [["how-to-grill-for-beginners", "How to Grill for Beginners"], ["baking-tips-for-beginners", "Baking Tips for Beginners"], ["how-to-go-vegan", "How to Go Vegan"], ["yoga-for-beginners-at-home", "Yoga for Beginners at Home"], ["how-to-start-a-youtube-channel", "How to Start a YouTube Channel"], ["how-to-start-journaling", "How to Start Journaling"], ["canning-for-beginners", "Canning for Beginners"], ["top-9-allergen-free-meal-ideas", "Allergen-Free Meal Ideas"]];
 const SITE = 'https://librava.store';
@@ -41,7 +45,7 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
 // all published books, read in pages of 1000 (the database never returns more than 1000 rows at once)
 async function readBooks() {
   if (process.env.SEO_TEST_BOOKS) return JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8'));
-  const q = `${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights,work_id&status=eq.published&deleted_at=is.null&order=published_at.desc,id.asc`;
+  const q = `${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights,work_id,sample_path&status=eq.published&deleted_at=is.null&order=published_at.desc,id.asc`;
   const out = [];
   for (let from = 0; ; from += 1000) {
     const r = await fetch(q, { headers: { ...H, Range: `${from}-${from + 999}`, 'Range-Unit': 'items' } });
@@ -115,6 +119,52 @@ for (const b of books) {
 const mainEd = b => { const e = books.filter(x => (x.work_id || x.id) === (b.work_id || b.id)); return e.find(x => x.id === (b.work_id || b.id)) || e.find(x => x.format === 'pdf') || e[0]; };
 const card = (l, b) => `<li><a href="/book/${b.id}/">${coverOf[b.id] ? `<img src="${esc(coverOf[b.id].url)}" alt="${esc(b.title)}" width="120" loading="lazy">` : ''}<span>${esc(b.title)}</span></a> <small>${esc(b.author)} · ${b.price_cents ? esc(money(l, b.price_cents, b.currency)) : esc(tr(l, 'book.free'))}</small></li>`;
 const mains = books.filter(b => mainEd(b).id === b.id); // one entry per title in lists
+
+// ---------- "look inside": real pictures from each book's own free sample (EPUB first, else PDF) ----------
+// Saved as book/<id>/in1.webp… so Google can show them (images + alt text) and people land on the book page.
+const insideOf = {};
+const walk = d => readdirSync(d).flatMap(f => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
+async function sampleImages(main) {
+  const eds = books.filter(x => (x.work_id || x.id) === (main.work_id || main.id) && x.sample_path);
+  const meta = `book/${main.id}/inside.json`, ver = eds.map(x => x.updated_at).sort().pop() || '';
+  try { const m = JSON.parse(readFileSync(meta, 'utf8')); if (m.ver === ver) return m.items; } catch { }
+  const work = join(tmpdir(), 'lv-' + main.id); rmSync(work, { recursive: true, force: true }); mkdirSync(work, { recursive: true });
+  let cand = [];
+  for (const ed of [...eds].sort((a, b) => (a.format === 'epub' ? -1 : 1) - (b.format === 'epub' ? -1 : 1))) {
+    try {
+      const r = await fetch(`${URL_}/storage/v1/object/public/samples/${ed.sample_path.split('/').map(encodeURIComponent).join('/')}`);
+      if (!r.ok) continue;
+      const f = join(work, 'sample.' + (ed.format === 'epub' ? 'epub' : 'pdf')), dir = join(work, 'x' + ed.format); mkdirSync(dir, { recursive: true });
+      writeFileSync(f, Buffer.from(await r.arrayBuffer()));
+      if (ed.format === 'epub') execFileSync('unzip', ['-o', '-q', f, '-d', dir], { stdio: 'ignore' });
+      else execFileSync('pdfimages', ['-png', '-f', '1', '-l', '16', f, join(dir, 'i')], { stdio: 'ignore' });
+      for (const p of walk(dir).filter(p => /\.(jpe?g|png|webp)$/i.test(p) && !/cover/i.test(p))) {
+        try { const m = await sharp(p).metadata(), ar = m.width / m.height; if (m.width >= 420 && m.height >= 300 && ar > 0.4 && ar < 2.6) cand.push({ p, w: m.width, h: m.height, k: createHash('md5').update(readFileSync(p)).digest('hex') }); } catch { }
+      }
+      if (cand.length) break;
+    } catch (e) { console.error('sample images', main.id, e.message); }
+  }
+  // unique by size, in book order, up to 4 spread over what was found
+  const seen = new Set(); cand = cand.filter(c => { const k = c.k; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.p.localeCompare(b.p, 'en', { numeric: true }));
+  const pick = cand.length <= 4 ? cand : [0, 1, 2, 3].map(i => cand[Math.round(i * (cand.length - 1) / 3)]);
+  const items = [];
+  for (const [i, c] of pick.entries()) {
+    try { const out = `book/${main.id}/in${i + 1}.webp`; const info = await sharp(c.p).flatten({ background: '#ffffff' }).resize({ width: 900, withoutEnlargement: true }).webp({ quality: 78 }).toFile(out); items.push({ f: `in${i + 1}.webp`, w: info.width, h: info.height }); } catch { }
+  }
+  rmSync(work, { recursive: true, force: true });
+  for (const f of existsSync(`book/${main.id}`) ? readdirSync(`book/${main.id}`).filter(f => /^in\d\.webp$/.test(f) && !items.some(i => i.f === f)) : []) rmSync(`book/${main.id}/${f}`, { force: true });
+  writeFileSync(meta, JSON.stringify({ ver, items }));
+  return items;
+}
+for (const b of books) {
+  if (mainEd(b).id !== b.id) continue;
+  try { insideOf[b.id] = await sampleImages(b); } catch (e) { console.error('inside failed', b.id, e.message); insideOf[b.id] = []; }
+}
+const insideHTML = (b, l = 'en', lead = true) => {
+  const it = insideOf[mainEd(b).id] || []; if (!it.length) return '';
+  const mid = mainEd(b).id;
+  return `<section class="g-preview"><h2>Look inside: ${esc(b.title)}</h2>${lead ? `<p>A free preview from the book. Open the page to read the free sample.</p>` : ''}<div class="g-shots">${it.map((x, i) => `<figure><a href="/book/${mid}/"><img src="/book/${mid}/${x.f}" width="${x.w}" height="${x.h}" loading="lazy" alt="${esc(b.title)} by ${esc(b.author)}, preview page ${i + 1}"></a><figcaption>${esc(b.title)} · preview ${i + 1}</figcaption></figure>`).join('')}</div><p><a class="g-btn" href="/book/${mid}/">Read the free sample →</a></p></section>`;
+};
 const catsOf = b => [...new Set([b.category, ...(b.categories || [])].filter(c => CATS.includes(c)))];
 
 const urls = []; // for the sitemap
@@ -221,6 +271,7 @@ for (const b of books) {
     <article class="seo-book">${cv ? `<img src="${esc(cv.url)}" alt="${esc(b.title)}" width="${cv.w}" height="${cv.h}">` : ''}<div><h1>${esc(b.title)}</h1>${b.subtitle ? `<p class="subtitle">${esc(b.subtitle)}</p>` : ''}
     <p>${esc(tr(l, 'book.by', { author: b.author }).replace(/<[^>]*>/g, ''))}</p><p>${eds.map(x => `<a href="/book/${x.id}/"><b>${esc(x.price_cents ? money(l, x.price_cents, x.currency) : tr(l, 'book.free'))}</b> · ${esc(fmtName(x))}</a>`).join(' &nbsp;|&nbsp; ')}</p>
     ${descFull.split('\n').filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('')}</div></article>
+    ${insideHTML(b, l)}
     ${guides.filter(g => g.book && (g.book.work_id || g.book.id) === (b.work_id || b.id)).map(g => `<p><a href="/${g.lang}/guide/${esc(g.slug)}/">${esc((g.lang === 'en' && keywordTargets.guides?.[g.slug]?.[0]) || g.title)}</a></p>`).join('')}
     ${related.length ? `<h2>${esc(tr(l, 'book.related'))}</h2><ul class="seo-books">${related.map(x => card(l, x)).join('')}</ul>` : ''}</div>`;
   write(`book/${b.id}`, page({ lang: l, head, body, boot: { lang: l }, hash: `#/book/${b.id}` }));
@@ -246,7 +297,7 @@ for (const g of guides) {
 <div class="g-meta">${esc(gu(l, 'by'))} · ${esc(gu(l, 'upd'))} ${esc(g.date || today)}</div>
 <div class="g-lead">${g.intro || ''}</div>
 ${secs.length > 2 ? `<nav class="g-toc"><b>${esc(gu(l, 'toc'))}</b><ol>${secs.map((x, i) => `<li><a href="#s${i + 1}">${esc(x.h2)}</a></li>`).join('')}</ol></nav>` : ''}
-${secs.map((x, i) => `<section><h2 id="s${i + 1}">${esc(x.h2)}</h2>${x.html || ''}</section>${i === 1 ? bookBox : ''}`).join('\n')}
+${secs.map((x, i) => `<section><h2 id="s${i + 1}">${esc(x.h2)}</h2>${x.html || ''}</section>${i === 1 ? bookBox + (b ? insideHTML(b, l, false) : '') : ''}`).join('\n')}
 ${secs.length <= 1 ? bookBox : ''}
 ${(g.faq || []).length ? `<section class="g-faq"><h2 id="faq">${esc(gu(l, 'faq'))}</h2>${g.faq.map(f => `<details open><summary>${esc(f.q)}</summary><div>${f.a}</div></details>`).join('')}</section>` : ''}
 ${g.outro || ''}

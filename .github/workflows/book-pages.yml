@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install --no-save --no-package-lock sharp@0.33.5
+      - run: sudo apt-get install -y -qq poppler-utils unzip || true
       - run: node tools/book-pages.mjs
       - name: Publish if something changed
         run: |

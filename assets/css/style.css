@@ -3238,3 +3238,9 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 /* cart number: above the basket, centred on it */
 .cart-count, .cart-count[class] { top: -4px !important; left: 50% !important; transform: translateX(-50%) !important; min-width: 0 !important; font-size: 18px !important; font-weight: 900 !important; line-height: 1 !important; }
 @media (max-width: 760px) { .cart-count, .cart-count[class] { top: -6px !important; left: 50% !important; font-size: 18px !important; } }
+/* "Look inside": real pictures from the book's free sample (book + guide pages) */
+.g-preview { margin: 26px 0; }
+.g-shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; margin: 12px 0; }
+.g-shots figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.g-shots img { display: block; width: 100%; height: auto; }
+.g-shots figcaption { font-size: 13px; color: var(--muted); padding: 8px 10px; }
