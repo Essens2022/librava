@@ -3271,3 +3271,6 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 .ladder-s.next { opacity: 1; color: #c76a00; } .ladder-s.next b { animation: ladPulse 1.6s infinite; } @keyframes ladPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(244,163,64,.6) } 50% { box-shadow: 0 0 0 8px rgba(244,163,64,0) } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ladder-s.on { color: #8fd36a; } :root:not([data-theme="light"]) .ladder-s.on b { background: #8fd36a; color: #10210a; } :root:not([data-theme="light"]) .ladder-s.next { color: #ffb55c; } }
 :root[data-theme="dark"] .ladder-s.on { color: #8fd36a; } :root[data-theme="dark"] .ladder-s.on b { background: #8fd36a; color: #10210a; } :root[data-theme="dark"] .ladder-s.next { color: #ffb55c; }
+
+/* desktop: the cart number sits centered over the basket icon (not over icon + the word "Cart") */
+@media (min-width: 861px) { .cart-btn .cart-count, .cart-btn .cart-count[class] { left: 26px !important; } }
