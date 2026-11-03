@@ -1,8 +1,8 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261103181500';
-import { store, esc } from './util.js?v=20261103181500';
-import { getLang } from './i18n.js?v=20261103181500';
-import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103181500';
+import { api } from './api.js?v=20261103181533';
+import { store, esc } from './util.js?v=20261103181533';
+import { getLang } from './i18n.js?v=20261103181533';
+import { modal, GIFT_SVG, currentPath, go } from './ui.js?v=20261103181533';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
@@ -18,6 +18,8 @@ export function couponLive(code) {
   return !until || Date.now() < until;
 }
 let tick = null;
+let fresh = false, openedBy = 0, collapseT = null, lastLeftFlag = 0;
+function peek(el, ms) { clearTimeout(collapseT); el.classList.remove('min'); collapseT = setTimeout(() => { if (Date.now() - openedBy > 9000) el.classList.add('min'); }, ms); }
 function pill(pct) {
   const until = store.get('welcome-until', 0);
   let el = document.getElementById('wl-box');
@@ -30,16 +32,25 @@ function pill(pct) {
   if (!el) {
     el = document.createElement('div'); el.id = 'wl-box';
     el.innerHTML = `<span class="wl-open"><button type="button" class="wl-c" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><span class="wl-g">${GIFT_SVG.replace('width="20" height="20"', 'width="14" height="14"')}</span><b>−${+pct}%</b><span class="wl-t"></span></span><span class="wl-ring"><span class="wl-t2"></span></span>`;
-    el.classList.toggle('min', !!store.get('welcome-collapsed'));
+    el.classList.toggle('min', !fresh);   // a new page load starts folded; only the moment the gift is taken starts open
     document.body.appendChild(el);
+    if (fresh) { peek(el, 5000); fresh = false; }
+    // smart: folds itself as soon as the visitor starts browsing (scroll or another page)
+    const fold = () => { if (Date.now() - openedBy > 9000) { clearTimeout(collapseT); el.classList.add('min'); } };
+    window.addEventListener('scroll', () => { if (window.scrollY > 90) fold(); }, { passive: true });
+    window.addEventListener('hashchange', fold); window.addEventListener('popstate', fold);
+    // ...and opens by itself for a moment when it matters: a book was added, or time is running out
+    window.addEventListener('librava:cart', () => { const e = document.getElementById('wl-box'); if (e) peek(e, 4500); });
     el.addEventListener('click', e => {
       const min = el.classList.contains('min');
-      if (e.target.closest('.wl-c')) { el.classList.add('min'); store.set('welcome-collapsed', 1); return; }
-      if (min) { el.classList.remove('min'); store.set('welcome-collapsed', 0); return; }
+      if (e.target.closest('.wl-c')) { clearTimeout(collapseT); el.classList.add('min'); return; }
+      if (min) { openedBy = Date.now(); clearTimeout(collapseT); el.classList.remove('min'); return; }
       go('/cart');
     });
   }
   el.classList.toggle('low', left < 120);
+  if (left <= 120 && left > 0 && lastLeftFlag !== 120) { lastLeftFlag = 120; peek(el, 6000); }
+  if (left <= 30 && lastLeftFlag !== 30) { lastLeftFlag = 30; peek(el, 6000); }
   el.style.setProperty('--p', Math.round(100 * left / (MIN * 60)) + '%');
   el.querySelector('.wl-t').textContent = time; el.querySelector('.wl-t2').textContent = time;
 }
@@ -69,7 +80,7 @@ export function welcomeGift() {
           <h2>${esc(title)}</h2>
           <div class="welcome-big">−${+pct}%</div>
           <div class="actions" style="justify-content:center"><button class="btn btn-buy" data-close data-take>${esc(btn)}</button></div>`,
-          { onMount: m => { m.classList.add('gift-modal'); m.querySelector('[data-take]').addEventListener('click', () => { try { sessionStorage.setItem('librava:coupon', CODE); } catch { } store.set('welcome-until', Date.now() + MIN * 60e3); resumePill(); }); } });
+          { onMount: m => { m.classList.add('gift-modal'); m.querySelector('[data-take]').addEventListener('click', () => { try { sessionStorage.setItem('librava:coupon', CODE); } catch { } store.set('welcome-until', Date.now() + MIN * 60e3); fresh = true; openedBy = 0; resumePill(); }); } });
       } catch { }
     }, 2000);
   } catch { }
