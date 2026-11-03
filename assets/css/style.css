@@ -3234,3 +3234,4 @@ a.promo-strip.promo-book.sp.sp-gift .sp-d1{right:0;top:0;bottom:0;width:14px;bac
 .guide-home .btn-ghost, .guide-home a.btn { color: #fff !important; }
 .guide-home .btn-buy { color: #1b1b1b !important; }
 .guide-home .btn-ghost, .guide-home a.btn:not(.btn-buy) { background: #fff !important; color: #1c1f1a !important; border: 1.5px solid #b9b49a !important; }
+.guide-home a.btn.btn-buy { background: #F4A340 !important; color: #1b1b1b !important; border: 0 !important; }
