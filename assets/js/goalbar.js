@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261103204345';
-import { t, money } from './i18n.js?v=20261103204345';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103204345';
-import { applyOffers, appliedLabel } from './offers.js?v=20261103204345';
-import { esc, store } from './util.js?v=20261103204345';
+import { api } from './api.js?v=20261103204654';
+import { t, money, getLang } from './i18n.js?v=20261103204654';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261103204654';
+import { applyOffers, appliedLabel } from './offers.js?v=20261103204654';
+import { esc, store } from './util.js?v=20261103204654';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -39,7 +39,7 @@ async function draw() {
     prevSaving = saving; prevCount = books.length;
     if (grew && top) {
       const nx = n ? (n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent })) : '';
-      pop(appliedLabel(top, t, c => t('cat.' + c)), saving, nx);
+      try { pop(appliedLabel(top, t, c => t('cat.' + c)), saving, nx); } catch { }   // a failing pop-up must never block the bar
     }
     if (!n) { bar?.remove(); return; }
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
