@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261104063407';
-import { CONFIG } from './config.js?v=20261104063407';
-import { SOCIAL_PATHS } from './social.js?v=20261104063407';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261104063407';
-import { esc, store, $, $$ } from './util.js?v=20261104063407';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261104064121';
+import { CONFIG } from './config.js?v=20261104064121';
+import { SOCIAL_PATHS } from './social.js?v=20261104064121';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261104064121';
+import { esc, store, $, $$ } from './util.js?v=20261104064121';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261104063407';
-import { suggest, highlight } from './search.js?v=20261104063407';
-import { track, trackPage } from './track.js?v=20261104063407';
-import { initGA, applyConsent } from './ga.js?v=20261104063407';
-import { consentStrings } from './consent-i18n.js?v=20261104063407';
-import { api } from './api.js?v=20261104063407';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261104063407';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261104064121';
+import { suggest, highlight } from './search.js?v=20261104064121';
+import { track, trackPage } from './track.js?v=20261104064121';
+import { initGA, applyConsent } from './ga.js?v=20261104064121';
+import { consentStrings } from './consent-i18n.js?v=20261104064121';
+import { api } from './api.js?v=20261104064121';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261104064121';
 
 // ---------------- icons ----------------
 const P = {
@@ -834,7 +834,7 @@ function promoOffersHTML(p, data, placement) {
     const pal = st.pal[i % st.pal.length], bg = pal[0], solid = /^#/.test(bg), tx = pal[4] || st.tx || (lumOf(bg) > 0.62 ? '#1b1340' : '#fff'), ink = lumOf(pal[1]) > 0.5 ? '#1b1340' : '#ffffff', key = [pal[1], pal[2], bg, pal[3]].find(c => /^#/.test(c) && lumOf(c) < 0.45) || '#1b1340';
     const lay = st.lay[i % st.lay.length], an = (st.an + i) % 8, bkm = withBooks ? OF_BK[(idx + i) % OF_BK.length] : '', cv = bkm ? covers(x.o, i) : [];
     const ln = '<u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u>', th = b => `/book/${esc(b.id)}/thumb.webp`, sz = 'sizes="(max-width: 760px) 130px, 210px"',
-      im = b => i ? `<img data-src="${th(b)}" data-srcset="${th(b)} 320w, ${esc(b.cover_url)} 640w" ${sz} data-full="${esc(b.cover_url)}" alt="" decoding="async">` : `<img src="${th(b)}" srcset="${th(b)} 320w, ${esc(b.cover_url)} 640w" ${sz} data-full="${esc(b.cover_url)}" alt="" fetchpriority="high" decoding="async">`;   // the first banner is what the visitor sees first: no lazy loading, loaded first
+      im = b => i ? `<img data-src="${th(b)}" data-srcset="${th(b)} 320w, ${esc(b.cover_url)} 640w" ${sz} data-full="${esc(b.cover_url)}" alt="" decoding="async">` : `<img src="${th(b)}" srcset="${th(b)} 320w, ${esc(b.cover_url)} 640w" ${sz} data-full="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async">`;
     const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">
       <span class="dvx dvx-lap"><i class="dvx-scr"><span class="pg">${im(cv[0])}</span><span class="pg tx"><b></b>${ln}</span></i><i class="dvx-base"></i><em class="dvx-tag">PDF</em></span>
       <span class="dvx dvx-tab"><i class="dvx-scr">${im(cv[1] || cv[0])}</i></span>
