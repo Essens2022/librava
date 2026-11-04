@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261104052452';
-import { askWhy } from './why.js?v=20261104052452';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104052452';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261104052452';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261104052452';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261104052452';
-import { couponLive } from './welcome.js?v=20261104052452';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261104052452';
-import { track } from './track.js?v=20261104052452';
-import { gaEvent } from './ga.js?v=20261104052452';
-import { guessLang } from './langdetect.js?v=20261104052452';
-import { didYouMean } from './search.js?v=20261104052452';
-import { api, editionsOf } from './api.js?v=20261104052452';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261104052452';
+import { CONFIG } from './config.js?v=20261104051851';
+import { askWhy } from './why.js?v=20261104051851';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104051851';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261104051851';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261104051851';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261104051851';
+import { couponLive } from './welcome.js?v=20261104051851';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261104051851';
+import { track } from './track.js?v=20261104051851';
+import { gaEvent } from './ga.js?v=20261104051851';
+import { guessLang } from './langdetect.js?v=20261104051851';
+import { didYouMean } from './search.js?v=20261104051851';
+import { api, editionsOf } from './api.js?v=20261104051851';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261104051851';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -217,6 +217,12 @@ export async function viewSearch(el, q) {
 //  BOOK PAGE
 // =====================================================================
 export async function viewBook(el, id) {
+  // everything the page needs is asked at once (not one step after another): the book, its reviews, whether it is owned and the offers
+  const offersP = api.offers ? api.offers().catch(() => []) : Promise.resolve([]);
+  const ownedP = api.owns(id);
+  const revSort = l => l.flat().sort((a, c) => String(c.created_at).localeCompare(String(a.created_at)));
+  const reviewsP = api.listBooks({ allFormats: true }).then(all => { const lb = all.find(x => x.id === id); const e = lb?.work_id ? editionsOf(all, lb) : [lb || { id }]; return Promise.all(e.map(x => api.listReviews(x.id).catch(() => []))).then(revSort); }).catch(() => []);
+  ownedP.catch(() => { }); reviewsP.catch(() => { });
   const b = await api.getBook(id);
   if (!b) {
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('book')}<p>${esc(t('book.notFound'))}</p><a class="btn btn-dark" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
@@ -228,14 +234,14 @@ export async function viewBook(el, id) {
   // the other formats of this book (EPUB, PDF…), each with its own price — shown like Amazon's format tiles
   const eds = b.work_id ? editionsOf(await api.listBooks({ allFormats: true }), b) : [b];
   const [owned, reviews, related, myRev, ownedEds] = await Promise.all([
-    api.owns(b.id),
-    // reviews are shared by all formats of the same book, as on Amazon
-    Promise.all(eds.map(x => api.listReviews(x.id).catch(() => []))).then(l => l.flat().sort((a, c) => String(c.created_at).localeCompare(String(a.created_at)))),
+    ownedP,
+    // reviews are shared by all formats of the same book, as on Amazon (already requested above, in parallel with the book)
+    reviewsP,
     api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id)).slice(0, 12)),
     api.myReview ? api.myReview(b.id) : null,
     eds.length > 1 ? Promise.all(eds.filter(x => x.id !== b.id).map(x => api.owns(x.id).then(o => o ? x : null).catch(() => null))).then(l => l.filter(Boolean)) : [],
   ]);
-  const offers = api.offers ? await api.offers().catch(() => []) : [];
+  const offers = await offersP;
   const offerRank = o => { const c = o.config || {}; if (o.kind === 'qty') return Math.min(...(c.tiers || [{ percent: 0 }]).map(x => +x.percent || 0)); return +(c.percent ?? 100); };
   const badges = offersForBook(b, offers).filter(o => o.show_badge !== false).sort((x, y) => offerRank(x) - offerRank(y));
   const canPreview = !owned && (b.sample_path || api.isDemo);

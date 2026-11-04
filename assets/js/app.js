@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261104052452';
-import { t, getLang, setLang } from './i18n.js?v=20261104052452';
-import { esc, $, $$ } from './util.js?v=20261104052452';
-import { api, chooseBackend } from './api.js?v=20261104052452';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261104052452';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261104052452';
-import { cartBack } from './cartback.js?v=20261104052452';
-import { goalBar } from './goalbar.js?v=20261104052452';
-import { welcomeGift } from './welcome.js?v=20261104052452';
-import { trackPage } from './track.js?v=20261104052452';
-import { offline } from './offline.js?v=20261104052452';
-import { viewReader } from './reader.js?v=20261104052452';
+import { CONFIG } from './config.js?v=20261104051851';
+import { t, getLang, setLang } from './i18n.js?v=20261104051851';
+import { esc, $, $$ } from './util.js?v=20261104051851';
+import { api, chooseBackend } from './api.js?v=20261104051851';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261104051851';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261104051851';
+import { cartBack } from './cartback.js?v=20261104051851';
+import { goalBar } from './goalbar.js?v=20261104051851';
+import { welcomeGift } from './welcome.js?v=20261104051851';
+import { trackPage } from './track.js?v=20261104051851';
+import { offline } from './offline.js?v=20261104051851';
+import { viewReader } from './reader.js?v=20261104051851';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -112,7 +112,7 @@ async function route() {
       case 'library': res = await viewLibrary(el, q); break;
       case 'welcome': res = await viewWelcome(el, q); break;
       case 'read': res = await viewReader(el, parts[1], q); break;
-      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261104052452'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
+      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261104051851'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
       case 'help': res = viewHelp(el); break;
       case 'legal': res = await viewLegal(el, parts[1]); break;
       case 'guide': res = await viewGuide(el, parts[1]); break;
@@ -236,3 +236,10 @@ if ('serviceWorker' in navigator && /(^|\.)librava\.store$/.test(location.hostna
   document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
   window.addEventListener('hashchange', () => check());   // moving around the site (e.g. between admin tabs)
 })();
+
+// the book page starts loading the moment a finger touches (or the mouse reaches) a book link, a moment before the click arrives
+{
+  const warm = e => { const a = e.target?.closest?.('a[href^="#/book/"]'); if (!a) return; const id = decodeURIComponent(a.getAttribute('href').slice(7).split(/[?/]/)[0]); if (id) api.getBook(id).catch(() => { }); };
+  document.addEventListener('touchstart', warm, { passive: true });
+  document.addEventListener('mouseover', warm, { passive: true });
+}
