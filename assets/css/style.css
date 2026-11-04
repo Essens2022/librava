@@ -3764,3 +3764,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .dvx-tab .dvx-scr { border-width: 3px; border-radius: 7px; } .dvx-lap .dvx-scr { border-width: 3px; border-radius: 6px 6px 2px 2px; } .dvx-base { height: 6px; }
 }
 @media (max-width: 760px) { .of-s.has-bk .of-bk { padding-inline: 3%; } .of-bk .dvx-tab { width: 26% !important; } }
+
+/* speed: the page keeps its shape while it loads (header and content area are reserved), so nothing jumps */
+#hdr:empty { min-height: 148px; background: var(--hdr); }
+#app { min-height: calc(100vh - 150px); min-height: calc(100svh - 150px); }
+@media (min-width: 900px) { #hdr:empty { min-height: 100px; } #app { min-height: calc(100vh - 100px); min-height: calc(100svh - 100px); } }
+@media (min-width: 640px) and (max-width: 899px) { #hdr:empty { min-height: 152px; } }
