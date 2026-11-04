@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261104051738';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104051738';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261104051738';
-import { resetCompanyCache } from './views.js?v=20261104051738';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261104051738';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261104051738';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261104051738';
-import { optimizeBook } from './optimize.js?v=20261104051738';
-import { api } from './api.js?v=20261104051738';
-import { OF_STYLES } from './offerstyles.js?v=20261104051738';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261104051738';
+import { CONFIG } from './config.js?v=20261104051851';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104051851';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261104051851';
+import { resetCompanyCache } from './views.js?v=20261104051851';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261104051851';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261104051851';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261104051851';
+import { optimizeBook } from './optimize.js?v=20261104051851';
+import { api } from './api.js?v=20261104051851';
+import { OF_STYLES } from './offerstyles.js?v=20261104051851';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261104051851';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
