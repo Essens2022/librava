@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261104064121';
-import { CONFIG } from './config.js?v=20261104064121';
-import { store } from './util.js?v=20261104064121';
+import { localize, loadRates } from './localprice.js?v=20261104072220';
+import { CONFIG } from './config.js?v=20261104072220';
+import { store } from './util.js?v=20261104072220';
 
 const D = {
   ro: {
@@ -4792,7 +4792,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261104064121`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261104072220`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
@@ -4847,4 +4847,4 @@ export function fmtDate(d) {
 }
 
 // first visit from outside the euro area: get today's rates, then redraw the page with local prices
-loadRates(() => window.dispatchEvent(new HashChangeEvent('hashchange')));
+loadRates();
