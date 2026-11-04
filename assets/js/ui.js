@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261104002256';
-import { CONFIG } from './config.js?v=20261104002256';
-import { SOCIAL_PATHS } from './social.js?v=20261104002256';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261104002256';
-import { esc, store, $, $$ } from './util.js?v=20261104002256';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261104030211';
+import { CONFIG } from './config.js?v=20261104030211';
+import { SOCIAL_PATHS } from './social.js?v=20261104030211';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261104030211';
+import { esc, store, $, $$ } from './util.js?v=20261104030211';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261104002256';
-import { suggest, highlight } from './search.js?v=20261104002256';
-import { track, trackPage } from './track.js?v=20261104002256';
-import { initGA, applyConsent } from './ga.js?v=20261104002256';
-import { consentStrings } from './consent-i18n.js?v=20261104002256';
-import { api } from './api.js?v=20261104002256';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261104002256';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261104030211';
+import { suggest, highlight } from './search.js?v=20261104030211';
+import { track, trackPage } from './track.js?v=20261104030211';
+import { initGA, applyConsent } from './ga.js?v=20261104030211';
+import { consentStrings } from './consent-i18n.js?v=20261104030211';
+import { api } from './api.js?v=20261104030211';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261104030211';
 
 // ---------------- icons ----------------
 const P = {
@@ -833,7 +833,7 @@ function promoOffersHTML(p, data, placement) {
   const slide = (x, i) => {
     const pal = st.pal[i % st.pal.length], bg = pal[0], solid = /^#/.test(bg), tx = pal[4] || st.tx || (lumOf(bg) > 0.62 ? '#1b1340' : '#fff'), ink = lumOf(pal[1]) > 0.5 ? '#1b1340' : '#ffffff', key = [pal[1], pal[2], bg, pal[3]].find(c => /^#/.test(c) && lumOf(c) < 0.45) || '#1b1340';
     const lay = st.lay[i % st.lay.length], an = (st.an + i) % 8, bkm = withBooks ? OF_BK[(idx + i) % OF_BK.length] : '', cv = bkm ? covers(x.o, i) : [];
-    const ln = '<u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u>', im = b => `<img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async">`;
+    const ln = '<u></u><u></u><u></u><u></u><u></u><u></u><u></u><u></u>', im = b => i ? `<img data-src="${esc(b.cover_url)}" alt="" decoding="async">` : `<img src="${esc(b.cover_url)}" alt="" loading="lazy" decoding="async">`;
     const bk = cv.length ? `<span class="of-bk bk-${bkm}" aria-hidden="true">
       <span class="dvx dvx-lap"><i class="dvx-scr"><span class="pg">${im(cv[0])}</span><span class="pg tx"><b></b>${ln}</span></i><i class="dvx-base"></i><em class="dvx-tag">PDF</em></span>
       <span class="dvx dvx-tab"><i class="dvx-scr">${im(cv[1] || cv[0])}</i></span>
@@ -853,7 +853,8 @@ export function offersBanners(root) {
     if (el._of) return; el._of = 1;
     const ss = [...el.querySelectorAll('.of-s')], ds = [...el.querySelectorAll('.of-dots i')]; if (ss.length < 1) return;
     let idx = 0, was = false, next = 0;
-    const show = i => { idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); };
+    const loadImgs = i => { [i, (i + 1) % ss.length].forEach(k => ss[k] && ss[k].querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); })); };
+    const show = i => { loadImgs(i); idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); };
     const tick = () => {
       if (!el.isConnected) return clearInterval(iv);
       const host = el.closest('.promo-slide'), on = !host || host.classList.contains('on');
