@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261104045214';
-import { askWhy } from './why.js?v=20261104045214';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104045214';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261104045214';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261104045214';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261104045214';
-import { couponLive } from './welcome.js?v=20261104045214';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261104045214';
-import { track } from './track.js?v=20261104045214';
-import { gaEvent } from './ga.js?v=20261104045214';
-import { guessLang } from './langdetect.js?v=20261104045214';
-import { didYouMean } from './search.js?v=20261104045214';
-import { api, editionsOf } from './api.js?v=20261104045214';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261104045214';
+import { CONFIG } from './config.js?v=20261104050942';
+import { askWhy } from './why.js?v=20261104050942';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104050942';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261104050942';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261104050942';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261104050942';
+import { couponLive } from './welcome.js?v=20261104050942';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261104050942';
+import { track } from './track.js?v=20261104050942';
+import { gaEvent } from './ga.js?v=20261104050942';
+import { guessLang } from './langdetect.js?v=20261104050942';
+import { didYouMean } from './search.js?v=20261104050942';
+import { api, editionsOf } from './api.js?v=20261104050942';
+import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261104050942';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -22,6 +22,7 @@ export async function viewHome(el) {
   // the store shows only books in the visitor's language
   const L = getLang();
   const promosP = api.promos ? api.promos(L).catch(() => []) : Promise.resolve([]); // loads together with the books
+  const catOrdP = loadCatOrder();   // also in parallel, not one after another
   const [featured, newest, free, deals, all, everything] = await Promise.all([
     api.listBooks({ lang: L, featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
     api.listBooks({ lang: L, sort: 'newest', limit: 14 }),
@@ -53,7 +54,7 @@ export async function viewHome(el) {
   const shelf = (title, books, more) => !books.length ? '' : `
     <section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2>
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
-  await loadCatOrder();
+  await catOrdP;
   const catTiles = applyCatOrder(CATS).map(c => {
     const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';

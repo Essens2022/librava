@@ -3,11 +3,11 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261104045214';
-import { applyOffers, offerRunning } from './offers.js?v=20261104045214';
-import { scoreBook } from './search.js?v=20261104045214';
-import { getLang } from './i18n.js?v=20261104045214';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261104045214';
+import { CONFIG } from './config.js?v=20261104050942';
+import { applyOffers, offerRunning } from './offers.js?v=20261104050942';
+import { scoreBook } from './search.js?v=20261104050942';
+import { getLang } from './i18n.js?v=20261104050942';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261104050942';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -109,7 +109,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261104045214')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261104050942')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -745,24 +745,37 @@ class SupabaseAPI {
     const { error } = await this.sb.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type || undefined, cacheControl: '3600' });
     this._err(error);
   }
+  // small lists the home page asks for on every visit (banners, offers, category order): kept for a minute in memory, so going back to the
+  // home page is instant. Anything saved in Admin clears them; staff sessions always read fresh.
+  _memo(key, fn, ttl = 60000) {
+    if (store.get('staff')) return fn();
+    this._mm = this._mm || new Map();
+    const h = this._mm.get(key);
+    if (h && Date.now() - h.at < ttl) return h.p;
+    const p = fn(); this._mm.set(key, { at: Date.now(), p });
+    p.catch(() => { if (this._mm.get(key)?.p === p) this._mm.delete(key); });
+    return p;
+  }
+  _memoClear() { this._mm = null; }
   // ---- offers & discounts (Admin → Offers) ----
-  async offers() { try { const { data } = await this.sb.from('offers').select('*'); return (data || []).filter(o => o.kind !== 'coupon' && offerRunning(o)); } catch { return []; } }
+  async offers() { try { const rows = await this._memo('offers', async () => { const { data, error } = await this.sb.from('offers').select('*'); if (error) throw error; return data || []; }); return rows.filter(o => o.kind !== 'coupon' && offerRunning(o)); } catch { return []; } }
   async findCoupon(code) { if (!String(code || '').trim()) return null; const { data } = await this.sb.rpc('find_coupon', { c: String(code).trim() }); return (data || [])[0] || null; }
   async adminOffers() { const { data, error } = await this.sb.from('offers').select('*').order('created_at', { ascending: false }); this._err(error); return data || []; }
-  async saveOffer(o) { const row = { ...o, updated_at: new Date().toISOString() }; delete row.uses; delete row.created_at; const { data, error } = await this.sb.from('offers').upsert(row).select('id').single(); this._err(error); return data.id; }
-  async deleteOffer(id) { const { error } = await this.sb.from('offers').delete().eq('id', id); this._err(error); }
+  async saveOffer(o) { this._memoClear(); const row = { ...o, updated_at: new Date().toISOString() }; delete row.uses; delete row.created_at; const { data, error } = await this.sb.from('offers').upsert(row).select('id').single(); this._err(error); return data.id; }
+  async deleteOffer(id) { this._memoClear(); const { error } = await this.sb.from('offers').delete().eq('id', id); this._err(error); }
   async boughtTogether(id) { try { const { data } = await this.sb.rpc('bought_together', { b: id, n: 6 }); return (data || []).map(r => r.book_id); } catch { return []; } }
   // ---- promotions (home page banners chosen by the shop owner, per language) ----
   _promoUrl(path, v) { return path ? this.sb.storage.from('covers').getPublicUrl(path).data.publicUrl : null; }
   _promoRow(p) { return { ...p, image_url: this._promoUrl(p.image_path), image_mobile_url: this._promoUrl(p.image_mobile_path) }; }
   async promos(lang) {
     try {
-      const { data } = await this.sb.from('promos').select('*').eq('active', true).order('sort');
-      return (data || []).filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort).map(p => this._promoRow(p));
+      const data = await this._memo('promos', async () => { const { data, error } = await this.sb.from('promos').select('*').eq('active', true).order('sort'); if (error) throw error; return data || []; });
+      return data.filter(p => promoRunning(p) && (!p.lang || p.lang === lang)).sort(promoSort).map(p => this._promoRow(p));
     } catch { return []; }
   }
   async adminPromos() { const { data, error } = await this.sb.from('promos').select('*'); this._err(error); return (data || []).sort(promoSort).map(p => this._promoRow(p)); }
   async savePromo(p, files = {}) {
+    this._memoClear();
     const id = p.id || crypto.randomUUID();
     const row = { ...p, id, updated_at: new Date().toISOString() };
     for (const k of ['image_url', 'image_mobile_url', 'views', 'clicks', 'created_at']) delete row[k];
@@ -779,11 +792,12 @@ class SupabaseAPI {
     return id;
   }
   async deletePromo(p) {
+    this._memoClear();
     const { error } = await this.sb.from('promos').delete().eq('id', p.id); this._err(error);
     const files = [p.image_path, p.image_mobile_path].filter(Boolean);
     if (files.length) await this.sb.storage.from('covers').remove(files).catch(() => { });
   }
-  async setPromoSort(id, sort) { const { error } = await this.sb.from('promos').update({ sort, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); }
+  async setPromoSort(id, sort) { this._memoClear(); const { error } = await this.sb.from('promos').update({ sort, updated_at: new Date().toISOString() }).eq('id', id); this._err(error); }
   async promoHit(id, kind) { try { await this.sb.rpc('promo_hit', { p: id, k: kind }); } catch { } }
   track(e) { this.sb.rpc('track', { e }).then(() => { }, () => { }); }
   // sent while the page is closing/hiding: keepalive lets the request finish after the page is gone
@@ -793,8 +807,8 @@ class SupabaseAPI {
   heartbeat(p) { if (this._user) this.sb.rpc('heartbeat', p).then(() => { }, () => { }); }
   async analytics(days) { const { data, error } = await this.sb.rpc('analytics_summary', { days }); this._err(error); return data; }
   // ---- shop settings (company details for the legal pages) and announcements ----
-  async getSetting(key) { try { const { data } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); return data?.value || null; } catch { return null; } }
-  async saveSetting(key, value) { const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
+  async getSetting(key) { try { return await this._memo('set:' + key, async () => { const { data, error } = await this.sb.from('site_settings').select('value').eq('key', key).maybeSingle(); if (error) throw error; return data?.value || null; }); } catch { return null; } }
+  async saveSetting(key, value) { this._memoClear(); const { error } = await this.sb.from('site_settings').upsert({ key, value, updated_at: new Date().toISOString() }); this._err(error); }
   async myGifts() { if (!this._user) return []; const { data } = await this.sb.from('purchases').select('id,book_id,created_at').eq('user_id', this._user.id).eq('gift', true).order('created_at', { ascending: false }).limit(20); return data || []; }
   async notifications() { const { data } = await this.sb.from('notifications').select('*').eq('published', true).order('created_at', { ascending: false }).limit(30); return data || []; }
   async adminNotifications() { const { data, error } = await this.sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(200); this._err(error); return data; }
