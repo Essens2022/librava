@@ -3770,3 +3770,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 #app { min-height: calc(100vh - 150px); min-height: calc(100svh - 150px); }
 @media (min-width: 900px) { #hdr:empty { min-height: 100px; } #app { min-height: calc(100vh - 100px); min-height: calc(100svh - 100px); } }
 @media (min-width: 640px) and (max-width: 899px) { #hdr:empty { min-height: 152px; } }
+
+/* CLS: spinnerul de încărcare nu mai împinge containerul (margin collapse) — conținutul nu mai „sare" */
+.route > .spinner:only-child { margin: 0 auto; position: relative; top: 50px; }
+.route:has(> .spinner:only-child) { min-height: 140px; }
+.cat-tile .thumbs img { aspect-ratio: 5/8; }
