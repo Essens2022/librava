@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261104074328';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261104074328';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261104074328';
-import { resetCompanyCache } from './views.js?v=20261104074328';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261104074328';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261104074328';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261104074328';
-import { optimizeBook } from './optimize.js?v=20261104074328';
-import { api } from './api.js?v=20261104074328';
-import { OF_STYLES } from './offerstyles.js?v=20261104074328';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261104074328';
+import { CONFIG } from './config.js?v=20261105100713';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261105100713';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261105100713';
+import { resetCompanyCache } from './views.js?v=20261105100713';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261105100713';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261105100713';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261105100713';
+import { optimizeBook } from './optimize.js?v=20261105100713';
+import { api } from './api.js?v=20261105100713';
+import { OF_STYLES } from './offerstyles.js?v=20261105100713';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261105100713';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -71,6 +71,7 @@ export async function viewAdmin(el, parts) {
     if (!u) sessionStorage.setItem('librava:after', '/admin');
     return;
   }
+  if (!inAdmin) { inAdmin = true; try { sessionStorage.removeItem(CU_KEY); } catch { } }
   let tab = parts[0] || 'visitors';
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
@@ -468,8 +469,18 @@ const ymd = d => { const z = n => String(n).padStart(2, '0'); return d.getFullYe
 const daysAgo = n => ymd(new Date(Date.now() - n * 864e5));
 function cuRange() {
   let r = null; try { r = JSON.parse(sessionStorage.getItem(CU_KEY)); } catch { }
-  return r && r.from && r.to ? r : { from: daysAgo(29), to: ymd(new Date()), p: '30' };
+  const today = ymd(new Date());
+  if (!(r && r.from && r.to)) return { from: today, to: today, p: 'today' };   // the panel always opens on today
+  // a ready-made period (Today, 7 days…) always ends today, even if it was chosen yesterday
+  if (r.p === 'today') return { from: today, to: today, p: 'today' };
+  if (r.p === 'all') return { from: '2020-01-01', to: today, p: 'all' };
+  if (['7', '30', '90'].includes(r.p)) return { from: daysAgo(+r.p - 1), to: today, p: r.p };
+  return r;
 }
+// every time the administrator opens the panel from outside it, the period goes back to Today (inside the panel the chosen period stays)
+let inAdmin = false;
+const leftAdmin = () => { if (!/^\/admin(\/|$|\?)/.test(currentPath())) inAdmin = false; };
+window.addEventListener('hashchange', leftAdmin); window.addEventListener('popstate', leftAdmin);
 function cuISO(r) { const f = new Date(r.from + 'T00:00:00'), e = new Date(r.to + 'T00:00:00'); e.setDate(e.getDate() + 1); return { from: f.toISOString(), to: e.toISOString() }; }
 function rangeBarHTML(r) {
   const P = [['today', t('admin.act2.p.today')], ['7', t('admin.act2.p.7')], ['30', t('admin.act2.p.30')], ['90', t('admin.act2.p.90')], ['all', t('admin.act2.p.all')]];
