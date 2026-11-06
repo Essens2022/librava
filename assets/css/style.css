@@ -3629,7 +3629,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .has-bk.lay-L2 .of-bk, .has-bk.lay-L7 .of-bk { opacity: .55; width: 100%; right: 0; } .has-bk.lay-L7 .of-bk { opacity: .35; }
 .of-dots { position: absolute; z-index: 5; top: 14px; right: 16px; display: flex; gap: 6px; pointer-events: none; }
 .of-dots i { width: 18px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.45); transition: width .3s, background .3s; } .of-dots i.on { width: 30px; background: #fff; }
-.of-still .of-s, .of-still .of-s * { animation: none !important; } .of-still .of-s { visibility: visible; }
+.of-still .of-s { clip-path: none !important; transform: none !important; opacity: 1 !important; filter: none !important; } .of-still .of-s, .of-still .of-s * { animation: none !important; } .of-still .of-s { visibility: visible; }
 @media (max-width: 760px) {
   .promo-offers { height: 236px; }
   .of-in { gap: 3px; padding-bottom: 24px; } .of-k { font-size: 11px; padding: 4px 9px; } .of-big { font-size: clamp(46px, 16vw, 74px); } .of-t { font-size: 14px; max-width: 15em; } .of-cta { padding: 7px 12px; margin-top: 3px; font-size: 13px; }
