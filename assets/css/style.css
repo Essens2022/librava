@@ -3803,3 +3803,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 /* shelf banner: reserve the tallest slide's height from the first paint so the page does not jump when its cover loads */
 @media (min-width: 761px) { .promo-strip-wrap .promo-track { min-height: 119px; } }
 @media (min-width: 761px) { .promo-strip-wrap .promo-strip.promo-book .promo-in, .promo-strip-wrap .sp .promo-in { min-height: 119px !important; } }
+
+/* free-guide cards: same book-like edge as the other covers */
+.guide-card .gcv { position: relative; display: block; line-height: 0; border-radius: 9px 3px 3px 9px; overflow: hidden; margin-bottom: 2px; background: #E8EBE4; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.guide-card .gcv img { margin: 0; border-radius: 0; display: block; }
+.guide-card .gcv::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.36) 0, rgba(0,0,0,.10) 3%, rgba(255,255,255,.26) 4.6%, rgba(255,255,255,0) 7.5%, rgba(0,0,0,0) 93%, rgba(0,0,0,.13) 100%); }

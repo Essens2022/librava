@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261106200859';
-import { askWhy } from './why.js?v=20261106200859';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106200859';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261106200859';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261106200859';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261106200859';
-import { couponLive } from './welcome.js?v=20261106200859';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261106200859';
-import { track } from './track.js?v=20261106200859';
-import { gaEvent } from './ga.js?v=20261106200859';
-import { guessLang } from './langdetect.js?v=20261106200859';
-import { didYouMean } from './search.js?v=20261106200859';
-import { api, editionsOf } from './api.js?v=20261106200859';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261106200859';
+import { CONFIG } from './config.js?v=20261106201404';
+import { askWhy } from './why.js?v=20261106201404';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106201404';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261106201404';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261106201404';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261106201404';
+import { couponLive } from './welcome.js?v=20261106201404';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261106201404';
+import { track } from './track.js?v=20261106201404';
+import { gaEvent } from './ga.js?v=20261106201404';
+import { guessLang } from './langdetect.js?v=20261106201404';
+import { didYouMean } from './search.js?v=20261106201404';
+import { api, editionsOf } from './api.js?v=20261106201404';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261106201404';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -116,7 +116,7 @@ function mountGuideRail(el) {
     for (const id in m) for (const g of m[id]) if (g.lang === 'en') by[g.slug] = { id, g };
     const cards = POP_GUIDES.filter(sl => by[sl]).map(sl => {
       const { id, g } = by[sl], title = String(g.title).split(':')[0];
-      return `<a class="guide-card" href="/en/guide/${esc(sl)}/"><img src="/book/${esc(id)}/thumb.webp" data-full="/book/${esc(id)}/cover.jpg" alt="" loading="lazy" width="120" height="192"><span class="gc-tag">Free guide</span><b>${esc(title)}</b><small>Read now →</small></a>`;
+      return `<a class="guide-card" href="/en/guide/${esc(sl)}/"><span class="gcv"><img src="/book/${esc(id)}/thumb.webp" data-full="/book/${esc(id)}/cover.jpg" alt="" loading="lazy" width="120" height="192"></span><span class="gc-tag">Free guide</span><b>${esc(title)}</b><small>Read now →</small></a>`;
     });
     if (cards.length) rail.innerHTML = cards.join('');
     else rail.closest('section').hidden = true;
