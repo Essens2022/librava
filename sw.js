@@ -1,6 +1,6 @@
 // Librava service worker: lets the store open and saved books be read without internet.
 // Pages: network first (always fresh when online). Scripts, styles, fonts, covers: cached.
-const APP = 'librava-app-v2', COVERS = 'librava-covers';
+const APP = 'librava-app-v3', COVERS = 'librava-covers';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 

@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261106023221';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106023221';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106023221';
-import { resetCompanyCache } from './views.js?v=20261106023221';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106023221';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106023221';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106023221';
-import { optimizeBook } from './optimize.js?v=20261106023221';
-import { api } from './api.js?v=20261106023221';
-import { OF_STYLES } from './offerstyles.js?v=20261106023221';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106023221';
+import { CONFIG } from './config.js?v=20261106034934';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106034934';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106034934';
+import { resetCompanyCache } from './views.js?v=20261106034934';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106034934';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106034934';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106034934';
+import { optimizeBook } from './optimize.js?v=20261106034934';
+import { api } from './api.js?v=20261106034934';
+import { OF_STYLES } from './offerstyles.js?v=20261106034934';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106034934';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -85,8 +85,15 @@ export async function viewAdmin(el, parts) {
   </div>`;
   // the tab bar scrolls sideways on phones: keep the open section in view (it used to jump back to the first tab)
   const nav = $('.adm-tabs', el), on = nav?.querySelector('a.on');
-  const centre = () => { if (nav && on) nav.scrollLeft = Math.max(0, on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2); };
-  centre(); requestAnimationFrame(centre); setTimeout(centre, 250);
+  // keep where the bar was scrolled between sections, and only re-centre when the open tab is out of sight
+  const fit = () => {
+    if (!nav || !on || nav.scrollWidth <= nav.clientWidth) return;
+    const l = on.offsetLeft, r = l + on.offsetWidth;
+    if (l < nav.scrollLeft + 8 || r > nav.scrollLeft + nav.clientWidth - 8) nav.scrollLeft = Math.max(0, l - (nav.clientWidth - on.offsetWidth) / 2);
+  };
+  if (nav) { nav.scrollLeft = admNavX; nav.addEventListener('scroll', () => { admNavX = nav.scrollLeft; }, { passive: true }); }
+  fit(); requestAnimationFrame(fit); setTimeout(fit, 250); setTimeout(fit, 900);
+  try { document.fonts?.ready.then(fit); } catch { }
   const body = $('#adm-body', el);
   liveAdmin(tab, parts, body);
   switch (tab) {
@@ -478,6 +485,7 @@ function cuRange() {
   return r;
 }
 // every time the administrator opens the panel from outside it, the period goes back to Today (inside the panel the chosen period stays)
+let admNavX = 0;
 let inAdmin = false;
 const leftAdmin = () => { if (!/^\/admin(\/|$|\?)/.test(currentPath())) inAdmin = false; };
 window.addEventListener('hashchange', leftAdmin); window.addEventListener('popstate', leftAdmin);
