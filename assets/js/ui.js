@@ -345,11 +345,14 @@ export async function loadLabels() {
     if (JSON.stringify(m) !== JSON.stringify(LABELS)) setLabels(m); else applyLabels(document);
   } catch { }
 }
+// Covers that already include the rounded-spine effect in the image itself
+const SPINE_BAKED = new Set(['928c1e7a-431a-424f-a03d-f4a96e527c53','a2ab3b56-888c-44da-87f9-a3598079ef13','c198d4e5-efae-48de-8c11-ef9c64013423','edb5d3a2-9aa0-4ceb-84cd-985f4ddf0b5b','1e36aa6b-3ea0-4134-b61f-914e1af906bb','f838a7f8-04c1-4cd4-bcf3-0f5fbe1721a1']);
 export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
-  return `<div class="cover"${badge ? ` data-b="${esc(b.id)}"` : ''}>${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
+  const baked = SPINE_BAKED.has(b.id) ? ' baked' : '';
+  return `<div class="cover${baked}"${badge ? ` data-b="${esc(b.id)}"` : ''}>${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
 }
 export function priceHTML(b) {
   if (!b.price_cents) return `<span class="price price-free">${esc(t('book.free'))}</span>`;
