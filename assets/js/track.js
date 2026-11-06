@@ -2,9 +2,9 @@
 // Google Analytics 4 receives the same events only if the visitor chose "Accept all" (see ga.js).
 // What a visit looks like: where people come from, which country/language/device, what they search, which
 // books they open, add to the cart and buy. Read in Admin → Statistics.
-import { api } from './api.js?v=20261106034934';
-import { store } from './util.js?v=20261106034934';
-import { gaEvent } from './ga.js?v=20261106034934';
+import { api } from './api.js?v=20261106052244';
+import { store } from './util.js?v=20261106052244';
+import { gaEvent } from './ga.js?v=20261106052244';
 
 const TZ = { 'Europe/Rome': 'IT', 'Europe/Bucharest': 'RO', 'Europe/Chisinau': 'MD', 'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Atlantic/Canary': 'ES', 'Europe/Lisbon': 'PT', 'Europe/Amsterdam': 'NL', 'Europe/Brussels': 'BE', 'Europe/Luxembourg': 'LU', 'Europe/Vienna': 'AT', 'Europe/Zurich': 'CH', 'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Bratislava': 'SK', 'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Athens': 'GR', 'Asia/Nicosia': 'CY', 'Europe/Copenhagen': 'DK', 'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI', 'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT', 'Europe/Kyiv': 'UA', 'Europe/Kiev': 'UA', 'Europe/Malta': 'MT', 'Europe/Belgrade': 'RS', 'Europe/Istanbul': 'TR', 'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US', 'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU' };
 function country() {
@@ -137,7 +137,7 @@ document.addEventListener('click', e => {
   try {
     if (off() || clicksN >= 60) return;
     const el = e.target && e.target.closest && e.target.closest('a,button,[role=button],summary,select,input[type=checkbox],input[type=radio],input[type=submit]');
-    if (!el) return;
+    if (!el || el.tagName === 'SELECT') return;
     let label = clean(el.getAttribute('aria-label') || el.getAttribute('title') || el.innerText || el.value || el.getAttribute('data-nav') || el.id);
     if (!label) { const img = el.querySelector && el.querySelector('img[alt]'); label = clean(img && img.alt) || (el.tagName === 'A' ? 'link' : el.tagName.toLowerCase()); }
     const where = el.tagName === 'A' ? hrefOf(el) : '';
@@ -148,8 +148,16 @@ document.addEventListener('click', e => {
 document.addEventListener('focusin', e => {
   try {
     const el = e.target; if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || /^(checkbox|radio|submit|button|hidden)$/.test(el.type) || off() || clicksN >= 60) return;
-    const f = clean(el.getAttribute('autocomplete') || el.name || el.id || el.type); if (!f || seenFields.has(f)) return; seenFields.add(f); clicksN++;
+    const ac = el.getAttribute('autocomplete');
+    const f = clean(el.name === 'q' ? 'search' : (ac && ac !== 'off' ? ac : el.name || el.id || el.type)); if (!f || seenFields.has(f)) return; seenFields.add(f); clicksN++;
     track('click', { note: 'field:' + f });
+  } catch { }
+}, { capture: true });
+// which category the person picked in the top menu (readable name, not a code)
+document.addEventListener('change', e => {
+  try {
+    const el = e.target; if (off() || clicksN >= 60 || !el || el.tagName !== 'SELECT' || el.name !== 'cat') return;
+    clicksN++; track('click', { note: 'cat=' + clean(el.options[el.selectedIndex]?.text || el.value || 'all') });
   } catch { }
 }, { capture: true });
 addEventListener('scroll', () => {

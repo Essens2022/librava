@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261106034934';
-import { CONFIG } from './config.js?v=20261106034934';
-import { store } from './util.js?v=20261106034934';
+import { localize, loadRates } from './localprice.js?v=20261106052244';
+import { CONFIG } from './config.js?v=20261106052244';
+import { store } from './util.js?v=20261106052244';
 
 const D = {
   ro: {
@@ -1375,6 +1375,12 @@ const D = {
     "admin.act2.ev.add_cartN": "A pus în coș {n} cărți:",
     "admin.act2.ev.click": "A apăsat",
     "admin.act2.ev.field": "A început să completeze câmpul «{f}»",
+    "admin.act2.ev.catPick": "A ales în meniul de sus categoria «{c}»",
+    "admin.act2.fld.cat": "A atins meniul de categorii din bara de sus (cel cu „Toate”)",
+    "admin.act2.fld.search": "A atins căsuța de căutare din bara de sus (încă nu a căutat nimic)",
+    "admin.act2.fld.email": "A atins câmpul pentru email",
+    "admin.act2.fld.name": "A atins câmpul pentru nume",
+    "admin.act2.fld.pass": "A atins câmpul pentru parolă",
     "admin.act2.ev.scroll50": "A citit până la jumătatea paginii",
     "admin.act2.ev.scroll90": "A citit aproape toată pagina",
     "admin.act2.ev.leaveInfo": "de pe „{p}”, după {s}, citit {sc}% din pagină",
@@ -2966,6 +2972,12 @@ const D = {
     "admin.act2.ev.add_cartN": "Ha messo nel carrello {n} libri:",
     "admin.act2.ev.click": "Ha premuto",
     "admin.act2.ev.field": "Ha iniziato a compilare il campo «{f}»",
+    "admin.act2.ev.catPick": "Ha scelto nel menu in alto la categoria «{c}»",
+    "admin.act2.fld.cat": "Ha toccato il menu delle categorie nella barra in alto (quello con «Tutti»)",
+    "admin.act2.fld.search": "Ha toccato la casella di ricerca nella barra in alto (non ha ancora cercato nulla)",
+    "admin.act2.fld.email": "Ha toccato il campo email",
+    "admin.act2.fld.name": "Ha toccato il campo nome",
+    "admin.act2.fld.pass": "Ha toccato il campo password",
     "admin.act2.ev.scroll50": "Ha letto fino a metà pagina",
     "admin.act2.ev.scroll90": "Ha letto quasi tutta la pagina",
     "admin.act2.ev.leaveInfo": "da «{p}», dopo {s}, letto {sc}% della pagina",
@@ -4557,6 +4569,12 @@ const D = {
     "admin.act2.ev.add_cartN": "Added {n} books to the cart:",
     "admin.act2.ev.click": "Pressed",
     "admin.act2.ev.field": "Started filling in the field “{f}”",
+    "admin.act2.ev.catPick": "Picked the category “{c}” in the top menu",
+    "admin.act2.fld.cat": "Tapped the category menu in the top bar (the one showing “All”)",
+    "admin.act2.fld.search": "Tapped the search box in the top bar (has not searched anything yet)",
+    "admin.act2.fld.email": "Tapped the email field",
+    "admin.act2.fld.name": "Tapped the name field",
+    "admin.act2.fld.pass": "Tapped the password field",
     "admin.act2.ev.scroll50": "Read down to half of the page",
     "admin.act2.ev.scroll90": "Read almost the whole page",
     "admin.act2.ev.leaveInfo": "from “{p}”, after {s}, read {sc}% of the page",
@@ -4813,7 +4831,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261106034934`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261106052244`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
