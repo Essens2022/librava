@@ -41,7 +41,9 @@ export async function viewHome(el) {
   const many = p => [...new Set((p.book_ids || []).map(shown).filter(Boolean))];
   const liveOffers = promos.some(p => p.kind === 'offers') ? await (api.offers ? api.offers().catch(() => []) : []) : [];
   const ok = p => p.kind === 'offers' ? offerSlides(liveOffers).length > 0 : p.kind === 'image' ? !!p.image_url : p.kind === 'books' ? many(p).length >= 2 : !!shown(p.book_id);
-  const lst = p => p.kind === 'offers' ? { offers: liveOffers, books: everything } : many(p);
+  // an offers banner may name its own books (theme part 4); make sure those are in the list even if the bestseller list doesn't hold them
+  const pickOf = p => (String(p.theme || '').split('~')[3] || '').split(',').filter(Boolean).map(id => byId[id] ? null : anyEd[id]).filter(Boolean);
+  const lst = p => p.kind === 'offers' ? { offers: liveOffers, books: [...everything, ...pickOf(p)] } : many(p);
   const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', lst(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
   const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', lst(p))}</div>`);
   const noBooks = !all.length;
