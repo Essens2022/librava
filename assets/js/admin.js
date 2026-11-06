@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261106202511';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106202511';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106202511';
-import { resetCompanyCache } from './views.js?v=20261106202511';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106202511';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106202511';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106202511';
-import { optimizeBook } from './optimize.js?v=20261106202511';
-import { api } from './api.js?v=20261106202511';
-import { OF_STYLES } from './offerstyles.js?v=20261106202511';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106202511';
+import { CONFIG } from './config.js?v=20261106203026';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106203026';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106203026';
+import { resetCompanyCache } from './views.js?v=20261106203026';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106203026';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106203026';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106203026';
+import { optimizeBook } from './optimize.js?v=20261106203026';
+import { api } from './api.js?v=20261106203026';
+import { OF_STYLES } from './offerstyles.js?v=20261106203026';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106203026';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -297,6 +297,9 @@ async function pricesAdmin(body) {
 }
 
 // ---------------------------------------------------------------- books
+// flag of the language a book is written in (English = USA + UK), shown in the admin book list
+const LANG_CC = { en: ['US', 'GB'], fr: ['FR'], de: ['DE'], es: ['ES'], it: ['IT'], pt: ['PT'], nl: ['NL'], pl: ['PL'], ro: ['RO'], cs: ['CZ'], sk: ['SK'], hu: ['HU'], bg: ['BG'], hr: ['HR'], sl: ['SI'], el: ['GR'], da: ['DK'], sv: ['SE'], no: ['NO'], fi: ['FI'], et: ['EE'], lv: ['LV'], lt: ['LT'], uk: ['UA'] };
+const langFlag = l => (LANG_CC[l] || []).map(c => String.fromCodePoint(...[...c].map(x => 0x1F1E6 + x.charCodeAt(0) - 65))).join('') || '🌐';
 async function booksList(body) {
   const books = await api.adminBooks();
   if (!books.length) {
@@ -321,7 +324,7 @@ async function booksList(body) {
       <label><span>${esc(t('qp.list'))}</span><input class="input" name="l" inputmode="decimal" value="${eur(b.list_price_cents)}" placeholder="—"></label>
       <div class="qp-btns"><button type="submit" class="btn btn-buy btn-sm">${esc(t('qp.save'))}</button><button type="button" class="btn btn-ghost btn-sm" data-qpx>${esc(t('qp.cancel'))}</button></div></form>`;
   const rowHTML = (b, pos = '') => `<tr class="${pos}">
-        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b><span class="fp-chip fmt-${esc(b.format)}">${esc(t('book.formatShort.' + b.format))}</span> ${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · ${esc(String(b.language || '').toUpperCase())}</div>
+        <td><div class="adm-book">${coverHTML(b, { badge: false })}<div style="min-width:0"><b><span class="fp-chip fmt-${esc(b.format)}">${esc(t('book.formatShort.' + b.format))}</span> ${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(b.author)} · ${esc(t('cat.' + b.category))} · ${esc(String(b.file_path || b.file_name ? b.format || '' : '—').toUpperCase())} · <span class="lang-flag" title="${esc(langName(b.language))}">${langFlag(b.language)} ${esc(String(b.language || '').toUpperCase())}</span></div>
           <div class="shelf-links">${b.status !== 'published' ? `<a class="continue" href="#/admin/edit/${encodeURIComponent(b.id)}">${esc(t('kdp.continueSetup'))} →</a>` : ''}${[[1, 'kdp.edit1'], [2, 'kdp.edit2'], ...(api.uploadAplusImage ? [[3, 'kdp.editAplus']] : []), [4, 'kdp.edit3']].map(([n, k]) => `<a href="#/admin/edit/${encodeURIComponent(b.id)}/${n}">${esc(t(k))}</a>`).join('')}${edLinks(b)}</div></div></div></td>
         <td class="num">${priceCell(b)}</td>
         <td class="num">${b.sales_count || 0}</td>
@@ -337,7 +340,7 @@ async function booksList(body) {
     <div class="adm-filters">
       <input class="input" id="adm-q" type="search" placeholder="${esc(t('admin.search'))}" aria-label="${esc(t('admin.search'))}">
       <select class="input" id="adm-st" aria-label="${esc(t('admin.colStatus'))}"><option value="">${esc(t('admin.filter.all'))}</option><option value="published">${esc(t('admin.filter.published'))}</option><option value="draft">${esc(t('admin.filter.draft'))}</option></select>
-      <select class="input" id="adm-lang" aria-label="${esc(t('search.bookLang'))}"><option value="">${esc(t('lang.all'))}</option>${langs.map(l => `<option value="${l}">${esc(langName(l))}</option>`).join('')}</select>
+      <select class="input" id="adm-lang" aria-label="${esc(t('search.bookLang'))}"><option value="">${esc(t('lang.all'))}</option>${langs.map(l => `<option value="${l}">${langFlag(l)} ${esc(langName(l))}</option>`).join('')}</select>
       <select class="input" id="adm-cat" aria-label="${esc(t('search.category'))}"><option value="">${esc(t('search.any'))}</option>${CATS.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('')}</select>
     </div>
     <p class="muted adm-count" id="adm-count"></p>
