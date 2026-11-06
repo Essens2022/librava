@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106225442';
-import { CONFIG } from './config.js?v=20261106225442';
-import { SOCIAL_PATHS } from './social.js?v=20261106225442';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106225442';
-import { esc, store, $, $$ } from './util.js?v=20261106225442';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106230734';
+import { CONFIG } from './config.js?v=20261106230734';
+import { SOCIAL_PATHS } from './social.js?v=20261106230734';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106230734';
+import { esc, store, $, $$ } from './util.js?v=20261106230734';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261106225442';
-import { suggest, highlight } from './search.js?v=20261106225442';
-import { track, trackPage } from './track.js?v=20261106225442';
-import { initGA, applyConsent } from './ga.js?v=20261106225442';
-import { consentStrings } from './consent-i18n.js?v=20261106225442';
-import { api } from './api.js?v=20261106225442';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106225442';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261106230734';
+import { suggest, highlight } from './search.js?v=20261106230734';
+import { track, trackPage } from './track.js?v=20261106230734';
+import { initGA, applyConsent } from './ga.js?v=20261106230734';
+import { consentStrings } from './consent-i18n.js?v=20261106230734';
+import { api } from './api.js?v=20261106230734';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106230734';
 
 // ---------------- icons ----------------
 const P = {
@@ -880,7 +880,8 @@ export function offersBanners(root) {
     const ss = [...el.querySelectorAll('.of-s')], ds = [...el.querySelectorAll('.of-dots i')]; if (ss.length < 1) return;
     let idx = 0, was = false, next = 0, firstDone = false;
     const loadImgs = i => { [i, (i + 1) % ss.length].forEach(k => ss[k] && ss[k].querySelectorAll('img[data-src]').forEach(im => { if (im.dataset.srcset) { im.srcset = im.dataset.srcset; im.removeAttribute('data-srcset'); } im.src = im.dataset.src; im.removeAttribute('data-src'); })); };
-    const show = (i, first) => { loadImgs(i); idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', !first && k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); clearTimeout(el._ot); el._ot = setTimeout(() => ss.forEach(x => x.classList.remove('out')), 1100); };
+    const rot = i => { const sl = ss[i], ims = sl ? [...sl.querySelectorAll('.dvx img')] : []; if (ims.length < 2) return; ims.forEach(m => { if (!m._c) m._c = { src: m.dataset.src || m.getAttribute('src'), srcset: m.dataset.srcset || m.getAttribute('srcset') }; }); const cs = ims.map(m => m._c), n = new Set(cs.map(c => c.src)).size; if (n < 2) return; sl._rot = ((sl._rot ?? -1) + 1) % cs.length; ims.forEach((m, k) => { const c = cs[(k + sl._rot) % cs.length]; if (c.srcset) m.srcset = c.srcset; m.src = c.src; if (m.dataset.src) { m.removeAttribute('data-src'); m.removeAttribute('data-srcset'); } }); };
+    const show = (i, first) => { loadImgs(i); rot(i); idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', !first && k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); clearTimeout(el._ot); el._ot = setTimeout(() => ss.forEach(x => x.classList.remove('out')), 1100); };
     const tick = () => {
       if (!el.isConnected) return clearInterval(iv);
       const host = el.closest('.promo-slide'), on = !host || host.classList.contains('on');
