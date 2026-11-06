@@ -25,7 +25,7 @@ while st:
     src = (js / f).read_text(encoding='utf-8')
     st += re.findall(r"""(?:import|export)\s[^;'"]*?from\s+['"]\./([\w.-]+\.js)""", src)
     st += re.findall(r"""\bimport\s+['"]\./([\w.-]+\.js)""", src)
-block = '<!--preload-->' + ''.join(f'<link rel="modulepreload" href="assets/js/{f}?v={v}">' for f in seen) + '<link rel="preload" as="script" href="assets/vendor/supabase.min.js"><!--/preload-->'
+block = '<!--preload-->' + ''.join(f'<link rel="modulepreload" href="assets/js/{f}?v={v}">' for f in seen) + '<link rel="preload" as="script" href="assets/vendor/supabase.min.js">' + ''.join(f'<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/{x}">' for x in ('inter-latin-700-normal.woff2', 'figtree-latin-wght-normal.woff2')) + '<!--/preload-->'
 h = (root / 'index.html').read_text(encoding='utf-8')
 h = re.sub(r'<!--preload-->.*?<!--/preload-->', '', h, flags=re.S)
 h = h.replace('<script type="module" src="assets/js/app.js', block + '\n<script type="module" src="assets/js/app.js', 1)
