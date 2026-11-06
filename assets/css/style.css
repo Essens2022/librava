@@ -3562,7 +3562,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .lay-L8 .of-in { grid-template-columns: auto 1fr; grid-template-areas: "k k" "big t" "big c"; } .lay-L8 .of-k { grid-area: k; } .lay-L8 .of-big { grid-area: big; color: transparent; -webkit-text-stroke: clamp(2px, .5vw, 5px) var(--a); text-shadow: 0 0 22px var(--a); } .lay-L8 .of-t { grid-area: t; } .lay-L8 .of-cta { grid-area: c; align-self: start; justify-self: start; background: var(--a); color: var(--ink, #1b1340); }
 /* entrances (only run on the slide that is showing) */
 .of-s.cur .of-k, .of-s.out .of-k { animation: oaK .6s .04s cubic-bezier(.2,1.6,.4,1) both; }
-.of-s.cur .of-big, .of-s.out .of-big { animation: oaBig .75s .08s cubic-bezier(.2,1.8,.4,1) both, ofBob 2.4s .8s ease-in-out infinite; }
+.of-s.cur .of-big, .of-s.out .of-big { animation: oaBig .75s .08s cubic-bezier(.2,1.8,.4,1) both, ofBob 2.4s 1s ease-in-out infinite; }
 .of-s.cur .of-t, .of-s.out .of-t { animation: oaUp .6s .16s cubic-bezier(.2,1.2,.4,1) both; }
 .of-s.cur .of-cta, .of-s.out .of-cta { animation: oaUp .6s .24s cubic-bezier(.2,1.4,.4,1) both, ofJump 1.5s 1s ease-in-out infinite; }
 @keyframes oaK { from { transform: translateY(-40px) rotate(-14deg); opacity: 0; } to { transform: rotate(-3deg); opacity: 1; } }
@@ -3730,8 +3730,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 /* variant 2: phone on the left, tablet on the right */
 .bk-d2 .dvx-ph { right: auto; left: 0; } .bk-d2 .dvx-tab { left: auto; right: 0; transform: rotate(4deg); } .bk-d2 .dvx-ph .dvx-tag { left: auto; right: -12px; }
 /* gentle motion */
-.of-s.cur .dvx-lap, .of-s.out .dvx-lap { animation: dvIn .9s .12s cubic-bezier(.2,1.1,.3,1) both, dvFl 7s .8s ease-in-out infinite; }
-.of-s.cur .dvx-tab, .of-s.out .dvx-tab { animation: dvIn .9s .27s cubic-bezier(.2,1.1,.3,1) both; } .of-s.cur .dvx-ph, .of-s.out .dvx-ph { animation: dvIn .9s .42s cubic-bezier(.2,1.1,.3,1) both, dvFl 6s .9s ease-in-out infinite reverse; }
+.of-s.cur .dvx-lap, .of-s.out .dvx-lap { animation: dvIn .9s .12s cubic-bezier(.2,1.1,.3,1) both, dvFl 7s 1.1s ease-in-out infinite; }
+.of-s.cur .dvx-tab, .of-s.out .dvx-tab { animation: dvIn .9s .27s cubic-bezier(.2,1.1,.3,1) both; } .of-s.cur .dvx-ph, .of-s.out .dvx-ph { animation: dvIn .9s .42s cubic-bezier(.2,1.1,.3,1) both, dvFl 6s 1.4s ease-in-out infinite reverse; }
 @keyframes dvIn { from { opacity: 0; translate: 0 60px; } 35% { opacity: 1; } to { opacity: 1; translate: 0 0; } } @keyframes dvFl { 50% { translate: 0 -8px; } }
 @media (max-width: 760px) {
   .of-s.has-bk .of-bk { --dw: 150px; width: 46%; }
