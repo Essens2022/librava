@@ -3512,6 +3512,11 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .of-serif .of-big, .of-serif .of-t { font-family: 'Playfair Display', Georgia, serif; }
 .of-mono .of-big, .of-mono .of-t, .of-mono .of-k { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
 /* slide-change effects */
+/* resting state of a slide that is not on screen = the first frame of its entrance, so it can never paint un-clipped for a frame; .out slides stay fully drawn */
+.promo-offers[data-w="W1"] .of-s { transform: translateX(100%); } .promo-offers[data-w="W1"] .of-s.out { transform: none; }
+.promo-offers[data-w="W2"] .of-s { clip-path: circle(0% at 78% 50%); } .promo-offers[data-w="W2"] .of-s.out { clip-path: none; }
+.promo-offers[data-w="W3"] .of-s { opacity: 0; transform: scale(1.18); filter: blur(10px); } .promo-offers[data-w="W3"] .of-s.out { opacity: 1; transform: none; filter: none; }
+.promo-offers[data-w="W4"] .of-s { clip-path: inset(100% 0 0 0); transform: translateY(8%); } .promo-offers[data-w="W4"] .of-s.out { clip-path: none; transform: none; }
 .promo-offers[data-w="W1"] .of-s.cur { animation: owW1 .7s cubic-bezier(.2,.9,.2,1) both; } .promo-offers[data-w="W1"] .of-s.out { animation: owOut .7s ease both; }
 .promo-offers[data-w="W2"] .of-s.cur { animation: owW2 .8s cubic-bezier(.4,0,.2,1) both; }
 .promo-offers[data-w="W3"] .of-s.cur { animation: owW3 .7s ease both; } .promo-offers[data-w="W3"] .of-s.out { animation: owOut3 .7s ease both; }
