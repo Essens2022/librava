@@ -3792,3 +3792,11 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .flg-opt img { border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
 @media (max-width: 760px) { .promo-carousel.single > .promo-offers { height: 236px; } }
 .of-still .promo-carousel.single > .promo-offers { height: var(--ih, 404px); }
+
+/* category tiles: same book-like edge as .cover (wrapper carries the shading) */
+.cat-tile .thumbs .tc { position: relative; display: flex; flex: 1 1 0; min-width: 0; max-width: 46%; max-height: 100%; align-self: flex-end; border-radius: 5px 2px 2px 5px; overflow: hidden; filter: drop-shadow(0 2px 4px rgba(0,0,0,.22)); }
+.cat-tile .thumbs .tc img { flex: 1 1 0; max-width: 100% !important; width: 100%; filter: none !important; border-radius: 0 !important; box-shadow: none !important; }
+.cat-tile .thumbs .tc:not(.baked)::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.36) 0, rgba(0,0,0,.10) 3%, rgba(255,255,255,.26) 4.6%, rgba(255,255,255,0) 7.5%, rgba(0,0,0,0) 93%, rgba(0,0,0,.13) 100%); }
+.cat-tile .thumbs .tc.baked { border-radius: 0; }
+/* hero: reserve the tallest slide's height from the first paint so the page does not jump when the other slides finish loading */
+@media (min-width: 761px) { .hero-promos .promo-track { min-height: 395px; } }

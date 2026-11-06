@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106194615';
-import { CONFIG } from './config.js?v=20261106194615';
-import { SOCIAL_PATHS } from './social.js?v=20261106194615';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106194615';
-import { esc, store, $, $$ } from './util.js?v=20261106194615';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106194828';
+import { CONFIG } from './config.js?v=20261106194828';
+import { SOCIAL_PATHS } from './social.js?v=20261106194828';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106194828';
+import { esc, store, $, $$ } from './util.js?v=20261106194828';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261106194615';
-import { suggest, highlight } from './search.js?v=20261106194615';
-import { track, trackPage } from './track.js?v=20261106194615';
-import { initGA, applyConsent } from './ga.js?v=20261106194615';
-import { consentStrings } from './consent-i18n.js?v=20261106194615';
-import { api } from './api.js?v=20261106194615';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106194615';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261106194828';
+import { suggest, highlight } from './search.js?v=20261106194828';
+import { track, trackPage } from './track.js?v=20261106194828';
+import { initGA, applyConsent } from './ga.js?v=20261106194828';
+import { consentStrings } from './consent-i18n.js?v=20261106194828';
+import { api } from './api.js?v=20261106194828';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106194828';
 
 // ---------------- icons ----------------
 const P = {
@@ -347,6 +347,7 @@ export async function loadLabels() {
 }
 // Covers that already include the rounded-spine effect in the image itself
 const SPINE_BAKED = new Set(['928c1e7a-431a-424f-a03d-f4a96e527c53','a2ab3b56-888c-44da-87f9-a3598079ef13','c198d4e5-efae-48de-8c11-ef9c64013423','edb5d3a2-9aa0-4ceb-84cd-985f4ddf0b5b','1e36aa6b-3ea0-4134-b61f-914e1af906bb','f838a7f8-04c1-4cd4-bcf3-0f5fbe1721a1']);
+export const isBakedCover = id => SPINE_BAKED.has(id);
 export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';

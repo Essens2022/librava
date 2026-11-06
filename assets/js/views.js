@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261106194615';
-import { askWhy } from './why.js?v=20261106194615';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106194615';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261106194615';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261106194615';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261106194615';
-import { couponLive } from './welcome.js?v=20261106194615';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261106194615';
-import { track } from './track.js?v=20261106194615';
-import { gaEvent } from './ga.js?v=20261106194615';
-import { guessLang } from './langdetect.js?v=20261106194615';
-import { didYouMean } from './search.js?v=20261106194615';
-import { api, editionsOf } from './api.js?v=20261106194615';
-import { GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261106194615';
+import { CONFIG } from './config.js?v=20261106194828';
+import { askWhy } from './why.js?v=20261106194828';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106194828';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261106194828';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261106194828';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261106194828';
+import { couponLive } from './welcome.js?v=20261106194828';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261106194828';
+import { track } from './track.js?v=20261106194828';
+import { gaEvent } from './ga.js?v=20261106194828';
+import { guessLang } from './langdetect.js?v=20261106194828';
+import { didYouMean } from './search.js?v=20261106194828';
+import { api, editionsOf } from './api.js?v=20261106194828';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261106194828';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -61,7 +61,7 @@ export async function viewHome(el) {
     const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';
     const n = Math.min(bs.length, window.innerWidth < 700 ? 2 : 3);
-    const imgs = bs.slice(0, n).map(b => b.cover_url ? `<img src="/book/${esc(b.id)}/thumb.webp" data-full="${esc(b.cover_url)}" alt="" loading="lazy">` : '').join('');
+    const imgs = bs.slice(0, n).map(b => b.cover_url ? `<span class="tc${isBakedCover(b.id) ? ' baked' : ''}"><img src="/book/${esc(b.id)}/thumb.webp" data-full="${esc(b.cover_url)}" alt="" loading="lazy"></span>` : '').join('');
     return `<a class="cat-tile" href="#/search?cat=${c}"><div class="thumbs n${n}">${imgs}</div><span>${esc(t('cat.' + c))}</span></a>`;
   }).join('');
 
