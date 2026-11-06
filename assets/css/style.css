@@ -2319,7 +2319,7 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
 @keyframes ctaShine { 0%, 55% { left: -60%; } 100% { left: 140%; } }
 /* entrance choreography when a slide becomes active */
 .promo-slide.on .promo-kicker, .promo-slide.on .promo-offer, .promo-slide.on .promo-title, .promo-slide.on .promo-sub, .promo-slide.on .promo-by, .promo-slide.on .promo-act > *, .promo-slide.on .pb { animation: promoIn .7s cubic-bezier(.2,.8,.2,1) both; }
-.promo-slide.on .promo-offer { animation-delay: .05s; } .promo-slide.on .promo-title { animation-delay: .12s; } .promo-slide.on .promo-sub { animation-delay: .2s; }
+.promo-slide.on .promo-offer { animation-delay: 0s; } .promo-slide.on .promo-title { animation-delay: .12s; } .promo-slide.on .promo-sub { animation-delay: .2s; }
 .promo-slide.on .promo-by { animation-delay: .26s; } .promo-slide.on .promo-act > :nth-child(1) { animation-delay: .32s; } .promo-slide.on .promo-act > :nth-child(2) { animation-delay: .38s; } .promo-slide.on .promo-act > :nth-child(3) { animation-delay: .44s; }
 .promo-slide.on .pb:nth-child(2) { animation-delay: .08s; } .promo-slide.on .pb:nth-child(3) { animation-delay: .16s; } .promo-slide.on .pb:nth-child(4) { animation-delay: .24s; } .promo-slide.on .pb:nth-child(5) { animation-delay: .32s; } .promo-slide.on .pb:nth-child(6) { animation-delay: .4s; }
 @keyframes promoIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -3561,10 +3561,10 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .lay-L7 .of-big { color: var(--k); text-shadow: none; } .lay-L7 .of-t { text-shadow: none; } .lay-L7 .of-cta { background: var(--k); color: #fff; align-self: center; box-shadow: 0 4px 0 rgba(0,0,0,.3); } .lay-L7 .of-k { align-self: center; }
 .lay-L8 .of-in { grid-template-columns: auto 1fr; grid-template-areas: "k k" "big t" "big c"; } .lay-L8 .of-k { grid-area: k; } .lay-L8 .of-big { grid-area: big; color: transparent; -webkit-text-stroke: clamp(2px, .5vw, 5px) var(--a); text-shadow: 0 0 22px var(--a); } .lay-L8 .of-t { grid-area: t; } .lay-L8 .of-cta { grid-area: c; align-self: start; justify-self: start; background: var(--a); color: var(--ink, #1b1340); }
 /* entrances (only run on the slide that is showing) */
-.of-s.cur .of-k, .of-s.out .of-k { animation: oaK .5s .05s cubic-bezier(.2,1.6,.4,1) both; }
-.of-s.cur .of-big, .of-s.out .of-big { animation: oaBig .6s .1s cubic-bezier(.2,1.8,.4,1) both, ofBob 2.4s .8s ease-in-out infinite; }
-.of-s.cur .of-t, .of-s.out .of-t { animation: oaUp .5s .2s cubic-bezier(.2,1.2,.4,1) both; }
-.of-s.cur .of-cta, .of-s.out .of-cta { animation: oaUp .5s .3s cubic-bezier(.2,1.4,.4,1) both, ofJump 1.5s 1s ease-in-out infinite; }
+.of-s.cur .of-k, .of-s.out .of-k { animation: oaK .35s 0s cubic-bezier(.2,1.6,.4,1) both; }
+.of-s.cur .of-big, .of-s.out .of-big { animation: oaBig .4s 0s cubic-bezier(.2,1.8,.4,1) both, ofBob 2.4s .8s ease-in-out infinite; }
+.of-s.cur .of-t, .of-s.out .of-t { animation: oaUp .35s 0s cubic-bezier(.2,1.2,.4,1) both; }
+.of-s.cur .of-cta, .of-s.out .of-cta { animation: oaUp .35s 0s cubic-bezier(.2,1.4,.4,1) both, ofJump 1.5s 1s ease-in-out infinite; }
 @keyframes oaK { from { transform: translateY(-40px) rotate(-14deg); opacity: 0; } to { transform: rotate(-3deg); opacity: 1; } }
 @keyframes oaBig { from { transform: scale(.2) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes oaUp { from { transform: translateY(26px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -3575,7 +3575,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @keyframes oaBig2 { from { transform: perspective(600px) rotateX(-95deg); opacity: 0; } to { transform: none; opacity: 1; } } @keyframes oaFade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .an-3.cur .of-big, .an-3.out .of-big { animation-name: oaBig3, ofBob; } .an-3.cur .of-t, .an-3.out .of-t { animation-name: oaFade; }
 @keyframes oaBig3 { from { transform: scale(3.2); opacity: 0; filter: blur(14px); } to { transform: none; opacity: 1; filter: none; } }
-.an-4.cur .of-k, .an-4.out .of-k { animation-name: oaPopS; animation-delay: .05s; } .an-4.cur .of-big, .an-4.out .of-big { animation-name: oaPopS, ofBob; animation-delay: .1s, 1s; } .an-4.cur .of-t, .an-4.out .of-t { animation-name: oaPopS; animation-delay: .2s; } .an-4.cur .of-cta, .an-4.out .of-cta { animation-name: oaPopS, ofJump; animation-delay: .3s, 1.2s; }
+.an-4.cur .of-k, .an-4.out .of-k { animation-name: oaPopS; animation-delay: 0s; } .an-4.cur .of-big, .an-4.out .of-big { animation-name: oaPopS, ofBob; animation-delay: 0s, 1s; } .an-4.cur .of-t, .an-4.out .of-t { animation-name: oaPopS; animation-delay: 0s; } .an-4.cur .of-cta, .an-4.out .of-cta { animation-name: oaPopS, ofJump; animation-delay: 0s, 1.2s; }
 @keyframes oaPopS { 0% { transform: scale(0); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .an-5.cur .of-big, .an-5.out .of-big { animation-name: oaGl, ofBob; } .an-5.cur .of-t, .an-5.out .of-t { animation-name: oaFade; }
 @keyframes oaGl { 0% { transform: translateX(-30px) skewX(20deg); opacity: 0; } 18% { transform: translateX(22px) skewX(-18deg); opacity: 1; } 32% { transform: translateX(-14px); } 46% { transform: translateX(10px) skewX(8deg); } 60% { transform: none; } 100% { transform: none; } }
@@ -3697,7 +3697,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .of-bk::after { height: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .of-bk .bk, .of-bk { animation: none !important; } }
-.of-s.has-bk.cur .of-k, .of-s.has-bk.out .of-k { animation: oaFade .5s .05s both; }
+.of-s.has-bk.cur .of-k, .of-s.has-bk.out .of-k { animation: oaFade .35s 0s both; }
 
 /* ======== ebook on devices: laptop (PDF, open book), tablet (cover), phone (EPUB reading) ======== */
 .of-s.has-bk .of-bk { --dw: clamp(250px, 26vw, 400px); }
