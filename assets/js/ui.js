@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106223310';
-import { CONFIG } from './config.js?v=20261106223310';
-import { SOCIAL_PATHS } from './social.js?v=20261106223310';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106223310';
-import { esc, store, $, $$ } from './util.js?v=20261106223310';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106223318';
+import { CONFIG } from './config.js?v=20261106223318';
+import { SOCIAL_PATHS } from './social.js?v=20261106223318';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106223318';
+import { esc, store, $, $$ } from './util.js?v=20261106223318';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261106223310';
-import { suggest, highlight } from './search.js?v=20261106223310';
-import { track, trackPage } from './track.js?v=20261106223310';
-import { initGA, applyConsent } from './ga.js?v=20261106223310';
-import { consentStrings } from './consent-i18n.js?v=20261106223310';
-import { api } from './api.js?v=20261106223310';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106223310';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261106223318';
+import { suggest, highlight } from './search.js?v=20261106223318';
+import { track, trackPage } from './track.js?v=20261106223318';
+import { initGA, applyConsent } from './ga.js?v=20261106223318';
+import { consentStrings } from './consent-i18n.js?v=20261106223318';
+import { api } from './api.js?v=20261106223318';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106223318';
 
 // ---------------- icons ----------------
 const P = {
@@ -885,7 +885,7 @@ export function offersBanners(root) {
       if (!el.isConnected) return clearInterval(iv);
       const host = el.closest('.promo-slide'), on = !host || host.classList.contains('on');
       if (!on) { was = false; return; }
-      if (!was) { was = true; show(0, !firstDone); firstDone = true; return; }
+      if (!was) { was = true; show(0, true); return; }
       if (ss.length > 1 && Date.now() >= next) show((idx + 1) % ss.length);
     };
     const iv = setInterval(tick, 250); tick();
