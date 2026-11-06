@@ -3800,3 +3800,5 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .cat-tile .thumbs .tc.baked { border-radius: 0; }
 /* hero: reserve the tallest slide's height from the first paint so the page does not jump when the other slides finish loading */
 @media (min-width: 761px) { .hero-promos .promo-track { min-height: 395px; } }
+/* shelf banner: reserve the tallest slide's height from the first paint so the page does not jump when its cover loads */
+@media (min-width: 761px) { .promo-strip-wrap .promo-track { min-height: 119px; } }
