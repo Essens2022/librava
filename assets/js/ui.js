@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106220631';
-import { CONFIG } from './config.js?v=20261106220631';
-import { SOCIAL_PATHS } from './social.js?v=20261106220631';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106220631';
-import { esc, store, $, $$ } from './util.js?v=20261106220631';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106222915';
+import { CONFIG } from './config.js?v=20261106222915';
+import { SOCIAL_PATHS } from './social.js?v=20261106222915';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106222915';
+import { esc, store, $, $$ } from './util.js?v=20261106222915';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261106220631';
-import { suggest, highlight } from './search.js?v=20261106220631';
-import { track, trackPage } from './track.js?v=20261106220631';
-import { initGA, applyConsent } from './ga.js?v=20261106220631';
-import { consentStrings } from './consent-i18n.js?v=20261106220631';
-import { api } from './api.js?v=20261106220631';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106220631';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261106222915';
+import { suggest, highlight } from './search.js?v=20261106222915';
+import { track, trackPage } from './track.js?v=20261106222915';
+import { initGA, applyConsent } from './ga.js?v=20261106222915';
+import { consentStrings } from './consent-i18n.js?v=20261106222915';
+import { api } from './api.js?v=20261106222915';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106222915';
 
 // ---------------- icons ----------------
 const P = {
@@ -880,7 +880,7 @@ export function offersBanners(root) {
     const ss = [...el.querySelectorAll('.of-s')], ds = [...el.querySelectorAll('.of-dots i')]; if (ss.length < 1) return;
     let idx = 0, was = false, next = 0;
     const loadImgs = i => { [i, (i + 1) % ss.length].forEach(k => ss[k] && ss[k].querySelectorAll('img[data-src]').forEach(im => { if (im.dataset.srcset) { im.srcset = im.dataset.srcset; im.removeAttribute('data-srcset'); } im.src = im.dataset.src; im.removeAttribute('data-src'); })); };
-    const show = i => { loadImgs(i); idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); };
+    const show = i => { loadImgs(i); idx = i; ss.forEach((x, k) => { x.classList.toggle('cur', k === i); x.classList.toggle('out', k === (i + ss.length - 1) % ss.length && ss.length > 1 && k !== i); x.setAttribute('aria-hidden', k === i ? 'false' : 'true'); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); next = Date.now() + (i === ss.length - 1 ? 3800 : 3300); clearTimeout(el._ot); el._ot = setTimeout(() => ss.forEach(x => x.classList.remove('out')), 1100); };
     const tick = () => {
       if (!el.isConnected) return clearInterval(iv);
       const host = el.closest('.promo-slide'), on = !host || host.classList.contains('on');
