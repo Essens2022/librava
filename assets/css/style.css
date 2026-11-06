@@ -3505,6 +3505,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
    optional 3D book covers (bk-*) and floating emoji (of-pt). One offer = one still scene; several offers = a new look each time. */
 .promo-offers { display: block; position: relative; overflow: hidden; height: 404px; color: #fff; text-decoration: none; background: #111; }
 .promo-offers:hover { text-decoration: none; }
+/* a language with a single offers banner (e.g. Italian) used to collapse to 0px: the carousel rule height:100% beat the banner's own height */
+.promo-carousel.single > .promo-offers { height: 404px; }
 .of-s { position: absolute; inset: 0; visibility: hidden; z-index: 1; overflow: hidden; background: var(--bgc, #6d28d9); color: var(--tx, #fff); font-family: Inter, system-ui, sans-serif; }
 .of-s.cur { visibility: visible; z-index: 3; } .of-s.out { visibility: visible; z-index: 2; }
 .of-serif .of-big, .of-serif .of-t { font-family: 'Playfair Display', Georgia, serif; }
@@ -3778,3 +3780,15 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .route > .spinner:only-child { margin: 0 auto; position: relative; top: 50px; }
 .route:has(> .spinner:only-child) { min-height: 140px; }
 .cat-tile .thumbs img { aspect-ratio: 5/8; }
+
+/* Language flag ribbon (top-right of the cover); sizes are relative to the cover width so it scales everywhere */
+.cover .flg { position: absolute; right: 0; top: 3.5%; z-index: 4; display: flex; gap: 3%; align-items: center; width: 40%; box-sizing: border-box; padding: 2.4% 3.4% 2.4% 3%; background: rgba(255,255,255,.97); border-radius: 4px 0 0 4px; box-shadow: 0 2px 5px rgba(0,0,0,.35); pointer-events: none; }
+.cover .flg img { flex: 1 1 0; min-width: 0; width: auto; height: auto; aspect-ratio: 4 / 3; display: block; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.22); object-fit: cover; }
+.cover .flg:has(> img:only-child) { width: 27%; }
+.flg-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.flg-opt { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 2px solid var(--line, #dfe5d6); border-radius: 10px; background: #fff; font-size: 12px; }
+.flg-opt.on { border-color: #2f8f4e; box-shadow: 0 0 0 3px rgba(47,143,78,.22); }
+.flg-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.flg-opt img { border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+@media (max-width: 760px) { .promo-carousel.single > .promo-offers { height: 236px; } }
+.of-still .promo-carousel.single > .promo-offers { height: var(--ih, 404px); }
