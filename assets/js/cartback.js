@@ -1,8 +1,8 @@
 // Return visit with books left in the cart: a quiet bar "your books are waiting", one tap to the cart.
 // Shown at most once a day, only when the visitor was away for at least 2 hours. Never on the cart page.
-import { store, esc } from './util.js?v=20261106213704';
-import { getLang } from './i18n.js?v=20261106213704';
-import { cart, go, currentPath } from './ui.js?v=20261106213704';
+import { store, esc } from './util.js?v=20261106214726';
+import { getLang } from './i18n.js?v=20261106214726';
+import { cart, go, currentPath } from './ui.js?v=20261106214726';
 const T = {
   en: ['Your books are waiting in your cart', 'Go to cart'], ro: ['Cărțile tale te așteaptă în coș', 'Mergi la coș'], it: ['I tuoi libri ti aspettano nel carrello', 'Vai al carrello'],
   fr: ['Vos livres vous attendent dans votre panier', 'Voir le panier'], de: ['Deine Bücher warten im Warenkorb', 'Zum Warenkorb'], es: ['Tus libros te esperan en el carrito', 'Ir al carrito'],

@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261106213704';
-import { t, getLang, setLang } from './i18n.js?v=20261106213704';
-import { esc, $, $$ } from './util.js?v=20261106213704';
-import { api, chooseBackend } from './api.js?v=20261106213704';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261106213704';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261106213704';
-import { cartBack } from './cartback.js?v=20261106213704';
-import { goalBar } from './goalbar.js?v=20261106213704';
-import { welcomeGift } from './welcome.js?v=20261106213704';
-import { trackPage } from './track.js?v=20261106213704';
-import { offline } from './offline.js?v=20261106213704';
-import { viewReader } from './reader.js?v=20261106213704';
+import { CONFIG } from './config.js?v=20261106214726';
+import { t, getLang, setLang } from './i18n.js?v=20261106214726';
+import { esc, $, $$ } from './util.js?v=20261106214726';
+import { api, chooseBackend } from './api.js?v=20261106214726';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261106214726';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261106214726';
+import { cartBack } from './cartback.js?v=20261106214726';
+import { goalBar } from './goalbar.js?v=20261106214726';
+import { welcomeGift } from './welcome.js?v=20261106214726';
+import { trackPage } from './track.js?v=20261106214726';
+import { offline } from './offline.js?v=20261106214726';
+import { viewReader } from './reader.js?v=20261106214726';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -112,7 +112,7 @@ async function route() {
       case 'library': res = await viewLibrary(el, q); break;
       case 'welcome': res = await viewWelcome(el, q); break;
       case 'read': res = await viewReader(el, parts[1], q); break;
-      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261106213704'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
+      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261106214726'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
       case 'help': res = viewHelp(el); break;
       case 'legal': res = await viewLegal(el, parts[1]); break;
       case 'guide': res = await viewGuide(el, parts[1]); break;

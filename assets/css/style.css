@@ -3516,6 +3516,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .promo-offers[data-w="W2"] .of-s.cur { animation: owW2 .8s cubic-bezier(.4,0,.2,1) both; }
 .promo-offers[data-w="W3"] .of-s.cur { animation: owW3 .7s ease both; } .promo-offers[data-w="W3"] .of-s.out { animation: owOut3 .7s ease both; }
 .promo-offers[data-w="W4"] .of-s.cur { animation: owW4 .75s cubic-bezier(.3,.9,.3,1) both; }
+.promo-offers[data-w="W2"] .of-s.out .of-in, .promo-offers[data-w="W4"] .of-s.out .of-in { animation: owTxOut .28s ease-in both; } @keyframes owTxOut { to { opacity: 0; } }
 @keyframes owW1 { from { transform: translateX(100%); } to { transform: none; } } @keyframes owOut { to { transform: translateX(-35%); opacity: .3; } }
 @keyframes owW2 { from { clip-path: circle(0% at 78% 50%); } to { clip-path: circle(150% at 78% 50%); } }
 @keyframes owW3 { from { opacity: 0; transform: scale(1.18); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } } @keyframes owOut3 { to { opacity: 0; transform: scale(.9); } }
