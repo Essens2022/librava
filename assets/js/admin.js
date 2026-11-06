@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261106203026';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106203026';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106203026';
-import { resetCompanyCache } from './views.js?v=20261106203026';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106203026';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106203026';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106203026';
-import { optimizeBook } from './optimize.js?v=20261106203026';
-import { api } from './api.js?v=20261106203026';
-import { OF_STYLES } from './offerstyles.js?v=20261106203026';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106203026';
+import { CONFIG } from './config.js?v=20261106203213';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106203213';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106203213';
+import { resetCompanyCache } from './views.js?v=20261106203213';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106203213';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106203213';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106203213';
+import { optimizeBook } from './optimize.js?v=20261106203213';
+import { api } from './api.js?v=20261106203213';
+import { OF_STYLES } from './offerstyles.js?v=20261106203213';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106203213';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -1549,6 +1549,9 @@ async function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('lbl.title'))}</h3><p>${esc(t('lbl.help'))}</p></div>
         <div class="kdp-fields"><div class="lbl-pick" id="lbl-pick" data-id="${esc(v.id || '')}" ${v.id ? '' : 'hidden'}>${['', ...BOOK_LABELS].map(k => `<label class="lbl-opt ${(v.id && labelOf(v.id) || '') === k ? 'on' : ''}"><input type="radio" name="lbl" value="${k}" ${(v.id && labelOf(v.id) || '') === k ? 'checked' : ''}>${k ? `<span class="lbl lbl-${k}" style="position:static">${esc(t('lbl.' + k))}</span>` : `<span class="lbl-none">${esc(t('lbl.none'))}</span>`}</label>`).join('')}</div>
           ${v.id ? '' : `<p class="muted">${esc(t('lbl.saveFirst'))}</p>`}</div></div>
+      <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('flg.title'))}</h3><p>${esc(t('flg.help'))}</p></div>
+        <div class="kdp-fields"><div class="flg-pick" id="flg-pick" data-id="${esc(v.id || '')}" ${v.id ? '' : 'hidden'}>${FLAG_CODES.map(c => `<label class="flg-opt ${v.id && flagsOf(v.id, v.language).includes(c) ? 'on' : ''}"><input type="checkbox" value="${c}" ${v.id && flagsOf(v.id, v.language).includes(c) ? 'checked' : ''}><img src="/assets/img/flags/${c}.svg" alt="${c.toUpperCase()}" width="30" height="22"><b>${c.toUpperCase()}</b></label>`).join('')}</div>
+          ${v.id ? '' : `<p class="muted">${esc(t('lbl.saveFirst'))}</p>`}</div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.checklist'))}</h3><p>${esc(t('kdp.checklistHelp'))}</p></div>
         <div class="kdp-fields"><ul class="checklist" id="checklist"></ul>
           <button type="button" class="btn btn-ghost" data-open-preview ${v.file_path || v.file_name ? '' : 'hidden'}>${icon('eye')} ${esc(t('pv.open'))}</button></div></div>
@@ -2850,6 +2853,17 @@ async function settingsAdmin(body) {
   };
 }
 
+document.addEventListener('change', async e => {
+  const r = e.target.closest && e.target.closest('#flg-pick input[type=checkbox]'); if (!r) return;
+  const box = r.closest('#flg-pick'), id = box.dataset.id; if (!id) return;
+  try {
+    const cur = (await api.getSetting('book_flags')) || {}, map = { ...(cur.map || {}) };
+    map[id] = [...box.querySelectorAll('input:checked')].map(i => i.value);
+    await api.saveSetting('book_flags', { map }); setFlags(map);
+    box.querySelectorAll('.flg-opt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
+    toast(t('flg.saved'));
+  } catch (err) { toast(errText(err), { error: true }); }
+});
 document.addEventListener('change', async e => {
   const r = e.target.closest && e.target.closest('#lbl-pick input[name=lbl]'); if (!r) return;
   const id = r.closest('#lbl-pick').dataset.id; if (!id) return;

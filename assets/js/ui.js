@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106203026';
-import { CONFIG } from './config.js?v=20261106203026';
-import { SOCIAL_PATHS } from './social.js?v=20261106203026';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106203026';
-import { esc, store, $, $$ } from './util.js?v=20261106203026';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261106203213';
+import { CONFIG } from './config.js?v=20261106203213';
+import { SOCIAL_PATHS } from './social.js?v=20261106203213';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261106203213';
+import { esc, store, $, $$ } from './util.js?v=20261106203213';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261106203026';
-import { suggest, highlight } from './search.js?v=20261106203026';
-import { track, trackPage } from './track.js?v=20261106203026';
-import { initGA, applyConsent } from './ga.js?v=20261106203026';
-import { consentStrings } from './consent-i18n.js?v=20261106203026';
-import { api } from './api.js?v=20261106203026';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106203026';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261106203213';
+import { suggest, highlight } from './search.js?v=20261106203213';
+import { track, trackPage } from './track.js?v=20261106203213';
+import { initGA, applyConsent } from './ga.js?v=20261106203213';
+import { consentStrings } from './consent-i18n.js?v=20261106203213';
+import { api } from './api.js?v=20261106203213';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261106203213';
 
 // ---------------- icons ----------------
 const P = {
@@ -326,6 +326,23 @@ export const BOOK_LABELS = ['bestseller', 'new', 'editor', 'deal', 'top', 'trend
 let LABELS = (() => { try { return JSON.parse(localStorage.getItem('librava:labels') || '{}') || {}; } catch { return {}; } })(), lblObs = false;
 export const labelOf = id => BOOK_LABELS.includes(LABELS[id]) ? LABELS[id] : '';
 const lblHTML = id => { const l = labelOf(id); return l ? `<span class="lbl lbl-${l}">${esc(t('lbl.' + l))}</span>` : ''; };
+// Language flags on the cover (top-left ribbon). Owner sets them per book in the admin (site_settings → book_flags);
+// without an override, English books show US + UK and Italian books show the Italian flag.
+export const FLAG_CODES = ['us', 'gb', 'ca', 'au', 'ie', 'it', 'ro', 'fr', 'de', 'es', 'pt', 'nl', 'pl', 'cz', 'se', 'dk', 'no', 'fi', 'gr', 'hu', 'hr', 'sk', 'si', 'bg', 'lt', 'lv', 'ee', 'ua'];
+const FLAG_LANG = { us: 'en', gb: 'en', ca: 'en', au: 'en', ie: 'en', it: 'it', ro: 'ro', fr: 'fr', de: 'de', es: 'es', pt: 'pt', nl: 'nl', pl: 'pl', cz: 'cs', se: 'sv', dk: 'da', no: 'no', fi: 'fi', gr: 'el', hu: 'hu', hr: 'hr', sk: 'sk', si: 'sl', bg: 'bg', lt: 'lt', lv: 'lv', ee: 'et', ua: 'uk' };
+const FLAG_DEFAULT = { en: ['us', 'gb'], it: ['it'] };
+let FLAGS = (() => { try { return JSON.parse(localStorage.getItem('librava:flags') || '{}') || {}; } catch { return {}; } })();
+export const flagsOf = (id, lang) => Array.isArray(FLAGS[id]) ? FLAGS[id].filter(c => FLAG_CODES.includes(c)) : (FLAG_DEFAULT[lang] || []);
+const flagsHTML = (id, lang) => { const f = flagsOf(id, lang); return f.length ? `<span class="flg" aria-hidden="true">${f.map(c => `<img src="/assets/img/flags/${c}.svg" alt="" width="20" height="15" title="${esc(langName(FLAG_LANG[c]))}" draggable="false">`).join('')}</span>` : ''; };
+export function setFlags(map) { FLAGS = map || {}; try { localStorage.setItem('librava:flags', JSON.stringify(FLAGS)); } catch { } applyFlags(document); }
+export function applyFlags(root = document) {
+  root.querySelectorAll('.cover[data-lg]').forEach(c => {
+    const html = flagsHTML(c.dataset.b || c.dataset.id || '', c.dataset.lg), old = c.querySelector(':scope > .flg');
+    c.classList.toggle('has-flg', !!html);
+    if (old && (!html || old.outerHTML !== html)) old.remove();
+    if (html && !c.querySelector(':scope > .flg')) c.insertAdjacentHTML('afterbegin', html);
+  });
+}
 export function applyLabels(root = document) {
   const put = (host, id) => {
     const l = labelOf(id), old = host.querySelector(':scope > .lbl');
@@ -334,6 +351,7 @@ export function applyLabels(root = document) {
     old && old.remove(); host.insertAdjacentHTML('afterbegin', lblHTML(id));
   };
   root.querySelectorAll('.cover[data-b]').forEach(c => put(c, c.dataset.b));
+  applyFlags(root);
   root.querySelectorAll('a.promo-one[data-bk] .promo-cover').forEach(c => put(c, c.closest('[data-bk]').dataset.bk));
   root.querySelectorAll('.promo-books .pb[href]').forEach(c => { const m = /\/book\/([^/?#]+)/.exec(c.getAttribute('href') || ''); if (m) put(c, decodeURIComponent(m[1])); });
 }
@@ -343,6 +361,8 @@ export async function loadLabels() {
     if (!lblObs && typeof MutationObserver !== 'undefined') { lblObs = true; let q = false; new MutationObserver(() => { if (q) return; q = true; requestAnimationFrame(() => { q = false; applyLabels(document); }); }).observe(document.body, { childList: true, subtree: true }); }
     const v = await api.getSetting('book_labels'), m = v && typeof v === 'object' && v.map && typeof v.map === 'object' ? v.map : {};
     if (JSON.stringify(m) !== JSON.stringify(LABELS)) setLabels(m); else applyLabels(document);
+    const fv = await api.getSetting('book_flags'), fm = fv && typeof fv === 'object' && fv.map && typeof fv.map === 'object' ? fv.map : {};
+    if (JSON.stringify(fm) !== JSON.stringify(FLAGS)) setFlags(fm);
   } catch { }
 }
 // Covers that already include the rounded-spine effect in the image itself
@@ -353,7 +373,8 @@ export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
   const baked = SPINE_BAKED.has(b.id) ? ' baked' : '';
-  return `<div class="cover${baked}"${badge ? ` data-b="${esc(b.id)}"` : ''}>${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
+  const fl = flagsHTML(b.id, b.language);
+  return `<div class="cover${baked}${fl ? ' has-flg' : ''}"${badge ? ` data-b="${esc(b.id)}"` : ` data-id="${esc(b.id)}"`} data-lg="${esc(b.language || '')}">${fl}${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
 }
 export function priceHTML(b) {
   if (!b.price_cents) return `<span class="price price-free">${esc(t('book.free'))}</span>`;

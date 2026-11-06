@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261106203026';
-import { CONFIG } from './config.js?v=20261106203026';
-import { store } from './util.js?v=20261106203026';
+import { localize, loadRates } from './localprice.js?v=20261106203213';
+import { CONFIG } from './config.js?v=20261106203213';
+import { store } from './util.js?v=20261106203213';
 
 const D = {
   ro: {
@@ -332,6 +332,9 @@ const D = {
     'lbl.gift': 'Idee de cadou',
     'lbl.quick': 'Lectură rapidă',
     'lbl.popular': 'Popular',
+        'flg.title': 'Steag limbă pe copertă',
+    'flg.help': 'Alege steagul (sau steagurile) țării în care este scrisă cartea. Apare sus-dreapta pe copertă, ca o panglică. Dacă nu alegi nimic, cărțile în engleză primesc SUA + Marea Britanie, iar cele în italiană primesc Italia.',
+    'flg.saved': 'Steagurile au fost salvate.',
     'lbl.title': 'Etichetă pe copertă',
     'lbl.help': 'Alege o etichetă care apare pe copertă în rafturi, pe pagina cărții și în bannere (ca pe Amazon).',
     'lbl.none': 'Fără etichetă',
@@ -1935,6 +1938,9 @@ const D = {
     'lbl.gift': 'Idea regalo',
     'lbl.quick': 'Lettura veloce',
     'lbl.popular': 'Popolare',
+        'flg.title': 'Bandiera della lingua sulla copertina',
+    'flg.help': 'Scegli la bandiera (o le bandiere) del paese in cui è scritto il libro. Appare in alto a destra sulla copertina, come un nastro. Se non scegli nulla, i libri in inglese mostrano USA + Regno Unito e quelli in italiano mostrano l’Italia.',
+    'flg.saved': 'Bandiere salvate.',
     'lbl.title': 'Etichetta sulla copertina',
     'lbl.help': 'Scegli un’etichetta che appare sulla copertina negli scaffali, nella pagina del libro e nei banner.',
     'lbl.none': 'Nessuna etichetta',
@@ -3538,6 +3544,9 @@ const D = {
     'lbl.gift': 'Gift idea',
     'lbl.quick': 'Quick read',
     'lbl.popular': 'Popular',
+        'flg.title': 'Language flag on the cover',
+    'flg.help': 'Pick the flag (or flags) of the country the book is written for. It shows at the top right of the cover as a ribbon. If you pick nothing, English books show US + UK and Italian books show Italy.',
+    'flg.saved': 'Flags saved.',
     'lbl.title': 'Cover label',
     'lbl.help': 'Pick a label shown on the cover in shelves, on the book page and in banners (like Amazon).',
     'lbl.none': 'No label',
@@ -4849,7 +4858,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261106203026`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261106203213`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
