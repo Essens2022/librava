@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Bestellung storniert.",
   "admin.noPending": "Keine offenen Bestellungen.",
   "admin.confirmPaidQ": "Bestätigen, dass du {amount} für die Bestellung {ref} erhalten hast?",
-  "common.tooMany": "Zu viele Versuche. Bitte versuche es in ein paar Minuten erneut."
+  "common.tooMany": "Zu viele Versuche. Bitte versuche es in ein paar Minuten erneut.",
+  "sp.title": "Kostenlose Leseprobe (PDF in Seiten, EPUB in Wörtern)",
+  "sp.help": "Wie viel ein Besucher vor dem Kauf kostenlos lesen kann. Die Leseprobe eines PDFs wird in Seiten gezählt, die eines EPUBs in Wörtern (etwa 250 Wörter ergeben eine gedruckte Seite). Eine Zahl für alle PDFs und eine für alle EPUBs; die Leseproben werden für alle Bücher neu erstellt.",
+  "sp.epub": "EPUB: Wörter der Leseprobe",
+  "sp.confirm": "Die Leseproben von {n} Büchern werden neu erstellt (PDF: {pdf} Seiten, EPUB: {epub} Wörter). Das kann einige Minuten dauern. Bleibe auf dieser Seite.",
+  "kdp.sampleTip": "Optional: Sie wird automatisch vom Anfang des Buches mit der unten eingestellten Länge erstellt. Lade nur dann eine hoch, wenn du eine andere Leseprobe möchtest.",
+  "kdp.samplePagesHelp": "Wie viele Seiten jeder kostenlos lesen kann. Neue Bücher starten mit dem in den Einstellungen gespeicherten Wert. Wenn du die Zahl änderst, wird die Leseprobe automatisch neu erstellt.",
+  "kdp.sampleWords": "Wörter in der Leseprobe",
+  "kdp.sampleWordsHelp": "Wie viele Wörter jeder kostenlos lesen kann (etwa 250 Wörter ergeben eine gedruckte Seite). Neue Bücher starten mit dem in den Einstellungen gespeicherten Wert. Wenn du die Zahl änderst, wird die Leseprobe automatisch neu erstellt.",
+  "kdp.sampleAutoWords": "Leseprobe automatisch erstellt: die ersten {n} Wörter. Sie wird gespeichert, wenn du auf Speichern klickst.",
+  "sp.applyPdf": "Speichern und auf PDFs anwenden",
+  "sp.applyEpub": "Speichern und auf EPUBs anwenden",
+  "sp.confirmPdf": "Die Leseproben von {n} PDF-Büchern werden neu erstellt ({pdf} Seiten). EPUB-Bücher bleiben unberührt. Das kann einige Minuten dauern. Bleibe auf dieser Seite.",
+  "sp.confirmEpub": "Die Leseproben von {n} EPUB-Büchern werden neu erstellt ({epub} Wörter). PDF-Bücher bleiben unberührt. Das kann einige Minuten dauern. Bleibe auf dieser Seite."
 };

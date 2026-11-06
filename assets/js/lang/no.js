@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Bestillingen er kansellert.",
   "admin.noPending": "Ingen ventende bestillinger.",
   "admin.confirmPaidQ": "Bekrefte at du har mottatt {amount} for bestilling {ref}?",
-  "common.tooMany": "For mange forsøk. Prøv igjen om noen minutter."
+  "common.tooMany": "For mange forsøk. Prøv igjen om noen minutter.",
+  "sp.title": "Gratis forhåndsvisning (PDF i sider, EPUB i ord)",
+  "sp.help": "Hvor mye en besøkende kan lese gratis før kjøp. En PDF-forhåndsvisning telles i sider, en EPUB-forhåndsvisning i ord (omtrent 250 ord er én trykt side). Ett tall for alle PDF-er og ett for alle EPUB-er; prøvene lages på nytt for alle bøker.",
+  "sp.epub": "EPUB: ord i prøven",
+  "sp.confirm": "Prøvene for {n} bøker lages på nytt (PDF: {pdf} sider, EPUB: {epub} ord). Det kan ta noen minutter. Bli på denne siden.",
+  "kdp.sampleTip": "Valgfritt: den lages automatisk fra starten av boken, med lengden som er satt nedenfor. Last opp en egen bare hvis du vil ha en annen prøve.",
+  "kdp.samplePagesHelp": "Hvor mange sider alle kan lese gratis. Nye bøker starter med verdien som er lagret i Innstillinger. Endrer du tallet, lages forhåndsvisningen automatisk på nytt.",
+  "kdp.sampleWords": "Ord i forhåndsvisningen",
+  "kdp.sampleWordsHelp": "Hvor mange ord alle kan lese gratis (omtrent 250 ord er én trykt side). Nye bøker starter med verdien som er lagret i Innstillinger. Endrer du tallet, lages forhåndsvisningen automatisk på nytt.",
+  "kdp.sampleAutoWords": "Prøve laget automatisk: de første {n} ordene. Den lagres når du trykker Lagre.",
+  "sp.applyPdf": "Lagre og bruk på PDF-er",
+  "sp.applyEpub": "Lagre og bruk på EPUB-er",
+  "sp.confirmPdf": "Prøvene for {n} PDF-bøker lages på nytt ({pdf} sider). EPUB-bøker berøres ikke. Det kan ta noen minutter. Bli på denne siden.",
+  "sp.confirmEpub": "Prøvene for {n} EPUB-bøker lages på nytt ({epub} ord). PDF-bøker berøres ikke. Det kan ta noen minutter. Bli på denne siden."
 };

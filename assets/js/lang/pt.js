@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Encomenda cancelada.",
   "admin.noPending": "Não há encomendas pendentes.",
   "admin.confirmPaidQ": "Confirmar que recebeu {amount} pela encomenda {ref}?",
-  "common.tooMany": "Demasiadas tentativas. Tente novamente dentro de alguns minutos."
+  "common.tooMany": "Demasiadas tentativas. Tente novamente dentro de alguns minutos.",
+  "sp.title": "Pré-visualização gratuita (PDF em páginas, EPUB em palavras)",
+  "sp.help": "Quanto um visitante pode ler gratuitamente antes de comprar. A pré-visualização de um PDF conta-se em páginas e a de um EPUB em palavras (cerca de 250 palavras fazem uma página impressa). Um número para todos os PDF e outro para todos os EPUB; as amostras são refeitas para todos os livros.",
+  "sp.epub": "EPUB: palavras da amostra",
+  "sp.confirm": "As amostras de {n} livros vão ser refeitas (PDF: {pdf} páginas, EPUB: {epub} palavras). Pode demorar alguns minutos. Fica nesta página.",
+  "kdp.sampleTip": "Opcional: é criada automaticamente desde o início do livro, com a extensão definida abaixo. Carrega uma só se quiseres uma amostra diferente.",
+  "kdp.samplePagesHelp": "Quantas páginas qualquer pessoa pode ler gratuitamente. Os livros novos começam com o valor guardado nas Definições. Se mudares o número, a pré-visualização é refeita automaticamente.",
+  "kdp.sampleWords": "Palavras na pré-visualização",
+  "kdp.sampleWordsHelp": "Quantas palavras qualquer pessoa pode ler gratuitamente (cerca de 250 palavras fazem uma página impressa). Os livros novos começam com o valor guardado nas Definições. Se mudares o número, a pré-visualização é refeita automaticamente.",
+  "kdp.sampleAutoWords": "Amostra criada automaticamente: as primeiras {n} palavras. É guardada quando carregas em Guardar.",
+  "sp.applyPdf": "Guardar e aplicar aos PDF",
+  "sp.applyEpub": "Guardar e aplicar aos EPUB",
+  "sp.confirmPdf": "As amostras de {n} livros PDF vão ser refeitas ({pdf} páginas). Os livros EPUB não são alterados. Pode demorar alguns minutos. Fica nesta página.",
+  "sp.confirmEpub": "As amostras de {n} livros EPUB vão ser refeitas ({epub} palavras). Os livros PDF não são alterados. Pode demorar alguns minutos. Fica nesta página."
 };

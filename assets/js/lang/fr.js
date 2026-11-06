@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Commande annulée.",
   "admin.noPending": "Aucune commande en attente.",
   "admin.confirmPaidQ": "Confirmer la réception de {amount} pour la commande {ref} ?",
-  "common.tooMany": "Trop de tentatives. Veuillez réessayer dans quelques minutes."
+  "common.tooMany": "Trop de tentatives. Veuillez réessayer dans quelques minutes.",
+  "sp.title": "Aperçu gratuit (PDF en pages, EPUB en mots)",
+  "sp.help": "Ce qu'un visiteur peut lire gratuitement avant d'acheter. L'aperçu d'un PDF se compte en pages, celui d'un EPUB en mots (environ 250 mots font une page imprimée). Un nombre pour tous les PDF et un pour tous les EPUB ; les extraits sont refaits pour tous les livres.",
+  "sp.epub": "EPUB : mots de l'extrait",
+  "sp.confirm": "Les extraits de {n} livres vont être refaits (PDF : {pdf} pages, EPUB : {epub} mots). Cela peut prendre quelques minutes. Restez sur cette page.",
+  "kdp.sampleTip": "Facultatif : il est créé automatiquement depuis le début du livre, avec la longueur définie ci-dessous. N'en importez un que si vous voulez un autre extrait.",
+  "kdp.samplePagesHelp": "Combien de pages chacun peut lire gratuitement. Les nouveaux livres commencent avec la valeur enregistrée dans les Réglages. Si vous changez le nombre, l'aperçu est refait automatiquement.",
+  "kdp.sampleWords": "Mots dans l'aperçu",
+  "kdp.sampleWordsHelp": "Combien de mots chacun peut lire gratuitement (environ 250 mots font une page imprimée). Les nouveaux livres commencent avec la valeur enregistrée dans les Réglages. Si vous changez le nombre, l'aperçu est refait automatiquement.",
+  "kdp.sampleAutoWords": "Extrait créé automatiquement : les {n} premiers mots. Il est enregistré lorsque vous cliquez sur Enregistrer.",
+  "sp.applyPdf": "Enregistrer et appliquer aux PDF",
+  "sp.applyEpub": "Enregistrer et appliquer aux EPUB",
+  "sp.confirmPdf": "Les extraits de {n} livres PDF vont être refaits ({pdf} pages). Les livres EPUB ne sont pas modifiés. Cela peut prendre quelques minutes. Restez sur cette page.",
+  "sp.confirmEpub": "Les extraits de {n} livres EPUB vont être refaits ({epub} mots). Les livres PDF ne sont pas modifiés. Cela peut prendre quelques minutes. Restez sur cette page."
 };

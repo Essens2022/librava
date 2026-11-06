@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Ordren er annulleret.",
   "admin.noPending": "Ingen ventende ordrer.",
   "admin.confirmPaidQ": "Bekræft, at du har modtaget {amount} for ordre {ref}?",
-  "common.tooMany": "For mange forsøg. Prøv igen om et par minutter."
+  "common.tooMany": "For mange forsøg. Prøv igen om et par minutter.",
+  "sp.title": "Gratis smagsprøve (PDF i sider, EPUB i ord)",
+  "sp.help": "Hvor meget en besøgende kan læse gratis, før de køber. En PDF-smagsprøve tælles i sider, en EPUB-smagsprøve i ord (ca. 250 ord er én trykt side). Ét tal for alle PDF'er og ét for alle EPUB'er; smagsprøverne laves igen for alle bøger.",
+  "sp.epub": "EPUB: ord i smagsprøven",
+  "sp.confirm": "Smagsprøverne for {n} bøger laves igen (PDF: {pdf} sider, EPUB: {epub} ord). Det kan tage et par minutter. Bliv på denne side.",
+  "kdp.sampleTip": "Valgfri: den oprettes automatisk fra bogens begyndelse med den længde, der er angivet nedenfor. Upload kun en, hvis du vil have en anden smagsprøve.",
+  "kdp.samplePagesHelp": "Hvor mange sider alle kan læse gratis. Nye bøger starter med den værdi, der er gemt i Indstillinger. Ændrer du tallet, laves smagsprøven igen automatisk.",
+  "kdp.sampleWords": "Ord i smagsprøven",
+  "kdp.sampleWordsHelp": "Hvor mange ord alle kan læse gratis (ca. 250 ord er én trykt side). Nye bøger starter med den værdi, der er gemt i Indstillinger. Ændrer du tallet, laves smagsprøven igen automatisk.",
+  "kdp.sampleAutoWords": "Smagsprøve oprettet automatisk: de første {n} ord. Den gemmes, når du trykker Gem.",
+  "sp.applyPdf": "Gem og anvend på PDF'er",
+  "sp.applyEpub": "Gem og anvend på EPUB'er",
+  "sp.confirmPdf": "Smagsprøverne for {n} PDF-bøger laves igen ({pdf} sider). EPUB-bøger berøres ikke. Det kan tage et par minutter. Bliv på denne side.",
+  "sp.confirmEpub": "Smagsprøverne for {n} EPUB-bøger laves igen ({epub} ord). PDF-bøger berøres ikke. Det kan tage et par minutter. Bliv på denne side."
 };

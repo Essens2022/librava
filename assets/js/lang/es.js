@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Pedido cancelado.",
   "admin.noPending": "No hay pedidos pendientes.",
   "admin.confirmPaidQ": "¿Confirmas que has recibido {amount} por el pedido {ref}?",
-  "common.tooMany": "Demasiados intentos. Vuelve a intentarlo dentro de unos minutos."
+  "common.tooMany": "Demasiados intentos. Vuelve a intentarlo dentro de unos minutos.",
+  "sp.title": "Vista previa gratuita (PDF en páginas, EPUB en palabras)",
+  "sp.help": "Cuánto puede leer gratis un visitante antes de comprar. La vista previa de un PDF se cuenta en páginas y la de un EPUB en palabras (unas 250 palabras forman una página impresa). Un número para todos los PDF y otro para todos los EPUB; las muestras se rehacen para todos los libros.",
+  "sp.epub": "EPUB: palabras de muestra",
+  "sp.confirm": "Se reharán las muestras de {n} libros (PDF: {pdf} páginas, EPUB: {epub} palabras). Puede tardar unos minutos. Permanece en esta página.",
+  "kdp.sampleTip": "Opcional: se crea automáticamente desde el principio del libro, con la longitud indicada abajo. Sube una solo si quieres una muestra distinta.",
+  "kdp.samplePagesHelp": "Cuántas páginas puede leer cualquiera gratis. Los libros nuevos empiezan con el valor guardado en Ajustes. Si cambias el número, la vista previa se rehace sola.",
+  "kdp.sampleWords": "Palabras en la vista previa",
+  "kdp.sampleWordsHelp": "Cuántas palabras puede leer cualquiera gratis (unas 250 palabras forman una página impresa). Los libros nuevos empiezan con el valor guardado en Ajustes. Si cambias el número, la vista previa se rehace sola.",
+  "kdp.sampleAutoWords": "Muestra creada automáticamente: las primeras {n} palabras. Se guarda cuando pulsas Guardar.",
+  "sp.applyPdf": "Guardar y aplicar a los PDF",
+  "sp.applyEpub": "Guardar y aplicar a los EPUB",
+  "sp.confirmPdf": "Se reharán las muestras de {n} libros PDF ({pdf} páginas). Los libros EPUB no se tocan. Puede tardar unos minutos. Permanece en esta página.",
+  "sp.confirmEpub": "Se reharán las muestras de {n} libros EPUB ({epub} palabras). Los libros PDF no se tocan. Puede tardar unos minutos. Permanece en esta página."
 };

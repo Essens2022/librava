@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Beställningen har avbrutits.",
   "admin.noPending": "Inga väntande beställningar.",
   "admin.confirmPaidQ": "Bekräfta att du har tagit emot {amount} för beställning {ref}?",
-  "common.tooMany": "För många försök. Försök igen om några minuter."
+  "common.tooMany": "För många försök. Försök igen om några minuter.",
+  "sp.title": "Gratis förhandsvisning (PDF i sidor, EPUB i ord)",
+  "sp.help": "Hur mycket en besökare kan läsa gratis innan köp. En PDF-förhandsvisning räknas i sidor, en EPUB-förhandsvisning i ord (cirka 250 ord är en tryckt sida). Ett tal för alla PDF:er och ett för alla EPUB:er; proven görs om för alla böcker.",
+  "sp.epub": "EPUB: ord i provet",
+  "sp.confirm": "Proven för {n} böcker görs om (PDF: {pdf} sidor, EPUB: {epub} ord). Det kan ta några minuter. Stanna kvar på den här sidan.",
+  "kdp.sampleTip": "Valfritt: det skapas automatiskt från bokens början med längden som anges nedan. Ladda bara upp ett eget om du vill ha ett annat prov.",
+  "kdp.samplePagesHelp": "Hur många sidor alla kan läsa gratis. Nya böcker startar med värdet som sparats i Inställningar. Ändrar du talet görs förhandsvisningen om automatiskt.",
+  "kdp.sampleWords": "Ord i förhandsvisningen",
+  "kdp.sampleWordsHelp": "Hur många ord alla kan läsa gratis (cirka 250 ord är en tryckt sida). Nya böcker startar med värdet som sparats i Inställningar. Ändrar du talet görs förhandsvisningen om automatiskt.",
+  "kdp.sampleAutoWords": "Prov skapat automatiskt: de första {n} orden. Det sparas när du trycker på Spara.",
+  "sp.applyPdf": "Spara och tillämpa på PDF:er",
+  "sp.applyEpub": "Spara och tillämpa på EPUB:er",
+  "sp.confirmPdf": "Proven för {n} PDF-böcker görs om ({pdf} sidor). EPUB-böcker berörs inte. Det kan ta några minuter. Stanna kvar på den här sidan.",
+  "sp.confirmEpub": "Proven för {n} EPUB-böcker görs om ({epub} ord). PDF-böcker berörs inte. Det kan ta några minuter. Stanna kvar på den här sidan."
 };

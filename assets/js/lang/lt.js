@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Užsakymas atšauktas.",
   "admin.noPending": "Laukiančių užsakymų nėra.",
   "admin.confirmPaidQ": "Patvirtinti, kad gavote {amount} už užsakymą {ref}?",
-  "common.tooMany": "Per daug bandymų. Bandykite dar kartą po kelių minučių."
+  "common.tooMany": "Per daug bandymų. Bandykite dar kartą po kelių minučių.",
+  "sp.title": "Nemokama peržiūra (PDF puslapiais, EPUB žodžiais)",
+  "sp.help": "Kiek lankytojas gali perskaityti nemokamai prieš pirkdamas. PDF peržiūra skaičiuojama puslapiais, EPUB peržiūra žodžiais (apie 250 žodžių sudaro vieną spausdintą puslapį). Vienas skaičius visiems PDF ir vienas visiems EPUB; ištraukos perkuriamos visoms knygoms.",
+  "sp.epub": "EPUB: žodžiai ištraukoje",
+  "sp.confirm": "{n} knygų ištraukos bus perkurtos (PDF: {pdf} puslapių, EPUB: {epub} žodžių). Tai gali užtrukti kelias minutes. Likite šiame puslapyje.",
+  "kdp.sampleTip": "Neprivaloma: ji sukuriama automatiškai nuo knygos pradžios, žemiau nustatyto ilgio. Įkelkite savo tik jei norite kitokios ištraukos.",
+  "kdp.samplePagesHelp": "Kiek puslapių kiekvienas gali perskaityti nemokamai. Naujos knygos prasideda nuo Nustatymuose išsaugotos reikšmės. Pakeitus skaičių, peržiūra sukuriama iš naujo automatiškai.",
+  "kdp.sampleWords": "Žodžiai peržiūroje",
+  "kdp.sampleWordsHelp": "Kiek žodžių kiekvienas gali perskaityti nemokamai (apie 250 žodžių sudaro vieną spausdintą puslapį). Naujos knygos prasideda nuo Nustatymuose išsaugotos reikšmės. Pakeitus skaičių, peržiūra sukuriama iš naujo automatiškai.",
+  "kdp.sampleAutoWords": "Ištrauka sukurta automatiškai: pirmieji {n} žodžiai. Ji išsaugoma, kai paspaudžiate Išsaugoti.",
+  "sp.applyPdf": "Išsaugoti ir taikyti PDF",
+  "sp.applyEpub": "Išsaugoti ir taikyti EPUB",
+  "sp.confirmPdf": "{n} PDF knygų ištraukos bus perkurtos ({pdf} puslapių). EPUB knygos nekeičiamos. Tai gali užtrukti kelias minutes. Likite šiame puslapyje.",
+  "sp.confirmEpub": "{n} EPUB knygų ištraukos bus perkurtos ({epub} žodžių). PDF knygos nekeičiamos. Tai gali užtrukti kelias minutes. Likite šiame puslapyje."
 };

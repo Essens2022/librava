@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261105100819';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261105100819';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261105100819';
-import { resetCompanyCache } from './views.js?v=20261105100819';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261105100819';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261105100819';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261105100819';
-import { optimizeBook } from './optimize.js?v=20261105100819';
-import { api } from './api.js?v=20261105100819';
-import { OF_STYLES } from './offerstyles.js?v=20261105100819';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261105100819';
+import { CONFIG } from './config.js?v=20261106023221';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106023221';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106023221';
+import { resetCompanyCache } from './views.js?v=20261106023221';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106023221';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106023221';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106023221';
+import { optimizeBook } from './optimize.js?v=20261106023221';
+import { api } from './api.js?v=20261106023221';
+import { OF_STYLES } from './offerstyles.js?v=20261106023221';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106023221';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -1192,12 +1192,34 @@ async function openPreviewer(source, kind) {
 }
 
 // ---------------------------------------------------------------- automatic free sample ("Look inside")
-const SAMPLE_PAGES = 6;
-// the free preview: the first N pages (PDF) — for EPUB the first N pages of real text (about 250 words a page,
-// like a printed book). Cover, title page, copyright and contents come along but don't count.
-export async function makeSample(file, pages = SAMPLE_PAGES) {
-  pages = Math.max(1, Math.min(200, Math.round(+pages || SAMPLE_PAGES)));
-  if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+const SAMPLE_PAGES = 6;     // PDF default: pages
+const SAMPLE_WORDS = 1500;  // EPUB default: words (6 pages x 250 words, the old default)
+const EPUB_WORDS_MIN = 50, EPUB_WORDS_MAX = 50000;
+// Length of a free preview. PDF: in PAGES (1-200). EPUB: in WORDS (50-50000). The same rule is used by the
+// per-book field, the Settings form, the importer and books.sample_pages / site_settings 'sample_pages' {pdf, epub}.
+// legacy=true is for values that were saved before EPUB moved to words (then they were pages, always below 50):
+// an EPUB value under 50 is read as pages and multiplied by 250. Returns 0 when there is no usable number.
+const sampleAmount = (fmt, n, legacy = false) => {
+  n = Math.round(+n); if (!(n > 0)) return 0;
+  if (fmt !== 'epub') return Math.min(200, n);
+  if (legacy && n < EPUB_WORDS_MIN) n *= 250;
+  return Math.max(EPUB_WORDS_MIN, Math.min(EPUB_WORDS_MAX, n));
+};
+const sampleDefault = (fmt, set) => (set && set[fmt]) || (fmt === 'epub' ? SAMPLE_WORDS : SAMPLE_PAGES);
+// the saved Settings values {pdf: pages, epub: words}, 0 where nothing is saved
+async function sampleSettings() {
+  let sp = {}; try { sp = (await api.getSetting('sample_pages')) || {}; } catch { }
+  return { pdf: sampleAmount('pdf', sp.pdf), epub: sampleAmount('epub', sp.epub, true) };
+}
+// the free preview: PDF = the first N pages; EPUB = the first N WORDS of real text (cut at the end of the paragraph
+// where the count is reached). Cover, title page, copyright and contents come along but don't count.
+// `amount` is pages for a PDF and words for an EPUB. Returns { file, pages, words? }: for an EPUB `pages` is the number of
+// words the preview stands for (min(requested, words available)) and `words` the real words counted in the sample.
+export async function makeSample(file, amount) {
+  const isPdf = /\.pdf$/i.test(file.name) || file.type === 'application/pdf';
+  amount = Math.round(+amount) || (isPdf ? SAMPLE_PAGES : SAMPLE_WORDS);
+  const pages = isPdf ? Math.max(1, Math.min(200, amount)) : 0;
+  if (isPdf) {
     await loadScript(VENDOR('pdf-lib.min.js'));
     const { PDFDocument } = window.PDFLib;
     const src = await PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
@@ -1215,7 +1237,7 @@ export async function makeSample(file, pages = SAMPLE_PAGES) {
   const opf = new DOMParser().parseFromString(await zip.file(opfPath).async('string'), 'application/xml');
   const items = Object.fromEntries([...opf.getElementsByTagName('item')].map(i => [i.getAttribute('id'), i]));
   const refs = [...opf.getElementsByTagName('itemref')];
-  const target = pages * 250, count = s => (s.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
+  const target = Math.max(1, Math.min(EPUB_WORDS_MAX, amount)), count = s => (s.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
   let words = 0, done = false, started = false; const removed = new Set();
   for (const r of refs) {
     const it = items[r.getAttribute('idref')]; if (!it) continue;
@@ -1285,7 +1307,7 @@ export async function makeSample(file, pages = SAMPLE_PAGES) {
   zip.file(opfPath, new XMLSerializer().serializeToString(opf));
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
   const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/epub+zip', compression: 'DEFLATE' });
-  return { file: new File([blob], 'sample.epub', { type: 'application/epub+zip' }), pages: Math.min(pages, Math.max(1, Math.round(words / 250))) };
+  return { file: new File([blob], 'sample.epub', { type: 'application/epub+zip' }), pages: Math.min(target, Math.max(1, words)), words };
 }
 
 // ---------------------------------------------------------------- A+ content editor
@@ -1360,7 +1382,11 @@ const ROLES = ['author', 'illustrator', 'translator', 'editor', 'foreword', 'pho
 async function bookForm(body, b, startStep = 1) {
   const allBooks = (await api.adminBooks().catch(() => [])).filter(x => x.status === 'published' && !x.deleted_at && x.price_cents > 0 && x.id !== b?.id);
   const recOpts = sel => allBooks.sort((x, y) => (y.language === (b?.language || getLang())) - (x.language === (b?.language || getLang()))).map(x => `<option value="${esc(x.id)}" ${sel === x.id ? 'selected' : ''}>${esc(x.title)} · ${esc((x.language || '').toUpperCase())}</option>`).join('');
+  const spSet = await sampleSettings();
   const v = b ? { ...b } : { language: getLang(), status: 'draft', price_cents: null, category: 'fiction', categories: [], contributors: [], keywords: [], rights: 'own', adult: false, published_at: new Date().toISOString().slice(0, 10) };
+  // free preview length of this book: PDF in pages, EPUB in words (follows the format of the book's file)
+  let spUnit = (v.file_path || v.file_name) && v.format === 'epub' ? 'epub' : 'pdf';
+  const spInit = (v.sample_pages ? sampleAmount(spUnit, v.sample_pages, true) : 0) || sampleDefault(spUnit, spSet);
   // unsaved changes kept on this device (survive a reload, a closed tab or a lost connection)
   const DKEY = id => 'librava:bookdraft:' + (id || 'new');
   let restored = false;
@@ -1468,9 +1494,9 @@ async function bookForm(body, b, startStep = 1) {
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('admin.f.sample'))}</h3><p>${esc(t('admin.f.sampleHelp'))}</p></div>
         <div class="kdp-fields"><label class="drop" data-drop="sample">${icon('eye')}<span><span class="fname" id="n-sample">${v.sample_path ? '✓ ' + esc(t('kdp.sampleKept')) : 'EPUB / PDF'}</span><br><small>${esc(t('kdp.sampleTip'))}</small></span><input type="file" id="f-sample" accept=".epub,.pdf,application/epub+zip,application/pdf"></label>
           <div class="kdp-ok" id="sample-ok" ${v.sample_path ? '' : 'hidden'}>✓ ${esc(t('kdp.sampleReady'))}</div>
-          <div class="sample-pages"><label class="field"><span>${esc(t('kdp.samplePages'))}</span><input id="f-samplepages" type="number" min="1" max="200" inputmode="numeric" value="${v.sample_pages || SAMPLE_PAGES}"></label>
+          <div class="sample-pages"><label class="field"><span id="sp-label">${esc(t(spUnit === 'epub' ? 'kdp.sampleWords' : 'kdp.samplePages'))}</span><input id="f-samplepages" type="number" min="${spUnit === 'epub' ? EPUB_WORDS_MIN : 1}" max="${spUnit === 'epub' ? EPUB_WORDS_MAX : 200}" inputmode="numeric" value="${spInit}"></label>
           <button type="button" class="btn btn-ghost btn-sm" id="b-mksample" ${(v.file_path || v.file_name) ? '' : 'hidden'}>${icon('eye')} ${esc(t('kdp.makeSample'))}</button></div>
-          <small class="muted">${esc(t('kdp.samplePagesHelp'))}</small></div></div>
+          <small class="muted" id="sp-help">${esc(t(spUnit === 'epub' ? 'kdp.sampleWordsHelp' : 'kdp.samplePagesHelp'))}</small></div></div>
       <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('kdp.details'))}</h3><p>${esc(t('kdp.detailsHelp'))}</p></div>
         <div class="kdp-fields two"><label class="field"><span>${esc(t('admin.f.pages'))}</span><input id="f-pages" type="number" min="1" inputmode="numeric" value="${v.pages || ''}"><small>${esc(t('admin.f.pagesHelp'))}</small></label>
           <label class="field"><span>ISBN (${esc(t('kdp.optional'))})</span><input id="f-isbn" maxlength="20" inputmode="numeric" value="${esc(v.isbn || '')}"><small>${esc(t('kdp.isbnHelp'))}</small></label>
@@ -1525,13 +1551,23 @@ async function bookForm(body, b, startStep = 1) {
   const authorName = () => [val('f-first'), val('f-last')].filter(Boolean).join(' ');
   const has = { file: !!(v.file_path || v.file_name), cover: !!v.cover_url, sample: !!v.sample_path };
   let ownSample = false;
+  // the preview length is in pages for a PDF and in words for an EPUB: label, limits and default follow the book's format
+  const syncSampleUnit = fmt => {
+    fmt = fmt === 'epub' ? 'epub' : 'pdf'; if (fmt === spUnit) return; spUnit = fmt;
+    const inp = $('#f-samplepages', body); if (!inp) return;
+    inp.min = fmt === 'epub' ? EPUB_WORDS_MIN : 1; inp.max = fmt === 'epub' ? EPUB_WORDS_MAX : 200; inp.value = sampleDefault(fmt, spSet);
+    $('#sp-label', body).textContent = t(fmt === 'epub' ? 'kdp.sampleWords' : 'kdp.samplePages');
+    $('#sp-help', body).textContent = t(fmt === 'epub' ? 'kdp.sampleWordsHelp' : 'kdp.samplePagesHelp');
+  };
+  const spAmount = fmt => sampleAmount(fmt, parseInt(val('f-samplepages'), 10)) || sampleDefault(fmt, spSet);
   const autoSample = async (src) => {
     const ok = $('#sample-ok', body), btn = $('#b-mksample', body);
     ok.hidden = false; ok.textContent = t('kdp.sampleMaking');
     try {
-      const r = await makeSample(src, parseInt(val('f-samplepages')) || SAMPLE_PAGES);
+      const sfmt = /\.epub$/i.test(src.name) ? 'epub' : 'pdf'; syncSampleUnit(sfmt);
+      const r = await makeSample(src, spAmount(sfmt));
       files.sample = r.file; has.sample = true;
-      ok.textContent = '✓ ' + t('kdp.sampleAutoPdf', { n: r.pages });
+      ok.textContent = '✓ ' + t(sfmt === 'epub' ? 'kdp.sampleAutoWords' : 'kdp.sampleAutoPdf', { n: r.pages });
       $('#n-sample', body).textContent = r.file.name + ' · ' + (r.file.size / 1048576).toFixed(1) + ' MB';
       ownSample = false;
     } catch (e) { console.warn(e); ok.textContent = '⚠ ' + t('kdp.sampleFail'); }
@@ -1645,7 +1681,7 @@ async function bookForm(body, b, startStep = 1) {
       file._original = original;
     }
     files[kind] = file;
-    if (kind === 'file') lastFile = file; // kept for the preview even after the upload clears files.file
+    if (kind === 'file') { lastFile = file; syncSampleUnit(fmtFile(file)); } // kept for the preview even after the upload clears files.file
     $('#n-' + kind, body).textContent = file.optimized
       ? t('img.optimized', { from: kb(file.optimized.from), to: kb(file.optimized.to), w: file.optimized.w, h: file.optimized.h })
       : `${file.name} · ${(file.size / 1048576).toFixed(1)} MB`;
@@ -1824,7 +1860,7 @@ async function bookForm(body, b, startStep = 1) {
       keywords: $$('.kw', body).map(i => i.value.trim()).filter(Boolean),
       color: radio('bcolor') === 'bw' ? 'bw' : 'color',
       recommend_ids: [...new Set($$('.f-rec', body).map(x => x.value).filter(Boolean))],
-      pages: parseInt(val('f-pages')) || null, sample_pages: Math.max(1, Math.min(200, parseInt(val('f-samplepages')) || SAMPLE_PAGES)), isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
+      pages: parseInt(val('f-pages')) || null, sample_pages: spAmount(mainFmt() || spUnit), isbn: val('f-isbn') || null, librava_id: val('f-lid') || null,
       allow_download: $('#f-dl', body).checked, stamp_downloads: $('#f-stamp', body).checked,
       price_cents: free ? 0 : cents(val('f-price')), list_price_cents: free ? null : (cents(val('f-list')) || null),
       published_at: val('f-date') || null, is_featured: $('#f-featured', body).checked, status,
@@ -1866,13 +1902,14 @@ async function bookForm(body, b, startStep = 1) {
         const f2 = files.file2, fmt2 = /\.epub$/i.test(f2.name) ? 'epub' : 'pdf';
         const src = await api.getBook(bookId);
         let sample = null, pages = null;
-        try { sample = (await makeSample(f2, data.sample_pages)).file; } catch { }
+        const sp2 = fmt2 === (mainFmt() || spUnit) ? data.sample_pages : sampleDefault(fmt2, spSet); // its own unit: PDF pages, EPUB words
+        try { sample = (await makeSample(f2, sp2)).file; } catch { }
         // its own page count (PDF: real pages; EPUB: estimated like a printed book), never the other format's
         try { pages = (await analyzeManuscript(f2, data.language))?.meta?.pages || null; } catch { }
         const free = radio('ptype') === 'free', p2 = free ? 0 : cents(val('f-price2'));
         // published together with this one only once it has its price (otherwise it waits as a draft)
         const st2 = status === 'published' && (free || p2 >= 49) ? 'published' : 'draft';
-        const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: free ? null : (cents(val('f-list2')) || null), status: st2, pages }, { file: f2, ...(sample ? { sample } : {}) });
+        const id2 = await api.newEdition(src, fmt2, { price_cents: p2 || 0, list_price_cents: free ? null : (cents(val('f-list2')) || null), status: st2, pages, sample_pages: sp2 }, { file: f2, ...(sample ? { sample } : {}) });
         v.work_id = src.work_id || bookId; files.file2 = null;
         sib = { id: id2, format: fmt2, price_cents: p2 || 0, status: st2, file_path: 'yes' };
         edition2UI(); drawSlots();
@@ -1923,7 +1960,7 @@ async function bookForm(body, b, startStep = 1) {
 // book.json example:
 // { "title": "…", "subtitle": "…", "author": "Clara Bennett", "language": "en", "description": "<p>…</p>",
 //   "category": "cooking", "categories": ["cooking", "hobby"], "keywords": ["…"], "series": { "name": "…", "number": 4 },
-//   "color": "color", "sample_pages": 10, "published_at": "2026-10-22",
+//   "color": "color", "sample_pages": 10,   (PDF: pages; EPUB: words, a number under 50 is read as pages x 250) "published_at": "2026-10-22",
 //   "formats": { "pdf": { "file": "Book.pdf", "price": 6.97, "list_price": 21.37 }, "epub": { "file": "Book.epub", "price": 3.97, "list_price": 12.37 } },
 //   "aplus": [ { "type": "banner", "image": "aplus/01.jpg", "title": "…" },
 //              { "type": "three", "items": [ { "image": "…", "title": "…", "text": "…" }, … ] },
@@ -2040,6 +2077,7 @@ async function runImport(pkg, { status, update = [], say }) {
   const fmts = IMP_FMTS.filter(f => pkg.files[f]);
   const existing = Object.fromEntries(update.map(b => [b.format, b]));
   const mainFmt = fmts.find(f => existing[f]) || fmts[0];
+  const spSet = await sampleSettings(), spFor = f => sampleAmount(f, m.sample_pages, true) || sampleDefault(f, spSet); // PDF pages / EPUB words
   const id = existing[mainFmt]?.id || crypto.randomUUID();
   // 1. the book files: made light for phones when they are heavy (originals kept apart), pages counted, free sample made
   const ready = {};
@@ -2054,7 +2092,7 @@ async function runImport(pkg, { status, update = [], say }) {
     let pages = null, check = null;
     try { const a = await analyzeManuscript(file, m.language); pages = a.meta.pages || null; check = { items: a.items, meta: { ...a.meta, doc: undefined } }; } catch { }
     let sample = null;
-    try { sample = (await makeSample(file, m.sample_pages || SAMPLE_PAGES)).file; } catch { }
+    try { sample = (await makeSample(file, spFor(f))).file; } catch { }
     ready[f] = { file, pages, check, sample };
   }
   // 2. the cover, light like every cover
@@ -2083,12 +2121,12 @@ async function runImport(pkg, { status, update = [], say }) {
     series_name: m.series?.name || null, series_number: m.series?.number ? +m.series.number : null,
     contributors: Array.isArray(m.contributors) ? m.contributors : [], keywords: (m.keywords || []).slice(0, 7), color: m.color === 'bw' ? 'bw' : 'color',
     rights: 'own', adult: !!m.adult, allow_download: m.allow_download !== false, stamp_downloads: true,
-    sample_pages: Math.max(1, Math.min(200, +m.sample_pages || SAMPLE_PAGES)), published_at: m.published_at || new Date().toISOString().slice(0, 10),
+    published_at: m.published_at || new Date().toISOString().slice(0, 10),
     ...(aplus.length ? { aplus } : {}),
   };
   // a format without a price waits as a draft (never published free by mistake)
   const statusFor = f => status === 'published' && pkg.prices[f].price != null && (pkg.prices[f].price === 0 || pkg.prices[f].price >= 50) ? 'published' : 'draft';
-  const rowFor = f => ({ ...shared, format: f, price_cents: pkg.prices[f].price ?? 0, list_price_cents: pkg.prices[f].list, pages: ready[f].pages, file_check: ready[f].check, status: statusFor(f) });
+  const rowFor = f => ({ ...shared, format: f, price_cents: pkg.prices[f].price ?? 0, list_price_cents: pkg.prices[f].list, pages: ready[f].pages, sample_pages: spFor(f), file_check: ready[f].check, status: statusFor(f) });
   // 5. the first format, then the other one linked to it (its own file, pages and price)
   say(t('imp.saving', { fmt: mainFmt.toUpperCase() }));
   const first = { ...rowFor(mainFmt), id };
@@ -2745,25 +2783,33 @@ async function settingsAdmin(body) {
     body.appendChild(pbox);
     pbox.innerHTML = `<h2 class="section-title" style="font-size:19px;margin:0">${esc(t('sp.title'))}</h2>
       <p class="muted" style="margin:0">${esc(t('sp.help'))}</p>
-      <div class="two"><label class="field"><span>${esc(t('sp.pdf'))}</span><input id="sp-pdf" type="number" min="1" max="200" value="${esc(sp.pdf || 12)}"></label>
-        <label class="field"><span>${esc(t('sp.epub'))}</span><input id="sp-epub" type="number" min="1" max="200" value="${esc(sp.epub || 12)}"></label></div>
+      <div class="two"><div style="display:flex;flex-direction:column;gap:8px"><label class="field"><span>${esc(t('sp.pdf'))}</span><input id="sp-pdf" type="number" min="1" max="200" value="${esc(sampleAmount('pdf', sp.pdf) || 12)}"></label><button class="btn btn-buy" type="button" id="sp-go-pdf" data-sp-go="pdf">${esc(t('sp.applyPdf'))}</button></div>
+        <div style="display:flex;flex-direction:column;gap:8px"><label class="field"><span>${esc(t('sp.epub'))}</span><input id="sp-epub" type="number" min="${EPUB_WORDS_MIN}" max="${EPUB_WORDS_MAX}" step="10" value="${esc(sampleAmount('epub', sp.epub, true) || 12 * 250)}"></label><button class="btn btn-buy" type="button" id="sp-go-epub" data-sp-go="epub">${esc(t('sp.applyEpub'))}</button></div></div>
       <small class="muted">${esc(t('sp.safe'))}</small>
       <div class="progress" id="sp-bar" hidden><i style="width:0"></i></div><div class="muted" id="sp-msg" aria-live="polite"></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-buy" type="submit" id="sp-go">${esc(t('sp.apply'))}</button><button class="btn btn-ghost" type="button" id="sp-stop" hidden>${esc(t('sp.stop'))}</button></div>`;
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-ghost" type="submit" id="sp-go">${esc(t('sp.apply'))}</button><button class="btn btn-ghost" type="button" id="sp-stop" hidden>${esc(t('sp.stop'))}</button></div>`;
     let stop = false;
     $('#sp-stop', pbox).onclick = () => { stop = true; };
-    pbox.onsubmit = async e => {
-      e.preventDefault();
-      const n = k => Math.max(1, Math.min(200, parseInt($('#sp-' + k, pbox).value, 10) || 12)), want = { pdf: n('pdf'), epub: n('epub') };
-      const all = (await api.adminBooks()).filter(b => !b.deleted_at && b.file_path && (b.format === 'pdf' || b.format === 'epub'));
-      // a preview is never more than half of a short book
-      const target = b => Math.max(1, Math.min(want[b.format], b.pages ? Math.floor(b.pages / 2) : want[b.format]));
+    // one function for all three buttons: only = 'pdf' | 'epub' (that format only) or null (both)
+    const applySamples = async only => {
+      // PDF in pages, EPUB in words
+      const typed = { pdf: sampleAmount('pdf', parseInt($('#sp-pdf', pbox).value, 10)) || 12, epub: sampleAmount('epub', parseInt($('#sp-epub', pbox).value, 10)) || 12 * 250 };
+      // only the format being applied is saved; the other format keeps the value already saved (the form shows it as is)
+      const cur = (await api.getSetting('sample_pages')) || {};
+      const want = { pdf: only === 'epub' ? (sampleAmount('pdf', cur.pdf) || typed.pdf) : typed.pdf, epub: only === 'pdf' ? (sampleAmount('epub', cur.epub, true) || typed.epub) : typed.epub };
+      const all = (await api.adminBooks()).filter(b => !b.deleted_at && b.file_path && (b.format === 'pdf' || b.format === 'epub') && (!only || b.format === only));
+      // a preview is never more than half of a short book (PDF: half the pages; EPUB: half the words, books.pages being
+      // the words / 250 counted when the book was checked)
+      const target = b => b.format === 'epub'
+        ? Math.max(1, Math.min(want.epub, b.pages ? Math.floor(b.pages * 250 / 2) : want.epub))
+        : Math.max(1, Math.min(want.pdf, b.pages ? Math.floor(b.pages / 2) : want.pdf));
       const todo = all.filter(b => !b.sample_path || +b.sample_pages !== target(b));
-      await api.saveSetting('sample_pages', want);
+      await api.saveSetting('sample_pages', only ? { ...cur, [only]: typed[only] } : want);
       if (!todo.length) { toast(t('sp.nothing')); return; }
-      if (!await confirmBox(t('sp.confirm', { n: todo.length, pdf: want.pdf, epub: want.epub }), { ok: t('sp.apply') })) return;
-      stop = false; const bar = $('#sp-bar', pbox), msg = $('#sp-msg', pbox), go = $('#sp-go', pbox), st = $('#sp-stop', pbox);
-      go.disabled = true; st.hidden = false; bar.hidden = false;
+      const askKey = only === 'pdf' ? 'sp.confirmPdf' : only === 'epub' ? 'sp.confirmEpub' : 'sp.confirm', okKey = only === 'pdf' ? 'sp.applyPdf' : only === 'epub' ? 'sp.applyEpub' : 'sp.apply';
+      if (!await confirmBox(t(askKey, { n: todo.length, pdf: want.pdf, epub: want.epub }), { ok: t(okKey) })) return;
+      stop = false; const bar = $('#sp-bar', pbox), msg = $('#sp-msg', pbox), goBtns = $$('#sp-go, [data-sp-go]', pbox), st = $('#sp-stop', pbox);
+      goBtns.forEach(g => g.disabled = true); st.hidden = false; bar.hidden = false;
       let ok = 0, bad = 0;
       for (const [i, b] of todo.entries()) {
         if (stop) break;
@@ -2775,9 +2821,11 @@ async function settingsAdmin(body) {
         } catch (x) { bad++; console.warn('sample not rebuilt', b.id, x); }
         bar.firstElementChild.style.width = Math.round((i + 1) / todo.length * 100) + '%';
       }
-      go.disabled = false; st.hidden = true;
+      goBtns.forEach(g => g.disabled = false); st.hidden = true;
       msg.textContent = t(stop ? 'sp.stopped' : 'sp.done', { ok, bad });
     };
+    pbox.onsubmit = async e => { e.preventDefault(); await applySamples(null); };
+    $$('[data-sp-go]', pbox).forEach(btn => btn.onclick = () => applySamples(btn.dataset.spGo));
   }
   $('#set-form', body).onsubmit = async e => {
     e.preventDefault();

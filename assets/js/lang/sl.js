@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Naročilo preklicano.",
   "admin.noPending": "Ni naročil na čakanju.",
   "admin.confirmPaidQ": "Ali potrjujete, da ste prejeli {amount} za naročilo {ref}?",
-  "common.tooMany": "Preveč poskusov. Poskusite znova čez nekaj minut."
+  "common.tooMany": "Preveč poskusov. Poskusite znova čez nekaj minut.",
+  "sp.title": "Brezplačen predogled (PDF v straneh, EPUB v besedah)",
+  "sp.help": "Koliko lahko obiskovalec prebere brezplačno pred nakupom. Predogled PDF se šteje v straneh, predogled EPUB v besedah (približno 250 besed je ena tiskana stran). Ena številka za vse PDF in ena za vse EPUB; odlomki se ponovno ustvarijo za vse knjige.",
+  "sp.epub": "EPUB: besede v odlomku",
+  "sp.confirm": "Odlomki za {n} knjig bodo ponovno ustvarjeni (PDF: {pdf} strani, EPUB: {epub} besed). To lahko traja nekaj minut. Ostanite na tej strani.",
+  "kdp.sampleTip": "Neobvezno: samodejno se ustvari od začetka knjige z dolžino, nastavljeno spodaj. Naložite svojega le, če želite drugačen odlomek.",
+  "kdp.samplePagesHelp": "Koliko strani lahko vsak prebere brezplačno. Nove knjige se začnejo z vrednostjo, shranjeno v Nastavitvah. Ko spremenite število, se predogled sam ponovno ustvari.",
+  "kdp.sampleWords": "Besede v predogledu",
+  "kdp.sampleWordsHelp": "Koliko besed lahko vsak prebere brezplačno (približno 250 besed je ena tiskana stran). Nove knjige se začnejo z vrednostjo, shranjeno v Nastavitvah. Ko spremenite število, se predogled sam ponovno ustvari.",
+  "kdp.sampleAutoWords": "Odlomek je bil samodejno ustvarjen: prvih {n} besed. Shrani se, ko pritisnete Shrani.",
+  "sp.applyPdf": "Shrani in uporabi pri PDF",
+  "sp.applyEpub": "Shrani in uporabi pri EPUB",
+  "sp.confirmPdf": "Odlomki za {n} knjig PDF bodo ponovno ustvarjeni ({pdf} strani). Knjige EPUB se ne spremenijo. To lahko traja nekaj minut. Ostanite na tej strani.",
+  "sp.confirmEpub": "Odlomki za {n} knjig EPUB bodo ponovno ustvarjeni ({epub} besed). Knjige PDF se ne spremenijo. To lahko traja nekaj minut. Ostanite na tej strani."
 };

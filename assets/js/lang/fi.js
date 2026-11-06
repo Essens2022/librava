@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Tilaus peruutettu.",
   "admin.noPending": "Ei odottavia tilauksia.",
   "admin.confirmPaidQ": "Vahvistetaanko, että olet saanut {amount} tilauksesta {ref}?",
-  "common.tooMany": "Liian monta yritystä. Yritä uudelleen muutaman minuutin kuluttua."
+  "common.tooMany": "Liian monta yritystä. Yritä uudelleen muutaman minuutin kuluttua.",
+  "sp.title": "Ilmainen esikatselu (PDF sivuina, EPUB sanoina)",
+  "sp.help": "Kuinka paljon vierailija voi lukea ilmaiseksi ennen ostamista. PDF-esikatselu lasketaan sivuina ja EPUB-esikatselu sanoina (noin 250 sanaa on yksi painettu sivu). Yksi luku kaikille PDF-tiedostoille ja yksi kaikille EPUB-tiedostoille; näytteet tehdään uudelleen kaikille kirjoille.",
+  "sp.epub": "EPUB: näytteen sanat",
+  "sp.confirm": "{n} kirjan näytteet tehdään uudelleen (PDF: {pdf} sivua, EPUB: {epub} sanaa). Se voi kestää muutaman minuutin. Pysy tällä sivulla.",
+  "kdp.sampleTip": "Valinnainen: se luodaan automaattisesti kirjan alusta alla asetetun pituisena. Lataa oma vain, jos haluat toisenlaisen näytteen.",
+  "kdp.samplePagesHelp": "Kuinka monta sivua kuka tahansa voi lukea ilmaiseksi. Uudet kirjat alkavat Asetuksiin tallennetulla arvolla. Kun muutat lukua, esikatselu tehdään automaattisesti uudelleen.",
+  "kdp.sampleWords": "Sanoja esikatselussa",
+  "kdp.sampleWordsHelp": "Kuinka monta sanaa kuka tahansa voi lukea ilmaiseksi (noin 250 sanaa on yksi painettu sivu). Uudet kirjat alkavat Asetuksiin tallennetulla arvolla. Kun muutat lukua, esikatselu tehdään automaattisesti uudelleen.",
+  "kdp.sampleAutoWords": "Näyte luotiin automaattisesti: ensimmäiset {n} sanaa. Se tallennetaan, kun painat Tallenna.",
+  "sp.applyPdf": "Tallenna ja käytä PDF-tiedostoihin",
+  "sp.applyEpub": "Tallenna ja käytä EPUB-tiedostoihin",
+  "sp.confirmPdf": "{n} PDF-kirjan näytteet tehdään uudelleen ({pdf} sivua). EPUB-kirjoihin ei kosketa. Se voi kestää muutaman minuutin. Pysy tällä sivulla.",
+  "sp.confirmEpub": "{n} EPUB-kirjan näytteet tehdään uudelleen ({epub} sanaa). PDF-kirjoihin ei kosketa. Se voi kestää muutaman minuutin. Pysy tällä sivulla."
 };

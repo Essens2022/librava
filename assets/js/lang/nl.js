@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Bestelling geannuleerd.",
   "admin.noPending": "Geen openstaande bestellingen.",
   "admin.confirmPaidQ": "Bevestigen dat je {amount} hebt ontvangen voor bestelling {ref}?",
-  "common.tooMany": "Te veel pogingen. Probeer het over een paar minuten opnieuw."
+  "common.tooMany": "Te veel pogingen. Probeer het over een paar minuten opnieuw.",
+  "sp.title": "Gratis voorbeeld (PDF in pagina's, EPUB in woorden)",
+  "sp.help": "Hoeveel een bezoeker gratis kan lezen voordat hij koopt. Een PDF-voorbeeld wordt in pagina's geteld, een EPUB-voorbeeld in woorden (ongeveer 250 woorden vormen één gedrukte pagina). Eén getal voor alle PDF's en één voor alle EPUB's; de voorbeelden worden voor alle boeken opnieuw gemaakt.",
+  "sp.epub": "EPUB: woorden in het voorbeeld",
+  "sp.confirm": "De voorbeelden van {n} boeken worden opnieuw gemaakt (PDF: {pdf} pagina's, EPUB: {epub} woorden). Dit kan een paar minuten duren. Blijf op deze pagina.",
+  "kdp.sampleTip": "Optioneel: het wordt automatisch gemaakt vanaf het begin van het boek, met de hieronder ingestelde lengte. Upload er alleen zelf een als je een ander voorbeeld wilt.",
+  "kdp.samplePagesHelp": "Hoeveel pagina's iedereen gratis kan lezen. Nieuwe boeken beginnen met de waarde die in Instellingen is opgeslagen. Verander je het getal, dan wordt het voorbeeld automatisch opnieuw gemaakt.",
+  "kdp.sampleWords": "Woorden in het voorbeeld",
+  "kdp.sampleWordsHelp": "Hoeveel woorden iedereen gratis kan lezen (ongeveer 250 woorden vormen één gedrukte pagina). Nieuwe boeken beginnen met de waarde die in Instellingen is opgeslagen. Verander je het getal, dan wordt het voorbeeld automatisch opnieuw gemaakt.",
+  "kdp.sampleAutoWords": "Voorbeeld automatisch gemaakt: de eerste {n} woorden. Het wordt opgeslagen wanneer je op Opslaan drukt.",
+  "sp.applyPdf": "Opslaan en toepassen op PDF's",
+  "sp.applyEpub": "Opslaan en toepassen op EPUB's",
+  "sp.confirmPdf": "De voorbeelden van {n} PDF-boeken worden opnieuw gemaakt ({pdf} pagina's). EPUB-boeken blijven ongemoeid. Dit kan een paar minuten duren. Blijf op deze pagina.",
+  "sp.confirmEpub": "De voorbeelden van {n} EPUB-boeken worden opnieuw gemaakt ({epub} woorden). PDF-boeken blijven ongemoeid. Dit kan een paar minuten duren. Blijf op deze pagina."
 };

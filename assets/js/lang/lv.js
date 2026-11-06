@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Pasūtījums atcelts.",
   "admin.noPending": "Nav gaidošu pasūtījumu.",
   "admin.confirmPaidQ": "Apstiprināt, ka saņēmi {amount} par pasūtījumu {ref}?",
-  "common.tooMany": "Pārāk daudz mēģinājumu. Lūdzu, mēģini vēlreiz pēc dažām minūtēm."
+  "common.tooMany": "Pārāk daudz mēģinājumu. Lūdzu, mēģini vēlreiz pēc dažām minūtēm.",
+  "sp.title": "Bezmaksas priekšskatījums (PDF lappusēs, EPUB vārdos)",
+  "sp.help": "Cik daudz apmeklētājs var izlasīt bez maksas pirms pirkuma. PDF priekšskatījumu skaita lappusēs, EPUB priekšskatījumu vārdos (apmēram 250 vārdi veido vienu drukātu lappusi). Viens skaitlis visiem PDF un viens visiem EPUB; fragmenti tiek izveidoti no jauna visām grāmatām.",
+  "sp.epub": "EPUB: vārdi fragmentā",
+  "sp.confirm": "Tiks no jauna izveidoti {n} grāmatu fragmenti (PDF: {pdf} lappuses, EPUB: {epub} vārdi). Tas var aizņemt dažas minūtes. Paliec šajā lapā.",
+  "kdp.sampleTip": "Neobligāti: tas tiek izveidots automātiski no grāmatas sākuma ar zemāk norādīto garumu. Augšupielādē savu tikai tad, ja vēlies citu fragmentu.",
+  "kdp.samplePagesHelp": "Cik lappuses ikviens var izlasīt bez maksas. Jaunas grāmatas sākas ar Iestatījumos saglabāto vērtību. Ja maini skaitli, priekšskatījums tiek izveidots no jauna automātiski.",
+  "kdp.sampleWords": "Vārdi priekšskatījumā",
+  "kdp.sampleWordsHelp": "Cik vārdus ikviens var izlasīt bez maksas (apmēram 250 vārdi veido vienu drukātu lappusi). Jaunas grāmatas sākas ar Iestatījumos saglabāto vērtību. Ja maini skaitli, priekšskatījums tiek izveidots no jauna automātiski.",
+  "kdp.sampleAutoWords": "Fragments izveidots automātiski: pirmie {n} vārdi. Tas tiek saglabāts, kad nospied Saglabāt.",
+  "sp.applyPdf": "Saglabāt un lietot PDF",
+  "sp.applyEpub": "Saglabāt un lietot EPUB",
+  "sp.confirmPdf": "Tiks no jauna izveidoti {n} PDF grāmatu fragmenti ({pdf} lappuses). EPUB grāmatas netiek mainītas. Tas var aizņemt dažas minūtes. Paliec šajā lapā.",
+  "sp.confirmEpub": "Tiks no jauna izveidoti {n} EPUB grāmatu fragmenti ({epub} vārdi). PDF grāmatas netiek mainītas. Tas var aizņemt dažas minūtes. Paliec šajā lapā."
 };

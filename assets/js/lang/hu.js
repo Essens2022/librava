@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Rendelés lemondva.",
   "admin.noPending": "Nincs várakozó rendelés.",
   "admin.confirmPaidQ": "Megerősíted, hogy megkaptad a(z) {amount} összeget a(z) {ref} rendelésért?",
-  "common.tooMany": "Túl sok próbálkozás. Próbáld újra néhány perc múlva."
+  "common.tooMany": "Túl sok próbálkozás. Próbáld újra néhány perc múlva.",
+  "sp.title": "Ingyenes előnézet (PDF oldalakban, EPUB szavakban)",
+  "sp.help": "Mennyit olvashat el ingyen a látogató vásárlás előtt. A PDF-előnézetet oldalakban, az EPUB-előnézetet szavakban számoljuk (körülbelül 250 szó tesz ki egy nyomtatott oldalt). Egy szám az összes PDF-hez és egy az összes EPUB-hoz; a mintákat minden könyvhöz újra elkészítjük.",
+  "sp.epub": "EPUB: szavak a mintában",
+  "sp.confirm": "{n} könyv mintája újra elkészül (PDF: {pdf} oldal, EPUB: {epub} szó). Ez eltarthat néhány percig. Maradj ezen az oldalon.",
+  "kdp.sampleTip": "Nem kötelező: automatikusan készül a könyv elejétől, az alább megadott hosszúsággal. Csak akkor tölts fel sajátot, ha másik mintát szeretnél.",
+  "kdp.samplePagesHelp": "Hány oldalt olvashat el bárki ingyen. Az új könyvek a Beállításokban mentett értékkel indulnak. Ha módosítod a számot, az előnézet magától újra elkészül.",
+  "kdp.sampleWords": "Szavak az előnézetben",
+  "kdp.sampleWordsHelp": "Hány szót olvashat el bárki ingyen (körülbelül 250 szó tesz ki egy nyomtatott oldalt). Az új könyvek a Beállításokban mentett értékkel indulnak. Ha módosítod a számot, az előnézet magától újra elkészül.",
+  "kdp.sampleAutoWords": "A minta automatikusan elkészült: az első {n} szó. A Mentés gombra kattintva tárolódik.",
+  "sp.applyPdf": "Mentés és alkalmazás a PDF-ekre",
+  "sp.applyEpub": "Mentés és alkalmazás az EPUB-okra",
+  "sp.confirmPdf": "{n} PDF könyv mintája újra elkészül ({pdf} oldal). Az EPUB könyvekhez nem nyúlunk. Ez eltarthat néhány percig. Maradj ezen az oldalon.",
+  "sp.confirmEpub": "{n} EPUB könyv mintája újra elkészül ({epub} szó). A PDF könyvekhez nem nyúlunk. Ez eltarthat néhány percig. Maradj ezen az oldalon."
 };

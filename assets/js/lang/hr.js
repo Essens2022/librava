@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Narudžba otkazana.",
   "admin.noPending": "Nema narudžbi na čekanju.",
   "admin.confirmPaidQ": "Potvrđujete li da ste primili {amount} za narudžbu {ref}?",
-  "common.tooMany": "Previše pokušaja. Pokušajte ponovno za nekoliko minuta."
+  "common.tooMany": "Previše pokušaja. Pokušajte ponovno za nekoliko minuta.",
+  "sp.title": "Besplatan pregled (PDF u stranicama, EPUB u riječima)",
+  "sp.help": "Koliko posjetitelj može besplatno pročitati prije kupnje. Pregled PDF-a računa se u stranicama, a pregled EPUB-a u riječima (oko 250 riječi čini jednu tiskanu stranicu). Jedan broj za sve PDF-ove i jedan za sve EPUB-ove; odlomci se ponovno izrađuju za sve knjige.",
+  "sp.epub": "EPUB: riječi u odlomku",
+  "sp.confirm": "Odlomci za {n} knjiga bit će ponovno izrađeni (PDF: {pdf} stranica, EPUB: {epub} riječi). To može potrajati nekoliko minuta. Ostanite na ovoj stranici.",
+  "kdp.sampleTip": "Neobavezno: automatski se izrađuje od početka knjige s duljinom postavljenom ispod. Učitajte vlastiti samo ako želite drukčiji odlomak.",
+  "kdp.samplePagesHelp": "Koliko stranica svatko može besplatno pročitati. Nove knjige počinju s vrijednošću spremljenom u Postavkama. Kad promijenite broj, pregled se sam ponovno izrađuje.",
+  "kdp.sampleWords": "Riječi u pregledu",
+  "kdp.sampleWordsHelp": "Koliko riječi svatko može besplatno pročitati (oko 250 riječi čini jednu tiskanu stranicu). Nove knjige počinju s vrijednošću spremljenom u Postavkama. Kad promijenite broj, pregled se sam ponovno izrađuje.",
+  "kdp.sampleAutoWords": "Odlomak je automatski izrađen: prvih {n} riječi. Sprema se kada pritisnete Spremi.",
+  "sp.applyPdf": "Spremi i primijeni na PDF-ove",
+  "sp.applyEpub": "Spremi i primijeni na EPUB-ove",
+  "sp.confirmPdf": "Odlomci za {n} PDF knjiga bit će ponovno izrađeni ({pdf} stranica). EPUB knjige se ne diraju. To može potrajati nekoliko minuta. Ostanite na ovoj stranici.",
+  "sp.confirmEpub": "Odlomci za {n} EPUB knjiga bit će ponovno izrađeni ({epub} riječi). PDF knjige se ne diraju. To može potrajati nekoliko minuta. Ostanite na ovoj stranici."
 };

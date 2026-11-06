@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Tellimus tühistatud.",
   "admin.noPending": "Ootel tellimusi pole.",
   "admin.confirmPaidQ": "Kas kinnitad, et said tellimuse {ref} eest {amount}?",
-  "common.tooMany": "Liiga palju katseid. Proovi mõne minuti pärast uuesti."
+  "common.tooMany": "Liiga palju katseid. Proovi mõne minuti pärast uuesti.",
+  "sp.title": "Tasuta eelvaade (PDF lehekülgedes, EPUB sõnades)",
+  "sp.help": "Kui palju võib külastaja enne ostmist tasuta lugeda. PDF-i eelvaadet loetakse lehekülgedes, EPUB-i eelvaadet sõnades (umbes 250 sõna moodustab ühe trükitud lehekülje). Üks arv kõigile PDF-idele ja üks kõigile EPUB-idele; lõigud tehakse uuesti kõigile raamatutele.",
+  "sp.epub": "EPUB: sõnu lõigus",
+  "sp.confirm": "{n} raamatu lõigud tehakse uuesti (PDF: {pdf} lehekülge, EPUB: {epub} sõna). See võib võtta mõne minuti. Jää sellele lehele.",
+  "kdp.sampleTip": "Valikuline: see luuakse automaatselt raamatu algusest allpool määratud pikkusega. Laadi üles oma lõik ainult siis, kui soovid teistsugust.",
+  "kdp.samplePagesHelp": "Mitu lehekülge võib igaüks tasuta lugeda. Uued raamatud algavad Seadetes salvestatud väärtusega. Kui muudad arvu, tehakse eelvaade ise uuesti.",
+  "kdp.sampleWords": "Sõnu eelvaates",
+  "kdp.sampleWordsHelp": "Mitu sõna võib igaüks tasuta lugeda (umbes 250 sõna moodustab ühe trükitud lehekülje). Uued raamatud algavad Seadetes salvestatud väärtusega. Kui muudad arvu, tehakse eelvaade ise uuesti.",
+  "kdp.sampleAutoWords": "Lõik loodi automaatselt: esimesed {n} sõna. See salvestatakse, kui vajutad Salvesta.",
+  "sp.applyPdf": "Salvesta ja rakenda PDF-idele",
+  "sp.applyEpub": "Salvesta ja rakenda EPUB-idele",
+  "sp.confirmPdf": "{n} PDF-raamatu lõigud tehakse uuesti ({pdf} lehekülge). EPUB-raamatuid ei muudeta. See võib võtta mõne minuti. Jää sellele lehele.",
+  "sp.confirmEpub": "{n} EPUB-raamatu lõigud tehakse uuesti ({epub} sõna). PDF-raamatuid ei muudeta. See võib võtta mõne minuti. Jää sellele lehele."
 };

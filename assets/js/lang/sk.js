@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Objednávka zrušená.",
   "admin.noPending": "Žiadne čakajúce objednávky.",
   "admin.confirmPaidQ": "Potvrdiť prijatie {amount} za objednávku {ref}?",
-  "common.tooMany": "Príliš veľa pokusov. Skúste to znova o niekoľko minút."
+  "common.tooMany": "Príliš veľa pokusov. Skúste to znova o niekoľko minút.",
+  "sp.title": "Ukážka zdarma (PDF v stranách, EPUB v slovách)",
+  "sp.help": "Koľko si môže návštevník prečítať zadarmo pred nákupom. Ukážka PDF sa počíta v stranách, ukážka EPUB v slovách (približne 250 slov tvorí jednu tlačenú stranu). Jedno číslo pre všetky PDF a jedno pre všetky EPUB; ukážky sa pri všetkých knihách vytvoria znova.",
+  "sp.epub": "EPUB: slová v ukážke",
+  "sp.confirm": "Ukážky pri {n} knihách sa vytvoria znova (PDF: {pdf} strán, EPUB: {epub} slov). Môže to trvať niekoľko minút. Zostaňte na tejto stránke.",
+  "kdp.sampleTip": "Nepovinné: vytvorí sa automaticky od začiatku knihy v dĺžke nastavenej nižšie. Nahrajte vlastnú len vtedy, ak chcete inú ukážku.",
+  "kdp.samplePagesHelp": "Koľko strán si môže ktokoľvek prečítať zadarmo. Nové knihy začínajú hodnotou uloženou v Nastaveniach. Keď číslo zmeníte, ukážka sa sama vytvorí znova.",
+  "kdp.sampleWords": "Slová v ukážke",
+  "kdp.sampleWordsHelp": "Koľko slov si môže ktokoľvek prečítať zadarmo (približne 250 slov tvorí jednu tlačenú stranu). Nové knihy začínajú hodnotou uloženou v Nastaveniach. Keď číslo zmeníte, ukážka sa sama vytvorí znova.",
+  "kdp.sampleAutoWords": "Ukážka bola vytvorená automaticky: prvých {n} slov. Uloží sa, keď stlačíte Uložiť.",
+  "sp.applyPdf": "Uložiť a použiť pri PDF",
+  "sp.applyEpub": "Uložiť a použiť pri EPUB",
+  "sp.confirmPdf": "Ukážky pri {n} knihách PDF sa vytvoria znova ({pdf} strán). Knihy EPUB sa nezmenia. Môže to trvať niekoľko minút. Zostaňte na tejto stránke.",
+  "sp.confirmEpub": "Ukážky pri {n} knihách EPUB sa vytvoria znova ({epub} slov). Knihy PDF sa nezmenia. Môže to trvať niekoľko minút. Zostaňte na tejto stránke."
 };

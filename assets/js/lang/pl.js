@@ -453,5 +453,18 @@ export default {
   "admin.orderCancelled": "Zamówienie anulowane.",
   "admin.noPending": "Brak oczekujących zamówień.",
   "admin.confirmPaidQ": "Potwierdzasz otrzymanie {amount} za zamówienie {ref}?",
-  "common.tooMany": "Zbyt wiele prób. Spróbuj ponownie za kilka minut."
+  "common.tooMany": "Zbyt wiele prób. Spróbuj ponownie za kilka minut.",
+  "sp.title": "Darmowy podgląd (PDF w stronach, EPUB w słowach)",
+  "sp.help": "Ile odwiedzający może przeczytać za darmo przed zakupem. Podgląd PDF liczony jest w stronach, a podgląd EPUB w słowach (około 250 słów to jedna strona drukowana). Jedna liczba dla wszystkich PDF-ów i jedna dla wszystkich EPUB-ów; fragmenty zostaną utworzone ponownie dla wszystkich książek.",
+  "sp.epub": "EPUB: słowa we fragmencie",
+  "sp.confirm": "Fragmenty {n} książek zostaną utworzone ponownie (PDF: {pdf} stron, EPUB: {epub} słów). To może potrwać kilka minut. Zostań na tej stronie.",
+  "kdp.sampleTip": "Opcjonalnie: tworzy się automatycznie od początku książki, o długości ustawionej poniżej. Wgraj własny tylko wtedy, gdy chcesz inny fragment.",
+  "kdp.samplePagesHelp": "Ile stron każdy może przeczytać za darmo. Nowe książki zaczynają od wartości zapisanej w Ustawieniach. Gdy zmienisz liczbę, podgląd utworzy się ponownie sam.",
+  "kdp.sampleWords": "Słowa w podglądzie",
+  "kdp.sampleWordsHelp": "Ile słów każdy może przeczytać za darmo (około 250 słów to jedna strona drukowana). Nowe książki zaczynają od wartości zapisanej w Ustawieniach. Gdy zmienisz liczbę, podgląd utworzy się ponownie sam.",
+  "kdp.sampleAutoWords": "Fragment utworzony automatycznie: pierwsze {n} słów. Zapisze się po naciśnięciu Zapisz.",
+  "sp.applyPdf": "Zapisz i zastosuj do PDF-ów",
+  "sp.applyEpub": "Zapisz i zastosuj do EPUB-ów",
+  "sp.confirmPdf": "Fragmenty {n} książek PDF zostaną utworzone ponownie ({pdf} stron). Książki EPUB nie zostaną zmienione. To może potrwać kilka minut. Zostań na tej stronie.",
+  "sp.confirmEpub": "Fragmenty {n} książek EPUB zostaną utworzone ponownie ({epub} słów). Książki PDF nie zostaną zmienione. To może potrwać kilka minut. Zostań na tej stronie."
 };
