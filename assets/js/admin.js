@@ -1,17 +1,17 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261106052312';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106052312';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106052312';
-import { resetCompanyCache } from './views.js?v=20261106052312';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106052312';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106052312';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106052312';
-import { optimizeBook } from './optimize.js?v=20261106052312';
-import { api } from './api.js?v=20261106052312';
-import { OF_STYLES } from './offerstyles.js?v=20261106052312';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106052312';
+import { CONFIG } from './config.js?v=20261106060139';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261106060139';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261106060139';
+import { resetCompanyCache } from './views.js?v=20261106060139';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261106060139';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261106060139';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261106060139';
+import { optimizeBook } from './optimize.js?v=20261106060139';
+import { api } from './api.js?v=20261106060139';
+import { OF_STYLES } from './offerstyles.js?v=20261106060139';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261106060139';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -533,6 +533,8 @@ const evLine = e => {
     case 'click': { const n = e.note || '';
       if (n.startsWith('cat=')) return esc(t('admin.act2.ev.catPick', { c: n.slice(4) }));
       if (n.startsWith('field:')) { const f = n.slice(6); const k = { cat: 'cat', search: 'search', off: 'search', q: 'search', email: 'email', name: 'name', password: 'pass', 'new-password': 'pass', 'current-password': 'pass' }[f]; return k ? esc(t('admin.act2.fld.' + k)) : esc(t('admin.act2.ev.field', { f })); }
+      const zm = /^(ck|gift|quick|modal|top|foot)\|(.*)$/s.exec(n);
+      if (zm) { const nm = zm[2].split(' → ')[0]; return esc(t('admin.act2.z.' + zm[1], { n: nm })); }
       return esc(t('admin.act2.ev.click')) + ' «' + esc(n) + '»'; }
     case 'scroll': return esc(t('admin.act2.ev.scroll' + (e.note === '90' ? '90' : '50')));
     case 'leave': { const m = /s=(\d+);sc=(\d+)/.exec(e.note || ''); const p = esc(pageLabel(e.path));

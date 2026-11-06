@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261106052312';
-import { CONFIG } from './config.js?v=20261106052312';
-import { store } from './util.js?v=20261106052312';
+import { localize, loadRates } from './localprice.js?v=20261106060139';
+import { CONFIG } from './config.js?v=20261106060139';
+import { store } from './util.js?v=20261106060139';
 
 const D = {
   ro: {
@@ -1375,6 +1375,12 @@ const D = {
     "admin.act2.ev.add_cartN": "A pus în coș {n} cărți:",
     "admin.act2.ev.click": "A apăsat",
     "admin.act2.ev.field": "A început să completeze câmpul «{f}»",
+    "admin.act2.z.ck": "Banner cookie: a apăsat «{n}» (a răspuns la mesajul despre cookie-uri, nu a cumpărat nimic)",
+    "admin.act2.z.gift": "Fereastra cadou de bun venit: a apăsat «{n}» (a luat reducerea de bun venit)",
+    "admin.act2.z.quick": "A apăsat butonul de adăugare în coș de pe o carte «{n}»",
+    "admin.act2.z.modal": "Într-o fereastră pop-up a apăsat «{n}»",
+    "admin.act2.z.top": "În bara de sus a apăsat «{n}»",
+    "admin.act2.z.foot": "În josul paginii a apăsat «{n}»",
     "admin.act2.ev.catPick": "A ales în meniul de sus categoria «{c}»",
     "admin.act2.fld.cat": "A atins meniul de categorii din bara de sus (cel cu „Toate”)",
     "admin.act2.fld.search": "A atins căsuța de căutare din bara de sus (încă nu a căutat nimic)",
@@ -2972,6 +2978,12 @@ const D = {
     "admin.act2.ev.add_cartN": "Ha messo nel carrello {n} libri:",
     "admin.act2.ev.click": "Ha premuto",
     "admin.act2.ev.field": "Ha iniziato a compilare il campo «{f}»",
+    "admin.act2.z.ck": "Banner cookie: ha premuto «{n}» (ha risposto ai cookie, non è un acquisto)",
+    "admin.act2.z.gift": "Finestra regalo di benvenuto: ha premuto «{n}» (ha preso lo sconto di benvenuto)",
+    "admin.act2.z.quick": "Ha premuto il pulsante aggiungi al carrello su un libro «{n}»",
+    "admin.act2.z.modal": "In una finestra pop-up ha premuto «{n}»",
+    "admin.act2.z.top": "Nella barra in alto ha premuto «{n}»",
+    "admin.act2.z.foot": "In fondo alla pagina ha premuto «{n}»",
     "admin.act2.ev.catPick": "Ha scelto nel menu in alto la categoria «{c}»",
     "admin.act2.fld.cat": "Ha toccato il menu delle categorie nella barra in alto (quello con «Tutti»)",
     "admin.act2.fld.search": "Ha toccato la casella di ricerca nella barra in alto (non ha ancora cercato nulla)",
@@ -4569,6 +4581,12 @@ const D = {
     "admin.act2.ev.add_cartN": "Added {n} books to the cart:",
     "admin.act2.ev.click": "Pressed",
     "admin.act2.ev.field": "Started filling in the field “{f}”",
+    "admin.act2.z.ck": "Cookie banner: pressed «{n}» (answered the cookie notice, not a purchase)",
+    "admin.act2.z.gift": "Welcome gift popup: pressed «{n}» (took the welcome discount)",
+    "admin.act2.z.quick": "Pressed add-to-cart on a book «{n}»",
+    "admin.act2.z.modal": "In a popup pressed «{n}»",
+    "admin.act2.z.top": "In the top bar pressed «{n}»",
+    "admin.act2.z.foot": "At page bottom pressed «{n}»",
     "admin.act2.ev.catPick": "Picked the category “{c}” in the top menu",
     "admin.act2.fld.cat": "Tapped the category menu in the top bar (the one showing “All”)",
     "admin.act2.fld.search": "Tapped the search box in the top bar (has not searched anything yet)",
@@ -4831,7 +4849,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261106052312`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261106060139`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
