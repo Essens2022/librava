@@ -2,13 +2,13 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261106201404';
-import { t } from './i18n.js?v=20261106201404';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261106201404';
-import { offline } from './offline.js?v=20261106201404';
-import { api } from './api.js?v=20261106201404';
-import { icon, go, backOr, toast, cart, errText, priceHTML, stars } from './ui.js?v=20261106201404';
-import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261106201404';
+import { CONFIG } from './config.js?v=20261106201825';
+import { t } from './i18n.js?v=20261106201825';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261106201825';
+import { offline } from './offline.js?v=20261106201825';
+import { api } from './api.js?v=20261106201825';
+import { icon, go, backOr, toast, cart, errText, priceHTML, stars, isBakedCover } from './ui.js?v=20261106201825';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261106201825';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
@@ -102,7 +102,7 @@ export async function viewReader(el, id, q) {
     // like Amazon: buy the book right here, then "customers who read this book also read"
     box.innerHTML = `<div class="box end-box">
       <button class="linkbtn end-back" data-end-back>‹ ${esc(t('reader.back'))}</button>
-      <div class="end-buy">${book.cover_url ? `<img class="end-cover" src="${esc(book.cover_url)}" alt="">` : ''}
+      <div class="end-buy">${book.cover_url ? `<span class="end-cover ecw${isBakedCover(book.id) ? ' baked' : ''}"><img src="${esc(book.cover_url)}" alt=""></span>` : ''}
         <div class="end-info"><h2>${esc(t('reader.enjoy'))}</h2>
           <p class="end-title"><b>${esc(book.title)}</b><span>${esc(book.author || '')}</span></p>
           ${book.price_cents ? `<div class="end-price">${priceHTML(book)}</div>` : ''}
@@ -124,7 +124,7 @@ export async function viewReader(el, id, q) {
       if (!list.length) { more.hidden = true; return; }
       // small cards, like Amazon's "customers also read": cover, title, stars, price
       row.innerHTML = list.map(x => `<a class="mini" href="#/book/${encodeURIComponent(x.id)}">
-          <span class="mini-cover">${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="">` : `<span class="ph">${esc(x.title)}</span>`}</span>
+          <span class="mini-cover${isBakedCover(x.id) ? ' baked' : ''}">${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="">` : `<span class="ph">${esc(x.title)}</span>`}</span>
           <span class="mini-title">${esc(x.title)}</span>
           ${x.rating_count ? `<span class="mini-stars">${stars(x.rating_avg)}<small>${x.rating_count}</small></span>` : ''}
           <span class="mini-price">${x.price_cents ? priceHTML(x) : esc(t('book.free'))}</span></a>`).join('');
