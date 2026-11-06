@@ -3782,9 +3782,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .cat-tile .thumbs img { aspect-ratio: 5/8; }
 
 /* Language flag ribbon (top-right of the cover); sizes are relative to the cover width so it scales everywhere */
-.cover .flg { position: absolute; right: 0; top: 3.5%; z-index: 4; display: flex; gap: 3%; align-items: center; width: 40%; box-sizing: border-box; padding: 2.4% 3.4% 2.4% 3%; background: rgba(255,255,255,.97); border-radius: 4px 0 0 4px; box-shadow: 0 2px 5px rgba(0,0,0,.35); pointer-events: none; }
+.cover .flg { position: absolute; right: 0; top: 0; z-index: 4; display: flex; gap: 3%; align-items: center; width: 27%; box-sizing: border-box; padding: 1.4% 2.2% 1.4% 2%; background: rgba(255,255,255,.97); border-radius: 0 0 0 4px; box-shadow: 0 1px 3px rgba(0,0,0,.3); pointer-events: none; }
 .cover .flg img { flex: 1 1 0; min-width: 0; width: auto; height: auto; aspect-ratio: 4 / 3; display: block; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.22); object-fit: cover; }
-.cover .flg:has(> img:only-child) { width: 27%; }
+.cover .flg:has(> img:only-child) { width: 17%; }
 .flg-pick { display: flex; flex-wrap: wrap; gap: 8px; }
 .flg-opt { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 2px solid var(--line, #dfe5d6); border-radius: 10px; background: #fff; font-size: 12px; }
 .flg-opt.on { border-color: #2f8f4e; box-shadow: 0 0 0 3px rgba(47,143,78,.22); }
