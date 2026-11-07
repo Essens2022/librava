@@ -137,12 +137,22 @@ export async function viewSearch(el, q) {
   const bookLang = langParam === 'all' ? '' : (langParam || UI);
   opts.lang = bookLang;
   let [books, everything] = await Promise.all([api.listBooks(opts), api.listBooks({})]);
+  // an empty answer is never trusted at once: the list on this phone may be old, or still arriving. Read a fresh copy (a few tries)
+  // before saying "no results"; the page keeps its loading spinner meanwhile.
+  if (opts.q && !books.length && api.freshCatalog && (!everything.length || api.catalogIsFromCache?.())) {
+    for (let i = 0; i < 3; i++) {
+      try { await Promise.race([api.freshCatalog(0), new Promise(r => setTimeout(r, 5000))]); } catch { }
+      [books, everything] = await Promise.all([api.listBooks(opts), api.listBooks({})]);
+      if (books.length || everything.length) break;
+      await new Promise(r => setTimeout(r, 900 * (i + 1)));
+    }
+  }
   // nothing in the visitor's language: show matches in other languages instead of an empty page
   let otherLangHits = false;
   if (opts.q && !books.length && bookLang && !langParam) { books = await api.listBooks({ ...opts, lang: '' }); otherLangHits = books.length > 0; }
   const dym = opts.q && (!books.length || books.loose) ? didYouMean(opts.q, everything) : null;
   // keep the words in the search box, like Amazon
-  setTimeout(() => document.querySelectorAll('[data-search] input[name=q]').forEach(i => { if (document.activeElement !== i) i.value = opts.q; }), 0);
+  setTimeout(() => { document.querySelectorAll('[data-search] input[name=q]').forEach(i => { if (document.activeElement !== i) i.value = opts.q; }); window.dispatchEvent(new Event('librava:sync')); }, 0);
   const otherLangs = [...new Set(everything.map(b => b.language).filter(l => l && l !== UI))]
     .sort((a, b) => langName(a).localeCompare(langName(b)));
   const mk = (patch) => {
@@ -200,12 +210,14 @@ export async function viewSearch(el, q) {
         </span>
       </div>
       ${books.length ? `<div class="results">${pageBooks.map(rcardHTML).join('')}</div>${pager}`
+        : !everything.length ? `<div class="panel empty">${icon('search')}<p>${esc(t('sugg.error'))}</p><button class="btn btn-buy" data-reload>${esc(t('search.retry'))}</button></div>`
         : bookLang && !everything.some(b => b.language === bookLang)
           ? `<div class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(bookLang, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
           : `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p>${bookLang ? `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>` : ''}</div>`}
     </div>
   </div></div>`;
   $('#sort-sel', el).onchange = e => go(mk({ sort: e.target.value }).slice(1));
+  const rl = $('[data-reload]', el); if (rl) rl.onclick = () => { rl.disabled = true; Promise.resolve(api.freshCatalog?.(0)).catch(() => { }).finally(() => go('/search?' + q.toString())); };
   const fl = $('#filters', el);
   $('[data-open-filters]', el).onclick = () => { fl.classList.add('open'); $('#scrim').hidden = false; $('#scrim').classList.add('open'); };
   const closeF = () => { fl.classList.remove('open'); $('#scrim').classList.remove('open'); $('#scrim').hidden = true; };
@@ -213,6 +225,7 @@ export async function viewSearch(el, q) {
   $('#scrim').addEventListener('click', closeF, { once: true });
   // keep header search in sync
   $$('[data-search]').forEach(f => { f.q.value = opts.q; f.cat.value = opts.category; });
+  window.dispatchEvent(new Event('librava:sync'));
 }
 
 // =====================================================================

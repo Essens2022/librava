@@ -15,7 +15,7 @@ export function applyTheme(v = getTheme()) {
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
 import { legalText, LEGAL_VERSION } from './legal.js?v=20261106230734';
-import { suggest, highlight } from './search.js?v=20261106230734';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261106230734';
 import { track, trackPage } from './track.js?v=20261106230734';
 import { initGA, applyConsent } from './ga.js?v=20261106230734';
 import { consentStrings } from './consent-i18n.js?v=20261106230734';
@@ -212,7 +212,8 @@ export function renderChrome() {
   const catOpts = CATS.map(c => `<option value="${c}">${esc(t('cat.' + c))}</option>`).join('');
   const searchForm = (id) => `<form class="search" role="search" data-search>
       <select aria-label="${esc(t('search.category'))}" name="cat" id="${id}-cat"><option value="">${esc(t('nav.all'))}</option>${catOpts}</select>
-      <input type="search" name="q" id="${id}-q" placeholder="${esc(t('nav.searchPlaceholder'))}" aria-label="${esc(t('nav.searchPlaceholder'))}" autocomplete="off" enterkeyhint="search">
+      <input type="search" name="q" id="${id}-q" placeholder="${esc(t('nav.searchPlaceholder'))}" aria-label="${esc(t('nav.searchPlaceholder'))}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <button type="button" class="search-clear" hidden aria-label="${esc(t('sugg.clear'))}">${icon('close')}</button>
       <button type="submit" aria-label="${esc(t('nav.searchPlaceholder'))}">${icon('search')}</button></form>`;
   $('#hdr').innerHTML = `
   <div class="hdr-main"><div class="wrap hdr-row">
@@ -972,68 +973,175 @@ export function mountPromos(root) {
 }
 
 // ---------------------------------------------------------------- search box suggestions (like Amazon)
+// Built on the catalogue already in memory (index kept until the catalogue changes). Waits for the catalogue and retries on
+// its own: while the books are still arriving it shows a loading line, never "no results".
 const RECENT = 'recentSearches';
 export function rememberSearch(q) { q = String(q || '').trim(); if (!q) return; const r = store.get(RECENT, []).filter(x => x.toLowerCase() !== q.toLowerCase()); r.unshift(q); store.set(RECENT, r.slice(0, 8)); }
-let suggBooks = null;
-async function suggCatalog() { if (!suggBooks) { suggBooks = await api.listBooks({}); setTimeout(() => { suggBooks = null; }, 60000); } return suggBooks; }
+const wantsAllLangsNow = () => /[?&]lang=all\b/.test(location.search + location.hash);
 function setupSuggest() {
-  let box = null, form = null, items = [], active = -1, timer = null, lastQ = null;
-  const close = () => { box?.remove(); box = null; items = []; active = -1; form?.q?.setAttribute('aria-expanded', 'false'); };
-  const pickUrl = it => it.type === 'book' ? '/book/' + encodeURIComponent(it.book.id) : it.type === 'cat' ? '/search?cat=' + it.cat : '/search?q=' + encodeURIComponent(it.label);
-  const choose = it => { const q = form.q.value.trim(); if (it.type === 'query' || it.type === 'recent') { rememberSearch(it.label); form.q.value = it.label; } else rememberSearch(q); close(); form.q.blur(); go(it.type === 'query' || it.type === 'recent' ? '/search?' + new URLSearchParams({ q: it.label, ...(form.cat?.value ? { cat: form.cat.value } : {}) }) : pickUrl(it)); };
-  const mark = i => { active = i; box?.querySelectorAll('[role=option]').forEach((o, k) => o.setAttribute('aria-selected', k === i ? 'true' : 'false')); const id = i >= 0 ? box?.querySelectorAll('[role=option]')[i]?.id : ''; form.q.setAttribute('aria-activedescendant', id || ''); };
-  const render = async () => {
-    const q = form.q.value, nq = q.trim(); lastQ = q;
-    const cat = form.cat?.value || '';
-    let list = [];
-    if (!nq) list = store.get(RECENT, []).slice(0, 6).map(label => ({ type: 'recent', label }));
-    else {
-      let books = await suggCatalog();
-      if (cat) books = books.filter(b => b.category === cat || (b.categories || []).includes(cat));
-      const L = getLang(), mine = books.filter(b => b.language === L);
-      list = suggest(q, mine, 8);
-      if (list.filter(x => x.type === 'book').length < 3) { const more = suggest(q, books, 8).filter(x => !list.some(y => y.type === x.type && y.label === x.label && y.book?.id === x.book?.id)); list = [...list, ...more].slice(0, 8); }
-      list.unshift({ type: 'query', label: nq });
-    }
-    if (form.q.value !== lastQ) return;
-    if (!list.length) return close();
-    items = list;
-    if (!box) { box = document.createElement('div'); box.className = 'sugg'; box.id = form.q.id + '-list'; box.setAttribute('role', 'listbox'); form.appendChild(box); form.q.setAttribute('aria-controls', box.id); }
-    form.q.setAttribute('aria-expanded', 'true');
-    const hl = s => highlight(s, nq, esc);
-    box.innerHTML = (nq ? '' : `<div class="sugg-head">${esc(t('sugg.recent'))}</div>`) + list.map((it, i) => {
-      const id = `${box.id}-${i}`;
-      if (it.type === 'book') { const b = it.book; return `<div role="option" id="${id}" class="sugg-item sugg-book" data-i="${i}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : `<span class="sugg-ph"></span>`}<span class="sugg-txt"><span class="sugg-title">${hl(b.title)}</span><span class="sugg-sub">${esc(t('book.by', { author: b.author }))}${b.language && b.language !== getLang() ? ' · ' + esc(b.language.toUpperCase()) : ''}</span></span><span class="sugg-price">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</span></div>`; }
-      const ic = { query: 'search', recent: 'clock', author: 'user', series: 'library', cat: 'grid' }[it.type] || 'search';
-      const hint = it.type === 'author' ? t('sugg.author') : it.type === 'series' ? t('sugg.series') : it.type === 'cat' ? t('sugg.cat') : '';
-      return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon(ic)}<span class="sugg-txt">${it.type === 'recent' ? esc(it.label) : hl(it.label)}${hint ? ` <span class="sugg-hint">${esc(hint)}</span>` : ''}</span>${it.type === 'recent' ? `<button type="button" class="sugg-x" data-x="${i}" aria-label="${esc(t('sugg.remove'))}">×</button>` : ''}</div>`;
-    }).join('');
-    mark(-1);
+  let box = null, form = null, items = [], active = -1, timer = null, seq = 0, lastHtml = '', loadT = null, idx = null, loading = null;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const cached = () => { const raw = api._catalog; return idx && raw && idx.raw === raw ? idx.list : null; };
+  // the list of books: from memory, or read (4 tries, each a little later, asking for a fresh copy from the second one)
+  const getList = () => {
+    const c = cached(); if (c) return Promise.resolve(c);
+    return loading || (loading = (async () => {
+      let err;
+      for (let i = 0; i < 4; i++) {
+        try {
+          if (i) await api.freshCatalog?.(0);
+          const l = await api.listBooks({});
+          if (l.length) { idx = { raw: api._catalog || l, list: l }; return l; }
+          err = new Error('empty');
+        } catch (e) { err = e; }
+        await sleep([700, 1500, 3000, 0][i]);
+      }
+      throw err;
+    })().finally(() => { loading = null; }));
   };
+  const toggleClear = f => { const x = (f || form)?.querySelector('.search-clear'); if (x) x.hidden = !(f || form).q.value; };
+  const close = () => { clearTimeout(loadT); seq++; box?.remove(); box = null; items = []; active = -1; lastHtml = ''; form?.q?.setAttribute('aria-expanded', 'false'); form?.q?.removeAttribute('aria-activedescendant'); };
+  const urlFor = (q, extra = {}) => '/search?' + new URLSearchParams({ q, ...(form?.cat?.value ? { cat: form.cat.value } : {}), ...(wantsAllLangsNow() ? { lang: 'all' } : {}), ...extra });
+  const choose = it => {
+    if (!it) return;
+    const typed = form.q.value.trim();
+    if (it.type === 'error') { idx = null; api.freshCatalog?.(0)?.catch(() => { }); render(); return; }
+    let to;
+    if (it.type === 'book') { rememberSearch(typed); to = '/book/' + encodeURIComponent(it.book.id); }
+    else if (it.type === 'cat') { rememberSearch(typed); to = '/search?' + new URLSearchParams({ q: cleanQuery(typed), cat: it.cat, ...(wantsAllLangsNow() ? { lang: 'all' } : {}) }); }
+    else if (it.type === 'otherlangs') { rememberSearch(typed); to = '/search?' + new URLSearchParams({ q: typed, lang: 'all', ...(form.cat?.value ? { cat: form.cat.value } : {}) }); }
+    else { const label = it.type === 'all' ? typed : it.label; rememberSearch(label); form.q.value = label; to = urlFor(label); }
+    toggleClear(); close(); form.q.blur(); go(to);
+  };
+  const mark = (i, scroll) => {
+    active = i; const os = box ? [...box.querySelectorAll('[role=option]')] : [];
+    os.forEach((o, k) => o.setAttribute('aria-selected', k === i ? 'true' : 'false'));
+    const el = i >= 0 ? os[i] : null;
+    if (el) form.q.setAttribute('aria-activedescendant', el.id); else form.q.removeAttribute('aria-activedescendant');
+    if (el && scroll) el.scrollIntoView({ block: 'nearest' });
+  };
+  // the box is as tall as its content, but never taller than the space above the keyboard
+  const fit = () => {
+    if (!box || !form) return;
+    const vv = window.visualViewport, bottom = vv ? vv.offsetTop + vv.height : innerHeight;
+    box.style.maxHeight = Math.round(Math.min(560, Math.max(150, bottom - form.getBoundingClientRect().bottom - 14))) + 'px';
+  };
+  const boldQ = (s, q) => esc(s).replace('\u0001', `<b>${esc(q)}</b>`);
+  const paint = (list, q) => {
+    const L = getLang(), mixed = wantsAllLangsNow();
+    const budget = Math.max(30, Math.min(78, Math.floor((window.innerWidth - 150) / 6.4)));
+    const hl = s => highlight(s, q, esc);
+    const html = (!q ? `<div class="sugg-head" role="presentation">${esc(t('sugg.recent'))}</div>` : '') + list.map((it, i) => {
+      const id = `${form.q.id}-list-${i}`;
+      if (it.type === 'loading') return `<div class="sugg-note" role="presentation"><span class="sugg-spin" aria-hidden="true"></span>${esc(t('sugg.loading'))}</div>`;
+      if (it.type === 'none') return `<div class="sugg-note" role="presentation"><span>${boldQ(t('sugg.none', { q: '\u0001' }), q)}</span></div>`;
+      if (it.type === 'book') {
+        const b = it.book, foreign = b.language && b.language !== L;
+        const fl = foreign ? flagsOf(b.id, b.language) : [];
+        const flag = foreign ? `<span class="sugg-flg" title="${esc(langName(b.language))}">${fl.map(c => `<img src="/assets/img/flags/${c}.svg" alt="" width="18" height="13">`).join('')}<small>${esc(String(b.language).toUpperCase())}</small></span>` : '';
+        const sub = cutWords(b.subtitle, budget);
+        return `<div role="option" id="${id}" class="sugg-item sugg-book" data-i="${i}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" width="40" height="60" decoding="async">` : `<span class="sugg-ph"></span>`}<span class="sugg-txt"><span class="sugg-title">${hl(b.title)}</span>${sub ? `<span class="sugg-sub">${esc(sub)}</span>` : ''}<span class="sugg-by">${esc(t('book.by', { author: b.author }))}${flag}</span></span><span class="sugg-price">${b.price_cents ? money(b.price_cents) : esc(t('book.free'))}</span></div>`;
+      }
+      if (it.type === 'otherlangs') return `<div role="option" id="${id}" class="sugg-item sugg-warn" data-i="${i}"><span class="sugg-txt">${esc(t('sugg.noneLang', { lang: langName(L, true), n: it.n }))}</span>${icon('chevR')}</div>`;
+      if (it.type === 'error') return `<div role="option" id="${id}" class="sugg-item sugg-warn" data-i="${i}"><span class="sugg-txt">${esc(t('sugg.error'))}</span></div>`;
+      if (it.type === 'dym') return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon('search')}<span class="sugg-txt">${esc(t('search.dym'))} <b>${esc(it.label)}</b></span></div>`;
+      if (it.type === 'all') return `<div role="option" id="${id}" class="sugg-item sugg-all" data-i="${i}">${icon('search')}<span class="sugg-txt">${boldQ(t('sugg.all', { q: '\u0001' }), q)}</span></div>`;
+      if (it.type === 'recent') return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon('clock')}<span class="sugg-txt">${esc(it.label)}</span><button type="button" class="sugg-x" data-x="${i}" tabindex="-1" aria-label="${esc(t('sugg.remove'))}: ${esc(it.label)}">${icon('close')}</button></div>`;
+      if (it.type === 'query') return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon('search')}<span class="sugg-txt">${highlight(it.label, q, esc, true)}</span></div>`;
+      if (it.type === 'cat') return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon('grid')}<span class="sugg-txt">${esc(cleanQuery(q))} <span class="sugg-hint">${esc(t('sugg.inCat', { cat: it.label }))}</span></span></div>`;
+      if (it.type === 'author') return `<div role="option" id="${id}" class="sugg-item" data-i="${i}">${icon('user')}<span class="sugg-txt">${hl(it.label)} <span class="sugg-hint">${esc(t('sugg.author'))}</span></span></div>`;
+      return '';
+    }).join('');
+    items = list;
+    if (!html) return close();
+    if (!box) {
+      box = document.createElement('div'); box.className = 'sugg'; box.id = form.q.id + '-list'; box.setAttribute('role', 'listbox'); box.setAttribute('aria-label', t('nav.searchPlaceholder'));
+      box.addEventListener('touchmove', () => { if (document.activeElement === form?.q) form.q.blur(); }, { passive: true });   // scrolling the list hides the keyboard, like Amazon
+      form.appendChild(box); form.q.setAttribute('aria-controls', box.id); lastHtml = '';
+    }
+    form.q.setAttribute('aria-expanded', 'true');
+    if (html !== lastHtml) { box.innerHTML = html; lastHtml = html; active = -1; }
+    fit();
+  };
+  const render = async () => {
+    if (!form) return;
+    const my = ++seq; clearTimeout(loadT);
+    const q = form.q.value, nq = q.trim();
+    toggleClear();
+    if (!nq) { const r = store.get(RECENT, []).slice(0, 6); return r.length ? paint(r.map(label => ({ type: 'recent', label })), '') : close(); }
+    const cat = form.cat?.value || '';
+    let list = cached();
+    if (!list) {
+      loadT = setTimeout(() => { if (my === seq && form) paint([{ type: 'loading' }], nq); }, 160);
+      try { list = await getList(); } catch { clearTimeout(loadT); if (my === seq) paint([{ type: 'error' }], nq); return; }
+      clearTimeout(loadT); if (my !== seq) return;
+    }
+    const inCat = b => b.category === cat || (b.categories || []).includes(cat);
+    const mixed = wantsAllLangsNow();
+    const run = l => { let r = smartSuggest(nq, cat ? l.filter(inCat) : l, { mixed }); if (cat && !r.rows.some(x => x.type === 'book')) r = smartSuggest(nq, l, { mixed }); return r; };
+    let r = run(list);
+    if (!r.rows.some(x => x.type === 'book') && nq.length >= 3 && api.catalogIsFromCache?.()) {
+      // the copy kept on this phone can be older than the newest books: get the fresh list before saying there is nothing
+      paint([{ type: 'loading' }], nq);
+      try { await Promise.race([api.freshCatalog(0), sleep(4500)]); } catch { }
+      if (my !== seq) return;
+      idx = null; try { list = await getList(); } catch { }
+      if (my !== seq) return;
+      r = run(list);
+    }
+    const out = [];
+    if (r.other && !r.own && !mixed) out.push({ type: 'otherlangs', n: r.other });
+    if (r.dym) out.push({ type: 'dym', label: r.dym });
+    out.push(...r.rows);
+    if (!r.rows.length && !r.dym) out.push({ type: 'none' });
+    else out.push({ type: 'all' });
+    paint(out, nq);
+  };
+  const later = ms => { clearTimeout(timer); timer = setTimeout(render, ms); };
   document.addEventListener('input', e => {
     const f = e.target.closest?.('[data-search]'); if (!f || e.target.name !== 'q') return;
     if (form !== f) { close(); form = f; }
-    clearTimeout(timer); timer = setTimeout(render, 90);
+    toggleClear(f); later(50);
   });
-  document.addEventListener('focusin', e => { const f = e.target.closest?.('[data-search]'); if (f && e.target.name === 'q') { if (form !== f) close(); form = f; render(); } });
+  document.addEventListener('focusin', e => {
+    const f = e.target.closest?.('[data-search]'); if (!f || e.target.name !== 'q') return;
+    if (form !== f) close(); form = f;
+    const q = f.q; q.setAttribute('role', 'combobox'); q.setAttribute('aria-autocomplete', 'list'); q.setAttribute('aria-haspopup', 'listbox');
+    getList().catch(() => { });                                          // builds the index before the first letter
+    try { api.freshCatalog?.(15 * 60e3)?.catch(() => { }); } catch { }     // a new book is found even on a page left open for hours
+    render();
+  });
   document.addEventListener('keydown', e => {
-    if (!box || !form || e.target !== form.q) return;
-    const n = items.length;
-    if (e.key === 'ArrowDown') { e.preventDefault(); mark((active + 1) % n); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); mark(active <= 0 ? n - 1 : active - 1); }
-    else if (e.key === 'Escape') { close(); }
+    if (!form || e.target !== form.q) return;
+    if (e.key === 'Escape') { if (box) { close(); e.preventDefault(); } return; }
+    if (!box) { if (e.key === 'ArrowDown' && form.q.value.trim()) { e.preventDefault(); render(); } return; }
+    const sel = items.map((it, i) => it.type === 'loading' || it.type === 'none' ? -1 : i).filter(i => i >= 0), n = sel.length; if (!n) return;
+    const pos = sel.indexOf(active);
+    if (e.key === 'ArrowDown') { e.preventDefault(); mark(sel[(pos + 1) % n], true); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); mark(sel[pos <= 0 ? n - 1 : pos - 1], true); }
     else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(items[active]); }
   });
-  document.addEventListener('mousedown', e => {
+  // keep the focus in the field while pressing inside the box (desktop); a finger that scrolls never selects anything
+  document.addEventListener('mousedown', e => { if (box && (e.target.closest('.sugg') || e.target.closest('.search-clear'))) e.preventDefault(); });
+  document.addEventListener('click', e => {
+    const clr = e.target.closest?.('.search-clear');
+    if (clr) { const f = clr.closest('[data-search]'); form = f; f.q.value = ''; toggleClear(f); f.q.focus(); render(); return; }   // one tap clears everything, keeps the keyboard, shows the recent searches
     if (!box) return;
     const x = e.target.closest('.sugg-x');
-    if (x) { e.preventDefault(); const it = items[+x.dataset.x]; store.set(RECENT, store.get(RECENT, []).filter(r => r !== it.label)); render(); return; }
+    if (x) { e.preventDefault(); const it = items[+x.dataset.x]; store.set(RECENT, store.get(RECENT, []).filter(r => r !== it.label)); render(); form.q.focus(); return; }
     const o = e.target.closest('.sugg-item');
-    if (o && box.contains(o)) { e.preventDefault(); choose(items[+o.dataset.i]); return; }
-    if (!e.target.closest('[data-search]')) close();
+    if (o && box.contains(o)) { e.preventDefault(); choose(items[+o.dataset.i]); }
   });
-  document.addEventListener('mouseover', e => { const o = e.target.closest?.('.sugg-item'); if (o && box?.contains(o)) mark(+o.dataset.i); });
+  document.addEventListener('pointerdown', e => { if (box && !e.target.closest('[data-search]')) close(); }, true);   // touching outside closes the box
+  document.addEventListener('mouseover', e => { const o = e.target.closest?.('.sugg-item'); if (o && box?.contains(o) && !o.getAttribute('aria-selected')?.includes('true')) mark(+o.dataset.i); });
   window.addEventListener('hashchange', close);
+  window.addEventListener('popstate', close);
+  window.addEventListener('librava:catalog', () => { idx = null; if (box && form) render(); });
+  window.addEventListener('librava:lang', () => { close(); idx = null; });
+  window.addEventListener('librava:sync', () => $$('[data-search]').forEach(f => toggleClear(f)));
+  window.addEventListener('pageshow', () => $$('[data-search]').forEach(f => toggleClear(f)));
+  try { window.visualViewport?.addEventListener('resize', fit); window.visualViewport?.addEventListener('scroll', fit); } catch { }
+  window.addEventListener('resize', fit);
   document.addEventListener('submit', e => { if (e.target.closest('[data-search]')) close(); }, true);
 }
 setupSuggest();

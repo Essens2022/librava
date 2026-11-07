@@ -586,33 +586,57 @@ class SupabaseAPI {
   async _loadCatalog(includeDrafts = false) {
     if (includeDrafts) return this._readBooks(CARD_COLS + ',' + ADMIN_COLS);
     if (this._catP) return this._catP;
-    // first visit of this session: start from the copy saved on the device (max 1 day old), refresh behind the scenes
+    // first visit of this session: start from the copy saved on the device (max 1 day old), refresh behind the scenes.
+    // One shared promise from the very first call: callers that arrive while the device copy is being read wait for it
+    // (before, they started their own read and the old copy could land after the fresh one and replace it).
     if (!this._cacheTried) {
       this._cacheTried = true;
-      try {
-        const c = await blobs.get(CAT_KEY);
-        if (c && c.v === CAT_V && Date.now() - c.at < 864e5 && Array.isArray(c.list) && c.list.length) {
-          this._catalog = c.list.map(b => ({ ...b, cover_url: this._coverUrl(b) }));
-          this._catP = Promise.resolve(this._catalog);
-          setTimeout(() => this._fetchCatalog().catch(() => { }), 1500);
-          return this._catalog;
-        }
-      } catch { }
+      const first = this._catP = (async () => {
+        try {
+          const c = await blobs.get(CAT_KEY);
+          if (c && c.v === CAT_V && Date.now() - c.at < 864e5 && Array.isArray(c.list) && c.list.length && !this.__cat) {
+            this._catalog = c.list.map(b => ({ ...b, cover_url: this._coverUrl(b) }));
+            this._fromCache = true;                         // may miss books published since: the search waits for the fresh copy when it finds nothing
+            setTimeout(() => this.freshCatalog(0).catch(() => { }), 1500);
+            return this._catalog;
+          }
+        } catch { }
+        return this._fetchCatalog();
+      })();
+      first.catch(() => { if (this._catP === first) this._catP = null; });
+      return first;
     }
     return this._fetchCatalog();
   }
+  // the list read again, with a few quiet retries (a phone on a weak connection must not end up with an empty or old list)
+  async _readCatalogRetry() {
+    for (let i = 0; ; i++) {
+      try { return await this._readBooks(CARD_COLS, q => q.eq('status', 'published')); }
+      catch (e) { if (i >= 2) throw e; await new Promise(r => setTimeout(r, 600 * (i + 1) * (i + 1))); }
+    }
+  }
   _fetchCatalog() {
     const gen = this._gen || 0;
-    const p = this._readBooks(CARD_COLS, q => q.eq('status', 'published')).then(list => {
+    const p = this._readCatalogRetry().then(list => {
+      if (!list.length) { if (this._catP === p) this._catP = null; return this.__cat || list; }   // an empty answer is never remembered: the next ask reads again
       if ((this._gen || 0) !== gen) return list;            // something changed in Admin meanwhile: a newer read follows
-      this.__cat = list; this._catP = Promise.resolve(list);
+      this.__cat = list; this._catP = Promise.resolve(list); this._fromCache = false; this._freshAt = Date.now();
       try { blobs.put(CAT_KEY, { v: CAT_V, at: Date.now(), list: list.map(({ cover_url, ...b }) => b) }); } catch { }
+      try { window.dispatchEvent(new Event('librava:catalog')); } catch { }   // the search box rebuilds its index with the new books
       return list;
     });
     if (!this.__cat) this._catP = p;                         // nothing to show yet: every page waits for this read
     p.catch(() => { if (this._catP === p) this._catP = null; });
     return p;
   }
+  // a fresh copy of the list (shared by every caller at the same time); maxAge: skip when one was read less than that many ms ago
+  freshCatalog(maxAge = 0) {
+    if (this._freshP) return this._freshP;
+    if (maxAge && this._freshAt && Date.now() - this._freshAt < maxAge) return Promise.resolve(this.__cat);
+    const p = this._fetchCatalog().finally(() => { if (this._freshP === p) this._freshP = null; });
+    return this._freshP = p;
+  }
+  catalogIsFromCache() { return !!this._fromCache; }
   async listBooks(o = {}) { const l = this._catalog || await this._loadCatalog(); return filterBooks(this._catalog || l, o); }
   // the whole book (description, A+ content, files…): kept for a few minutes, read once even if asked twice at the same time
   getBook(id) {

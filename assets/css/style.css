@@ -1102,22 +1102,45 @@ a.adm-line:hover { text-decoration: none; background: var(--surface-2); }
 .search select { border-radius: 8px 0 0 8px; }
 .search button { border-radius: 0 8px 8px 0; }
 .hdr-mobile-search .search input { border-radius: 8px 0 0 8px; }
-.sugg { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 14px 36px rgba(0, 0, 0, .25); z-index: 120; overflow: hidden; max-height: min(70vh, 560px); overflow-y: auto; padding: 4px 0; }
-.sugg-head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 14px 4px; }
-.sugg-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px; cursor: pointer; font-size: 15px; min-height: 40px; }
+.sugg { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 14px 36px rgba(0, 0, 0, .25); z-index: 120; overflow-x: hidden; overflow-y: auto; max-height: min(70vh, 560px); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0; text-align: left; }
+.sugg-head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 10px 14px 4px; }
+.sugg-item { display: flex; align-items: center; gap: 12px; padding: 6px 14px; cursor: pointer; font-size: 16px; line-height: 1.3; min-height: 48px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.sugg-item + .sugg-item { border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
 .sugg-item[aria-selected="true"] { background: var(--surface-2); }
+@media (hover: hover) { .sugg-item:hover { background: var(--surface-2); } }
+.sugg-item:active { background: var(--surface-2); }
 .sugg-item > .ico { width: 18px; height: 18px; color: var(--muted); flex: none; }
 .sugg-item b { font-weight: 700; }
 .sugg-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.sugg-item:not(.sugg-book) .sugg-txt { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 400; }
-.sugg-item:not(.sugg-book) .sugg-txt b { font-weight: 700; }
-.sugg-hint { color: var(--link); font-size: 13px; margin-left: 4px; }
-.sugg-book img, .sugg-ph { width: 34px; height: 52px; object-fit: contain; flex: none; border-radius: 2px; background: var(--surface-2); }
-.sugg-title { font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sugg-sub { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sugg-price { font-weight: 700; font-size: 14px; white-space: nowrap; }
-.sugg-x { border: 0; background: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 0 4px; }
-.sugg-x:hover { color: var(--deal); }
+.sugg-item:not(.sugg-book) .sugg-txt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-weight: 400; }
+.sugg-hint { color: var(--link); font-size: 14px; margin-left: 4px; }
+.sugg-book { padding-top: 8px; padding-bottom: 8px; align-items: flex-start; }
+.sugg-book img, .sugg-ph { width: 40px; height: 60px; object-fit: contain; flex: none; border-radius: 3px; background: var(--surface-2); }
+.sugg-title { font-weight: 600; font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sugg-title b { font-weight: 800; }
+.sugg-sub { font-size: 13px; line-height: 1.3; color: var(--fg); opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sugg-by { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sugg-flg { display: inline-flex; align-items: center; gap: 3px; flex: none; }
+.sugg-flg img { width: 18px; height: 13px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .15); object-fit: cover; background: none; }
+.sugg-flg small { font-size: 11px; font-weight: 700; color: var(--muted); }
+.sugg-price { font-weight: 700; font-size: 14px; white-space: nowrap; align-self: center; }
+.sugg-all { color: var(--link); font-weight: 600; min-height: 48px; }
+.sugg-all .ico { color: var(--link); }
+.sugg-warn { background: var(--surface-2); font-size: 14px; }
+.sugg-note { display: flex; align-items: center; gap: 10px; padding: 14px; font-size: 15px; color: var(--muted); }
+.sugg-spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--link); animation: sugg-spin .7s linear infinite; flex: none; }
+@keyframes sugg-spin { to { transform: rotate(360deg); } }
+.search .sugg button.sugg-x { all: unset; box-sizing: border-box; width: 44px; height: 44px; margin: -6px -10px -6px 0; display: grid; place-items: center; color: var(--muted); cursor: pointer; flex: none; border-radius: 50%; -webkit-tap-highlight-color: transparent; }
+.search .sugg button.sugg-x .ico { width: 16px; height: 16px; }
+@media (hover: hover) { .search .sugg button.sugg-x:hover { color: var(--deal); } }
+/* the X that wipes the whole text (always there while there is text; 44 px to touch) */
+.search .search-clear { position: relative; flex: none; width: 44px; background: #fff; color: #5b6660 !important; border-radius: 0; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.search .search-clear[hidden] { display: none; }
+.search .search-clear::after { content: ""; position: absolute; inset: -1px -2px; }
+.search .search-clear .ico { width: 18px; height: 18px; }
+.search .search-clear:hover, .search .search-clear:active, .search .search-clear:focus-visible { background: #fff; }
+@media (hover: hover) { .search .search-clear:hover { color: #111 !important; } }
+.search input[type="search"]::-webkit-search-cancel-button, .search input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
 .dym { font-size: 16px; }
 .dym a { color: var(--deal); }
 /* strip banner on phones: the cover keeps a real size, next to the text */
