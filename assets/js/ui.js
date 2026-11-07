@@ -1204,7 +1204,8 @@ function fitShelves() {
     sh.style.setProperty('--fit', Math.max(110, Math.min(max, Math.floor(room / ratio))) + 'px'); sh.classList.add('fit');
   });
 }
-addEventListener('resize', () => requestAnimationFrame(fitShelves));
+let shelfW = innerWidth;   // shelves depend on the width only: skip the height-only resizes of Safari's sliding toolbars
+addEventListener('resize', () => { if (innerWidth !== shelfW) { shelfW = innerWidth; requestAnimationFrame(fitShelves); } });
 document.addEventListener('load', e => { if (e.target.closest?.('.promo-books')) fitShelves(); }, true);
 new MutationObserver(() => { if (document.querySelector('.promo-books .promo-shelf:not(.fit):not(.marq)')) requestAnimationFrame(fitShelves); }).observe(document.documentElement, { childList: true, subtree: true });
 

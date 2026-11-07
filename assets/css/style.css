@@ -56,7 +56,7 @@ html { -webkit-text-size-adjust: 100%; background: var(--hdr-2); }
 html.reading, html.reading body { background: var(--bg); }
 body {
   margin: 0; background: var(--hdr-2); color: var(--fg); font-family: var(--font-ui);
-  font-size: 15px; font-weight: 500; line-height: 1.45; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+  font-size: 15px; font-weight: 500; line-height: 1.45; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--hdr); }
 img { max-width: 100%; display: block; }
@@ -3870,3 +3870,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 
 /* buy bar slides away while the footer is in view (class set from views.js through an IntersectionObserver) */
 .buy-sticky.bs-off { transform: translate3d(0, 110%, 0); opacity: 0; pointer-events: none; box-shadow: none; }
+
+/* ---- header while Safari's toolbars slide (invisible at rest) ---- */
+/* the header colour extends upward beyond the header box, so if the sticky header lags the page for a few frames
+   while the address bar re-expands, the gap above it shows header colour, never page or footer text */
+.hdr::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 160px; background: var(--hdr); pointer-events: none; }

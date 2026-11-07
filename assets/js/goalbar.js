@@ -70,7 +70,9 @@ function place() {
 }
 export function goalBar() {
   const again = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };
-  window.addEventListener('resize', again); window.addEventListener('orientationchange', again);
+  // the header's bottom edge depends on the width only: ignore the height-only resizes that fire many times while Safari's toolbars slide
+  let lastW = innerWidth; const onWidth = () => { if (innerWidth !== lastW) { lastW = innerWidth; again(); } };
+  window.addEventListener('resize', onWidth); window.addEventListener('orientationchange', again);
   try { const h = document.getElementById('hdr'); if (h && 'ResizeObserver' in window) new ResizeObserver(again).observe(h); } catch { }
   window.addEventListener('librava:cart', draw); window.addEventListener('librava:lang', draw);
   window.addEventListener('hashchange', draw); window.addEventListener('popstate', draw);
