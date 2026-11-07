@@ -6,6 +6,7 @@ import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPa
 import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewLegal, spinner } from './views.js?v=20261107214116';
 import { cartBack } from './cartback.js?v=20261107214116';
 import { goalBar } from './goalbar.js?v=20261107214116';
+import { scrollPerf } from './scrollperf.js?v=20261107214116';
 import { welcomeGift } from './welcome.js?v=20261107214116';
 import { trackPage } from './track.js?v=20261107214116';
 import { offline } from './offline.js?v=20261107214116';
@@ -144,7 +145,7 @@ async function route() {
     if (goPage) { const u = pretty; if (location.pathname + location.search !== u || location.hash) try { history.replaceState(history.state, '', u); } catch { } }
     else if (location.pathname !== pretty) try { history.replaceState(history.state, '', pretty + location.search + location.hash); } catch { }
   }
-  trackPage(); cartBack(); welcomeGift(); if (!window.__goalbar) { window.__goalbar = 1; goalBar(); }
+  trackPage(); cartBack(); welcomeGift(); if (!window.__goalbar) { window.__goalbar = 1; goalBar(); scrollPerf(); }
   // highlight current strip link
   const navKey = parts[0] === 'search' ? (q.get('cat') ? 'cat-' + q.get('cat') : q.get('price') === 'free' ? 'free' : q.get('deals') ? 'deals' : q.get('sort') === 'newest' ? 'new' : '') : parts[0] || '';
   $$('.subnav [data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === navKey));

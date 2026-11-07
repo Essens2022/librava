@@ -3857,3 +3857,31 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .promo-offers[data-w] .of-s .dvx-lap { animation: dvFl 7s ease-in-out infinite; }
 .promo-offers[data-w] .of-s .dvx-tab { animation: none; }
 .promo-offers[data-w] .of-s .dvx-ph { animation: dvFl 6s ease-in-out infinite reverse; }
+
+/* ================= scroll performance on phones (iOS Safari) — same look, less work per frame ================= */
+/* 1. decorative endless animations pause while the page is scrolling (class set by assets/js/scrollperf.js) */
+html.is-scrolling :is(.marq-track, .promo-shelf, .promo-slide, .promo-strip, .promo-hero, .promo-offers, .nudge, .dc-bolt, .vi-live, .ladder-bar, .ladder-s, #goal-bar, #goal-pop, #wl-box),
+html.is-scrolling :is(.marq-track, .promo-shelf, .promo-slide, .promo-strip, .promo-hero, .promo-offers, .nudge, .dc-bolt, .ladder-bar, #goal-bar, #wl-box) :is(*, *::before, *::after),
+html.is-scrolling :is(.marq-track, .promo-shelf, .promo-slide, .promo-strip, .promo-hero, .promo-offers, .nudge, .ladder-bar, #goal-bar)::before,
+html.is-scrolling :is(.marq-track, .promo-shelf, .promo-slide, .promo-strip, .promo-hero, .promo-offers, .nudge, .ladder-bar, #goal-bar)::after { animation-play-state: paused !important; }
+
+/* 2. fixed bars get their own compositor layer, so the browser moves them instead of repainting them */
+.buy-sticky, #goal-bar { transform: translateZ(0); -webkit-transform: translateZ(0); backface-visibility: hidden; contain: layout style; }
+.buy-sticky { -webkit-backface-visibility: hidden; }
+
+/* 3. touch screens: no live blur behind small banner chips (backdrop-filter is re-computed on every scrolled frame) */
+@media (hover: none) {
+  .promo-hero .promo-offer, .promo-hero .promo-price, .tp-spotlight .promo-cta, .tp-glass .promo-text,
+  a.promo-strip.promo-book.sp .promo-cta, a.promo-strip.promo-book.sp .promo-price { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .tp-glass .promo-text { background: rgba(255,255,255,.22); }
+  /* the loading shimmer on every not-yet-loaded cover repaints each frame: the placeholder keeps its soft grey, only the moving highlight is dropped */
+  .cover, .guide-card img { animation: none; }
+}
+
+/* 4. the long footer is skipped by the renderer until it is near the screen */
+footer.foot { content-visibility: auto; contain-intrinsic-size: auto 1000px; }
+@media (min-width: 700px) { footer.foot { contain-intrinsic-size: auto 660px; } }   /* measured heights: ~1000-1100px on phones, ~660px on tablets */
+
+/* 5. bottom-sheet filters follow the visible area when Safari's toolbar collapses (vh = tallest, dvh = current) */
+@media (max-width: 860px) { .filters { max-height: 80vh; max-height: 80dvh; } }
+.soon { min-height: 100vh; min-height: 100dvh; }

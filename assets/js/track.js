@@ -162,11 +162,16 @@ document.addEventListener('change', e => {
     clicksN++; track('click', { note: 'cat=' + clean(el.options[el.selectedIndex]?.text || el.value || 'all') });
   } catch { }
 }, { capture: true });
-addEventListener('scroll', () => {
+// scroll depth: at most one measurement per frame, and none once the visitor reached the very end
+// (reading scrollHeight on every scroll event forces a layout while Safari is scrolling)
+let depthRaf = 0;
+function depth() {
+  depthRaf = 0;
   try {
     const h = document.documentElement.scrollHeight, v = innerHeight; if (h <= v + 80) return;
     const p = Math.min(100, Math.round((scrollY + v) / h * 100)); if (p > maxScroll) maxScroll = p;
     if (!sent50 && p >= 50) { sent50 = true; track('scroll', { note: '50' }); }
     if (!sent90 && p >= 90) { sent90 = true; track('scroll', { note: '90' }); }
   } catch { }
-}, { passive: true });
+}
+addEventListener('scroll', () => { if (!depthRaf && !(sent90 && maxScroll >= 100)) depthRaf = requestAnimationFrame(depth); }, { passive: true });

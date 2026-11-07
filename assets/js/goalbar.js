@@ -57,17 +57,21 @@ async function draw() {
     place();
   } catch { }
 }
-// the strip sits right under the header and follows it while the page scrolls
-let raf = 0;
+// the strip sits right under the header. The header is sticky, so its bottom edge never moves while the page
+// scrolls: measure only when the header or the bar changes size (ResizeObserver / resize), never on scroll
+// (a layout read + a root custom property write on every scroll event made iOS Safari stutter).
+let raf = 0, lastTop = null, lastH = null;
 function place() {
-  const bar = document.getElementById('goal-bar'); if (!bar) return;
+  const bar = document.getElementById('goal-bar'); if (!bar) { lastTop = lastH = null; return; }
   const h = document.getElementById('hdr');
-  bar.style.top = Math.max(0, Math.round(h ? h.getBoundingClientRect().bottom : 0)) + 'px';
-  document.documentElement.style.setProperty('--gb-h', bar.offsetHeight + 'px');   // reserve exactly the bar's height so it never covers the page
+  const top = Math.max(0, Math.round(h ? h.getBoundingClientRect().bottom : 0)), bh = bar.offsetHeight;
+  if (top !== lastTop) { bar.style.top = top + 'px'; lastTop = top; }
+  if (bh !== lastH) { document.documentElement.style.setProperty('--gb-h', bh + 'px'); lastH = bh; }   // reserve exactly the bar's height so it never covers the page
 }
 export function goalBar() {
   const again = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };
-  window.addEventListener('scroll', place, { passive: true }); window.addEventListener('resize', again); window.addEventListener('touchmove', place, { passive: true });
+  window.addEventListener('resize', again); window.addEventListener('orientationchange', again);
+  try { const h = document.getElementById('hdr'); if (h && 'ResizeObserver' in window) new ResizeObserver(again).observe(h); } catch { }
   window.addEventListener('librava:cart', draw); window.addEventListener('librava:lang', draw);
   window.addEventListener('hashchange', draw); window.addEventListener('popstate', draw);
   setInterval(() => { const has = !!document.getElementById('goal-bar'); if (has !== cart.get().length > 0) draw(); }, 2500);
