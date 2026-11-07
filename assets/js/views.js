@@ -516,6 +516,10 @@ export async function viewBook(el, id) {
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(es => { bar.hidden = es.some(x => x.isIntersecting) || !document.body.contains(bar); }, { threshold: 0.1 });
       io.observe(mainBuy);
+      // once the footer is on screen the bar slides away (transform + opacity only, no scroll listener, no layout reads):
+      // nothing fixed sits at the bottom while Safari's toolbars resize at the end of the page
+      const foot = document.querySelector('footer.foot');
+      if (foot) { const fo = new IntersectionObserver(es => { bar.classList.toggle('bs-off', es.some(x => x.isIntersecting)); }, { threshold: 0 }); fo.observe(foot); }
       const watch = new MutationObserver(() => { if (!document.body.contains(bar)) { io.disconnect(); watch.disconnect(); } });
       watch.observe(document.body, { childList: true, subtree: true });
     }

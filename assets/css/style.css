@@ -2165,7 +2165,8 @@ html[data-theme="dark"] .ntf-hl { background: #5A4520; color: #FFE9B8; }
   .buy-sticky .btn { flex: 1; max-width: 220px; min-height: 46px }
   .book-cover-col .cover { max-width: 160px }
 
-  body:has(.buy-sticky:not([hidden])) .site-foot, body:has(.buy-sticky:not([hidden])) footer { padding-bottom: 70px }
+  /* space for the bar is reserved whenever it exists (not only while it is visible), so the footer never changes height when the bar hides */
+  body:has(.buy-sticky) .site-foot, body:has(.buy-sticky) footer { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) }
   body:has(.buy-sticky) main { padding-bottom: calc(84px + env(safe-area-inset-bottom)) }
   .buy-sticky { transition: transform .25s ease, opacity .2s ease }
 }
@@ -3878,10 +3879,12 @@ html.is-scrolling :is(.marq-track, .promo-shelf, .promo-slide, .promo-strip, .pr
   .cover, .guide-card img { animation: none; }
 }
 
-/* 4. the long footer is skipped by the renderer until it is near the screen */
-footer.foot { content-visibility: auto; contain-intrinsic-size: auto 1000px; }
-@media (min-width: 700px) { footer.foot { contain-intrinsic-size: auto 660px; } }   /* measured heights: ~1000-1100px on phones, ~660px on tablets */
+/* 4. (removed) */
+/* (footer content-visibility was tried and dropped: a footer whose height is estimated can change height at the very end of the page) */
 
 /* 5. bottom-sheet filters follow the visible area when Safari's toolbar collapses (vh = tallest, dvh = current) */
 @media (max-width: 860px) { .filters { max-height: 80vh; max-height: 80dvh; } }
 .soon { min-height: 100vh; min-height: 100dvh; }
+
+/* buy bar slides away while the footer is in view (class set from views.js through an IntersectionObserver) */
+.buy-sticky.bs-off { transform: translate3d(0, 110%, 0); opacity: 0; pointer-events: none; box-shadow: none; }
