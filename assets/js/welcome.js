@@ -1,9 +1,9 @@
 // First visit: one festive window with a gift and one button (same look as the gift window), almost no text.
-import { api } from './api.js?v=20261107214116';
-import { store, esc } from './util.js?v=20261107214116';
-import { describeOffer } from './offers.js?v=20261107214116';
-import { getLang, t } from './i18n.js?v=20261107214116';
-import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261107214116';
+import { api } from './api.js?v=20261107230141';
+import { store, esc } from './util.js?v=20261107230141';
+import { describeOffer } from './offers.js?v=20261107230141';
+import { getLang, t } from './i18n.js?v=20261107230141';
+import { modal, GIFT_SVG, currentPath, go, cart } from './ui.js?v=20261107230141';
 const T = {
   en: ['A gift for you', 'Get it'], ro: ['Un cadou pentru tine', 'Ia-l'], it: ['Un regalo per te', 'Prendilo'], fr: ['Un cadeau pour vous', 'Je le prends'], de: ['Ein Geschenk für Sie', 'Holen'],
   es: ['Un regalo para ti', 'Cogerlo'], pt: ['Um presente para si', 'Aproveitar'], nl: ['Een cadeau voor jou', 'Pakken'], pl: ['Prezent dla Ciebie', 'Odbierz'], cs: ['Dárek pro vás', 'Vzít'],
