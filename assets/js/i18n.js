@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261106230734';
-import { CONFIG } from './config.js?v=20261106230734';
-import { store } from './util.js?v=20261106230734';
+import { localize, loadRates } from './localprice.js?v=20261107214116';
+import { CONFIG } from './config.js?v=20261107214116';
+import { store } from './util.js?v=20261107214116';
 
 const D = {
   ro: {
@@ -4882,7 +4882,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261106230734`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261107214116`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
