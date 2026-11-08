@@ -1,6 +1,6 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261107230141';
+import { store } from './util.js?v=20261108104608';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
 // Google Ads tag + purchase conversion label: public identifiers (visible on every page that uses Google Ads)
