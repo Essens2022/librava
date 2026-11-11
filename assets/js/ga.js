@@ -1,6 +1,6 @@
 // Google Analytics 4 — loaded ONLY after the visitor chooses "Accept all" in the cookie notice.
 // The measurement ID is a public identifier (it is visible in every page that uses Analytics), not a secret.
-import { store } from './util.js?v=20261111180505';
+import { store } from './util.js?v=20261111200749';
 
 const GA_ID = 'G-ZEE5K1Z2RB';
 // Google Ads tag + purchase conversion label: public identifiers (visible on every page that uses Google Ads)
@@ -8,7 +8,9 @@ const ADS_ID = 'AW-18550229876';
 const ADS_PURCHASE_LABEL = 'kI85CKHBt7AdEPSWuI1F'; // filled in after the Purchase conversion is created in Google Ads
 // Meta Pixel ID: also a public identifier (visible in every page that uses it), not a secret
 const META_PIXEL_ID = '2177981823134602';
-let ready = false, fbReady = false;
+// Spotify Pixel key: public identifier (visible in every page that uses the pixel), not a secret
+const SPOTIFY_KEY = '8e341c69943b4b0dad74b1eb8edc197f';
+let ready = false, fbReady = false, spReady = false;
 
 // two separate choices: Statistics (Google Analytics) and Advertising (Google Ads + Meta Pixel + remarketing)
 const hostOk = () => /(^|\.)librava\.store$/.test(location.hostname) && navigator.globalPrivacyControl !== true;
@@ -28,7 +30,7 @@ function configure() {
   const g = window.gtag;
   if (analyticsOn() && !gaCfg) { gaCfg = true; g('config', GA_ID, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false }); }
   if (adsOn() && !adsCfg) { adsCfg = true; g('config', ADS_ID, { allow_ad_personalization_signals: true }); }  // Google Ads: sales measurement + remarketing list
-  if (adsOn()) initPixel();
+  if (adsOn()) { initPixel(); initSpotify(); }
 }
 export function initGA() {
   if (ready || !gaAllowed()) return;
@@ -52,7 +54,7 @@ export function applyConsent() {
   const host = location.hostname.split('.').slice(-2).join('.');
   const wipe = re => document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => re.test(n)).forEach(n => { document.cookie = `${n}=; Max-Age=0; path=/; domain=.${host}`; document.cookie = `${n}=; Max-Age=0; path=/`; });
   if (!analyticsOn()) { gaCfg = false; wipe(/^_ga/); }
-  if (!adsOn()) { adsCfg = false; try { window.fbq && window.fbq('consent', 'revoke'); } catch { } fbReady = false; wipe(/^_fb[pc]$/); }
+  if (!adsOn()) { adsCfg = false; try { window.fbq && window.fbq('consent', 'revoke'); } catch { } fbReady = false; spReady = false; wipe(/^_fb[pc]$/); }
 }
 
 // Meta Pixel: only with the Advertising choice; measures Facebook/Instagram ads
@@ -63,6 +65,13 @@ function initPixel() {
   window.fbq('consent', 'grant');
   window.fbq('init', META_PIXEL_ID);
 }
+// Spotify Pixel: only with the Advertising choice; measures Spotify ads (page views)
+function initSpotify() {
+  if (spReady) return; spReady = true;
+  (function (w, d) { var id = 'spdt-capture', n = 'script'; if (!d.getElementById(id)) { w.spdt = w.spdt || function () { (w.spdt.q = w.spdt.q || []).push(arguments); }; var e = d.createElement(n); e.id = id; e.async = 1; e.src = 'https://pixel.byspotify.com/ping.min.js'; var s = d.getElementsByTagName(n)[0]; s.parentNode.insertBefore(e, s); } w.spdt('conf', { key: SPOTIFY_KEY }); w.spdt('view'); })(window, document);
+}
+let spFirst = true;
+const sp = (...a) => { try { if (spReady && window.spdt) window.spdt(...a); } catch { } };
 const fb = (...a) => { try { if (fbReady && window.fbq) window.fbq(...a); } catch { } };
 
 // visitor withdrew consent: stop sending and remove the _ga cookies
@@ -72,7 +81,7 @@ export function stopGA() {
   gaCfg = false; adsCfg = false;
   try { window['ga-disable-' + GA_ID] = true; } catch { }
   try { window.fbq && window.fbq('consent', 'revoke'); } catch { }
-  fbReady = false;
+  fbReady = false; spReady = false;
   const host = location.hostname.split('.').slice(-2).join('.');
   document.cookie.split(';').map(c => c.split('=')[0].trim()).filter(n => /^_ga|^_fb[pc]$/.test(n)).forEach(n => {
     document.cookie = `${n}=; Max-Age=0; path=/; domain=.${host}`;
@@ -91,7 +100,7 @@ export function gaEvent(type, data = {}) {
     if (!ready) initGA();
     const g = window.gtag; if (!g) return;
     switch (type) {
-      case 'pageview': g('event', 'page_view', { page_location: pageLocation(), page_title: document.title, language: document.documentElement.lang }); fb('track', 'PageView'); break;
+      case 'pageview': g('event', 'page_view', { page_location: pageLocation(), page_title: document.title, language: document.documentElement.lang }); fb('track', 'PageView'); if (spFirst) spFirst = false; else sp('view'); break;
       case 'book_view': if (data.book) { g('event', 'view_item', { currency: cur(data.book), value: (data.book.price_cents || 0) / 100, items: [item(data.book)] }); fb('track', 'ViewContent', fbData([data.book])); } break;
       case 'add_cart': if (data.book) { g('event', 'add_to_cart', { currency: cur(data.book), value: (data.book.price_cents || 0) / 100, items: [item(data.book)] }); fb('track', 'AddToCart', fbData([data.book])); } break;
       case 'checkout': if (data.books) { g('event', 'begin_checkout', { currency: cur(data.books[0]), value: data.books.reduce((a, b) => a + (b.price_cents || 0), 0) / 100, items: data.books.map(item) }); fb('track', 'InitiateCheckout', { ...fbData(data.books), num_items: data.books.length }); } break;
