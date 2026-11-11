@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261111163446';
-import { CONFIG } from './config.js?v=20261111163446';
-import { store } from './util.js?v=20261111163446';
+import { localize, loadRates } from './localprice.js?v=20261111180505';
+import { CONFIG } from './config.js?v=20261111180505';
+import { store } from './util.js?v=20261111180505';
 
 const D = {
   ro: {
@@ -1417,6 +1417,14 @@ const D = {
     "admin.diag.sBook": "a oprit la carte",
     "admin.diag.sHome": "a oprit la început",
     "admin.act2.ev.remove_cart": "A scos din coș",
+    "admin.act2.ev.survey": "A răspuns la sondaj: «{a}»",
+    "admin.act2.sv.price": "Prețul",
+    "admin.act2.sv.value": "Nu e sigur că merită",
+    "admin.act2.sv.look": "Doar se uita",
+    "admin.act2.sv.trust": "Nu e sigur să plătească aici",
+    "admin.act2.sv.amazon": "Preferă cartea tipărită sau Amazon",
+    "admin.act2.sv.format": "Nu poate citi acest format",
+    "admin.act2.sv.other": "Altceva",
     "admin.act2.ev.pay_redirect": "A fost trimis la pagina de plată",
     "admin.act2.ev.pay_error": "Eroare la plată",
     "admin.act2.ev.waiver_no": "S-a oprit la confirmarea renunțării (nu a bifat)",
@@ -3031,6 +3039,14 @@ const D = {
     "admin.diag.sBook": "si è fermato al libro",
     "admin.diag.sHome": "si è fermato all’inizio",
     "admin.act2.ev.remove_cart": "Ha tolto dal carrello",
+    "admin.act2.ev.survey": "Ha risposto al sondaggio: «{a}»",
+    "admin.act2.sv.price": "Il prezzo",
+    "admin.act2.sv.value": "Non è sicuro che valga",
+    "admin.act2.sv.look": "Stava solo guardando",
+    "admin.act2.sv.trust": "Non si fida a pagare qui",
+    "admin.act2.sv.amazon": "Preferisce il cartaceo o Amazon",
+    "admin.act2.sv.format": "Non può leggere questo formato",
+    "admin.act2.sv.other": "Altro",
     "admin.act2.ev.pay_redirect": "Mandato alla pagina di pagamento",
     "admin.act2.ev.pay_error": "Errore nel pagamento",
     "admin.act2.ev.waiver_no": "Si è fermato alla conferma di rinuncia",
@@ -4645,6 +4661,14 @@ const D = {
     "admin.diag.sBook": "stopped at a book",
     "admin.diag.sHome": "stopped at the start",
     "admin.act2.ev.remove_cart": "Removed from cart",
+    "admin.act2.ev.survey": "Answered the survey: «{a}»",
+    "admin.act2.sv.price": "The price",
+    "admin.act2.sv.value": "Not sure it is worth it",
+    "admin.act2.sv.look": "Was only looking",
+    "admin.act2.sv.trust": "Not sure about paying here",
+    "admin.act2.sv.amazon": "Prefers a paperback or Amazon",
+    "admin.act2.sv.format": "Cannot read this format",
+    "admin.act2.sv.other": "Something else",
     "admin.act2.ev.pay_redirect": "Sent to the payment page",
     "admin.act2.ev.pay_error": "Payment error",
     "admin.act2.ev.waiver_no": "Stopped at the withdrawal confirmation",
@@ -4882,7 +4906,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261111163446`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261111180505`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
