@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261110022035';
-import { CONFIG } from './config.js?v=20261110022035';
-import { SOCIAL_PATHS } from './social.js?v=20261110022035';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261110022035';
-import { esc, store, $, $$ } from './util.js?v=20261110022035';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261111163446';
+import { CONFIG } from './config.js?v=20261111163446';
+import { SOCIAL_PATHS } from './social.js?v=20261111163446';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261111163446';
+import { esc, store, $, $$ } from './util.js?v=20261111163446';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,13 +14,13 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261110022035';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261110022035';
-import { track, trackPage } from './track.js?v=20261110022035';
-import { initGA, applyConsent } from './ga.js?v=20261110022035';
-import { consentStrings } from './consent-i18n.js?v=20261110022035';
-import { api } from './api.js?v=20261110022035';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261110022035';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261111163446';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261111163446';
+import { track, trackPage } from './track.js?v=20261111163446';
+import { initGA, applyConsent } from './ga.js?v=20261111163446';
+import { consentStrings } from './consent-i18n.js?v=20261111163446';
+import { api } from './api.js?v=20261111163446';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261111163446';
 
 // ---------------- icons ----------------
 const P = {
@@ -328,10 +328,10 @@ let LABELS = (() => { try { return JSON.parse(localStorage.getItem('librava:labe
 export const labelOf = id => BOOK_LABELS.includes(LABELS[id]) ? LABELS[id] : '';
 const lblHTML = id => { const l = labelOf(id); return l ? `<span class="lbl lbl-${l}">${esc(t('lbl.' + l))}</span>` : ''; };
 // Language flags on the cover (top-left ribbon). Owner sets them per book in the admin (site_settings → book_flags);
-// without an override, English books show US + UK and Italian books show the Italian flag.
+// without an override, English books show US + UK, other languages their own flag (IT, DE, ES, FR, PT, RO).
 export const FLAG_CODES = ['us', 'gb', 'ca', 'au', 'ie', 'it', 'ro', 'fr', 'de', 'es', 'pt', 'nl', 'pl', 'cz', 'se', 'dk', 'no', 'fi', 'gr', 'hu', 'hr', 'sk', 'si', 'bg', 'lt', 'lv', 'ee', 'ua'];
 const FLAG_LANG = { us: 'en', gb: 'en', ca: 'en', au: 'en', ie: 'en', it: 'it', ro: 'ro', fr: 'fr', de: 'de', es: 'es', pt: 'pt', nl: 'nl', pl: 'pl', cz: 'cs', se: 'sv', dk: 'da', no: 'no', fi: 'fi', gr: 'el', hu: 'hu', hr: 'hr', sk: 'sk', si: 'sl', bg: 'bg', lt: 'lt', lv: 'lv', ee: 'et', ua: 'uk' };
-const FLAG_DEFAULT = { en: ['us', 'gb'], it: ['it'] };
+const FLAG_DEFAULT = { en: ['us', 'gb'], it: ['it'], de: ['de'], es: ['es'], fr: ['fr'], pt: ['pt'], ro: ['ro'] };
 let FLAGS = (() => { try { return JSON.parse(localStorage.getItem('librava:flags') || '{}') || {}; } catch { return {}; } })();
 export const flagsOf = (id, lang) => Array.isArray(FLAGS[id]) ? FLAGS[id].filter(c => FLAG_CODES.includes(c)) : (FLAG_DEFAULT[lang] || []);
 const flagsHTML = (id, lang) => { const f = flagsOf(id, lang); return f.length ? `<span class="flg" aria-hidden="true">${f.map(c => `<img src="/assets/img/flags/${c}.svg" alt="" width="20" height="15" title="${esc(langName(FLAG_LANG[c]))}" draggable="false">`).join('')}</span>` : ''; };
