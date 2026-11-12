@@ -3917,3 +3917,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-next p { font-size: 13px; }
 .pay-consent, .pay-terms { font-size: 10.5px; line-height: 1.35; margin: -4px 0 0; opacity: .85; }
 .pay-terms { margin-top: -8px; }
+.pay-chips { gap: 8px; }
+.pay-chip { border: 0 !important; background: none !important; padding: 0 !important; display: inline-flex; }
+.pay-chip svg { height: 26px; width: auto; display: block; border-radius: 4px; }
+.pay-chips { gap: 6px; flex-wrap: nowrap; }
+.pay-chip svg { height: 24px; }
