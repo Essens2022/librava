@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261112202241';
-import { t, money, getLang } from './i18n.js?v=20261112202241';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261112202241';
-import { applyOffers, appliedLabel } from './offers.js?v=20261112202241';
-import { esc, store } from './util.js?v=20261112202241';
+import { api } from './api.js?v=20261112212046';
+import { t, money, getLang } from './i18n.js?v=20261112212046';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261112212046';
+import { applyOffers, appliedLabel } from './offers.js?v=20261112212046';
+import { esc, store } from './util.js?v=20261112212046';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;

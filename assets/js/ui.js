@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112202241';
-import { CONFIG } from './config.js?v=20261112202241';
-import { SOCIAL_PATHS } from './social.js?v=20261112202241';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112202241';
-import { esc, store, $, $$ } from './util.js?v=20261112202241';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112212046';
+import { CONFIG } from './config.js?v=20261112212046';
+import { SOCIAL_PATHS } from './social.js?v=20261112212046';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112212046';
+import { esc, store, $, $$ } from './util.js?v=20261112212046';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112202241';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112202241';
-import { track, trackPage } from './track.js?v=20261112202241';
-import { initGA, applyConsent } from './ga.js?v=20261112202241';
-import { consentStrings } from './consent-i18n.js?v=20261112202241';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112202241';
-import { api } from './api.js?v=20261112202241';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112202241';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261112212046';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112212046';
+import { track, trackPage } from './track.js?v=20261112212046';
+import { initGA, applyConsent } from './ga.js?v=20261112212046';
+import { consentStrings } from './consent-i18n.js?v=20261112212046';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112212046';
+import { api } from './api.js?v=20261112212046';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112212046';
 
 // ---------------- icons ----------------
 const P = {
@@ -385,7 +385,15 @@ export async function loadLabels() {
 // Covers that already include the rounded-spine effect in the image itself
 const SPINE_BAKED = new Set(['928c1e7a-431a-424f-a03d-f4a96e527c53','a2ab3b56-888c-44da-87f9-a3598079ef13','c198d4e5-efae-48de-8c11-ef9c64013423','edb5d3a2-9aa0-4ceb-84cd-985f4ddf0b5b','1e36aa6b-3ea0-4134-b61f-914e1af906bb','f838a7f8-04c1-4cd4-bcf3-0f5fbe1721a1']);
 export const isBakedCover = id => SPINE_BAKED.has(id);
+// digital products (planners, calendars, spreadsheets...) never look like books: wide product picture, no spine, no flag ribbon, a clear type tag
+export function pcoverHTML(b, { badge = true } = {}) {
+  const ty = ptypeOf(b), disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
+  const bd = !badge ? '' : !b.price_cents ? `<span class="pbadge free">${esc(t('book.free'))}</span>` : disc ? `<span class="pbadge">-${disc}%</span>` : '';
+  const img = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
+  return `<div class="pcover pc-${ty}" data-id="${esc(b.id)}"><span class="ptag ptag-${ty}">${icon('pt_' + ty, 'ico')}${esc(t('ptype1.' + ty))}</span>${bd}${img}<span class="pfmt">${esc(t('book.formatShort.' + b.format))}</span></div>`;
+}
 export function coverHTML(b, { badge = true, thumb = false } = {}) {
+  if (isDigital(b)) return pcoverHTML(b, { badge });
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
@@ -420,6 +428,13 @@ export function fullTitle(b) {
   return /[:.?!—–-]$/.test(tt) || /^[—–-]/.test(st) ? `${tt} ${st}` : `${tt}: ${st}`;
 }
 export function cardHTML(b) {
+  if (isDigital(b)) return `<a class="card pcard" href="#/book/${encodeURIComponent(b.id)}">
+    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="card-title" title="${esc(fullTitle(b))}">${esc(b.title)}</div>
+    ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
+    ${ratingHTML(b)}
+    <div class="pcard-foot">${priceHTML(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div>
+  </a>`;
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
     <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
@@ -430,6 +445,15 @@ export function cardHTML(b) {
   </a>`;
 }
 export function rcardHTML(b) {
+  if (isDigital(b)) return `<a class="rcard prcard" href="#/book/${encodeURIComponent(b.id)}">
+    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="rinfo">
+      <div class="card-title" title="${esc(fullTitle(b))}">${esc(b.title)}</div>
+      ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
+      ${ratingHTML(b)}
+      <div class="pcard-foot">${priceHTML(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div>
+    </div>
+  </a>`;
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
     <div class="rinfo">
