@@ -1,18 +1,18 @@
-import { CONFIG } from './config.js?v=20261112191337';
-import { askWhy } from './why.js?v=20261112191337';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112191337';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112191337';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112191337';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112191337';
-import { PAY_ICONS, PAY_TEXT } from './payicons.js?v=20261112191337';
-import { couponLive } from './welcome.js?v=20261112191337';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112191337';
-import { track } from './track.js?v=20261112191337';
-import { gaEvent } from './ga.js?v=20261112191337';
-import { guessLang } from './langdetect.js?v=20261112191337';
-import { didYouMean } from './search.js?v=20261112191337';
-import { api, editionsOf } from './api.js?v=20261112191337';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112191337';
+import { CONFIG } from './config.js?v=20261112191416';
+import { askWhy } from './why.js?v=20261112191416';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112191416';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112191416';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112191416';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112191416';
+import { PAY_ICONS, PAY_TEXT } from './payicons.js?v=20261112191416';
+import { couponLive } from './welcome.js?v=20261112191416';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112191416';
+import { track } from './track.js?v=20261112191416';
+import { gaEvent } from './ga.js?v=20261112191416';
+import { guessLang } from './langdetect.js?v=20261112191416';
+import { didYouMean } from './search.js?v=20261112191416';
+import { api, editionsOf } from './api.js?v=20261112191416';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112191416';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1367,7 +1367,7 @@ export async function viewContact(el) {
     <p><a class="btn btn-buy" href="mailto:${esc(CONFIG.supportEmail)}">${icon('mail', 'ico')} ${esc(CONFIG.supportEmail)}</a></p>
     <p class="muted">${esc(t('contact.response'))}</p>
     <h2>${esc(t('contact.faq'))}</h2>${topics}
-    <p class="muted">${esc(t('contact.legalLine', { company: c.company || CONFIG.siteName }))} <a href="#/legal/imprint">${esc(legalText(getLang()).title.imprint)}</a> · <a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></p>
+    <p class="muted"><a href="#/legal/imprint">${esc(legalText(getLang()).title.imprint)}</a> · <a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></p>
   </article></div>`;
 }
 
@@ -1390,7 +1390,7 @@ function waiverConfirm(sum) {
       <p class="pay-terms">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
       <button class="pay-back" data-close>${esc(t('pay.back'))}</button>
       <div class="pay-foot"><div class="pay-secure">${icon('lock', 'ico')} ${esc(t('pay.secured'))}</div>${payChipsHTML()}
-        <div class="pay-meta">${sum?.company ? `<span>${esc(t('pay.soldBy', { company: sum.company }))}</span>` : ''}<a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>
+        <div class="pay-meta"><a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>
     </div>`, {
       onMount: (m, closeFn) => {
         const go2 = m.querySelector('#w-go');
