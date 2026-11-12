@@ -1,11 +1,11 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { t, getLang, LANGS } from './i18n.js?v=20261112212046';
-import { esc, $, $$ } from './util.js?v=20261112212046';
-import { api } from './api.js?v=20261112212046';
-import { icon, toast, errText, CATS } from './ui.js?v=20261112212046';
-import { aplusEditor } from './admin.js?v=20261112212046';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261112212046';
+import { t, getLang, LANGS } from './i18n.js?v=20261112212659';
+import { esc, $, $$ } from './util.js?v=20261112212659';
+import { api } from './api.js?v=20261112212659';
+import { icon, toast, errText, CATS } from './ui.js?v=20261112212659';
+import { aplusEditor } from './admin.js?v=20261112212659';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261112212659';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
@@ -16,7 +16,7 @@ export async function digitalAdmin(body) {
     <h2 style="margin:0 0 4px;font-size:18px">Produse digitale</h2>
     <p class="muted" style="margin:0 0 12px">Planificatoare, calendare, organizatoare, foi de calcul, șabloane. Clientul le descarcă imediat după plată din bibliotecă. Formate: ${FILE_FORMATS.filter(f => f !== 'epub').map(f => f.toUpperCase()).join(', ')}.</p>
     <button class="btn btn-buy" id="dg-new">${icon('plus', 'ico')} Adaugă produs digital</button></div>
-    <div class="panel"><div id="dg-list">${list.length ? list.map(b => `<div class="dg-row" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+    <div class="panel"><div id="dg-rows">${list.length ? list.map(b => `<div class="dg-row" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
       <div style="flex:1;min-width:0"><b>${esc(b.title)}</b><div class="muted" style="font-size:13px">${esc(t('ptype1.' + ptypeOf(b)))} · ${esc(String(b.format).toUpperCase())} · ${b.status === 'published' ? 'publicat' : 'ciornă'} · ${(b.price_cents / 100).toFixed(2)} €</div></div>
       <button class="btn btn-ghost btn-sm" data-edit="${esc(b.id)}">Modifică</button></div>`).join('') : '<p class="muted">Niciun produs digital încă.</p>'}</div></div>
     <div id="dg-form"></div>`;
