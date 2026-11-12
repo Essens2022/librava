@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261112190111';
-import { askWhy } from './why.js?v=20261112190111';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112190111';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112190111';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112190111';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112190111';
-import { couponLive } from './welcome.js?v=20261112190111';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112190111';
-import { track } from './track.js?v=20261112190111';
-import { gaEvent } from './ga.js?v=20261112190111';
-import { guessLang } from './langdetect.js?v=20261112190111';
-import { didYouMean } from './search.js?v=20261112190111';
-import { api, editionsOf } from './api.js?v=20261112190111';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112190111';
+import { CONFIG } from './config.js?v=20261112190305';
+import { askWhy } from './why.js?v=20261112190305';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112190305';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112190305';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112190305';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112190305';
+import { couponLive } from './welcome.js?v=20261112190305';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112190305';
+import { track } from './track.js?v=20261112190305';
+import { gaEvent } from './ga.js?v=20261112190305';
+import { guessLang } from './langdetect.js?v=20261112190305';
+import { didYouMean } from './search.js?v=20261112190305';
+import { api, editionsOf } from './api.js?v=20261112190305';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112190305';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1386,9 +1386,9 @@ function waiverConfirm(sum) {
       <h2>${esc(t('legal.waiverTitle'))}</h2>
       ${summary}
       <div class="pay-next">${icon('shield', 'ico')}<div><b>${esc(t('pay.nextTitle'))}</b><p>${esc(t('pay.nextText'))}</p></div></div>
+      <button class="btn btn-buy btn-block" id="w-go">${icon('lock', 'ico')} ${esc(r ? t('pay.payNow', { total: money(r.total) }) : t('legal.waiverGo'))}</button>
       <p class="pay-consent">${esc(t('pay.consentNote'))}</p>
       <p class="pay-terms">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
-      <button class="btn btn-buy btn-block" id="w-go">${icon('lock', 'ico')} ${esc(r ? t('pay.payNow', { total: money(r.total) }) : t('legal.waiverGo'))}</button>
       <button class="pay-back" data-close>${esc(t('pay.back'))}</button>
       <div class="pay-foot"><div class="pay-secure">${icon('lock', 'ico')} ${esc(t('pay.secured'))}</div>${payChipsHTML()}
         <div class="pay-meta">${sum?.company ? `<span>${esc(t('pay.soldBy', { company: sum.company }))}</span>` : ''}<a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>

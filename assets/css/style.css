@@ -3915,3 +3915,5 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-terms { font-size: 12px; line-height: 1.4; text-align: center; margin-top: -8px; }
 .pay-modal { gap: 12px; }
 .pay-next p { font-size: 13px; }
+.pay-consent, .pay-terms { font-size: 10.5px; line-height: 1.35; margin: -4px 0 0; opacity: .85; }
+.pay-terms { margin-top: -8px; }
