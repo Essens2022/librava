@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261111200749';
-import { askWhy } from './why.js?v=20261111200749';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261111200749';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261111200749';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261111200749';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261111200749';
-import { couponLive } from './welcome.js?v=20261111200749';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261111200749';
-import { track } from './track.js?v=20261111200749';
-import { gaEvent } from './ga.js?v=20261111200749';
-import { guessLang } from './langdetect.js?v=20261111200749';
-import { didYouMean } from './search.js?v=20261111200749';
-import { api, editionsOf } from './api.js?v=20261111200749';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261111200749';
+import { CONFIG } from './config.js?v=20261112185400';
+import { askWhy } from './why.js?v=20261112185400';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112185400';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112185400';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112185400';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112185400';
+import { couponLive } from './welcome.js?v=20261112185400';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112185400';
+import { track } from './track.js?v=20261112185400';
+import { gaEvent } from './ga.js?v=20261112185400';
+import { guessLang } from './langdetect.js?v=20261112185400';
+import { didYouMean } from './search.js?v=20261112185400';
+import { api, editionsOf } from './api.js?v=20261112185400';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112185400';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -588,9 +588,17 @@ export async function startCheckout(ids) {
     toast(t('cart.ownedRemoved'));
     if (!ids.length) { go('/library'); return; }
   }
-  if (!await waiverConfirm()) { track('waiver_no'); return; }
-  track('checkout', { value_cents: null });
   const gaBooks = (await Promise.all(ids.map(id => api.getBook(id).catch(() => null)))).filter(Boolean);
+  // order summary shown inside the consent window: same price rules as the cart (offers + coupon)
+  let sum = null;
+  try {
+    let code = sessionStorage.getItem(COUPON) || '';
+    if (code && !couponLive(code)) code = '';
+    const [offers, coupon] = await Promise.all([api.offers ? api.offers().catch(() => []) : [], code && api.findCoupon ? api.findCoupon(code).catch(() => null) : null]);
+    sum = { books: gaBooks, r: applyOffers(gaBooks, [...offers, ...(coupon ? [coupon] : [])], { coupon: code }), company: (await companyInfo().catch(() => ({})))?.company || '' };
+  } catch { }
+  if (!await waiverConfirm(sum)) { track('waiver_no'); return; }
+  track('checkout', { value_cents: null });
   gaEvent('checkout', { books: gaBooks });
   try {
     const cpn = sessionStorage.getItem(COUPON) || null;
@@ -1347,15 +1355,44 @@ export async function viewLegal(el, page) {
     </article></div>`;
 }
 
+// support page: one clear place for questions, with the topics people ask about most
+export async function viewContact(el) {
+  const c = await companyInfo().catch(() => ({}));
+  document.title = t('contact.title') + ' · ' + CONFIG.siteName;
+  const topics = ['download', 'payment', 'refund', 'invoice'].map(k => `<div class="faq-i"><b>${esc(t('contact.q.' + k))}</b><p>${esc(t('contact.a.' + k))}</p></div>`).join('');
+  el.innerHTML = `<div class="wrap page legal-wrap"><article class="panel legal">
+    <h1>${esc(t('contact.title'))}</h1>
+    <p>${esc(t('contact.intro'))}</p>
+    <p><a class="btn btn-buy" href="mailto:${esc(CONFIG.supportEmail)}">${icon('mail', 'ico')} ${esc(CONFIG.supportEmail)}</a></p>
+    <p class="muted">${esc(t('contact.response'))}</p>
+    <h2>${esc(t('contact.faq'))}</h2>${topics}
+    <p class="muted">${esc(t('contact.legalLine', { company: c.company || CONFIG.siteName }))} <a href="#/legal/imprint">${esc(legalText(getLang()).title.imprint)}</a> · <a href="#/legal/withdrawal">${esc(legalText(getLang()).title.withdrawal)}</a></p>
+  </article></div>`;
+}
+
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
-function waiverConfirm() {
+// the consent logic is unchanged (unticked box, button disabled until ticked, server checks waiver === true); only the trust content around it is new
+const PAY_CHIPS = ['Visa', 'Mastercard', 'American Express', 'Apple Pay', 'Google Pay'];
+export const payChipsHTML = () => `<span class="pay-chips" aria-label="${esc(t('pay.methods'))}">${PAY_CHIPS.map(n => `<span class="pay-chip">${esc(n)}</span>`).join('')}</span>`;
+function waiverConfirm(sum) {
   return new Promise(resolve => {
     let ok = false;
     const L = legalText(getLang());
-    const close = modal(`<h2 style="margin:0">${esc(t('legal.waiverTitle'))}</h2>
+    const bk = sum?.books || [], r = sum?.r;
+    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(t('book.format.' + b.format))}</small></div><div class="pay-item-p">${money(r.final?.[b.id] ?? b.price_cents)}</div></div>`).join('') : '';
+    const summary = r ? `<section class="pay-sum" aria-label="${esc(t('pay.yourOrder'))}"><h3>${esc(t('pay.yourOrder'))}</h3>${items}
+        <div class="pay-total"><span>${esc(t('pay.totalVat'))}</span><b>${money(r.total)}</b></div></section>` : '';
+    const close = modal(`<div class="pay-modal">
+      <h2>${esc(t('legal.waiverTitle'))}</h2>
+      ${summary}
+      <div class="pay-next">${icon('shield', 'ico')}<div><b>${esc(t('pay.nextTitle'))}</b><p>${esc(t('pay.nextText'))}</p></div></div>
       <label class="check consent-check"><input type="checkbox" id="w-ok"> <span>${esc(t('legal.waiverText'))}</span></label>
-      <p class="muted" style="margin:0;font-size:13px">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
-      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-ghost" data-close>${esc(t('admin.cancel'))}</button><button class="btn btn-buy" id="w-go" disabled>${esc(t('legal.waiverGo'))}</button></div>`, {
+      <p class="pay-terms">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
+      <button class="btn btn-buy btn-block" id="w-go" disabled>${esc(t('legal.waiverGo'))}</button>
+      <button class="pay-back" data-close>${esc(t('pay.back'))}</button>
+      <div class="pay-foot"><div class="pay-secure">${icon('lock', 'ico')} ${esc(t('pay.secured'))}</div>${payChipsHTML()}
+        <div class="pay-meta">${sum?.company ? `<span>${esc(t('pay.soldBy', { company: sum.company }))}</span>` : ''}<a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>
+    </div>`, {
       onMount: (m, closeFn) => {
         const cb = m.querySelector('#w-ok'), go2 = m.querySelector('#w-go');
         cb.onchange = () => { go2.disabled = !cb.checked; };
