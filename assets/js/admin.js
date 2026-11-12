@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261112220311';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112220311';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112220311';
-import { resetCompanyCache } from './views.js?v=20261112220311';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112220311';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112220311';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112220311';
-import { optimizeBook } from './optimize.js?v=20261112220311';
-import { api } from './api.js?v=20261112220311';
-import { isDigital } from './ptypes.js?v=20261112220311';
-import { digitalAdmin } from './admin-digital.js?v=20261112220311';
-import { OF_STYLES } from './offerstyles.js?v=20261112220311';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112220311';
+import { CONFIG } from './config.js?v=20261112220334';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112220334';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112220334';
+import { resetCompanyCache } from './views.js?v=20261112220334';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112220334';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112220334';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112220334';
+import { optimizeBook } from './optimize.js?v=20261112220334';
+import { api } from './api.js?v=20261112220334';
+import { isDigital } from './ptypes.js?v=20261112220334';
+import { digitalAdmin } from './admin-digital.js?v=20261112220334';
+import { OF_STYLES } from './offerstyles.js?v=20261112220334';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112220334';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
