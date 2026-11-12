@@ -1,18 +1,18 @@
-import { CONFIG } from './config.js?v=20261112191722';
-import { askWhy } from './why.js?v=20261112191722';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112191722';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112191722';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112191722';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112191722';
-import { PAY_ICONS, PAY_TEXT, STRIPE_ICON } from './payicons.js?v=20261112191722';
-import { couponLive } from './welcome.js?v=20261112191722';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112191722';
-import { track } from './track.js?v=20261112191722';
-import { gaEvent } from './ga.js?v=20261112191722';
-import { guessLang } from './langdetect.js?v=20261112191722';
-import { didYouMean } from './search.js?v=20261112191722';
-import { api, editionsOf } from './api.js?v=20261112191722';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112191722';
+import { CONFIG } from './config.js?v=20261112191846';
+import { askWhy } from './why.js?v=20261112191846';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112191846';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112191846';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112191846';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112191846';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112191846';
+import { couponLive } from './welcome.js?v=20261112191846';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112191846';
+import { track } from './track.js?v=20261112191846';
+import { gaEvent } from './ga.js?v=20261112191846';
+import { guessLang } from './langdetect.js?v=20261112191846';
+import { didYouMean } from './search.js?v=20261112191846';
+import { api, editionsOf } from './api.js?v=20261112191846';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112191846';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1373,7 +1373,7 @@ export async function viewContact(el) {
 
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
 // consent is given by pressing the pay button, whose wording states the loss of the withdrawal right right above it; the server still gets waiver === true and stores waiver_at
-export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${Object.entries(PAY_ICONS).map(([n, svg]) => `<span class="pay-chip" title="${esc(n)}">${svg}</span>`).join('')}${PAY_TEXT.map(n => `<span class="pay-chip pay-chip-t">${esc(n)}</span>`).join('')}<span class="pay-more">${esc(t('pay.more'))}</span></span>`;
+export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${PAY_LOGOS.map(([n, f]) => `<img class="pay-logo" src="${payLogo(f)}" alt="${esc(n)}" title="${esc(n)}" height="26" loading="lazy" decoding="async">`).join('')}<span class="pay-more">${esc(t('pay.more'))}</span></span>`;
 function waiverConfirm(sum) {
   return new Promise(resolve => {
     let ok = false;
@@ -1389,7 +1389,7 @@ function waiverConfirm(sum) {
       <p class="pay-consent">${esc(t('pay.consentNote'))}</p>
       <p class="pay-terms">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
       <button class="pay-back" data-close>${esc(t('pay.back'))}</button>
-      <div class="pay-foot"><div class="pay-secure"><span class="pay-stripe">${STRIPE_ICON}</span> <span>Powered by <b>Stripe</b></span></div>${payChipsHTML()}
+      <div class="pay-foot"><div class="pay-secure"><span>Powered by</span> <img class="pay-stripe-logo" src="${payLogo('stripe')}" alt="Stripe" height="20"></div>${payChipsHTML()}
         <div class="pay-meta"><a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>
     </div>`, {
       onMount: (m, closeFn) => {
