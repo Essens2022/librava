@@ -1,23 +1,26 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261112192149';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112192149';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112192149';
-import { resetCompanyCache } from './views.js?v=20261112192149';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112192149';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112192149';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112192149';
-import { optimizeBook } from './optimize.js?v=20261112192149';
-import { api } from './api.js?v=20261112192149';
-import { OF_STYLES } from './offerstyles.js?v=20261112192149';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112192149';
+import { CONFIG } from './config.js?v=20261112202241';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112202241';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112202241';
+import { resetCompanyCache } from './views.js?v=20261112202241';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112202241';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112202241';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112202241';
+import { optimizeBook } from './optimize.js?v=20261112202241';
+import { api } from './api.js?v=20261112202241';
+import { isDigital } from './ptypes.js?v=20261112202241';
+import { digitalAdmin } from './admin-digital.js?v=20261112202241';
+import { OF_STYLES } from './offerstyles.js?v=20261112202241';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112202241';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
   ['overview', '/admin/overview', 'chart', 'admin.tab.overview'],
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
+  ['digital', '/admin/digital', 'box', 'admin.tab.digital'],
   ['prices', '/admin/prices', 'tag', 'bp.tab'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['import', '/admin/import', 'upload', 'imp.tab'],
@@ -100,6 +103,7 @@ export async function viewAdmin(el, parts) {
     case 'new': return bookForm(body, null);
     case 'edit': { const book = await api.getBook(parts[1]).catch(() => null); return bookForm(body, book || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }  // the whole book, not the light list
     case 'books': return booksList(body);
+    case 'digital': return digitalAdmin(body);
     case 'prices': return pricesAdmin(body);
     case 'import': return importBooks(body);
     case 'kdp': return kdpAdmin(body);
@@ -313,7 +317,7 @@ async function booksList(body) {
   const edLinks = b => {
     const have = new Set(sibs(b).map(x => x.format));
     const tag = sibs(b).length > 1 ? `<span class="ed-tag" title="${esc(t('ed.linked'))}">${icon('book', 'ico')} ${esc(sibs(b).map(x => t('book.formatShort.' + x.format)).join(' + '))}</span>` : '';
-    return tag + (api.newEdition ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
+    return tag + (api.newEdition && !isDigital(b) ? ['epub', 'pdf'].filter(f => !have.has(f)).map(f => `<button type="button" class="ed-add" data-edition="${esc(b.id)}" data-fmt="${f}">+ ${esc(t('ed.add', { fmt: t('book.formatShort.' + f) }))}</button>`).join('') : '');
   };
   // the price can be changed right here, like on KDP's bookshelf: tap it, type the new price (and the crossed-out one), Save
   const priceCell = b => `<button type="button" class="qp-show" data-qp="${esc(b.id)}" title="${esc(t('qp.edit'))}">
@@ -1338,7 +1342,7 @@ const APLUS = {
 function imgSize(file) {
   return new Promise(res => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight }); im.onerror = () => res({ w: 0, h: 0 }); im.src = u; });
 }
-function aplusEditor(root, modules, getBookId) {
+export function aplusEditor(root, modules, getBookId) {
   const draw = () => {
     root.innerHTML = `${modules.length ? '' : `<p class="muted" style="margin:0">${esc(t('ap.empty'))}</p>`}
       ${modules.map((m, i) => {

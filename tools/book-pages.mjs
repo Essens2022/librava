@@ -45,7 +45,7 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
 // all published books, read in pages of 1000 (the database never returns more than 1000 rows at once)
 async function readBooks() {
   if (process.env.SEO_TEST_BOOKS) return JSON.parse(readFileSync(process.env.SEO_TEST_BOOKS, 'utf8'));
-  const q = `${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights,work_id,sample_path&status=eq.published&deleted_at=is.null&order=published_at.desc,id.asc`;
+  const q = `${URL_}/rest/v1/books?select=id,title,subtitle,author,description,category,categories,language,format,pages,price_cents,list_price_cents,currency,cover_path,isbn,librava_id,published_at,updated_at,rating_avg,rating_count,series_name,contributors,color,rights,work_id,sample_path,product_type&status=eq.published&deleted_at=is.null&order=published_at.desc,id.asc`;
   const out = [];
   for (let from = 0; ; from += 1000) {
     const r = await fetch(q, { headers: { ...H, Range: `${from}-${from + 999}`, 'Range-Unit': 'items' } });
@@ -263,12 +263,13 @@ for (const b of books) {
   const price = b.price_cents ? money(l, b.price_cents, b.currency) : tr(l, 'book.free');
   const title = `${b.title}${b.subtitle ? ': ' + b.subtitle : ''}`;
   const pageTitle = cut(title, 62) + ' | Librava';
-  const fmtName = x => tr(l, 'book.format.' + (x.format === 'epub' ? 'epub' : 'pdf'));
+  const fmtName = x => tr(l, 'book.format.' + (['epub', 'xlsx', 'docx', 'zip'].includes(x.format) ? x.format : 'pdf'));
   const offerOf = x => ({ '@type': 'Offer', url: `${SITE}/book/${x.id}/`, name: fmtName(x), price: (x.price_cents / 100).toFixed(2), priceCurrency: (x.currency || 'eur').toUpperCase(), availability: 'https://schema.org/InStock', itemCondition: 'https://schema.org/NewCondition', seller: { '@id': SITE + '/#org' },
       hasMerchantReturnPolicy: RETURN_POLICY, shippingDetails: shipping((x.currency || 'eur').toUpperCase()) });
   const cats = catsOf(b), cat = cats[0];
-  const ld = { '@type': ['Book', 'Product'], '@id': mainUrl + '#book', name: b.title, alternativeName: b.subtitle || undefined, url: mainUrl, description: cut(descFull, 5000),
-    image: cv ? [cv.url] : undefined, author: { '@type': 'Person', name: b.author }, inLanguage: b.language, bookFormat: 'https://schema.org/EBook',
+  const digital = !!b.product_type && b.product_type !== 'ebook';
+  const ld = { '@type': digital ? 'Product' : ['Book', 'Product'], '@id': mainUrl + '#book', name: b.title, alternativeName: b.subtitle || undefined, url: mainUrl, description: cut(descFull, 5000),
+    image: cv ? [cv.url] : undefined, ...(digital ? { category: tr(l, 'ptype1.' + b.product_type) } : { author: { '@type': 'Person', name: b.author }, inLanguage: b.language, bookFormat: 'https://schema.org/EBook' }),
     isbn: b.isbn || undefined, numberOfPages: b.pages || undefined, datePublished: b.published_at ? String(b.published_at).slice(0, 10) : undefined,
     publisher: { '@id': SITE + '/#org' },
     ...(b.rights === 'public' ? { copyrightNotice: 'Public domain text' } : { copyrightHolder: { '@id': SITE + '/#org' }, copyrightYear: new Date(b.published_at || Date.now()).getFullYear(), copyrightNotice: `© ${new Date(b.published_at || Date.now()).getFullYear()} Librava (librava.store). All rights reserved.` }),
@@ -383,7 +384,7 @@ for (const l of LANGS) if (!keepGuide[l] && existsSync(`${l}/guide`)) rmSync(`${
   const eur = c => `${(c / 100).toFixed(2)} ${'EUR'}`;
   const cols = ['id', 'title', 'description', 'availability', 'condition', 'price', 'sale_price', 'link', 'image_link', 'brand', 'item_group_id', 'google_product_category', 'product_type', 'custom_label_0', 'custom_label_1'];
   const rows = books.filter(b => coverOf[b.id] && b.price_cents > 0).map(b => {
-    const fmt = b.format === 'epub' ? 'EPUB' : 'PDF';
+    const fmt = String(b.format || 'pdf').toUpperCase();
     const cats = catsOf(b), cat = cats[0];
     const list = b.list_price_cents > b.price_cents ? b.list_price_cents : 0;
     return {
@@ -395,8 +396,8 @@ for (const l of LANGS) if (!keepGuide[l] && existsSync(`${l}/guide`)) rmSync(`${
       link: `${SITE}/book/${b.id}/?utm_source=facebook&utm_medium=paid&utm_campaign=catalog`,
       image_link: coverOf[b.id].url,
       brand: 'Librava', item_group_id: b.work_id || b.id,
-      google_product_category: 'Media > Books',
-      product_type: `Books > eBooks${cat ? ' > ' + tr('en', 'cat.' + cat) : ''}`,
+      google_product_category: b.product_type && b.product_type !== 'ebook' ? 'Software > Digital Goods & Currency' : 'Media > Books',
+      product_type: b.product_type && b.product_type !== 'ebook' ? `Digital products > ${tr('en', 'ptype1.' + b.product_type)}` : `Books > eBooks${cat ? ' > ' + tr('en', 'cat.' + cat) : ''}`,
       custom_label_0: cat ? tr('en', 'cat.' + cat) : 'Books', custom_label_1: fmt,
     };
   });

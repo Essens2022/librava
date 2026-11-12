@@ -3935,3 +3935,27 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-secure { gap: 6px; }
 .pay-consent, .pay-terms { font-size: 9.5px; line-height: 1.3; opacity: .75; }
 .pay-terms { margin-top: -10px; }
+
+/* ---- digital products (planners, calendars, organizers, spreadsheets, templates) ---- */
+[data-digital][hidden], [data-digital-drawer][hidden] { display: none !important; }
+.ptb { position: absolute; left: 6px; top: 34px; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 1; font-size: 10px; font-weight: 700; letter-spacing: .02em; padding: 2px 7px; border-radius: 999px; background: rgba(15, 25, 35, .82); color: #fff; backdrop-filter: blur(2px); }
+.ptb-planner { background: rgba(14, 116, 144, .92); }
+.ptb-calendar { background: rgba(180, 83, 9, .92); }
+.ptb-organizer { background: rgba(109, 40, 217, .88); }
+.ptb-spreadsheet { background: rgba(21, 128, 61, .92); }
+.ptb-template { background: rgba(190, 24, 93, .88); }
+.ptiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+.ptile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--fg); text-decoration: none; transition: border-color .15s, transform .15s; }
+.ptile:hover { border-color: var(--pista-strong); text-decoration: none; transform: translateY(-1px); }
+.ptile b { font-size: 15px; }
+.ptile small { color: var(--muted); font-size: 12px; }
+.ptile-ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--surface); color: var(--pista-strong); margin-bottom: 4px; }
+.ptile-ico svg { width: 22px; height: 22px; }
+.dh-head h1 { margin: 0 0 6px; font-size: 26px; }
+.dh-head p { margin: 0 0 14px; color: var(--muted); }
+.dh-how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.dh-how li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.dh-how .ico { width: 20px; height: 20px; color: var(--pista-strong); flex: none; }
+@media (max-width: 600px) { .ptiles { grid-template-columns: repeat(2, 1fr); gap: 10px; } .dh-head h1 { font-size: 22px; } }
+
+.lib-item > .lib-link { display: flex; flex-direction: column; gap: 4px; }

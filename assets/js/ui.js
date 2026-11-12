@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112192149';
-import { CONFIG } from './config.js?v=20261112192149';
-import { SOCIAL_PATHS } from './social.js?v=20261112192149';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112192149';
-import { esc, store, $, $$ } from './util.js?v=20261112192149';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112202241';
+import { CONFIG } from './config.js?v=20261112202241';
+import { SOCIAL_PATHS } from './social.js?v=20261112202241';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112202241';
+import { esc, store, $, $$ } from './util.js?v=20261112202241';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,16 +14,22 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112192149';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112192149';
-import { track, trackPage } from './track.js?v=20261112192149';
-import { initGA, applyConsent } from './ga.js?v=20261112192149';
-import { consentStrings } from './consent-i18n.js?v=20261112192149';
-import { api } from './api.js?v=20261112192149';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112192149';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261112202241';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112202241';
+import { track, trackPage } from './track.js?v=20261112202241';
+import { initGA, applyConsent } from './ga.js?v=20261112202241';
+import { consentStrings } from './consent-i18n.js?v=20261112202241';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112202241';
+import { api } from './api.js?v=20261112202241';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112202241';
 
 // ---------------- icons ----------------
 const P = {
+  pt_calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  pt_planner: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  pt_organizer: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+  pt_spreadsheet: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>',
+  pt_template: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M10 9v12"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
@@ -125,10 +131,16 @@ function topCats() {
   if (!topCatsCache) { try { const c = JSON.parse(localStorage.getItem('librava:topcats') || 'null'); if (Array.isArray(c) && c.length) topCatsCache = c; } catch { } }
   return applyCatOrder(topCatsCache || MAIN_CATS);
 }
+const digitalKnown = () => { try { return localStorage.getItem('librava:hasdigital') === '1'; } catch { return false; } };
+function showDigital(on) {
+  try { localStorage.setItem('librava:hasdigital', on ? '1' : '0'); } catch { }
+  document.querySelectorAll('[data-digital],[data-digital-drawer]').forEach(e => { e.hidden = !on; });
+}
 function refreshTopCats() {
   loadCatOrder(); loadLabels();
   api.listBooks({ limit: 1 }).then(() => {
     const all = api._catalog || [], seen = new Map();
+    if (all && all.length) showDigital(hasDigital(all));
     for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }
     const n = {}; for (const c of seen.values()) n[c] = (n[c] || 0) + 1;
     const list = CATS.filter(c => n[c] >= 3).sort((a, b) => n[b] - n[a]).slice(0, 12);
@@ -236,6 +248,7 @@ export function renderChrome() {
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
+    <a href="#/digital" data-nav="digital" data-digital${digitalKnown() ? '' : ' hidden'}>${esc(t('nav.digital'))}</a>
     <span class="subnav-cats" data-topcats>${topCatLinks()}</span>
     <a href="#/library" data-nav="library">${esc(t('nav.library'))}</a>
     ${u?.isAdmin ? `<a href="#/admin" data-nav="admin">${icon('gear')} ${esc(t('nav.admin'))}</a>` : ''}
@@ -250,6 +263,7 @@ export function renderChrome() {
         <a href="#/search" class="drawer-sub">${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))} ${icon('chevR')}</a>
         <a href="#/search?lang=all" class="drawer-sub">${esc(t('nav.inAllLangs'))} ${icon('chevR')}</a></div>
       ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
+      <div data-digital-drawer${digitalKnown() ? '' : ' hidden'}><hr><h3>${esc(t('nav.digital'))}</h3>${PTYPES.map(p => `<a href="#/search?type=${p}">${esc(t('ptype.' + p))} ${icon('chevR')}</a>`).join('')}</div>
       <hr>
       <a href="#/search?sort=newest">${esc(t('nav.new'))}</a>
       <a href="#/search?deals=1">${esc(t('nav.deals'))}</a>
@@ -375,9 +389,10 @@ export function coverHTML(b, { badge = true, thumb = false } = {}) {
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
+  const ptb = isDigital(b) ? `<span class="ptb ptb-${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</span>` : '';
   const baked = SPINE_BAKED.has(b.id) ? ' baked' : '';
   const fl = flagsHTML(b.id, b.language);
-  return `<div class="cover${baked}${fl ? ' has-flg' : ''}"${badge ? ` data-b="${esc(b.id)}"` : ` data-id="${esc(b.id)}"`} data-lg="${esc(b.language || '')}">${fl}${badge ? lblHTML(b.id) : ''}${bd}${img}</div>`;
+  return `<div class="cover${baked}${fl ? ' has-flg' : ''}"${badge ? ` data-b="${esc(b.id)}"` : ` data-id="${esc(b.id)}"`} data-lg="${esc(b.language || '')}">${fl}${badge ? lblHTML(b.id) : ''}${bd}${ptb}${img}</div>`;
 }
 export function priceHTML(b) {
   if (!b.price_cents) return `<span class="price price-free">${esc(t('book.free'))}</span>`;
@@ -410,7 +425,7 @@ export function cardHTML(b) {
     <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
     <div class="card-author">${esc(b.author)}</div>
     ${ratingHTML(b)}
-    <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}</span></div>
+    <div class="card-meta"><span class="fmt">${isDigital(b) ? esc(kindLabel(b)) : `${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}`}</span></div>
     <div>${priceHTML(b)}</div>
   </a>`;
 }
@@ -421,7 +436,7 @@ export function rcardHTML(b) {
       <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
       <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
       ${ratingHTML(b)}
-      <div class="card-meta"><span class="fmt">${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
+      <div class="card-meta"><span class="fmt">${isDigital(b) ? esc(kindLabel(b)) : `${esc(t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))} · ${esc((b._fmts || [b.format]).map(f => t('book.formatShort.' + f)).join(' · '))}`}</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
       <div>${priceHTML(b)}</div>
       <div class="muted" style="font-size:12px">${esc(t('cart.digital'))}</div>
     </div>
@@ -671,7 +686,7 @@ async function celebrateGifts(gn) {
     <p class="gift-lead">${esc(one ? t('ntf.giftLead', { book: b.title }) : t('ntf.giftLeadMany', { n: books.length }))}</p>
     <div class="gift-books">${books.slice(0, 4).map(x => `<a href="#/read/${encodeURIComponent(x.id)}" data-close>${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="${esc(x.title)}">` : `<span class="ph">${esc(x.title)}</span>`}</a>`).join('')}</div>
     <p class="muted gift-note">${esc(t('ntf.giftNote'))}</p>
-    <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div>`,
+    <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div>`,
     { onMount: m => m.classList.add('gift-modal') });
 }
 let notifWho = null;
@@ -723,7 +738,7 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
     <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${ntfRich(t('ntf.giftBody'))}</p>
     <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
       <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
-      <a class="btn btn-buy btn-sm" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div></div></div></article>`;
+      <a class="btn btn-buy btn-sm" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div></div></div></article>`;
   }
   return `<article class="ntf2 ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>

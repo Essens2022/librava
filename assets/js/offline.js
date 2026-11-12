@@ -2,8 +2,9 @@
 //  Books the reader keeps on this device: download a personal copy (PDF / EPUB)
 //  and/or save it inside the browser to read without internet.
 // =====================================================================
-import { blobs, store, loadScript } from './util.js?v=20261112192149';
-import { api } from './api.js?v=20261112192149';
+import { blobs, store, loadScript } from './util.js?v=20261112202241';
+import { api } from './api.js?v=20261112202241';
+import { FORMAT_MIME } from './ptypes.js?v=20261112202241';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
@@ -49,6 +50,7 @@ export async function fetchBookFile(book, onProgress) {
 // a personal copy: PDFs get a discreet line on the first page with the buyer's name (like many ebook shops)
 export async function downloadBook(book, onProgress) {
   let blob = await fetchBookFile(book, onProgress);
+  if (!['pdf', 'epub'].includes(book.format) && FORMAT_MIME[book.format]) blob = new Blob([blob], { type: FORMAT_MIME[book.format] }); // planners, spreadsheets…: delivered unchanged
   const u = api.user();
   if (book.format === 'pdf' && book.stamp_downloads !== false && u && blob.size < 200 * 1048576) {
     try {
@@ -75,7 +77,8 @@ export async function downloadBook(book, onProgress) {
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `${safeName(book.title)} - ${safeName(book.author)}.${book.format === 'epub' ? 'epub' : 'pdf'}`;
+  const ext = FORMAT_MIME[book.format] ? book.format : 'pdf';
+  a.download = `${safeName(book.title)} - ${safeName(book.author)}.${ext}`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 60000);
 }
