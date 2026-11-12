@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "A {terms} érvényes. Ha egy könyvvel probléma van, visszatérítjük az árát: lásd {withdrawal}.",
   "legal.waiverGo": "Tovább a fizetéshez",
   "pay.consentNote": "A fizetés gombra kattintva az e-könyv azonnali kézbesítését kéri a könyvtárába, és elfogadja, hogy elveszíti a 14 napos elállási jogát.",
-  "pay.payNow": "Fizetés: {total}"
+  "pay.payNow": "Fizetés: {total}",
+  "pay.more": "+ és más"
 };

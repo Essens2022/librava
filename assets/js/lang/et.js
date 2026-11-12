@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Kehtivad {terms}. Kui raamatuga on probleem, maksame raha tagasi: vaata {withdrawal}.",
   "legal.waiverGo": "Jätka maksmisega",
   "pay.consentNote": "Makse nupule vajutades soovid e-raamatu viivitamatut kättetoimetamist oma raamatukogusse ja nõustud, et kaotad 14-päevase taganemisõiguse.",
-  "pay.payNow": "Maksa {total}"
+  "pay.payNow": "Maksa {total}",
+  "pay.more": "+ ja veel"
 };

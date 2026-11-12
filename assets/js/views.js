@@ -1,18 +1,18 @@
-import { CONFIG } from './config.js?v=20261112190806';
-import { askWhy } from './why.js?v=20261112190806';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112190806';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112190806';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112190806';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112190806';
-import { PAY_ICONS } from './payicons.js?v=20261112190806';
-import { couponLive } from './welcome.js?v=20261112190806';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112190806';
-import { track } from './track.js?v=20261112190806';
-import { gaEvent } from './ga.js?v=20261112190806';
-import { guessLang } from './langdetect.js?v=20261112190806';
-import { didYouMean } from './search.js?v=20261112190806';
-import { api, editionsOf } from './api.js?v=20261112190806';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112190806';
+import { CONFIG } from './config.js?v=20261112191337';
+import { askWhy } from './why.js?v=20261112191337';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112191337';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112191337';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112191337';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112191337';
+import { PAY_ICONS, PAY_TEXT } from './payicons.js?v=20261112191337';
+import { couponLive } from './welcome.js?v=20261112191337';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112191337';
+import { track } from './track.js?v=20261112191337';
+import { gaEvent } from './ga.js?v=20261112191337';
+import { guessLang } from './langdetect.js?v=20261112191337';
+import { didYouMean } from './search.js?v=20261112191337';
+import { api, editionsOf } from './api.js?v=20261112191337';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112191337';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1373,7 +1373,7 @@ export async function viewContact(el) {
 
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
 // consent is given by pressing the pay button, whose wording states the loss of the withdrawal right right above it; the server still gets waiver === true and stores waiver_at
-export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${Object.entries(PAY_ICONS).map(([n, svg]) => `<span class="pay-chip" title="${esc(n)}">${svg}</span>`).join('')}</span>`;
+export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${Object.entries(PAY_ICONS).map(([n, svg]) => `<span class="pay-chip" title="${esc(n)}">${svg}</span>`).join('')}${PAY_TEXT.map(n => `<span class="pay-chip pay-chip-t">${esc(n)}</span>`).join('')}<span class="pay-more">${esc(t('pay.more'))}</span></span>`;
 function waiverConfirm(sum) {
   return new Promise(resolve => {
     let ok = false;

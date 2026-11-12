@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Sovellamme {terms}. Jos kirjassa on ongelma, palautamme maksusi: katso {withdrawal}.",
   "legal.waiverGo": "Jatka maksuun",
   "pay.consentNote": "Painamalla maksupainiketta pyydät e-kirjan välitöntä toimitusta kirjastoosi ja hyväksyt, että menetät 14 päivän peruuttamisoikeutesi.",
-  "pay.payNow": "Maksa {total}"
+  "pay.payNow": "Maksa {total}",
+  "pay.more": "+ ja muita"
 };

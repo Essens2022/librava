@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Primjenjuju se {terms}. Ako knjiga ima problem, vraćamo vam novac: pogledajte {withdrawal}.",
   "legal.waiverGo": "Nastavi na plaćanje",
   "pay.consentNote": "Pritiskom na gumb za plaćanje zahtijevate trenutačnu isporuku e-knjige u svoju knjižnicu i pristajete na gubitak prava na odustajanje u roku od 14 dana.",
-  "pay.payNow": "Plati {total}"
+  "pay.payNow": "Plati {total}",
+  "pay.more": "+ i više"
 };

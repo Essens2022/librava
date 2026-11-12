@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Taikomos {terms}. Jei knyga turi problemą, pinigus grąžiname: žr. {withdrawal}.",
   "legal.waiverGo": "Tęsti į apmokėjimą",
   "pay.consentNote": "Paspausdami apmokėjimo mygtuką prašote nedelsiant pristatyti el. knygą į savo biblioteką ir sutinkate, kad prarandate 14 dienų atsisakymo teisę.",
-  "pay.payNow": "Mokėti {total}"
+  "pay.payNow": "Mokėti {total}",
+  "pay.more": "+ ir kiti"
 };

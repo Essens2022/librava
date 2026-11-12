@@ -618,5 +618,6 @@ export default {
   "pay.soldBy": "Verkauft von {company}",
   "pay.help": "Fragen? Kontaktiere uns",
   "pay.consentNote": "Mit dem Klick auf den Bezahlen-Button verlangst du die sofortige Bereitstellung des E-Books in deiner Bibliothek und stimmst zu, dass du dein 14-tägiges Widerrufsrecht verlierst.",
-  "pay.payNow": "{total} bezahlen"
+  "pay.payNow": "{total} bezahlen",
+  "pay.more": "+ und mehr"
 };

@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Ir spēkā {terms}. Ja grāmatai ir problēma, mēs atmaksājam naudu: skatiet {withdrawal}.",
   "legal.waiverGo": "Turpināt uz maksājumu",
   "pay.consentNote": "Nospiežot maksājuma pogu, jūs pieprasāt e-grāmatas tūlītēju piegādi savā bibliotēkā un piekrītat, ka zaudējat 14 dienu atteikuma tiesības.",
-  "pay.payNow": "Maksāt {total}"
+  "pay.payNow": "Maksāt {total}",
+  "pay.more": "+ un citi"
 };

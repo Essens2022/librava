@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Platia {terms}. Ak má kniha problém, vrátime vám peniaze: pozrite {withdrawal}.",
   "legal.waiverGo": "Pokračovať na platbu",
   "pay.consentNote": "Stlačením tlačidla platby žiadate o okamžité doručenie e-knihy do svojej knižnice a súhlasíte s tým, že strácate 14-dňové právo na odstúpenie od zmluvy.",
-  "pay.payNow": "Zaplatiť {total}"
+  "pay.payNow": "Zaplatiť {total}",
+  "pay.more": "+ ďalšie"
 };

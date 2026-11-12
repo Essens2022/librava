@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "Obowiązuje {terms}. Jeśli książka ma problem, zwrócimy Ci pieniądze: zobacz {withdrawal}.",
   "legal.waiverGo": "Przejdź do płatności",
   "pay.consentNote": "Naciskając przycisk płatności, żądasz natychmiastowego dostarczenia e-booka do swojej biblioteki i zgadzasz się na utratę 14-dniowego prawa do odstąpienia od umowy.",
-  "pay.payNow": "Zapłać {total}"
+  "pay.payNow": "Zapłać {total}",
+  "pay.more": "+ i więcej"
 };

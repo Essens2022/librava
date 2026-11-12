@@ -502,5 +502,6 @@ export default {
   "legal.waiverTerms": "{terms} gjelder. Hvis det er noe feil med en bok, refunderer vi deg: se {withdrawal}.",
   "legal.waiverGo": "Fortsett til betaling",
   "pay.consentNote": "Ved å trykke på betalingsknappen ber du om umiddelbar levering av e-boken til biblioteket ditt og samtykker i at du mister angreretten på 14 dager.",
-  "pay.payNow": "Betal {total}"
+  "pay.payNow": "Betal {total}",
+  "pay.more": "+ og flere"
 };
