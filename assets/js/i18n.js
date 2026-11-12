@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261112200251';
-import { CONFIG } from './config.js?v=20261112200251';
-import { store } from './util.js?v=20261112200251';
+import { localize, loadRates } from './localprice.js?v=20261112200406';
+import { CONFIG } from './config.js?v=20261112200406';
+import { store } from './util.js?v=20261112200406';
 
 const D = {
   ro: {
@@ -858,6 +858,8 @@ const D = {
     "welcome.retry": "Reîncarcă",
     "cart.guestNote": "Nu ai nevoie de cont acum: plătești, apoi îți creezi contul dintr-un singur pas.",
     'pay.freeAdded': 'Cartea a fost adăugată în biblioteca ta.',
+    'book.dcS3d': 'Descarci și folosești pe orice dispozitiv',
+    'book.dcFootD': 'Fișierul rămâne în biblioteca ta și îl poți descărca din nou oricând.',
     'nav.digital': 'Produse digitale',
     'digital.title': 'Produse digitale',
     'digital.intro': 'Planificatoare, calendare, organizatoare, foi de calcul și șabloane — gata de descărcat și folosit imediat.',
@@ -2539,6 +2541,8 @@ const D = {
     "welcome.retry": "Ricarica",
     "cart.guestNote": "Non ti serve un account ora: paghi, poi crei l'account in un solo passaggio.",
     'pay.freeAdded': 'Il libro è stato aggiunto alla tua libreria.',
+    'book.dcS3d': 'Lo scarichi e lo usi su qualsiasi dispositivo',
+    'book.dcFootD': 'Il file resta nella tua libreria, pronto da scaricare di nuovo in qualsiasi momento.',
     'nav.digital': 'Prodotti digitali',
     'digital.title': 'Prodotti digitali',
     'digital.intro': 'Planner, calendari, organizer, fogli di calcolo e modelli — pronti da scaricare e usare subito.',
@@ -4220,6 +4224,8 @@ const D = {
     "welcome.retry": "Reload",
     "cart.guestNote": "No account needed now: you pay, then create your account in one step.",
     'pay.freeAdded': 'The book has been added to your library.',
+    'book.dcS3d': 'Download it and use it on any device',
+    'book.dcFootD': 'Your file stays in your library, ready to download again anytime.',
     'nav.digital': 'Digital products',
     'digital.title': 'Digital products',
     'digital.intro': 'Planners, calendars, organizers, spreadsheets and templates — ready to download and use right away.',
@@ -5083,7 +5089,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261112200251`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261112200406`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
