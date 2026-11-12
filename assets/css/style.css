@@ -3959,3 +3959,63 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @media (max-width: 600px) { .ptiles { grid-template-columns: repeat(2, 1fr); gap: 10px; } .dh-head h1 { font-size: 22px; } }
 
 .lib-item > .lib-link { display: flex; flex-direction: column; gap: 4px; }
+
+/* ---- digital products: separate "shop within the shop", never styled like books ---- */
+.pcover { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 14px 14px 0 0; overflow: hidden; background: #e9efe6; }
+.pcover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcover .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; text-align: center; font-weight: 700; background: linear-gradient(135deg, #17402a, #2f7d4a); color: #fff; }
+.ptag { position: absolute; left: 8px; top: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px 4px 7px; border-radius: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: #17402a; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.ptag .ico { width: 13px; height: 13px; flex: none; }
+.ptag-calendar { background: #b45309; } .ptag-organizer { background: #6d28d9; } .ptag-spreadsheet { background: #15803d; } .ptag-template { background: #be185d; } .ptag-planner { background: #0e7490; }
+.pfmt { position: absolute; left: 8px; bottom: 8px; z-index: 2; padding: 3px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: rgba(255,255,255,.94); color: #17402a; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+.pbadge { position: absolute; right: 8px; top: 8px; z-index: 2; background: var(--deal); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
+.pbadge.free { background: var(--pista-strong); }
+.card.pcard { width: 236px; background: var(--surface); border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.14); padding-bottom: 12px; gap: 3px; border: 1px solid var(--line); }
+.card.pcard .cover-wrap { margin-bottom: 4px; }
+.card.pcard .card-title, .card.pcard .pcard-sub, .card.pcard .rating-line, .card.pcard .pcard-foot { margin-left: 12px; margin-right: 12px; }
+.card.pcard .card-title { margin-top: 4px; font-size: 15px; -webkit-line-clamp: 2; }
+.pcard-sub { font-size: 12.5px; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pcard-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.pcard-inst { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 700; color: var(--pista-strong); }
+.pcard-inst .ico { width: 13px; height: 13px; }
+.pcard .quick-add { right: 8px; bottom: 8px; }
+.rcard.prcard { padding: 0; overflow: hidden; }
+.rcard.prcard .cover-wrap { width: 100%; }
+.rcard.prcard .pcover { width: 100%; margin: 0; border-radius: 0; }
+.rcard.prcard .rinfo { padding: 4px 14px 14px; }
+@media (min-width: 701px) { .rcard.prcard { flex-direction: column; } }
+@media (max-width: 700px) { .rcard.prcard { flex-direction: column; gap: 0; padding: 0; } .rcard.prcard .pcover { width: 100%; } }
+/* the band on the home page and the top of the digital page */
+.dshop { background: radial-gradient(120% 140% at 0% 0%, #2f7d4a 0%, #17402a 55%, #0f2c1d 100%); color: #fff; border-radius: var(--radius); padding: 22px 20px 20px; box-shadow: var(--shadow); overflow: hidden; }
+.dshop-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.dshop-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #cfe8d4; background: rgba(255,255,255,.12); padding: 4px 10px; border-radius: 999px; margin-bottom: 8px; }
+.dshop-eyebrow .ico { width: 13px; height: 13px; }
+.dshop h1, .dshop h2 { margin: 0 0 4px; font-size: 26px; line-height: 1.15; color: #fff; }
+.dshop p { margin: 0; color: #d6e9db; max-width: 620px; font-size: 14.5px; }
+.dshop-all { color: #17402a; background: #fff; font-weight: 700; font-size: 14px; padding: 8px 16px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+.dshop-all:hover { text-decoration: none; background: #e8f3ea; }
+.dshop-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+.dchip { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px 8px 11px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font-size: 14px; border: 1px solid rgba(255,255,255,.22); text-decoration: none; }
+.dchip:hover { background: rgba(255,255,255,.24); text-decoration: none; }
+.dchip .ico { width: 18px; height: 18px; } .dchip small { opacity: .8; font-size: 12px; }
+.dshop-track { margin-top: 12px; padding-bottom: 4px; }
+.dshop .dh-how { margin-top: 14px; } .dshop .dh-how .ico { color: #bfe3c6; }
+.dshop-hero { margin-bottom: 14px; }
+.dsec-ico { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--surface-2); color: var(--pista-strong); margin-right: 8px; vertical-align: middle; }
+.dsec-ico .ico { width: 18px; height: 18px; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px; margin-top: 12px; }
+.pgrid .card.pcard { width: auto; }
+@media (max-width: 600px) { .dshop { padding: 18px 14px; } .dshop h1, .dshop h2 { font-size: 22px; } .card.pcard { width: 214px; } .pgrid { grid-template-columns: 1fr; } .pgrid .card.pcard { width: auto; } }
+/* product page: wide picture instead of a book cover */
+.book-cover-col .pcover { max-width: 460px; border-radius: 14px; box-shadow: 0 6px 22px rgba(0,0,0,.22); }
+.book-cover-col .pcover .ptag { font-size: 12px; padding: 5px 11px 5px 9px; }
+.lib-item .pcover, .pay-item .pcover, .fbt-cover .pcover, .acc-mini .pcover, .ol-cover .pcover { border-radius: 8px; }
+.pay-item .pcover { width: 88px; flex: none; } .pay-item .pcover .ptag, .pay-item .pcover .pfmt { display: none; }
+.fbt-cover .pcover .ptag, .fbt-cover .pcover .pfmt, .acc-mini .pcover .ptag, .acc-mini .pcover .pfmt, .ol-cover .pcover .ptag, .ol-cover .pcover .pfmt, .adm-book .pcover .ptag, .adm-book .pcover .pfmt { display: none; }
+.adm-book .pcover { width: 64px; flex: none; border-radius: 6px; }
+@media (min-width: 900px) {
+  .dshop:not(.dshop-hero) { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; column-gap: 28px; align-items: start; }
+  .dshop:not(.dshop-hero) .dshop-head { grid-column: 1; flex-direction: column; align-items: flex-start; }
+  .dshop:not(.dshop-hero) .dshop-chips { grid-column: 1; }
+  .dshop:not(.dshop-hero) .dshop-track { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+}

@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261112202241';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112202241';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112202241';
-import { resetCompanyCache } from './views.js?v=20261112202241';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112202241';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112202241';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112202241';
-import { optimizeBook } from './optimize.js?v=20261112202241';
-import { api } from './api.js?v=20261112202241';
-import { isDigital } from './ptypes.js?v=20261112202241';
-import { digitalAdmin } from './admin-digital.js?v=20261112202241';
-import { OF_STYLES } from './offerstyles.js?v=20261112202241';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112202241';
+import { CONFIG } from './config.js?v=20261112212046';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112212046';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261112212046';
+import { resetCompanyCache } from './views.js?v=20261112212046';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261112212046';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261112212046';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261112212046';
+import { optimizeBook } from './optimize.js?v=20261112212046';
+import { api } from './api.js?v=20261112212046';
+import { isDigital } from './ptypes.js?v=20261112212046';
+import { digitalAdmin } from './admin-digital.js?v=20261112212046';
+import { OF_STYLES } from './offerstyles.js?v=20261112212046';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261112212046';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -1142,7 +1142,7 @@ async function optimizeExisting(btn) {
               const f = await fetchFile(im.url || im.ref, 'aplus');
               if (f.size > 105 * 1024) {
                 const big = spec.rec && spec.rec[0] > 1000;
-                const light = await compressImage(f, { maxW: big ? 1600 : (spec.rec?.[0] || 970), maxH: big ? 500 : (spec.rec?.[1] || 600), name: 'aplus' });
+                const light = await compressImage(f, { maxW: big ? 2400 : (spec.rec?.[0] || 970) * 2, maxH: big ? 744 : (spec.rec?.[1] || 600) * 2, maxBytes: big ? 420 * 1024 : 280 * 1024, name: 'aplus' });
                 if (light.size < f.size) { const up = await api.uploadAplusImage(b.id, light); clean.ref = up.ref; changed = true; saved += f.size - light.size; done++; }
               }
             } catch { }
@@ -1379,7 +1379,7 @@ export function aplusEditor(root, modules, getBookId) {
       else if (Math.abs(w / h - spec.rec[0] / spec.rec[1]) > 0.15 * (spec.rec[0] / spec.rec[1])) warn = t('ap.ratio', { w, h, rw: spec.rec[0], rh: spec.rec[1] });
       const slot = e.target.closest('[data-img]'); slot.classList.add('busy');
       try {
-        const light = await compressImage(file, { maxW: spec.rec[0] > 1000 ? 1600 : spec.rec[0], maxH: spec.rec[0] > 1000 ? 500 : spec.rec[1], name: 'aplus' });
+        const light = await compressImage(file, { maxW: spec.rec[0] > 1000 ? 2400 : spec.rec[0] * 2, maxH: spec.rec[0] > 1000 ? 744 : spec.rec[1] * 2, maxBytes: spec.rec[0] > 1000 ? 420 * 1024 : 280 * 1024, name: 'aplus' });
         const up = await api.uploadAplusImage(getBookId(), light);
         m.imgs = m.imgs || []; m.imgs[k] = { ref: up.ref, url: up.url, w, h, warn };
       } catch (x) { toast(errText(x), { error: true }); }
@@ -2131,7 +2131,7 @@ async function runImport(pkg, { status, update = [], say }) {
       for (const f of mod.files || []) {
         if (!f) { imgs.push(null); continue; }
         const { w, h } = await imgSize(f);
-        const light = await compressImage(f, { maxW: spec.rec[0] > 1000 ? 1600 : spec.rec[0], maxH: spec.rec[0] > 1000 ? 500 : spec.rec[1], name: 'aplus' });
+        const light = await compressImage(f, { maxW: spec.rec[0] > 1000 ? 2400 : spec.rec[0] * 2, maxH: spec.rec[0] > 1000 ? 744 : spec.rec[1] * 2, maxBytes: spec.rec[0] > 1000 ? 420 * 1024 : 280 * 1024, name: 'aplus' });
         const up = await api.uploadAplusImage(id, light);
         imgs.push({ ref: up.ref, w, h });
       }

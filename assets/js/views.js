@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261112202241';
-import { askWhy } from './why.js?v=20261112202241';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112202241';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112202241';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112202241';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112202241';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112202241';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112202241';
-import { couponLive } from './welcome.js?v=20261112202241';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112202241';
-import { track } from './track.js?v=20261112202241';
-import { gaEvent } from './ga.js?v=20261112202241';
-import { guessLang } from './langdetect.js?v=20261112202241';
-import { didYouMean } from './search.js?v=20261112202241';
-import { api, editionsOf } from './api.js?v=20261112202241';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112202241';
+import { CONFIG } from './config.js?v=20261112212046';
+import { askWhy } from './why.js?v=20261112212046';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112212046';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112212046';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112212046';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112212046';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112212046';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112212046';
+import { couponLive } from './welcome.js?v=20261112212046';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112212046';
+import { track } from './track.js?v=20261112212046';
+import { gaEvent } from './ga.js?v=20261112212046';
+import { guessLang } from './langdetect.js?v=20261112212046';
+import { didYouMean } from './search.js?v=20261112212046';
+import { api, editionsOf } from './api.js?v=20261112212046';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112212046';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -64,10 +64,14 @@ export async function viewHome(el) {
   const digiTypes = PTYPES.filter(p => digi.some(b => ptypeOf(b) === p));
   const digiNew = digi.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 14);
   const typeStrip = !digi.length ? '' : `
-    <section class="panel"><h2 class="section-title">${esc(t('home.byType'))} <a href="#/digital">${esc(t('home.seeAll'))}</a></h2>
-    <div class="ptiles">${digiTypes.map(p => `<a class="ptile" href="#/search?type=${p}${digiAll ? '&lang=all' : ''}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b>${digi.filter(b => ptypeOf(b) === p).length > 1 ? `<small>${esc(t('digital.count', { n: digi.filter(b => ptypeOf(b) === p).length }))}</small>` : ''}</a>`).join('')}</div></section>`;
+    <section class="dshop">
+      <div class="dshop-head"><div><span class="dshop-eyebrow">${icon('bolt', 'ico')} ${esc(t('book.tile1'))}</span><h2>${esc(t('digital.title'))}</h2><p>${esc(t('digital.intro'))}</p></div>
+        <a class="dshop-all" href="#/digital${digiAll ? '?lang=all' : ''}">${esc(t('home.seeAll'))} →</a></div>
+      <div class="dshop-chips">${digiTypes.map(p => `<a class="dchip" href="#/search?type=${p}${digiAll ? '&lang=all' : ''}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b></a>`).join('')}</div>
+      <div class="shelf-track dshop-track">${digiNew.map(cardHTML).join('')}</div>
+    </section>`;
   const catTiles = applyCatOrder(CATS).map(c => {
-    const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
+    const bs = all.filter(b => !isDigital(b) && (b.category === c || (b.categories || []).includes(c))).slice(0, 4);
     if (!bs.length) return '';
     const n = Math.min(bs.length, window.innerWidth < 700 ? 2 : 3);
     const imgs = bs.slice(0, n).map(b => b.cover_url ? `<span class="tc${isBakedCover(b.id) ? ' baked' : ''}"><img src="/book/${esc(b.id)}/thumb.webp" data-full="${esc(b.cover_url)}" alt="" loading="lazy"></span>` : '').join('');
@@ -107,7 +111,6 @@ export async function viewHome(el) {
     ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest.filter(b => !isDigital(b)), '#/search?sort=newest')}
-    ${shelf(t('digital.newest'), digiNew, '#/digital')}
     ${strips[2] || ''}
     ${shelf(t('home.deals'), deals.filter(b => !isDigital(b)), '#/search?deals=1')}
     ${strips.slice(3).join('')}
@@ -1399,16 +1402,16 @@ export async function viewDigital(el) {
   document.title = t('digital.title') + ' · ' + CONFIG.siteName;
   if (!list.length) { el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('box')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('digital.title'))}</h2><p>${esc(t('digital.empty'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`; return; }
   const n = Object.fromEntries(PTYPES.map(p => [p, list.filter(b => ptypeOf(b) === p).length]));
-  const tiles = PTYPES.filter(p => n[p]).map(p => `<a class="ptile" href="#/search?type=${p}${allLangs ? '&lang=all' : ''}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b>${n[p] > 1 ? `<small>${esc(t('digital.count', { n: n[p] }))}</small>` : ''}</a>`).join('');
-  const newest = [...list].sort((a, b) => String(b.published_at || '').localeCompare(String(a.published_at || ''))).slice(0, 14);
-  const best = [...list].sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0)).slice(0, 14);
-  const shelf = (title, books, more) => !books.length ? '' : `<section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2><div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
+  const lg = allLangs ? '&lang=all' : '';
+  const types = PTYPES.filter(p => n[p]);
+  const chips = types.map(p => `<a class="dchip" href="#/search?type=${p}${lg}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b>${n[p] > 1 ? `<small>${n[p]}</small>` : ''}</a>`).join('');
+  const sections = types.map(p => `<section class="panel dsec"><h2 class="section-title"><span class="dsec-ico">${icon('pt_' + p, 'ico')}</span>${esc(t('ptype.' + p))} <a href="#/search?type=${p}${lg}">${esc(t('home.seeAll'))}</a></h2>
+      <div class="pgrid">${list.filter(b => ptypeOf(b) === p).sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0) || String(y.published_at || '').localeCompare(String(x.published_at || ''))).map(cardHTML).join('')}</div></section>`).join('');
   el.innerHTML = `<div class="wrap page digital-hub">
-    <section class="panel dh-head"><h1>${esc(t('digital.title'))}</h1><p>${esc(t('digital.intro'))}</p>
-      <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul></section>
-    <section class="panel"><h2 class="section-title">${esc(t('digital.byType'))}</h2><div class="ptiles">${tiles}</div></section>
-    ${shelf(t('digital.newest'), newest, '#/search?sort=newest&type=' + (PTYPES.find(p => n[p]) || ''))}
-    ${shelf(t('digital.best'), best.filter(b => (b.sales_count || 0) > 0), '')}
+    <section class="dshop dshop-hero"><div class="dshop-head"><div><span class="dshop-eyebrow">${icon('bolt', 'ico')} ${esc(t('book.tile1'))}</span><h1>${esc(t('digital.title'))}</h1><p>${esc(t('digital.intro'))}</p></div></div>
+      <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul>
+      <div class="dshop-chips">${chips}</div></section>
+    ${sections}
   </div>`;
 }
 
