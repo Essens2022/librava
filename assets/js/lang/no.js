@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Digitale produkter",
   "digital.title": "Digitale produkter",
   "digital.intro": "Planleggere, kalendere, organiserere, regneark og maler – last ned og bruk med en gang.",
+  "digital.anyDevice": "Alle enheter",
+  "digital.printA4": "Skriv ut på A4",
   "digital.how1": "Umiddelbar nedlasting etter betaling",
   "digital.how2": "Fungerer på mobil, nettbrett og datamaskin",
   "digital.how3": "Alltid tilgjengelig i biblioteket ditt",

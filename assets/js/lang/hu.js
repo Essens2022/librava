@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Digitális termékek",
   "digital.title": "Digitális termékek",
   "digital.intro": "Tervezők, naptárak, szervezők, táblázatok és sablonok — letöltésre és azonnali használatra készen.",
+  "digital.anyDevice": "Bármely eszközön",
+  "digital.printA4": "Nyomtatható A4-re",
   "digital.how1": "Azonnali letöltés a fizetés után",
   "digital.how2": "Működik telefonon, tableten és számítógépen",
   "digital.how3": "Mindig elérhető a könyvtáradban",

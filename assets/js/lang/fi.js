@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Digitaaliset tuotteet",
   "digital.title": "Digitaaliset tuotteet",
   "digital.intro": "Suunnittelijat, kalenterit, järjestäjät, taulukot ja mallit — valmiina ladattavaksi ja heti käyttöön.",
+  "digital.anyDevice": "Kaikilla laitteilla",
+  "digital.printA4": "Tulosta A4:lle",
   "digital.how1": "Välitön lataus maksun jälkeen",
   "digital.how2": "Toimii puhelimella, tabletilla ja tietokoneella",
   "digital.how3": "Aina saatavilla kirjastossasi",

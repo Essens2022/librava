@@ -623,6 +623,8 @@ export default {
   "nav.digital": "Digitale Produkte",
   "digital.title": "Digitale Produkte",
   "digital.intro": "Planer, Kalender, Organizer, Tabellen und Vorlagen — sofort zum Download und Loslegen bereit.",
+  "digital.anyDevice": "Auf jedem Gerät",
+  "digital.printA4": "Auf A4 drucken",
   "digital.how1": "Sofortiger Download nach der Zahlung",
   "digital.how2": "Funktioniert auf Smartphone, Tablet und Computer",
   "digital.how3": "Immer in Ihrer Bibliothek verfügbar",

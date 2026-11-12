@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112212659';
-import { CONFIG } from './config.js?v=20261112212659';
-import { SOCIAL_PATHS } from './social.js?v=20261112212659';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112212659';
-import { esc, store, $, $$ } from './util.js?v=20261112212659';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112213608';
+import { CONFIG } from './config.js?v=20261112213608';
+import { SOCIAL_PATHS } from './social.js?v=20261112213608';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112213608';
+import { esc, store, $, $$ } from './util.js?v=20261112213608';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112212659';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112212659';
-import { track, trackPage } from './track.js?v=20261112212659';
-import { initGA, applyConsent } from './ga.js?v=20261112212659';
-import { consentStrings } from './consent-i18n.js?v=20261112212659';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112212659';
-import { api } from './api.js?v=20261112212659';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112212659';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261112213608';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112213608';
+import { track, trackPage } from './track.js?v=20261112213608';
+import { initGA, applyConsent } from './ga.js?v=20261112213608';
+import { consentStrings } from './consent-i18n.js?v=20261112213608';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112213608';
+import { api } from './api.js?v=20261112213608';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112213608';
 
 // ---------------- icons ----------------
 const P = {
@@ -54,6 +54,7 @@ const P = {
   download: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   devices: '<rect x="2" y="5" width="13" height="10" rx="1.5"/><path d="M5 19h7"/><rect x="16" y="8" width="6" height="12" rx="1.5"/>',
   upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
@@ -429,11 +430,12 @@ export function fullTitle(b) {
 }
 export function cardHTML(b) {
   if (isDigital(b)) return `<a class="card pcard" href="#/book/${encodeURIComponent(b.id)}">
-    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="cover-wrap">${coverHTML(b)}</div>
     <div class="card-title" title="${esc(fullTitle(b))}">${esc(b.title)}</div>
     ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
     ${ratingHTML(b)}
-    <div class="pcard-foot">${priceHTML(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div>
+    <div class="pcard-use"><span>${icon('devices', 'ico')}${esc(t('digital.anyDevice'))}</span><span>${icon('print', 'ico')}${esc(t('digital.printA4'))}</span></div>
+    <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
   </a>`;
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
@@ -446,12 +448,13 @@ export function cardHTML(b) {
 }
 export function rcardHTML(b) {
   if (isDigital(b)) return `<a class="rcard prcard" href="#/book/${encodeURIComponent(b.id)}">
-    <div class="cover-wrap">${coverHTML(b)}${quickAdd(b)}</div>
+    <div class="cover-wrap">${coverHTML(b)}</div>
     <div class="rinfo">
       <div class="card-title" title="${esc(fullTitle(b))}">${esc(b.title)}</div>
       ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
       ${ratingHTML(b)}
-      <div class="pcard-foot">${priceHTML(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div>
+      <div class="pcard-use"><span>${icon('devices', 'ico')}${esc(t('digital.anyDevice'))}</span><span>${icon('print', 'ico')}${esc(t('digital.printA4'))}</span></div>
+      <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
     </div>
   </a>`;
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">

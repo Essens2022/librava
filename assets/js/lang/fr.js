@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Produits numériques",
   "digital.title": "Produits numériques",
   "digital.intro": "Planificateurs, calendriers, organisateurs, feuilles de calcul et modèles : prêts à télécharger et à utiliser immédiatement.",
+  "digital.anyDevice": "Sur tout appareil",
+  "digital.printA4": "Impression A4",
   "digital.how1": "Téléchargement immédiat après le paiement",
   "digital.how2": "Fonctionne sur téléphone, tablette et ordinateur",
   "digital.how3": "Toujours disponible dans votre bibliothèque",

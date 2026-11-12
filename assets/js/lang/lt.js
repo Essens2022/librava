@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Skaitmeniniai produktai",
   "digital.title": "Skaitmeniniai produktai",
   "digital.intro": "Planuokliai, kalendoriai, organizatoriai, skaičiuoklės ir šablonai – parsisiųskite ir naudokite iškart.",
+  "digital.anyDevice": "Bet kuriame įrenginyje",
+  "digital.printA4": "Spausdink A4",
   "digital.how1": "Iškart parsisiunčiama po apmokėjimo",
   "digital.how2": "Veikia telefone, planšetėje ir kompiuteryje",
   "digital.how3": "Visada prieinama jūsų bibliotekoje",

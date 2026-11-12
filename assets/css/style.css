@@ -4019,3 +4019,56 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .dshop:not(.dshop-hero) .dshop-chips { grid-column: 1; }
   .dshop:not(.dshop-hero) .dshop-track { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
 }
+/* ---- digital v3: vivid, compact band (Amazon-style) + cart next to the price ---- */
+.dshop { background: linear-gradient(125deg, #5b21b6 0%, #7c3aed 38%, #d946ef 72%, #fb7185 100%); position: relative; }
+.dshop::before { content: ""; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(253,224,71,.55), rgba(253,224,71,0) 70%); pointer-events: none; }
+.dshop > * { position: relative; }
+.dshop-all { background: #fde047; color: #3b0764; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.dshop-all:hover { background: #fef08a; }
+.dshop h1, .dshop h2 { text-shadow: 0 1px 8px rgba(59,7,100,.35); }
+.dshop p, .dshop-eyebrow { color: #f5e8ff; }
+.dshop-eyebrow { background: rgba(255,255,255,.2); }
+.dchip { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.38); }
+.dchip:hover { background: rgba(255,255,255,.34); }
+.dshop-slim { padding: 14px 14px 14px; }
+.dshop-slim .dshop-head { align-items: center; flex-wrap: nowrap; }
+.dshop-slim h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 21px; }
+.dshop-slim h2 .ico { width: 22px; height: 22px; color: #fde047; flex: none; }
+.dshop-slim .dshop-chips { flex-wrap: nowrap; overflow-x: auto; margin: 10px 0 2px; scrollbar-width: none; }
+.dshop-slim .dshop-chips::-webkit-scrollbar { display: none; }
+.dshop-slim .dchip { flex: none; padding: 6px 12px 6px 9px; font-size: 13px; }
+.dshop-slim .dshop-track { margin-top: 10px; }
+@media (min-width: 900px) {
+  .dshop-slim:not(.dshop-hero) { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; column-gap: 32px; align-items: center; padding: 22px 26px; }
+  .dshop-slim .dshop-head { grid-column: 1; grid-row: 1; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .dshop-slim h2 { font-size: 32px; line-height: 1.1; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .dshop-slim h2 .ico { width: 34px; height: 34px; }
+  .dshop-slim .dshop-chips { grid-column: 1; grid-row: 2; flex-wrap: wrap; margin: 14px 0 0; }
+  .dshop-slim .dshop-track { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; }
+}
+.card.pcard { border: 0; box-shadow: 0 6px 18px rgba(59,7,100,.22); transition: transform .18s, box-shadow .18s; }
+.card.pcard:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(59,7,100,.3); }
+.pcard-foot { flex-wrap: nowrap; align-items: flex-end; margin-top: 6px; }
+.pf-price { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; min-width: 0; }
+.pf-price .price { font-size: 22px; font-weight: 800; }
+.pf-price .price-old { margin: 0; font-size: 13px; }
+.pf-buy { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: none; }
+.pcard-foot .quick-add { position: static; width: 46px; height: 46px; box-shadow: 0 4px 12px rgba(251,113,133,.45); }
+.pcard-foot .quick-add svg { width: 24px; height: 24px; }
+.pcard-inst { font-size: 10.5px; color: #15803d; white-space: nowrap; }
+.pcard-inst .ico { color: #f59e0b; }
+.rcard.prcard .pcard-foot { margin-top: 8px; }
+.pcard-use { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 12px 0; font-size: 11.5px; font-weight: 700; color: #6d28d9; }
+.pcard-use span { display: inline-flex; align-items: center; gap: 4px; }
+.pcard-use .ico { width: 14px; height: 14px; }
+.rcard.prcard .pcard-use { margin: 4px 0 0; }
+.trust-tiles.tt4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 420px) { .trust-tiles.tt4 b { font-size: 11px; } }
+.pcard-foot { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 8px; row-gap: 2px; align-items: center; }
+.pf-price, .pf-buy { display: contents; }
+.pf-price .price { grid-column: 1; grid-row: 1; }
+.pf-price .price-old { grid-column: 1; grid-row: 2; justify-self: start; }
+.pcard-foot .quick-add { grid-column: 2; grid-row: 1; justify-self: center; }
+.pcard-foot .pcard-inst { grid-column: 2; grid-row: 2; justify-self: center; }
+.pcard-foot .quick-add:not(.in):not(.owned) { background: linear-gradient(135deg, #f59e0b, #fb7185 60%, #d946ef); color: #fff; }
+.pcard-foot .quick-add:not(.in):not(.owned):hover { filter: brightness(1.08); }

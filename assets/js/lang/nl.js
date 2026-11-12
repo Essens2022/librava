@@ -507,6 +507,8 @@ export default {
   "nav.digital": "Digitale producten",
   "digital.title": "Digitale producten",
   "digital.intro": "Planners, kalenders, organizers, spreadsheets en sjablonen – direct te downloaden en te gebruiken.",
+  "digital.anyDevice": "Op elk apparaat",
+  "digital.printA4": "Print op A4",
   "digital.how1": "Direct downloaden na betaling",
   "digital.how2": "Werkt op telefoon, tablet en computer",
   "digital.how3": "Altijd beschikbaar in je bibliotheek",
