@@ -3933,3 +3933,5 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-logo { height: 26px; width: auto; border-radius: 4px; display: block; }
 .pay-stripe-logo { height: 18px; width: auto; vertical-align: middle; }
 .pay-secure { gap: 6px; }
+.pay-consent, .pay-terms { font-size: 9.5px; line-height: 1.3; opacity: .75; }
+.pay-terms { margin-top: -10px; }
