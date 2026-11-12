@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitalni izdelki",
   "digital.intro": "Planerji, koledarji, organizatorji, preglednice in predloge – prenesite in uporabite takoj.",
   "digital.anyDevice": "Na vsaki napravi",
+  "digital.tag": "Prenesi · Natisni · Uporabljaj",
   "digital.printA4": "Natisni na A4",
   "digital.how1": "Takojšen prenos po plačilu",
   "digital.how2": "Deluje na telefonu, tablici in računalniku",

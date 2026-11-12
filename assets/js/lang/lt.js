@@ -510,6 +510,7 @@ export default {
   "digital.title": "Skaitmeniniai produktai",
   "digital.intro": "Planuokliai, kalendoriai, organizatoriai, skaičiuoklės ir šablonai – parsisiųskite ir naudokite iškart.",
   "digital.anyDevice": "Bet kuriame įrenginyje",
+  "digital.tag": "Atsisiųsk · Atsispausdink · Naudok",
   "digital.printA4": "Spausdink A4",
   "digital.how1": "Iškart parsisiunčiama po apmokėjimo",
   "digital.how2": "Veikia telefone, planšetėje ir kompiuteryje",

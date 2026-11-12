@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitális termékek",
   "digital.intro": "Tervezők, naptárak, szervezők, táblázatok és sablonok — letöltésre és azonnali használatra készen.",
   "digital.anyDevice": "Bármely eszközön",
+  "digital.tag": "Töltsd le · Nyomtasd ki · Használd",
   "digital.printA4": "Nyomtatható A4-re",
   "digital.how1": "Azonnali letöltés a fizetés után",
   "digital.how2": "Működik telefonon, tableten és számítógépen",

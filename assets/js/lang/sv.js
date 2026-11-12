@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitala produkter",
   "digital.intro": "Planerare, kalendrar, organisatörer, kalkylblad och mallar – ladda ner och använd direkt.",
   "digital.anyDevice": "På alla enheter",
+  "digital.tag": "Ladda ner · Skriv ut · Använd",
   "digital.printA4": "Skriv ut på A4",
   "digital.how1": "Direkt nedladdning efter betalning",
   "digital.how2": "Fungerar på mobil, surfplatta och dator",

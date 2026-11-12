@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261112220459';
-import { askWhy } from './why.js?v=20261112220459';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112220459';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112220459';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112220459';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112220459';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112220459';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112220459';
-import { couponLive } from './welcome.js?v=20261112220459';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112220459';
-import { track } from './track.js?v=20261112220459';
-import { gaEvent } from './ga.js?v=20261112220459';
-import { guessLang } from './langdetect.js?v=20261112220459';
-import { didYouMean } from './search.js?v=20261112220459';
-import { api, editionsOf } from './api.js?v=20261112220459';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112220459';
+import { CONFIG } from './config.js?v=20261112222449';
+import { askWhy } from './why.js?v=20261112222449';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112222449';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112222449';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112222449';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112222449';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112222449';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112222449';
+import { couponLive } from './welcome.js?v=20261112222449';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112222449';
+import { track } from './track.js?v=20261112222449';
+import { gaEvent } from './ga.js?v=20261112222449';
+import { guessLang } from './langdetect.js?v=20261112222449';
+import { didYouMean } from './search.js?v=20261112222449';
+import { api, editionsOf } from './api.js?v=20261112222449';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112222449';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -67,6 +67,7 @@ export async function viewHome(el) {
     <section class="dshop dshop-slim">
       <div class="dshop-head"><h2>${icon('bolt', 'ico')} ${esc(t('digital.title'))}</h2>
         <a class="dshop-all" href="#/digital${digiAll ? '?lang=all' : ''}">${esc(t('home.seeAll'))} →</a></div>
+      <p class="dshop-tag">${esc(t('digital.tag'))}</p>
       <div class="dshop-chips">${digiTypes.map(p => `<a class="dchip" href="#/search?type=${p}${digiAll ? '&lang=all' : ''}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b></a>`).join('')}</div>
       <div class="shelf-track dshop-track">${digiNew.map(cardHTML).join('')}</div>
     </section>`;
@@ -1407,11 +1408,14 @@ export async function viewDigital(el) {
   const chips = types.map(p => `<a class="dchip" href="#/search?type=${p}${lg}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b>${n[p] > 1 ? `<small>${n[p]}</small>` : ''}</a>`).join('');
   const sections = types.map(p => `<section class="panel dsec"><h2 class="section-title"><span class="dsec-ico">${icon('pt_' + p, 'ico')}</span>${esc(t('ptype.' + p))} <a href="#/search?type=${p}${lg}">${esc(t('home.seeAll'))}</a></h2>
       <div class="pgrid">${list.filter(b => ptypeOf(b) === p).sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0) || String(y.published_at || '').localeCompare(String(x.published_at || ''))).map(cardHTML).join('')}</div></section>`).join('');
+  // a small catalogue is one tidy grid; sections per type only once there are many products
+  const sorted = list.slice().sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0) || String(y.published_at || '').localeCompare(String(x.published_at || '')));
+  const body = list.length <= 8 ? `<section class="panel dsec"><div class="pgrid">${sorted.map(cardHTML).join('')}</div></section>` : sections;
   el.innerHTML = `<div class="wrap page digital-hub">
-    <section class="dshop dshop-hero"><div class="dshop-head"><div><span class="dshop-eyebrow">${icon('bolt', 'ico')} ${esc(t('book.tile1'))}</span><h1>${esc(t('digital.title'))}</h1><p>${esc(t('digital.intro'))}</p></div></div>
+    <section class="dshop dshop-slim dshop-hero"><div class="dshop-head"><h1>${icon('bolt', 'ico')} ${esc(t('digital.title'))}</h1></div><p class="dshop-tag">${esc(t('digital.tag'))}</p>
       <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul>
       <div class="dshop-chips">${chips}</div></section>
-    ${sections}
+    ${body}
   </div>`;
 }
 

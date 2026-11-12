@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitálne produkty",
   "digital.intro": "Plánovače, kalendáre, organizéry, tabuľky a šablóny – stiahnite si a používajte hneď.",
   "digital.anyDevice": "Na každom zariadení",
+  "digital.tag": "Stiahni · Vytlač · Používaj",
   "digital.printA4": "Tlač na A4",
   "digital.how1": "Okamžité stiahnutie po zaplatení",
   "digital.how2": "Funguje na telefóne, tablete aj počítači",

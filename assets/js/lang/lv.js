@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitālie produkti",
   "digital.intro": "Plānotāji, kalendāri, organizatori, izklājlapas un veidnes – lejupielādējiet un izmantojiet uzreiz.",
   "digital.anyDevice": "Jebkurā ierīcē",
+  "digital.tag": "Lejupielādē · Izdrukā · Lieto",
   "digital.printA4": "Drukā uz A4",
   "digital.how1": "Tūlītēja lejupielāde pēc apmaksas",
   "digital.how2": "Darbojas tālrunī, planšetdatorā un datorā",

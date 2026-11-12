@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261112220459';
-import { CONFIG } from './config.js?v=20261112220459';
-import { store } from './util.js?v=20261112220459';
+import { localize, loadRates } from './localprice.js?v=20261112222449';
+import { CONFIG } from './config.js?v=20261112222449';
+import { store } from './util.js?v=20261112222449';
 
 const D = {
   ro: {
@@ -864,6 +864,7 @@ const D = {
     'digital.title': 'Produse digitale',
     'digital.intro': 'Planificatoare, calendare, organizatoare, foi de calcul și șabloane — gata de descărcat și folosit imediat.',
     'digital.anyDevice': 'Orice dispozitiv',
+    'digital.tag': 'Descarci · Printezi · Folosești',
     'digital.printA4': 'Tipărești pe A4',
     'digital.how1': 'Descărcare instantă după plată',
     'digital.how2': 'Funcționează pe telefon, tabletă și computer',
@@ -2550,6 +2551,7 @@ const D = {
     'digital.title': 'Prodotti digitali',
     'digital.intro': 'Planner, calendari, organizer, fogli di calcolo e modelli — pronti da scaricare e usare subito.',
     'digital.anyDevice': 'Su ogni dispositivo',
+    'digital.tag': 'Scarica · Stampa · Usa',
     'digital.printA4': 'Stampa su A4',
     'digital.how1': 'Download immediato dopo il pagamento',
     'digital.how2': 'Funziona su telefono, tablet e computer',
@@ -4236,6 +4238,7 @@ const D = {
     'digital.title': 'Digital products',
     'digital.intro': 'Planners, calendars, organizers, spreadsheets and templates — ready to download and use right away.',
     'digital.anyDevice': 'Any device',
+    'digital.tag': 'Download · Print · Use',
     'digital.printA4': 'Print on A4',
     'digital.how1': 'Instant download after payment',
     'digital.how2': 'Works on phone, tablet and computer',
@@ -5098,7 +5101,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261112220459`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261112222449`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

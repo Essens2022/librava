@@ -510,6 +510,7 @@ export default {
   "digital.title": "Produits numériques",
   "digital.intro": "Planificateurs, calendriers, organisateurs, feuilles de calcul et modèles : prêts à télécharger et à utiliser immédiatement.",
   "digital.anyDevice": "Sur tout appareil",
+  "digital.tag": "Téléchargez · Imprimez · Utilisez",
   "digital.printA4": "Impression A4",
   "digital.how1": "Téléchargement immédiat après le paiement",
   "digital.how2": "Fonctionne sur téléphone, tablette et ordinateur",

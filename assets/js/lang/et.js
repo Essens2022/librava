@@ -510,6 +510,7 @@ export default {
   "digital.title": "Digitaalsed tooted",
   "digital.intro": "Planeerijad, kalendrid, korrastajad, tabelid ja mallid — valmis alla laadimiseks ja kohe kasutamiseks.",
   "digital.anyDevice": "Igas seadmes",
+  "digital.tag": "Laadi alla · Prindi · Kasuta",
   "digital.printA4": "Prindi A4-le",
   "digital.how1": "Kohene allalaadimine pärast makset",
   "digital.how2": "Töötab telefonis, tahvelarvutis ja arvutis",
