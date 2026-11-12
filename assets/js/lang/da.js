@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "“{book}” er nu din. Den venter i dit bibliotek, klar til at blive læst.",
   "ntf.giftLeadMany": "Du har fået {n} bøger i gave. De venter i dit bibliotek, klar til at blive læst.",
   "ntf.giftNote": "Du finder den altid i Mit bibliotek, på alle enheder. God læselyst!",
+  "ntf.giftLeadD": "»{book}« er nu din. Den venter i dit bibliotek, klar til download.",
+  "ntf.giftNoteD": "Du finder den altid i dit bibliotek, på alle enheder. God fornøjelse!",
   "ntf.title": "Notifikationer",
   "ntf.empty": "Ingen notifikationer endnu.",
   "ntf.open": "Se",

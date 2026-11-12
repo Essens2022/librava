@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "„{book}“ on nüüd teie oma. See ootab teid raamatukogus, lugemiseks valmis.",
   "ntf.giftLeadMany": "Saite {n} raamatut kingituseks. Need ootavad teid raamatukogus, lugemiseks valmis.",
   "ntf.giftNote": "Leiate selle alati jaotisest Minu raamatukogu, igas seadmes. Head lugemist!",
+  "ntf.giftLeadD": "„{book}“ on nüüd sinu oma. See ootab sinu raamatukogus allalaadimiseks valmis.",
+  "ntf.giftNoteD": "Leiad selle alati oma raamatukogust, igas seadmes. Head kasutamist!",
   "ntf.title": "Teavitused",
   "ntf.empty": "Teavitusi veel pole.",
   "ntf.open": "Vaata",

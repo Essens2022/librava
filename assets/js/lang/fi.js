@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "”{book}” on nyt sinun. Se odottaa kirjastossasi valmiina luettavaksi.",
   "ntf.giftLeadMany": "Sait {n} kirjaa lahjaksi. Ne odottavat kirjastossasi valmiina luettavaksi.",
   "ntf.giftNote": "Löydät sen aina kohdasta Oma kirjasto, millä tahansa laitteella. Mukavia lukuhetkiä!",
+  "ntf.giftLeadD": "”{book}” on nyt sinun. Se odottaa kirjastossasi ladattavana.",
+  "ntf.giftNoteD": "Löydät sen aina kirjastostasi millä tahansa laitteella. Hyvää käyttöä!",
   "ntf.title": "Ilmoitukset",
   "ntf.empty": "Ei vielä ilmoituksia.",
   "ntf.open": "Katso",

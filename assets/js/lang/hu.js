@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "A(z) „{book}” mostantól a tiéd. A könyvtáradban vár, olvasásra készen.",
   "ntf.giftLeadMany": "{n} könyvet kaptál ajándékba. A könyvtáradban várnak, olvasásra készen.",
   "ntf.giftNote": "Mindig megtalálod a Könyvtáramban, bármelyik eszközön. Jó olvasást!",
+  "ntf.giftLeadD": "A(z) „{book}” mostantól a tiéd. A könyvtáradban vár, letöltésre készen.",
+  "ntf.giftNoteD": "Mindig megtalálod a könyvtáradban, bármelyik eszközön. Jó használatot!",
   "ntf.title": "Értesítések",
   "ntf.empty": "Még nincs értesítés.",
   "ntf.open": "Megnézem",

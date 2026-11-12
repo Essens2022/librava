@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112213608';
-import { CONFIG } from './config.js?v=20261112213608';
-import { SOCIAL_PATHS } from './social.js?v=20261112213608';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112213608';
-import { esc, store, $, $$ } from './util.js?v=20261112213608';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112220311';
+import { CONFIG } from './config.js?v=20261112220311';
+import { SOCIAL_PATHS } from './social.js?v=20261112220311';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112220311';
+import { esc, store, $, $$ } from './util.js?v=20261112220311';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112213608';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112213608';
-import { track, trackPage } from './track.js?v=20261112213608';
-import { initGA, applyConsent } from './ga.js?v=20261112213608';
-import { consentStrings } from './consent-i18n.js?v=20261112213608';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112213608';
-import { api } from './api.js?v=20261112213608';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112213608';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261112220311';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112220311';
+import { track, trackPage } from './track.js?v=20261112220311';
+import { initGA, applyConsent } from './ga.js?v=20261112220311';
+import { consentStrings } from './consent-i18n.js?v=20261112220311';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112220311';
+import { api } from './api.js?v=20261112220311';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112220311';
 
 // ---------------- icons ----------------
 const P = {
@@ -710,9 +710,9 @@ async function celebrateGifts(gn) {
   modal(`<div class="gift-confetti" aria-hidden="true">${conf}</div>
     <div class="gift-hero">${GIFT_SVG.replace('width="20" height="20"', 'width="44" height="44"')}</div>
     <h2>${esc(t('ntf.giftHi'))}</h2>
-    <p class="gift-lead">${esc(one ? t('ntf.giftLead', { book: b.title }) : t('ntf.giftLeadMany', { n: books.length }))}</p>
+    <p class="gift-lead">${esc(one ? t(isDigital(b) ? 'ntf.giftLeadD' : 'ntf.giftLead', { book: b.title }) : t('ntf.giftLeadMany', { n: books.length }))}</p>
     <div class="gift-books">${books.slice(0, 4).map(x => `<a href="#/read/${encodeURIComponent(x.id)}" data-close>${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="${esc(x.title)}">` : `<span class="ph">${esc(x.title)}</span>`}</a>`).join('')}</div>
-    <p class="muted gift-note">${esc(t('ntf.giftNote'))}</p>
+    <p class="muted gift-note">${esc(t(isDigital(b) ? 'ntf.giftNoteD' : 'ntf.giftNote'))}</p>
     <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div>`,
     { onMount: m => m.classList.add('gift-modal') });
 }

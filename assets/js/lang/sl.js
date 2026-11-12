@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "»{book}« je zdaj vaša. Čaka vas v knjižnici, pripravljena za branje.",
   "ntf.giftLeadMany": "Prejeli ste {n} knjig v dar. Čakajo vas v knjižnici, pripravljene za branje.",
   "ntf.giftNote": "Vedno jo najdete v Moji knjižnici, na vsaki napravi. Prijetno branje!",
+  "ntf.giftLeadD": "„{book}“ je zdaj vaš. Čaka v vaši knjižnici, pripravljen za prenos.",
+  "ntf.giftNoteD": "Vedno ga najdete v svoji knjižnici, na vsaki napravi. Veliko užitka!",
   "ntf.title": "Obvestila",
   "ntf.empty": "Še ni obvestil.",
   "ntf.open": "Poglej",

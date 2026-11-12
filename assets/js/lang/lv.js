@@ -7,6 +7,8 @@ export default {
   "ntf.giftLead": "“{book}” tagad ir jūsu. Tā gaida jūs bibliotēkā, gatava lasīšanai.",
   "ntf.giftLeadMany": "Jūs saņēmāt {n} grāmatas dāvanā. Tās gaida jūs bibliotēkā, gatavas lasīšanai.",
   "ntf.giftNote": "Jūs to vienmēr atradīsiet sadaļā Mana bibliotēka, jebkurā ierīcē. Patīkamu lasīšanu!",
+  "ntf.giftLeadD": "„{book}” tagad ir tavs. Tas gaida tavā bibliotēkā, gatavs lejupielādei.",
+  "ntf.giftNoteD": "Vienmēr atradīsi to savā bibliotēkā, jebkurā ierīcē. Veiksmīgu lietošanu!",
   "ntf.title": "Paziņojumi",
   "ntf.empty": "Paziņojumu vēl nav.",
   "ntf.open": "Skatīt",
