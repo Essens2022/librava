@@ -536,5 +536,7 @@ export default {
   "book.formatShort.zip": "ZIP",
   "book.d.type": "Produkta veids",
   "home.byType": "Pārlūkot pēc veida",
-  "lib.download": "Gatavs lejupielādei"
+  "lib.download": "Gatavs lejupielādei",
+  "book.dcS3d": "Lejupielādējiet un izmantojiet jebkurā ierīcē",
+  "book.dcFootD": "Jūsu fails paliek jūsu bibliotēkā, gatavs lejupielādei jebkurā laikā."
 };

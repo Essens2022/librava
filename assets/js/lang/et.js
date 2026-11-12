@@ -536,5 +536,7 @@ export default {
   "book.formatShort.zip": "ZIP",
   "book.d.type": "Toote tüüp",
   "home.byType": "Sirvi tüübi järgi",
-  "lib.download": "Valmis allalaadimiseks"
+  "lib.download": "Valmis allalaadimiseks",
+  "book.dcS3d": "Laadi alla ja kasuta igal seadmel",
+  "book.dcFootD": "Sinu fail jääb sinu raamatukokku ja on igal ajal valmis uuesti allalaadimiseks."
 };

@@ -536,5 +536,7 @@ export default {
   "book.formatShort.zip": "ZIP",
   "book.d.type": "Tipo de producto",
   "home.byType": "Explorar por tipo",
-  "lib.download": "Listo para descargar"
+  "lib.download": "Listo para descargar",
+  "book.dcS3d": "Descárgalo y úsalo en cualquier dispositivo",
+  "book.dcFootD": "Tu archivo permanece en tu biblioteca, listo para volver a descargarlo cuando quieras."
 };

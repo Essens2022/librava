@@ -536,5 +536,7 @@ export default {
   "book.formatShort.zip": "ZIP",
   "book.d.type": "Terméktípus",
   "home.byType": "Böngészés típus szerint",
-  "lib.download": "Letöltésre kész"
+  "lib.download": "Letöltésre kész",
+  "book.dcS3d": "Töltse le, és használja bármilyen eszközön",
+  "book.dcFootD": "A fájl a könyvtárában marad, és bármikor újra letölthető."
 };

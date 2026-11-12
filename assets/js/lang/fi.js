@@ -536,5 +536,7 @@ export default {
   "book.formatShort.zip": "ZIP",
   "book.d.type": "Tuotetyyppi",
   "home.byType": "Selaa tyypin mukaan",
-  "lib.download": "Valmis ladattavaksi"
+  "lib.download": "Valmis ladattavaksi",
+  "book.dcS3d": "Lataa se ja käytä millä tahansa laitteella",
+  "book.dcFootD": "Tiedostosi pysyy kirjastossasi valmiina ladattavaksi uudelleen milloin tahansa."
 };

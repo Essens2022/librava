@@ -1,10 +1,10 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { t, getLang, LANGS } from './i18n.js?v=20261112200406';
-import { esc, $, $$ } from './util.js?v=20261112200406';
-import { api } from './api.js?v=20261112200406';
-import { icon, toast, errText, CATS } from './ui.js?v=20261112200406';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261112200406';
+import { t, getLang, LANGS } from './i18n.js?v=20261112200416';
+import { esc, $, $$ } from './util.js?v=20261112200416';
+import { api } from './api.js?v=20261112200416';
+import { icon, toast, errText, CATS } from './ui.js?v=20261112200416';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261112200416';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
