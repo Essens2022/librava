@@ -511,6 +511,7 @@ export default {
   "digital.intro": "Plánovače, kalendáře, organizéry, tabulky a šablony — připravené ke stažení a okamžitému použití.",
   "digital.anyDevice": "Každé zařízení",
   "digital.tag": "Stáhni · Vytiskni · Používej",
+  "digital.about": "O tomto produktu",
   "digital.printA4": "Tisk na A4",
   "digital.how1": "Okamžité stažení po zaplacení",
   "digital.how2": "Funguje na telefonu, tabletu i počítači",

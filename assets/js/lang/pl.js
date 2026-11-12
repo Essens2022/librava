@@ -511,6 +511,7 @@ export default {
   "digital.intro": "Planery, kalendarze, organizery, arkusze kalkulacyjne i szablony – pobierz i korzystaj od razu.",
   "digital.anyDevice": "Na każdym urządzeniu",
   "digital.tag": "Pobierz · Wydrukuj · Używaj",
+  "digital.about": "O tym produkcie",
   "digital.printA4": "Wydruk na A4",
   "digital.how1": "Natychmiastowe pobranie po płatności",
   "digital.how2": "Działa na telefonie, tablecie i komputerze",

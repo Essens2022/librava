@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261112222449';
-import { askWhy } from './why.js?v=20261112222449';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112222449';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112222449';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112222449';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112222449';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112222449';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112222449';
-import { couponLive } from './welcome.js?v=20261112222449';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112222449';
-import { track } from './track.js?v=20261112222449';
-import { gaEvent } from './ga.js?v=20261112222449';
-import { guessLang } from './langdetect.js?v=20261112222449';
-import { didYouMean } from './search.js?v=20261112222449';
-import { api, editionsOf } from './api.js?v=20261112222449';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112222449';
+import { CONFIG } from './config.js?v=20261112224230';
+import { askWhy } from './why.js?v=20261112224230';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112224230';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112224230';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112224230';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112224230';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112224230';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112224230';
+import { couponLive } from './welcome.js?v=20261112224230';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112224230';
+import { track } from './track.js?v=20261112224230';
+import { gaEvent } from './ga.js?v=20261112224230';
+import { guessLang } from './langdetect.js?v=20261112224230';
+import { didYouMean } from './search.js?v=20261112224230';
+import { api, editionsOf } from './api.js?v=20261112224230';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112224230';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -329,7 +329,7 @@ export async function viewBook(el, id) {
       <div class="book-main book-body">
         <div class="formats" role="list" aria-label="${esc(t('book.d.format'))}">${eds.map(x => `<a role="listitem" class="format-chip${x.id === b.id ? '' : ' alt'}" href="#/book/${encodeURIComponent(x.id)}"${x.id === b.id ? ' aria-current="true"' : ''}><span class="muted">${isDigital(x) ? '' : esc(t('book.color.' + (x.color === 'bw' ? 'bw' : 'color'))) + ' · '}${esc(t('book.formatShort.' + x.format))}</span><b>${x.price_cents ? money(x.price_cents) : esc(t('book.free'))}</b></a>`).join('')}</div>
         <hr>
-        <h2 class="section-title" style="font-size:18px;margin-bottom:8px">${esc(t('book.description'))}</h2>
+        <h2 class="section-title" style="font-size:18px;margin-bottom:8px">${esc(t(isDigital(b) ? 'digital.about' : 'book.description'))}</h2>
         <div class="desc clamped ${hasTags(b.description) ? 'rich' : ''}" id="desc">${safeHTML(b.description)}</div>
         <button class="linkbtn" id="desc-more" hidden>${esc(t('book.more'))}</button>
         <div id="free-guide"></div>

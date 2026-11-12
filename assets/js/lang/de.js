@@ -627,6 +627,7 @@ export default {
   "digital.intro": "Planer, Kalender, Organizer, Tabellen und Vorlagen — sofort zum Download und Loslegen bereit.",
   "digital.anyDevice": "Auf jedem Gerät",
   "digital.tag": "Laden · Drucken · Nutzen",
+  "digital.about": "Über dieses Produkt",
   "digital.printA4": "Auf A4 drucken",
   "digital.how1": "Sofortiger Download nach der Zahlung",
   "digital.how2": "Funktioniert auf Smartphone, Tablet und Computer",

@@ -511,6 +511,7 @@ export default {
   "digital.intro": "Planleggere, kalendere, organiserere, regneark og maler – last ned og bruk med en gang.",
   "digital.anyDevice": "Alle enheter",
   "digital.tag": "Last ned · Skriv ut · Bruk",
+  "digital.about": "Om dette produktet",
   "digital.printA4": "Skriv ut på A4",
   "digital.how1": "Umiddelbar nedlasting etter betaling",
   "digital.how2": "Fungerer på mobil, nettbrett og datamaskin",

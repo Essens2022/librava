@@ -511,6 +511,7 @@ export default {
   "digital.intro": "Planeri, kalendari, organizatori, proračunske tablice i predlošci — spremni za preuzimanje i trenutačno korištenje.",
   "digital.anyDevice": "Na svakom uređaju",
   "digital.tag": "Preuzmi · Ispiši · Koristi",
+  "digital.about": "O ovom proizvodu",
   "digital.printA4": "Ispis na A4",
   "digital.how1": "Trenutačno preuzimanje nakon plaćanja",
   "digital.how2": "Radi na mobitelu, tabletu i računalu",

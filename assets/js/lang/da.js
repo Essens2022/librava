@@ -511,6 +511,7 @@ export default {
   "digital.intro": "Planlæggere, kalendere, organizere, regneark og skabeloner — klar til download og brug med det samme.",
   "digital.anyDevice": "Alle enheder",
   "digital.tag": "Download · Print · Brug",
+  "digital.about": "Om dette produkt",
   "digital.printA4": "Print på A4",
   "digital.how1": "Øjeblikkelig download efter betaling",
   "digital.how2": "Fungerer på telefon, tablet og computer",
