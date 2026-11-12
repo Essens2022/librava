@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112200416';
-import { CONFIG } from './config.js?v=20261112200416';
-import { SOCIAL_PATHS } from './social.js?v=20261112200416';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112200416';
-import { esc, store, $, $$ } from './util.js?v=20261112200416';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112200704';
+import { CONFIG } from './config.js?v=20261112200704';
+import { SOCIAL_PATHS } from './social.js?v=20261112200704';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112200704';
+import { esc, store, $, $$ } from './util.js?v=20261112200704';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112200416';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112200416';
-import { track, trackPage } from './track.js?v=20261112200416';
-import { initGA, applyConsent } from './ga.js?v=20261112200416';
-import { consentStrings } from './consent-i18n.js?v=20261112200416';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112200416';
-import { api } from './api.js?v=20261112200416';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112200416';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261112200704';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112200704';
+import { track, trackPage } from './track.js?v=20261112200704';
+import { initGA, applyConsent } from './ga.js?v=20261112200704';
+import { consentStrings } from './consent-i18n.js?v=20261112200704';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112200704';
+import { api } from './api.js?v=20261112200704';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112200704';
 
 // ---------------- icons ----------------
 const P = {
@@ -140,7 +140,7 @@ function refreshTopCats() {
   loadCatOrder(); loadLabels();
   api.listBooks({ limit: 1 }).then(() => {
     const all = api._catalog || [], seen = new Map();
-    showDigital(hasDigital(all));
+    if (all && all.length) showDigital(hasDigital(all));
     for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }
     const n = {}; for (const c of seen.values()) n[c] = (n[c] || 0) + 1;
     const list = CATS.filter(c => n[c] >= 3).sort((a, b) => n[b] - n[a]).slice(0, 12);
@@ -686,7 +686,7 @@ async function celebrateGifts(gn) {
     <p class="gift-lead">${esc(one ? t('ntf.giftLead', { book: b.title }) : t('ntf.giftLeadMany', { n: books.length }))}</p>
     <div class="gift-books">${books.slice(0, 4).map(x => `<a href="#/read/${encodeURIComponent(x.id)}" data-close>${x.cover_url ? `<img src="${esc(x.cover_url)}" alt="${esc(x.title)}">` : `<span class="ph">${esc(x.title)}</span>`}</a>`).join('')}</div>
     <p class="muted gift-note">${esc(t('ntf.giftNote'))}</p>
-    <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div>`,
+    <div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#/library" data-close>${esc(t('nav.library'))}</a><a class="btn btn-buy" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div>`,
     { onMount: m => m.classList.add('gift-modal') });
 }
 let notifWho = null;
@@ -738,7 +738,7 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
     <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${ntfRich(t('ntf.giftBody'))}</p>
     <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
       <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
-      <a class="btn btn-buy btn-sm" href="#/read/${encodeURIComponent(b.id)}" data-close>${esc(t('book.readNow'))}</a></div></div></div></article>`;
+      <a class="btn btn-buy btn-sm" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div></div></div></article>`;
   }
   return `<article class="ntf2 ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
     <div class="ntf-top"><span class="ntf-brand" aria-label="${esc(CONFIG.siteName)}">${logoHTML()}</span><small class="muted">${preview ? esc(t('ntf.now')) : esc(ago(n.created_at))}</small></div>

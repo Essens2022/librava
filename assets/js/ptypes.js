@@ -1,6 +1,6 @@
 // Product types: every title is an "ebook" unless the product_type column says otherwise.
 // Digital products (planners, calendars, organizers, spreadsheets, templates) are files that are downloaded and used, not read in the reader.
-import { t } from './i18n.js?v=20261112200416';
+import { t } from './i18n.js?v=20261112200704';
 
 export const PTYPES = ['planner', 'calendar', 'organizer', 'spreadsheet', 'template'];
 export const ptypeOf = b => (b && PTYPES.includes(b.product_type)) ? b.product_type : 'ebook';

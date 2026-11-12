@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261112200416';
-import { askWhy } from './why.js?v=20261112200416';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112200416';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112200416';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112200416';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112200416';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112200416';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112200416';
-import { couponLive } from './welcome.js?v=20261112200416';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112200416';
-import { track } from './track.js?v=20261112200416';
-import { gaEvent } from './ga.js?v=20261112200416';
-import { guessLang } from './langdetect.js?v=20261112200416';
-import { didYouMean } from './search.js?v=20261112200416';
-import { api, editionsOf } from './api.js?v=20261112200416';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112200416';
+import { CONFIG } from './config.js?v=20261112200704';
+import { askWhy } from './why.js?v=20261112200704';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112200704';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112200704';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112200704';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112200704';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112200704';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112200704';
+import { couponLive } from './welcome.js?v=20261112200704';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112200704';
+import { track } from './track.js?v=20261112200704';
+import { gaEvent } from './ga.js?v=20261112200704';
+import { guessLang } from './langdetect.js?v=20261112200704';
+import { didYouMean } from './search.js?v=20261112200704';
+import { api, editionsOf } from './api.js?v=20261112200704';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112200704';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -60,12 +60,12 @@ export async function viewHome(el) {
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
   await catOrdP;
   // digital products (planners, calendars…) appear on the home page only once the store has some
-  let digi = all.filter(isDigital); if (!digi.length) digi = everything.filter(isDigital);
+  let digi = all.filter(isDigital), digiAll = false; if (!digi.length) { digi = everything.filter(isDigital); digiAll = digi.length > 0; }
   const digiTypes = PTYPES.filter(p => digi.some(b => ptypeOf(b) === p));
   const digiNew = digi.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 14);
   const typeStrip = !digi.length ? '' : `
     <section class="panel"><h2 class="section-title">${esc(t('home.byType'))} <a href="#/digital">${esc(t('home.seeAll'))}</a></h2>
-    <div class="ptiles">${digiTypes.map(p => `<a class="ptile" href="#/search?type=${p}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b>${digi.filter(b => ptypeOf(b) === p).length > 1 ? `<small>${esc(t('digital.count', { n: digi.filter(b => ptypeOf(b) === p).length }))}</small>` : ''}</a>`).join('')}</div></section>`;
+    <div class="ptiles">${digiTypes.map(p => `<a class="ptile" href="#/search?type=${p}${digiAll ? '&lang=all' : ''}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b>${digi.filter(b => ptypeOf(b) === p).length > 1 ? `<small>${esc(t('digital.count', { n: digi.filter(b => ptypeOf(b) === p).length }))}</small>` : ''}</a>`).join('')}</div></section>`;
   const catTiles = applyCatOrder(CATS).map(c => {
     const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';
@@ -100,18 +100,18 @@ export async function viewHome(el) {
         <a class="btn btn-cart btn-sm" href="#/read/${encodeURIComponent(cont.book.id)}">${icon('book')} ${esc(t('book.readNow'))}</a></div>
       </div></section>` : ''}
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
-    ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
+    ${shelf(t('home.featured'), featured.filter(b => !isDigital(b)), '#/search?sort=bestsellers')}
     ${strips[0] || ''}
     ${typeStrip}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
     ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
-    ${shelf(t('home.new'), newest, '#/search?sort=newest')}
+    ${shelf(t('home.new'), newest.filter(b => !isDigital(b)), '#/search?sort=newest')}
     ${shelf(t('digital.newest'), digiNew, '#/digital')}
     ${strips[2] || ''}
-    ${shelf(t('home.deals'), deals, '#/search?deals=1')}
+    ${shelf(t('home.deals'), deals.filter(b => !isDigital(b)), '#/search?deals=1')}
     ${strips.slice(3).join('')}
-    ${shelf(t('home.free'), free, '#/search?price=free')}
+    ${shelf(t('home.free'), free.filter(b => !isDigital(b)), '#/search?price=free')}
   </div>`;
   mountPromos(el);
   if (L === 'en') mountGuideRail(el);
@@ -543,7 +543,7 @@ export async function viewBook(el, id) {
   }
   $('[data-free]', el)?.addEventListener('click', async () => {
     if (!api.user()) { sessionStorage.setItem('librava:after', '/book/' + b.id); go('/account'); return; }
-    try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go('/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
+    try { await api.claimFree(b.id); toast(t('pay.freeAdded')); go(isDigital(b) ? '/library' : '/read/' + encodeURIComponent(b.id)); } catch (e) { toast(errText(e), { error: true }); }
   });
 
   $('#rev-login', el)?.addEventListener('click', () => sessionStorage.setItem('librava:after', location.hash.slice(1) || currentPath()));
@@ -1052,7 +1052,7 @@ async function accOrders(el) {
         <div class="ol-info"><a href="#/book/${encodeURIComponent(p.book_id)}"><b>${esc(p.book?.title || '')}</b></a>
           <div class="muted">${esc(p.book?.author || '')}</div>
           <div class="ol-price">${p.price_cents ? esc(money(p.price_cents, cur(p))) : esc(p.gift ? t('ord.gift') : t('book.free'))}</div></div>
-        <div class="ol-actions"><a class="btn btn-cart btn-sm" href="#/read/${encodeURIComponent(p.book_id)}">${esc(t('book.readNow'))}</a>
+        <div class="ol-actions"><a class="btn btn-cart btn-sm" href="#/${p.book && isDigital(p.book) ? 'library' : 'read/' + encodeURIComponent(p.book_id)}">${esc(p.book && isDigital(p.book) ? t('off.download') : t('book.readNow'))}</a>
           <a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(p.book_id)}#reviews">${esc(t('ord.review'))}</a></div>
       </div>`).join('')}
     </article>`).join('') : `<div class="panel empty">${icon('box')}<p>${esc(t('acc.ordersEmpty'))}</p><a class="btn btn-buy" href="#/">${esc(t('acc.startShopping'))}</a></div>`}
