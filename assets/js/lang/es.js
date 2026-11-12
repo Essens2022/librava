@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Antes del pago",
   "legal.waiverText": "Acepto que el eBook se entregue de inmediato en mi biblioteca y entiendo que, con ello, pierdo mi derecho de desistimiento de 14 días.",
   "legal.waiverTerms": "Se aplican los {terms}. Si un libro tiene algún problema, te devolvemos el dinero: consulta {withdrawal}.",
-  "legal.waiverGo": "Continuar al pago"
+  "legal.waiverGo": "Continuar al pago",
+  "pay.consentNote": "Al pulsar el botón de pago solicitas la entrega inmediata del ebook en tu biblioteca y aceptas que pierdes tu derecho de desistimiento de 14 días.",
+  "pay.payNow": "Pagar {total}"
 };

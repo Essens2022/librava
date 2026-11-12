@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Före betalning",
   "legal.waiverText": "Jag godkänner att e-boken levereras till mitt bibliotek omedelbart och förstår att jag därmed förlorar min 14-dagars ångerrätt.",
   "legal.waiverTerms": "{terms} gäller. Om en bok har ett problem får du pengarna tillbaka: se {withdrawal}.",
-  "legal.waiverGo": "Fortsätt till betalning"
+  "legal.waiverGo": "Fortsätt till betalning",
+  "pay.consentNote": "Genom att trycka på betalknappen begär du omedelbar leverans av e-boken till ditt bibliotek och samtycker till att du förlorar din 14-dagars ångerrätt.",
+  "pay.payNow": "Betala {total}"
 };

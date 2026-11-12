@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Fizetés előtt",
   "legal.waiverText": "Elfogadom, hogy az e-könyv azonnal a könyvtáramba kerül, és tudomásul veszem, hogy ezzel elveszítem a 14 napos elállási jogomat.",
   "legal.waiverTerms": "A {terms} érvényes. Ha egy könyvvel probléma van, visszatérítjük az árát: lásd {withdrawal}.",
-  "legal.waiverGo": "Tovább a fizetéshez"
+  "legal.waiverGo": "Tovább a fizetéshez",
+  "pay.consentNote": "A fizetés gombra kattintva az e-könyv azonnali kézbesítését kéri a könyvtárába, és elfogadja, hogy elveszíti a 14 napos elállási jogát.",
+  "pay.payNow": "Fizetés: {total}"
 };

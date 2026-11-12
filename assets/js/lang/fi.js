@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Ennen maksua",
   "legal.waiverText": "Hyväksyn, että e-kirja toimitetaan kirjastooni heti, ja ymmärrän menettäväni siten 14 päivän peruuttamisoikeuteni.",
   "legal.waiverTerms": "Sovellamme {terms}. Jos kirjassa on ongelma, palautamme maksusi: katso {withdrawal}.",
-  "legal.waiverGo": "Jatka maksuun"
+  "legal.waiverGo": "Jatka maksuun",
+  "pay.consentNote": "Painamalla maksupainiketta pyydät e-kirjan välitöntä toimitusta kirjastoosi ja hyväksyt, että menetät 14 päivän peruuttamisoikeutesi.",
+  "pay.payNow": "Maksa {total}"
 };

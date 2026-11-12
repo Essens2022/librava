@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Prieš apmokėjimą",
   "legal.waiverText": "Sutinku, kad el. knyga iškart bus pristatyta į mano biblioteką, ir suprantu, kad taip prarandu 14 dienų atsisakymo teisę.",
   "legal.waiverTerms": "Taikomos {terms}. Jei knyga turi problemą, pinigus grąžiname: žr. {withdrawal}.",
-  "legal.waiverGo": "Tęsti į apmokėjimą"
+  "legal.waiverGo": "Tęsti į apmokėjimą",
+  "pay.consentNote": "Paspausdami apmokėjimo mygtuką prašote nedelsiant pristatyti el. knygą į savo biblioteką ir sutinkate, kad prarandate 14 dienų atsisakymo teisę.",
+  "pay.payNow": "Mokėti {total}"
 };

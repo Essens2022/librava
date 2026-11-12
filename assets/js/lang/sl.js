@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Pred plačilom",
   "legal.waiverText": "Strinjam se, da se e-knjiga takoj dostavi v mojo knjižnico, in razumem, da s tem izgubim 14-dnevno pravico do odstopa od pogodbe.",
   "legal.waiverTerms": "Veljajo {terms}. Če ima knjiga težavo, vam denar vrnemo: glejte {withdrawal}.",
-  "legal.waiverGo": "Nadaljuj na plačilo"
+  "legal.waiverGo": "Nadaljuj na plačilo",
+  "pay.consentNote": "S pritiskom na gumb za plačilo zahtevate takojšnjo dostavo e-knjige v svojo knjižnico in soglašate, da izgubite 14-dnevno pravico do odstopa.",
+  "pay.payNow": "Plačaj {total}"
 };

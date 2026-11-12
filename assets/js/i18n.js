@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261112185400';
-import { CONFIG } from './config.js?v=20261112185400';
-import { store } from './util.js?v=20261112185400';
+import { localize, loadRates } from './localprice.js?v=20261112185928';
+import { CONFIG } from './config.js?v=20261112185928';
+import { store } from './util.js?v=20261112185928';
 
 const D = {
   ro: {
@@ -858,6 +858,8 @@ const D = {
     "welcome.retry": "Reîncarcă",
     "cart.guestNote": "Nu ai nevoie de cont acum: plătești, apoi îți creezi contul dintr-un singur pas.",
     'pay.freeAdded': 'Cartea a fost adăugată în biblioteca ta.',
+    'pay.consentNote': 'Apăsând butonul de plată ceri livrarea imediată a eBook-ului în biblioteca ta și ești de acord că îți pierzi dreptul de retragere de 14 zile.',
+    'pay.payNow': 'Plătește {total}',
     'contact.title': 'Contact și ajutor',
     'contact.intro': 'Ai o întrebare despre o comandă, o descărcare sau o plată? Scrie-ne și te ajutăm.',
     'contact.response': 'Răspundem de obicei în cel mult 24 de ore în zilele lucrătoare.',
@@ -2502,6 +2504,8 @@ const D = {
     "welcome.retry": "Ricarica",
     "cart.guestNote": "Non ti serve un account ora: paghi, poi crei l'account in un solo passaggio.",
     'pay.freeAdded': 'Il libro è stato aggiunto alla tua libreria.',
+    'pay.consentNote': 'Premendo il pulsante di pagamento chiedi la consegna immediata dell\'eBook nella tua libreria e accetti di perdere il diritto di recesso di 14 giorni.',
+    'pay.payNow': 'Paga {total}',
     'contact.title': 'Contatti e assistenza',
     'contact.intro': 'Hai una domanda su un ordine, un download o un pagamento? Scrivici e ti aiutiamo.',
     'contact.response': 'Di solito rispondiamo entro 24 ore nei giorni lavorativi.',
@@ -4146,6 +4150,8 @@ const D = {
     "welcome.retry": "Reload",
     "cart.guestNote": "No account needed now: you pay, then create your account in one step.",
     'pay.freeAdded': 'The book has been added to your library.',
+    'pay.consentNote': 'By pressing the pay button you request immediate delivery of the eBook to your library and agree that you lose your 14-day right of withdrawal.',
+    'pay.payNow': 'Pay {total}',
     'contact.title': 'Contact & help',
     'contact.intro': 'Have a question about an order, a download or a payment? Write to us and we\'ll help.',
     'contact.response': 'We usually reply within 24 hours on working days.',
@@ -4972,7 +4978,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261112185400`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261112185928`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Pirms maksājuma",
   "legal.waiverText": "Piekrītu, ka e-grāmata tiek uzreiz piegādāta manā bibliotēkā, un saprotu, ka tādējādi zaudēju 14 dienu atteikuma tiesības.",
   "legal.waiverTerms": "Ir spēkā {terms}. Ja grāmatai ir problēma, mēs atmaksājam naudu: skatiet {withdrawal}.",
-  "legal.waiverGo": "Turpināt uz maksājumu"
+  "legal.waiverGo": "Turpināt uz maksājumu",
+  "pay.consentNote": "Nospiežot maksājuma pogu, jūs pieprasāt e-grāmatas tūlītēju piegādi savā bibliotēkā un piekrītat, ka zaudējat 14 dienu atteikuma tiesības.",
+  "pay.payNow": "Maksāt {total}"
 };

@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Antes do pagamento",
   "legal.waiverText": "Concordo que o eBook seja entregue de imediato na minha biblioteca e compreendo que, com isso, perco o meu direito de livre resolução de 14 dias.",
   "legal.waiverTerms": "Aplicam-se os {terms}. Se um livro tiver um problema, reembolsamos o valor: veja {withdrawal}.",
-  "legal.waiverGo": "Continuar para o pagamento"
+  "legal.waiverGo": "Continuar para o pagamento",
+  "pay.consentNote": "Ao premir o botão de pagamento, solicita a entrega imediata do e-book na sua biblioteca e aceita perder o direito de livre resolução de 14 dias.",
+  "pay.payNow": "Pagar {total}"
 };

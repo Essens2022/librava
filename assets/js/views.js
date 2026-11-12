@@ -1,17 +1,17 @@
-import { CONFIG } from './config.js?v=20261112185400';
-import { askWhy } from './why.js?v=20261112185400';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112185400';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112185400';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112185400';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112185400';
-import { couponLive } from './welcome.js?v=20261112185400';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112185400';
-import { track } from './track.js?v=20261112185400';
-import { gaEvent } from './ga.js?v=20261112185400';
-import { guessLang } from './langdetect.js?v=20261112185400';
-import { didYouMean } from './search.js?v=20261112185400';
-import { api, editionsOf } from './api.js?v=20261112185400';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112185400';
+import { CONFIG } from './config.js?v=20261112185928';
+import { askWhy } from './why.js?v=20261112185928';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112185928';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112185928';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112185928';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112185928';
+import { couponLive } from './welcome.js?v=20261112185928';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112185928';
+import { track } from './track.js?v=20261112185928';
+import { gaEvent } from './ga.js?v=20261112185928';
+import { guessLang } from './langdetect.js?v=20261112185928';
+import { didYouMean } from './search.js?v=20261112185928';
+import { api, editionsOf } from './api.js?v=20261112185928';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112185928';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1371,7 +1371,7 @@ export async function viewContact(el) {
 }
 
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
-// the consent logic is unchanged (unticked box, button disabled until ticked, server checks waiver === true); only the trust content around it is new
+// consent is given by pressing the pay button, whose wording states the loss of the withdrawal right right above it; the server still gets waiver === true and stores waiver_at
 const PAY_CHIPS = ['Visa', 'Mastercard', 'American Express', 'Apple Pay', 'Google Pay'];
 export const payChipsHTML = () => `<span class="pay-chips" aria-label="${esc(t('pay.methods'))}">${PAY_CHIPS.map(n => `<span class="pay-chip">${esc(n)}</span>`).join('')}</span>`;
 function waiverConfirm(sum) {
@@ -1386,16 +1386,15 @@ function waiverConfirm(sum) {
       <h2>${esc(t('legal.waiverTitle'))}</h2>
       ${summary}
       <div class="pay-next">${icon('shield', 'ico')}<div><b>${esc(t('pay.nextTitle'))}</b><p>${esc(t('pay.nextText'))}</p></div></div>
-      <label class="check consent-check"><input type="checkbox" id="w-ok"> <span>${esc(t('legal.waiverText'))}</span></label>
+      <p class="pay-consent">${esc(t('pay.consentNote'))}</p>
       <p class="pay-terms">${t('legal.waiverTerms', { terms: `<a href="#/legal/terms" target="_blank">${esc(L.title.terms)}</a>`, withdrawal: `<a href="#/legal/withdrawal" target="_blank">${esc(L.title.withdrawal)}</a>` })}</p>
-      <button class="btn btn-buy btn-block" id="w-go" disabled>${esc(t('legal.waiverGo'))}</button>
+      <button class="btn btn-buy btn-block" id="w-go">${icon('lock', 'ico')} ${esc(r ? t('pay.payNow', { total: money(r.total) }) : t('legal.waiverGo'))}</button>
       <button class="pay-back" data-close>${esc(t('pay.back'))}</button>
       <div class="pay-foot"><div class="pay-secure">${icon('lock', 'ico')} ${esc(t('pay.secured'))}</div>${payChipsHTML()}
         <div class="pay-meta">${sum?.company ? `<span>${esc(t('pay.soldBy', { company: sum.company }))}</span>` : ''}<a href="#/contact" target="_blank">${esc(t('pay.help'))}</a></div></div>
     </div>`, {
       onMount: (m, closeFn) => {
-        const cb = m.querySelector('#w-ok'), go2 = m.querySelector('#w-go');
-        cb.onchange = () => { go2.disabled = !cb.checked; };
+        const go2 = m.querySelector('#w-go');
         go2.onclick = () => { ok = true; closeFn(); resolve(true); };
         new MutationObserver((_, obs) => { if (!m.isConnected) { obs.disconnect(); if (!ok) resolve(false); } }).observe(document.body, { childList: true });
       },

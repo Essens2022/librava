@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Przed płatnością",
   "legal.waiverText": "Zgadzam się, aby e-book został od razu dostarczony do mojej biblioteki, i rozumiem, że tym samym tracę 14-dniowe prawo odstąpienia od umowy.",
   "legal.waiverTerms": "Obowiązuje {terms}. Jeśli książka ma problem, zwrócimy Ci pieniądze: zobacz {withdrawal}.",
-  "legal.waiverGo": "Przejdź do płatności"
+  "legal.waiverGo": "Przejdź do płatności",
+  "pay.consentNote": "Naciskając przycisk płatności, żądasz natychmiastowego dostarczenia e-booka do swojej biblioteki i zgadzasz się na utratę 14-dniowego prawa do odstąpienia od umowy.",
+  "pay.payNow": "Zapłać {total}"
 };

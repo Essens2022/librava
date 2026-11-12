@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Enne maksmist",
   "legal.waiverText": "Nõustun, et e-raamat tarnitakse kohe minu raamatukokku, ja saan aru, et sellega kaotan 14-päevase taganemisõiguse.",
   "legal.waiverTerms": "Kehtivad {terms}. Kui raamatuga on probleem, maksame raha tagasi: vaata {withdrawal}.",
-  "legal.waiverGo": "Jätka maksmisega"
+  "legal.waiverGo": "Jätka maksmisega",
+  "pay.consentNote": "Makse nupule vajutades soovid e-raamatu viivitamatut kättetoimetamist oma raamatukogusse ja nõustud, et kaotad 14-päevase taganemisõiguse.",
+  "pay.payNow": "Maksa {total}"
 };

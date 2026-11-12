@@ -500,5 +500,7 @@ export default {
   "legal.waiverTitle": "Vóór de betaling",
   "legal.waiverText": "Ik ga ermee akkoord dat het e-book direct in mijn bibliotheek wordt geleverd en ik begrijp dat ik daarmee mijn herroepingsrecht van 14 dagen verlies.",
   "legal.waiverTerms": "De {terms} zijn van toepassing. Als er iets mis is met een boek, betalen we je terug: zie {withdrawal}.",
-  "legal.waiverGo": "Verder naar betaling"
+  "legal.waiverGo": "Verder naar betaling",
+  "pay.consentNote": "Door op de betaalknop te drukken, vraagt u om directe levering van het e-book in uw bibliotheek en gaat u ermee akkoord dat u uw herroepingsrecht van 14 dagen verliest.",
+  "pay.payNow": "Betaal {total}"
 };

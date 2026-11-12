@@ -3902,3 +3902,11 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-chip { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--bg); }
 .pay-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; font-size: 12px; color: var(--muted); }
 .faq-i { padding: 8px 0; border-top: 1px solid var(--line); } .faq-i p { margin: 4px 0 0; color: var(--muted); }
+
+/* modern pay modal polish */
+.pay-modal .btn-buy { background: #1a7f4b; color: #fff; border: 0; border-radius: 12px; box-shadow: 0 6px 16px rgba(26,127,75,.28); gap: 8px; font-weight: 700; }
+.pay-modal .btn-buy:hover { background: #166c40; }
+.pay-modal .btn-buy .ico { width: 18px; height: 18px; }
+.pay-consent { margin: 0; font-size: 13px; line-height: 1.45; color: var(--fg); background: #f3f8f5; border: 1px solid #d3e6db; border-radius: 10px; padding: 10px 12px; }
+.pay-sum { box-shadow: 0 1px 2px rgba(0,0,0,.04); background: #fff; }
+.pay-chip { border-radius: 8px; padding: 4px 10px; background: #fff; letter-spacing: .01em; }

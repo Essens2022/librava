@@ -616,5 +616,7 @@ export default {
   "pay.back": "Zurück zum Warenkorb",
   "pay.secured": "Sichere Zahlung über Stripe · SSL-verschlüsselte Daten",
   "pay.soldBy": "Verkauft von {company}",
-  "pay.help": "Fragen? Kontaktiere uns"
+  "pay.help": "Fragen? Kontaktiere uns",
+  "pay.consentNote": "Mit dem Klick auf den Bezahlen-Button verlangst du die sofortige Bereitstellung des E-Books in deiner Bibliothek und stimmst zu, dass du dein 14-tägiges Widerrufsrecht verlierst.",
+  "pay.payNow": "{total} bezahlen"
 };
