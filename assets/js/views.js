@@ -1,18 +1,19 @@
-import { CONFIG } from './config.js?v=20261112192149';
-import { askWhy } from './why.js?v=20261112192149';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112192149';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112192149';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112192149';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112192149';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112192149';
-import { couponLive } from './welcome.js?v=20261112192149';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112192149';
-import { track } from './track.js?v=20261112192149';
-import { gaEvent } from './ga.js?v=20261112192149';
-import { guessLang } from './langdetect.js?v=20261112192149';
-import { didYouMean } from './search.js?v=20261112192149';
-import { api, editionsOf } from './api.js?v=20261112192149';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112192149';
+import { CONFIG } from './config.js?v=20261112200251';
+import { askWhy } from './why.js?v=20261112200251';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261112200251';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261112200251';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261112200251';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261112200251';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112200251';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261112200251';
+import { couponLive } from './welcome.js?v=20261112200251';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261112200251';
+import { track } from './track.js?v=20261112200251';
+import { gaEvent } from './ga.js?v=20261112200251';
+import { guessLang } from './langdetect.js?v=20261112200251';
+import { didYouMean } from './search.js?v=20261112200251';
+import { api, editionsOf } from './api.js?v=20261112200251';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261112200251';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -58,6 +59,13 @@ export async function viewHome(el) {
     <section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2>
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
   await catOrdP;
+  // digital products (planners, calendars…) appear on the home page only once the store has some
+  let digi = all.filter(isDigital); if (!digi.length) digi = everything.filter(isDigital);
+  const digiTypes = PTYPES.filter(p => digi.some(b => ptypeOf(b) === p));
+  const digiNew = digi.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 14);
+  const typeStrip = !digi.length ? '' : `
+    <section class="panel"><h2 class="section-title">${esc(t('home.byType'))} <a href="#/digital">${esc(t('home.seeAll'))}</a></h2>
+    <div class="ptiles">${digiTypes.map(p => `<a class="ptile" href="#/search?type=${p}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b><small>${esc(t('digital.count', { n: digi.filter(b => ptypeOf(b) === p).length }))}</small></a>`).join('')}</div></section>`;
   const catTiles = applyCatOrder(CATS).map(c => {
     const bs = all.filter(b => b.category === c || (b.categories || []).includes(c)).slice(0, 4);
     if (!bs.length) return '';
@@ -94,10 +102,12 @@ export async function viewHome(el) {
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
     ${shelf(t('home.featured'), featured, '#/search?sort=bestsellers')}
     ${strips[0] || ''}
+    ${typeStrip}
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
     ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest, '#/search?sort=newest')}
+    ${shelf(t('digital.newest'), digiNew, '#/digital')}
     ${strips[2] || ''}
     ${shelf(t('home.deals'), deals, '#/search?deals=1')}
     ${strips.slice(3).join('')}
@@ -129,7 +139,7 @@ function mountGuideRail(el) {
 // =====================================================================
 export async function viewSearch(el, q) {
   const opts = {
-    q: q.get('q') || '', category: q.get('cat') || '', format: q.get('format') || '', color: q.get('color') || '', price: q.get('price') || '',
+    q: q.get('q') || '', category: q.get('cat') || '', ptype: q.get('type') || '', format: q.get('format') || '', color: q.get('color') || '', price: q.get('price') || '',
     rating: Number(q.get('rating')) || 0, sort: q.get('sort') || '', deals: q.get('deals') === '1',
   };
   // book language: the visitor's language unless they pick another one or "all languages"
@@ -176,20 +186,23 @@ export async function viewSearch(el, q) {
     ${pnums.map((n, i) => `${i && n - pnums[i - 1] > 1 ? '<span class="pg-gap">…</span>' : ''}${n === pg ? `<span class="pg-num on" aria-current="page">${n}</span>` : `<a class="pg-num" href="${mk({ pg: n === 1 ? '' : n })}">${n}</a>`}`).join('')}
     ${pg < pages ? `<a class="pg-btn" href="${mk({ pg: pg + 1 })}" rel="next">${esc(t('search.next'))} ›</a>` : `<span class="pg-btn off">${esc(t('search.next'))} ›</span>`}
   </nav>`;
-  const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
+  const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : (opts.ptype && !opts.category) ? t('search.inCat', { n: books.length, cat: esc(t('ptype.' + opts.ptype)) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
   const sortSel = ['relevance', 'bestsellers', 'newest', 'priceAsc', 'priceDesc', 'rating'].map(s => `<option value="${s}" ${(opts.sort || (opts.q ? 'relevance' : 'bestsellers')) === s ? 'selected' : ''}>${esc(t('search.s.' + s))}</option>`).join('');
-  const hasFilters = ['cat', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
+  const hasFilters = ['cat', 'type', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
+  const digitalOn = hasDigital(everything), types = digitalOn ? ['ebook', ...PTYPES.filter(p => everything.some(b => ptypeOf(b) === p))] : [];
+  const fmts = ['pdf', 'epub', ...['xlsx', 'docx', 'zip'].filter(f => everything.some(b => b.format === f))];
   const langNote = bookLang
     ? `<div class="lang-note"><span class="chip">${icon('globe')} ${esc(t('lang.showing', { lang: langName(bookLang, true) }))}</span><a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
     : '';
 
   el.innerHTML = `<div class="wrap page"><div class="search-layout">
     <aside class="filters panel" id="filters" aria-label="${esc(t('search.filters'))}">
+      ${types.length > 1 ? `<h4>${esc(t('search.type'))}</h4>${radio('t', 'type', '', t('search.any'))}${types.map(p => radio('t', 'type', p, t('ptype.' + p))).join('')}` : ''}
       <h4>${esc(t('search.category'))}</h4>
       ${radio('c', 'cat', '', t('search.any'))}${CATS.slice(0, 10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}
       <details class="more-cats" ${CATS.indexOf(q.get('cat')) >= 10 ? 'open' : ''}><summary>${esc(t('search.moreCats', { n: CATS.length - 10 }))}</summary>${CATS.slice(10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}</details>
       <h4>${esc(t('search.format'))}</h4>
-      ${radio('f', 'format', '', t('search.any'))}${radio('f', 'format', 'pdf', t('book.format.pdf'))}${radio('f', 'format', 'epub', t('book.format.epub'))}
+      ${radio('f', 'format', '', t('search.any'))}${fmts.map(f => radio('f', 'format', f, t('book.format.' + f))).join('')}
       <h4>${esc(t('book.d.color'))}</h4>
       ${radio('k', 'color', '', t('search.any'))}${radio('k', 'color', 'color', t('book.color.color'))}${radio('k', 'color', 'bw', t('book.color.bw'))}
       <h4>${esc(t('search.price'))}</h4>
@@ -260,7 +273,7 @@ export async function viewBook(el, id) {
   const offers = await offersP;
   const offerRank = o => { const c = o.config || {}; if (o.kind === 'qty') return Math.min(...(c.tiers || [{ percent: 0 }]).map(x => +x.percent || 0)); return +(c.percent ?? 100); };
   const badges = offersForBook(b, offers).filter(o => o.show_badge !== false).sort((x, y) => offerRank(x) - offerRank(y));
-  const canPreview = !owned && (b.sample_path || api.isDemo);
+  const canPreview = !owned && !isDigital(b) && (b.sample_path || api.isDemo);
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? b.list_price_cents - b.price_cents : 0;
   const inCart = cart.has(b.id);
   const counts = [5, 4, 3, 2, 1].map(n => reviews.filter(r => r.rating === n).length);
@@ -268,8 +281,10 @@ export async function viewBook(el, id) {
 
   const buy = owned ? `
       <div class="owned-box">${icon('check', 'ico')} ${esc(t('book.owned', { date: fmtDate(owned.created_at) }))}</div>
-      <a class="btn btn-buy btn-block" href="#/read/${encodeURIComponent(b.id)}">${icon('book')} ${esc(t('book.readNow'))}</a>
-      <a class="btn btn-ghost btn-block" href="#/library">${esc(t('nav.library'))}</a>`
+      ${isDigital(b)
+        ? `<a class="btn btn-buy btn-block" href="#/library">${icon('download')} ${esc(t('off.download'))}</a>`
+        : `<a class="btn btn-buy btn-block" href="#/read/${encodeURIComponent(b.id)}">${icon('book')} ${esc(t('book.readNow'))}</a>
+      <a class="btn btn-ghost btn-block" href="#/library">${esc(t('nav.library'))}</a>`}`
     : (ownedEds.length ? `<div class="owned-box owned-other">${icon('check', 'ico')} <span>${esc(t('book.ownedOther', { fmt: ownedEds.map(x => t('book.formatShort.' + x.format)).join(', ') }))} <a href="#/read/${encodeURIComponent(ownedEds[0].id)}">${esc(t('book.readNow'))}</a></span></div>` : '') + (!b.price_cents ? `
       <div class="bigprice price-free">${esc(t('book.free'))}</div>
       <button class="btn btn-buy btn-block" data-free>${esc(t('book.getFree'))}</button>`
@@ -300,7 +315,7 @@ export async function viewBook(el, id) {
         ${canPreview ? `<button class="look-inside" data-preview>${icon('eye')} ${esc(t('book.lookInside'))}</button>` : ''}
       </div>
       <div class="book-main book-head">
-        <div class="pt-fmt">${esc(t('book.format.' + b.format))}</div>
+        <div class="pt-fmt">${esc(kindLabel(b))}</div>
         <h1 class="pt"><span class="pt-title">${esc(b.title)}</span>${b.subtitle ? `<span class="pt-sub">${esc(b.subtitle.replace(/^\s*[:—–-]\s*/, ''))}</span>` : ''}</h1>
         ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
         <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')}</div>
@@ -333,9 +348,10 @@ export async function viewBook(el, id) {
             ${pdRow('book.d.copyright', b.rights === 'public' ? t('book.publicDomain') : `© ${copyYear(b)} Librava`)}
           </dl></div>
           <div class="pd-col"><h3>${esc(t('book.d.groupFile'))}</h3><dl>
+            ${isDigital(b) ? pdRow('book.d.type', t('ptype1.' + ptypeOf(b))) : ''}
             ${pdRow('book.d.format', t('book.format.' + b.format))}
             ${pdRow('book.d.color', t('book.color.' + (b.color === 'bw' ? 'bw' : 'color')))}
-            ${bookSpecs(b)}
+            ${isDigital(b) ? '' : bookSpecs(b)}
           </dl></div>
         </div>
         ${b.rights === 'public' ? '' : `<p class="copy-note">${esc(t('book.copyNote', { year: copyYear(b) }))}</p>`}
@@ -927,7 +943,7 @@ export async function viewCart(el) {
           <h3><a href="#/book/${encodeURIComponent(b.id)}" style="color:var(--fg)">${esc(b.title)}</a></h3>
           <div class="card-author">${esc(t('book.by', { author: b.author }))}</div>
           <div class="ok">${esc(t('cart.digital'))}</div>
-          <div class="muted" style="font-size:13px">${esc(t('book.format.' + b.format))}</div>
+          <div class="muted" style="font-size:13px">${esc(kindLabel(b))}</div>
           ${r.final[b.id] === 0 ? `<div><span class="free-tag">${GIFT_SVG.replace('width="20" height="20"', 'width="14" height="14"')} ${esc(t('book.free'))}</span></div>` : ''}
           <div><button class="rm-btn" data-rm="${esc(b.id)}">${icon('trash')} ${esc(t('cart.remove'))}</button></div>
         </div>
@@ -1262,14 +1278,15 @@ export async function viewLibrary(el, q) {
       const pct = p?.percent ? Math.round(p.percent * 100) : 0;
       const status = !p ? t('lib.notStarted') : pct >= 99 ? t('lib.finished') : t('lib.read', { p: pct });
       const off = offline.has(b.id);
-      return `<div class="lib-item"><a href="#/read/${encodeURIComponent(b.id)}">
+      const dg = isDigital(b);
+      return `<div class="lib-item"><${dg ? 'div class="lib-link"' : `a href="#/read/${encodeURIComponent(b.id)}"`}>
         ${coverHTML(b, { badge: false })}
-        <div class="progress"><i style="width:${pct}%"></i></div>
+        ${dg ? '' : `<div class="progress"><i style="width:${pct}%"></i></div>`}
         <div class="card-title">${esc(b.title)}</div>
-        <div class="lib-status">${esc(status)} · ${esc(t('book.formatShort.' + b.format))}${off ? ` · <span class="off-tag">${icon('check')} ${esc(t('off.saved'))}</span>` : ''}</div></a>
+        <div class="lib-status">${dg ? esc(t('ptype1.' + ptypeOf(b))) + ' · ' + esc(t('book.formatShort.' + b.format)) : esc(status) + ' · ' + esc(t('book.formatShort.' + b.format))}${off ? ` · <span class="off-tag">${icon('check')} ${esc(t('off.saved'))}</span>` : ''}</div></${dg ? 'div' : 'a'}>
         <div class="lib-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-offline="${esc(b.id)}" title="${esc(off ? t('off.removeHint') : t('off.saveHint'))}">${icon(off ? 'trash' : 'devices')} ${esc(off ? t('off.remove') : t('off.save'))}</button>
-          ${b.allow_download !== false && !offlineMode ? `<button type="button" class="btn btn-ghost btn-sm" data-download="${esc(b.id)}" title="${esc(t('off.downloadHint'))}">${icon('download')} ${esc(t('off.download'))}</button>` : ''}
+          ${dg ? '' : `<button type="button" class="btn btn-ghost btn-sm" data-offline="${esc(b.id)}" title="${esc(off ? t('off.removeHint') : t('off.saveHint'))}">${icon(off ? 'trash' : 'devices')} ${esc(off ? t('off.remove') : t('off.save'))}</button>`}
+          ${b.allow_download !== false && !offlineMode ? `<button type="button" class="btn ${dg ? 'btn-buy' : 'btn-ghost'} btn-sm" data-download="${esc(b.id)}" title="${esc(t('off.downloadHint'))}">${icon('download')} ${esc(t('off.download'))}</button>` : ''}
         </div></div>`;
     }).join('')}</div></div>` : `<div class="panel empty">${icon('library')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lib.empty'))}</h2><p>${esc(t('lib.emptyHint'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div>`}
   </div>`;
@@ -1371,6 +1388,30 @@ export async function viewContact(el) {
   </article></div>`;
 }
 
+// =====================================================================
+//  DIGITAL PRODUCTS HUB  (#/digital): planners, calendars, organizers, spreadsheets, templates
+// =====================================================================
+export async function viewDigital(el) {
+  const L = getLang();
+  let list = (await api.listBooks({ lang: L })).filter(isDigital);
+  let allLangs = false;
+  if (!list.length) { list = (await api.listBooks({})).filter(isDigital); allLangs = list.length > 0; }
+  document.title = t('digital.title') + ' · ' + CONFIG.siteName;
+  if (!list.length) { el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('box')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('digital.title'))}</h2><p>${esc(t('digital.empty'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`; return; }
+  const n = Object.fromEntries(PTYPES.map(p => [p, list.filter(b => ptypeOf(b) === p).length]));
+  const tiles = PTYPES.filter(p => n[p]).map(p => `<a class="ptile" href="#/search?type=${p}${allLangs ? '&lang=all' : ''}"><span class="ptile-ico">${icon('pt_' + p, 'ico')}</span><b>${esc(t('ptype.' + p))}</b><small>${esc(t('digital.count', { n: n[p] }))}</small></a>`).join('');
+  const newest = [...list].sort((a, b) => String(b.published_at || '').localeCompare(String(a.published_at || ''))).slice(0, 14);
+  const best = [...list].sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0)).slice(0, 14);
+  const shelf = (title, books, more) => !books.length ? '' : `<section class="panel"><h2 class="section-title">${esc(title)} ${more ? `<a href="${more}">${esc(t('home.seeAll'))}</a>` : ''}</h2><div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
+  el.innerHTML = `<div class="wrap page digital-hub">
+    <section class="panel dh-head"><h1>${esc(t('digital.title'))}</h1><p>${esc(t('digital.intro'))}</p>
+      <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul></section>
+    <section class="panel"><h2 class="section-title">${esc(t('digital.byType'))}</h2><div class="ptiles">${tiles}</div></section>
+    ${shelf(t('digital.newest'), newest, '#/search?sort=newest&type=' + (PTYPES.find(p => n[p]) || ''))}
+    ${shelf(t('digital.best'), best.filter(b => (b.sales_count || 0) > 0), '')}
+  </div>`;
+}
+
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
 // consent is given by pressing the pay button, whose wording states the loss of the withdrawal right right above it; the server still gets waiver === true and stores waiver_at
 export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${PAY_LOGOS.map(([n, f]) => `<img class="pay-logo" src="${payLogo(f)}" alt="${esc(n)}" title="${esc(n)}" height="26" loading="lazy" decoding="async">`).join('')}<span class="pay-more">${esc(t('pay.more'))}</span></span>`;
@@ -1379,7 +1420,7 @@ function waiverConfirm(sum) {
     let ok = false;
     const L = legalText(getLang());
     const bk = sum?.books || [], r = sum?.r;
-    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(t('book.format.' + b.format))}</small></div><div class="pay-item-p">${money(r.final?.[b.id] ?? b.price_cents)}</div></div>`).join('') : '';
+    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${money(r.final?.[b.id] ?? b.price_cents)}</div></div>`).join('') : '';
     const summary = r ? `<section class="pay-sum" aria-label="${esc(t('pay.yourOrder'))}"><h3>${esc(t('pay.yourOrder'))}</h3>${items}
         <div class="pay-total"><span>${esc(t('pay.totalVat'))}</span><b>${money(r.total)}</b></div></section>` : '';
     const close = modal(`<div class="pay-modal">

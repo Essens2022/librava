@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
-      .select('id,title,author,price_cents,currency,category,categories')
+      .select('id,title,author,price_cents,currency,category,categories,product_type')
       .in('id', ids).eq('status', 'published').is('deleted_at', null);
     if (error) throw error;
     const { data: owned } = guest ? { data: [] as { book_id: string }[] } : await admin.from('purchases').select('book_id').eq('user_id', user!.id).in('book_id', ids);
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       p.set(`line_items[${i}][price_data][currency]`, currency);
       p.set(`line_items[${i}][price_data][unit_amount]`, String(b.price_cents));
       p.set(`line_items[${i}][price_data][product_data][name]`, b.title.slice(0, 250));
-      p.set(`line_items[${i}][price_data][product_data][description]`, `eBook · ${b.author}`.slice(0, 250));
+      p.set(`line_items[${i}][price_data][product_data][description]`, (b.product_type && b.product_type !== 'ebook' ? `Digital download · ${b.product_type}` : `eBook · ${b.author}`).slice(0, 250));
     });
 
     // the discount appears on Stripe's payment page as one line, with the offer's name

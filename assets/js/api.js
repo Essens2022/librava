@@ -3,11 +3,12 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261112192149';
-import { applyOffers, offerRunning } from './offers.js?v=20261112192149';
-import { scoreBook } from './search.js?v=20261112192149';
-import { getLang } from './i18n.js?v=20261112192149';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261112192149';
+import { CONFIG } from './config.js?v=20261112200251';
+import { applyOffers, offerRunning } from './offers.js?v=20261112200251';
+import { scoreBook } from './search.js?v=20261112200251';
+import { getLang } from './i18n.js?v=20261112200251';
+import { FILE_FORMATS } from './ptypes.js?v=20261112200251';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261112200251';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -19,6 +20,7 @@ export function filterBooks(all, o = {}) {
   if (!o.includeDrafts) list = list.filter(b => b.status === 'published');
   if (o.category) list = list.filter(b => b.category === o.category || (b.categories || []).includes(o.category));
   if (o.format) list = list.filter(b => b.format === o.format);
+  if (o.ptype) list = list.filter(b => (b.product_type || 'ebook') === o.ptype);
   if (o.color) list = list.filter(b => (b.color || 'color') === o.color);
   if (o.lang) list = list.filter(b => b.language === o.lang);
   if (o.featured) list = list.filter(b => b.is_featured);
@@ -59,9 +61,9 @@ export function filterBooks(all, o = {}) {
 }
 
 // what the store list needs for cards, filters, search and recommendations (the rest is read on the book page)
-const CARD_COLS = 'id,title,subtitle,author,contributors,category,categories,language,format,color,pages,price_cents,list_price_cents,currency,cover_path,updated_at,published_at,status,is_featured,rating_avg,rating_count,sales_count,series_name,series_number,keywords,isbn,librava_id,work_id,deleted_at,blurb,sample_path';
+const CARD_COLS = 'id,title,subtitle,author,contributors,category,categories,language,format,color,pages,price_cents,list_price_cents,currency,cover_path,updated_at,published_at,status,is_featured,rating_avg,rating_count,sales_count,series_name,series_number,keywords,isbn,librava_id,work_id,deleted_at,blurb,sample_path,product_type';
 const ADMIN_COLS = 'file_path,file_name,recommend_ids';
-const CAT_KEY = 'catalog:list', CAT_V = 3;
+const CAT_KEY = 'catalog:list', CAT_V = 4;
 const FMT_ORDER = { epub: 0, pdf: 1 };
 // all published editions of a book (itself included), EPUB first
 export function editionsOf(all, b) {
@@ -109,7 +111,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261112192149')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261112200251')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {
@@ -311,7 +313,7 @@ class DemoAPI {
     const id = data.id || uid('bk_');
     const patch = { ...data, id };
     if (files.cover) { await blobs.put('cover:' + id, files.cover); patch.cover_url = 'idb:cover:' + id; }
-    if (files.file) { await blobs.put('file:' + id, files.file); patch.file_path = 'idb:file:' + id; patch.format = fileExt(files.file.name) === 'epub' ? 'epub' : 'pdf'; patch.file_name = files.file.name; }
+    if (files.file) { await blobs.put('file:' + id, files.file); patch.file_path = 'idb:file:' + id; patch.format = FILE_FORMATS.includes(fileExt(files.file.name)) ? fileExt(files.file.name) : 'pdf'; patch.file_name = files.file.name; }
     if (files.sample) { await blobs.put('sample:' + id, files.sample); patch.sample_path = 'idb:sample:' + id; patch.sample_kind = fileExt(files.sample.name) === 'epub' ? 'epub' : 'pdf'; }
     // keep already stored idb references when no new file was chosen
     for (const key of ['cover_url', 'file_path', 'sample_path']) if (!files[{ cover_url: 'cover', file_path: 'file', sample_path: 'sample' }[key]]) delete patch[key];
@@ -709,7 +711,7 @@ class SupabaseAPI {
     }
     const owned = await this.owns(book.id);
     if (owned || this._user?.isAdmin) {
-      const { data, error } = await this.sb.storage.from('books').createSignedUrl(book.file_path, 60 * 60 * 3);
+      const { data, error } = await this.sb.storage.from('books').createSignedUrl(book.file_path, book.product_type && book.product_type !== 'ebook' ? 600 : 60 * 60 * 3);   // a downloaded product file: a short-lived link
       this._err(error);
       return { url: data.signedUrl, kind: book.format, limited: false };
     }
@@ -871,7 +873,7 @@ class SupabaseAPI {
     if (files.file) {
       const ext = fileExt(files.file.name);
       const p = `${id}/book.${ext}`; await this._upload('books', p, files.file);
-      row.file_path = p; row.format = ext === 'epub' ? 'epub' : 'pdf'; row.file_name = files.file.name;
+      row.file_path = p; row.format = FILE_FORMATS.includes(ext) ? ext : 'pdf'; row.file_name = files.file.name;
       // a book made light for screens: its full-size original is kept apart, private (only the admin can get it)
       if (files.file._original) {
         try { const o = `${id}/original.${ext}`; await this._upload('originals', o, files.file._original); row.original_path = o; }
