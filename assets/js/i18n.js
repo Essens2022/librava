@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261113152750';
-import { CONFIG } from './config.js?v=20261113152750';
-import { store } from './util.js?v=20261113152750';
+import { localize, loadRates } from './localprice.js?v=20261113192947';
+import { CONFIG } from './config.js?v=20261113192947';
+import { store } from './util.js?v=20261113192947';
 
 const D = {
   ro: {
@@ -5134,7 +5134,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261113152750`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261113192947`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
@@ -5151,6 +5151,13 @@ export async function setLang(l, { remember = true } = {}) {
 
 export function t(key, vars) {
   let s = (D[lang] && D[lang][key]) ?? D.en[key] ?? key;
+  if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+
+// the admin panel is always in Romanian (whatever language the shop is set to), so it never mixes two languages
+export function tAdmin(key, vars) {
+  let s = (D.ro && D.ro[key]) ?? D.en[key] ?? key;
   if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
   return s;
 }

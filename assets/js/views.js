@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113152750';
-import { askWhy } from './why.js?v=20261113152750';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113152750';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113152750';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113152750';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113152750';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113152750';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113152750';
-import { couponLive } from './welcome.js?v=20261113152750';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113152750';
-import { track } from './track.js?v=20261113152750';
-import { gaEvent } from './ga.js?v=20261113152750';
-import { guessLang } from './langdetect.js?v=20261113152750';
-import { didYouMean } from './search.js?v=20261113152750';
-import { api, editionsOf } from './api.js?v=20261113152750';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113152750';
+import { CONFIG } from './config.js?v=20261113192947';
+import { askWhy } from './why.js?v=20261113192947';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113192947';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113192947';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113192947';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113192947';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113192947';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113192947';
+import { couponLive } from './welcome.js?v=20261113192947';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113192947';
+import { track } from './track.js?v=20261113192947';
+import { gaEvent } from './ga.js?v=20261113192947';
+import { guessLang } from './langdetect.js?v=20261113192947';
+import { didYouMean } from './search.js?v=20261113192947';
+import { api, editionsOf } from './api.js?v=20261113192947';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113192947';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -284,7 +284,7 @@ export async function viewBook(el, id) {
     ownedP,
     // reviews are shared by all formats of the same book, as on Amazon (already requested above, in parallel with the book)
     reviewsP,
-    api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' }).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id)).slice(0, 12)),
+    (isDigital(b) ? api.listBooks({ lang: b.language, sort: 'bestsellers' }) : api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' })).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && isDigital(x) === isDigital(b)).sort((x, y) => isDigital(b) ? (ptypeOf(y) === ptypeOf(b)) - (ptypeOf(x) === ptypeOf(b)) : 0).slice(0, 12)),
     api.myReview ? api.myReview(b.id) : null,
     eds.length > 1 ? Promise.all(eds.filter(x => x.id !== b.id).map(x => api.owns(x.id).then(o => o ? x : null).catch(() => null))).then(l => l.filter(Boolean)) : [],
   ]);
@@ -326,7 +326,7 @@ export async function viewBook(el, id) {
       </div>`);
 
   el.innerHTML = `<div class="wrap page">
-    <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › <a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a></nav>
+    <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › ${isDigital(b) ? `<a href="#/search?type=${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</a>` : `<a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a>`}</nav>
     <div class="book-layout">
       <div class="book-cover-col">
         ${coverHTML(b)}
@@ -352,14 +352,14 @@ export async function viewBook(el, id) {
         ${(b.aplus || []).some(m => (m.imgs || []).some(Boolean) || m.title || m.text) ? `<h2 class="section-title" style="font-size:18px;margin-bottom:12px">${esc(t('book.fromAuthor'))}</h2>${aplusHTML(b.aplus)}<hr>` : ''}
         <h2 class="section-title" style="font-size:18px">${esc(t('book.details'))}</h2>
         <div class="pd">
-          <div class="pd-col"><h3>${esc(t('book.d.groupBook'))}</h3><dl>
+          <div class="pd-col"><h3>${esc(t(isDigital(b) ? 'digital.about' : 'book.d.groupBook'))}</h3><dl>
             ${pdRow('book.d.publisher', 'Librava')}
             ${b.published_at ? pdRow('book.d.published', esc(fmtDate(b.published_at)), true) : ''}
             ${b.series_name ? pdRow('book.series', `<a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(b.series_name)}${b.series_number ? ' · ' + esc(t('book.bookN', { n: b.series_number })) : ''}</a>`, true) : ''}
             ${b.edition ? pdRow('book.edition', String(b.edition)) : ''}
             ${pdRow('book.d.language', langName(b.language))}
             ${b.pages ? pdRow('book.d.pages', String(b.pages)) : ''}
-            ${pdRow('book.d.category', [...new Set([b.category, ...(b.categories || [])])].filter(Boolean).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', '), true)}
+            ${isDigital(b) ? '' : pdRow('book.d.category', [...new Set([b.category, ...(b.categories || [])])].filter(Boolean).map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))}</a>`).join(', '), true)}
             ${b.age_min != null || b.age_max != null ? pdRow('book.age', b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 })) : ''}
             ${b.isbn ? pdRow('ISBN', b.isbn, false, true) : ''}
             ${b.librava_id ? pdRow('kdp.lidShort', b.librava_id) : ''}
@@ -758,7 +758,7 @@ function showBankOrder(res) {
 const wantsAllLangs = () => /[?&]lang=all\b/.test(location.search + location.hash);
 async function boughtTogetherFor(b) {
   const all = await api.listBooks({});
-  const ok = x => x && x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && x.status !== 'draft' && x.price_cents > 0 && (wantsAllLangs() || !b.language || x.language === b.language);
+  const ok = x => x && x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && x.status !== 'draft' && x.price_cents > 0 && isDigital(x) === isDigital(b) && (wantsAllLangs() || !b.language || x.language === b.language);
   const byId = Object.fromEntries((await api.listBooks({ allFormats: true })).map(x => [x.id, x]));
   const out = [], add = x => { if (ok(x) && !out.some(y => y.id === x.id || (x.work_id && y.work_id === x.work_id))) out.push(x); };
   (b.recommend_ids || []).forEach(id => add(byId[id]));                       // chosen by the shop owner
