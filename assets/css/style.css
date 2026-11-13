@@ -4124,10 +4124,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .drawer .drawer-subs .drawer-sub{padding:11px 20px 11px 36px;font-size:14.5px}
 .drawer .drawer-subs .drawer-sub-main{font-weight:700}
 .drawer [data-digital-drawer] .drawer-all-toggle{color:#5b3fd9}
-/* digital cards v3: cover shown whole, labels sit under the picture (never over the title) */
-.card.pcard .pcover, .pgrid .card.pcard .pcover { aspect-ratio: auto; display: grid; grid-template-columns: auto 1fr; align-items: center; background: #fff; }
-.card.pcard .pcover img { position: static; grid-column: 1 / -1; grid-row: 1; aspect-ratio: 4 / 3; height: auto; }
-.card.pcard .pcover .ph { position: static; grid-column: 1 / -1; grid-row: 1; aspect-ratio: 4 / 3; }
-.card.pcard .pcover .ptag { position: static; grid-row: 2; grid-column: 1; margin: 7px 0 0 8px; justify-self: start; }
-.card.pcard .pcover .pfmt { position: static; grid-row: 2; grid-column: 2; margin: 7px 8px 0 0; justify-self: end; background: #f3f0ff; box-shadow: none; }
-.card.pcard .pcover .pbadge { top: 8px; right: 8px; }
+/* digital cards v5: labels stay top-left on the picture; cover shown whole (not cropped) so the title is never cut */
+.card.pcard .pcover, .pgrid .card.pcard .pcover { aspect-ratio: 4 / 3; }
+.card.pcard .pcover .ptag { top: 6px; left: 6px; }
+.card.pcard .pcover .pfmt { left: auto; right: 8px; bottom: 8px; }
