@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113142601';
-import { askWhy } from './why.js?v=20261113142601';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113142601';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113142601';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113142601';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113142601';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113142601';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113142601';
-import { couponLive } from './welcome.js?v=20261113142601';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113142601';
-import { track } from './track.js?v=20261113142601';
-import { gaEvent } from './ga.js?v=20261113142601';
-import { guessLang } from './langdetect.js?v=20261113142601';
-import { didYouMean } from './search.js?v=20261113142601';
-import { api, editionsOf } from './api.js?v=20261113142601';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113142601';
+import { CONFIG } from './config.js?v=20261113142837';
+import { askWhy } from './why.js?v=20261113142837';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113142837';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113142837';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113142837';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113142837';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113142837';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113142837';
+import { couponLive } from './welcome.js?v=20261113142837';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113142837';
+import { track } from './track.js?v=20261113142837';
+import { gaEvent } from './ga.js?v=20261113142837';
+import { guessLang } from './langdetect.js?v=20261113142837';
+import { didYouMean } from './search.js?v=20261113142837';
+import { api, editionsOf } from './api.js?v=20261113142837';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113142837';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1416,7 +1416,7 @@ export async function viewDigital(el) {
   const n = Object.fromEntries(PTYPES.map(p => [p, list.filter(b => ptypeOf(b) === p).length]));
   const lg = allLangs ? '&lang=all' : '';
   const types = PTYPES.filter(p => n[p]);
-  const chips = types.map(p => `<a class="dchip" href="#/search?type=${p}${lg}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b><small>${n[p]}</small></a>`).join('');
+  const chips = types.map(p => `<a class="dchip dc-${p}" href="#/search?type=${p}${lg}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b><small>${n[p]}</small></a>`).join('');
   const sections = types.map(p => `<section class="panel dsec"><h2 class="section-title"><span class="dsec-ico">${icon('pt_' + p, 'ico')}</span>${esc(t('ptype.' + p))} <a href="#/search?type=${p}${lg}">${esc(t('home.seeAll'))}</a></h2>
       <div class="pgrid">${list.filter(b => ptypeOf(b) === p).sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0) || String(y.published_at || '').localeCompare(String(x.published_at || ''))).map(cardHTML).join('')}</div></section>`).join('');
   // a small catalogue is one tidy grid; sections per type only once there are many products
