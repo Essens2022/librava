@@ -196,8 +196,12 @@ function allBooksMenu(btn) {
     <a role="menuitem" href="#/search?lang=all">${icon('book')} ${esc(t('nav.inAllLangs'))}</a>`;
   m.addEventListener('click', () => setTimeout(() => m.remove(), 0));
   document.body.appendChild(m);
-  const close = () => { m.remove(); removeEventListener('scroll', close); };
+  // it also closes when the visitor taps anywhere else, opens the side menu or changes page (before, it stayed floating over the menu)
+  const close = () => { m.remove(); removeEventListener('scroll', close); document.removeEventListener('pointerdown', out, true); removeEventListener('hashchange', close); };
+  const out = e => { if (!m.contains(e.target) && !btn.contains(e.target)) close(); };
   addEventListener('scroll', close, { once: true, passive: true });
+  addEventListener('hashchange', close, { once: true });
+  setTimeout(() => document.addEventListener('pointerdown', out, true), 0);
 }
 
 // ---------------- the visitor's way through the site (for "Back" like Amazon) ----------------
@@ -323,6 +327,7 @@ export function openLangPicker() {
 }
 
 export function openDrawer(open) {
+  if (open) document.querySelector('.allbooks-menu')?.remove();
   $('#drawer').classList.toggle('open', open);
   $('#scrim').hidden = !open;
   requestAnimationFrame(() => $('#scrim').classList.toggle('open', open));
