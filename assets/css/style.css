@@ -4211,3 +4211,15 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .dshop-hero .dc-planner { --c: #0e7490; } .dshop-hero .dc-calendar { --c: #2563eb; } .dshop-hero .dc-organizer { --c: #ea580c; } .dshop-hero .dc-spreadsheet { --c: #16a34a; } .dshop-hero .dc-template { --c: #7c3aed; }
 .dshop-hero .dc-game { --c: #db2777; } .dshop-hero .dc-coloring { --c: #d97706; } .dshop-hero .dc-kids { --c: #0284c7; } .dshop-hero .dc-wallart { --c: #be123c; } .dshop-hero .dc-cards { --c: #dc2626; }
 @media (min-width: 1000px) { .dshop-hero .dchip { gap: 7px; padding: 0 9px 0 5px; min-height: 42px; font-size: 13.5px; } .dshop-hero .dchip .ico { width: 28px; height: 28px; padding: 6px; } .dshop-hero .dshop-chips { gap: 7px; } .dshop-hero .dchip small { padding: 1px 6px; } }
+/* hub header on phones: smaller, lighter buttons */
+@media (max-width: 699px) {
+  .dshop-hero { padding: 11px 12px 11px; }
+  .dshop-hero h1 { font-size: 19px; gap: 7px; }
+  .dshop-hero h1 .ico { width: 20px; height: 20px; }
+  .dshop-hero .dshop-tag { margin: 2px 0 9px !important; font-size: 11.5px; }
+  .dshop-hero .dshop-chips { gap: 6px; margin: 0; padding: 1px 0 2px; }
+  .dshop-hero .dchip { min-height: 34px; padding: 0 9px 0 4px; gap: 6px; font-size: 12.5px; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .dshop-hero .dchip .ico { width: 25px; height: 25px; padding: 5.5px; }
+  .dshop-hero .dchip small { font-size: 10.5px; padding: 1px 5px; }
+  .dshop-hero .dchip::after { font-size: 16px; }
+}
