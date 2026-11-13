@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261113143704';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113143704';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261113143704';
-import { resetCompanyCache } from './views.js?v=20261113143704';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261113143704';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261113143704';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261113143704';
-import { optimizeBook } from './optimize.js?v=20261113143704';
-import { api } from './api.js?v=20261113143704';
-import { isDigital } from './ptypes.js?v=20261113143704';
-import { digitalAdmin } from './admin-digital.js?v=20261113143704';
-import { OF_STYLES } from './offerstyles.js?v=20261113143704';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261113143704';
+import { CONFIG } from './config.js?v=20261113144311';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113144311';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261113144311';
+import { resetCompanyCache } from './views.js?v=20261113144311';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261113144311';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261113144311';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261113144311';
+import { optimizeBook } from './optimize.js?v=20261113144311';
+import { api } from './api.js?v=20261113144311';
+import { isDigital } from './ptypes.js?v=20261113144311';
+import { digitalAdmin } from './admin-digital.js?v=20261113144311';
+import { OF_STYLES } from './offerstyles.js?v=20261113144311';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261113144311';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2335,7 +2335,22 @@ async function promosAdmin(body) {
     const a = seen.indexOf(p), b = a + dir; if (a < 0 || b < 0 || b >= seen.length) return;
     const ga = group.indexOf(seen[a]), gb = group.indexOf(seen[b]);
     [group[ga], group[gb]] = [group[gb], group[ga]];
-    try { for (let k = 0; k < group.length; k++) await api.setPromoSort(group[k].id, k); promosAdmin(body); } catch (x) { toast(errText(x), { error: true }); }
+    try {
+      for (let k = 0; k < group.length; k++) await api.setPromoSort(group[k].id, k);
+      // every language has its own banners: keep the same relative order (image / offers / books) on the other languages too
+      const KINDS = ['image', 'offers', 'books'], moved = seen[a], other = seen[b];
+      if (moved.lang && KINDS.includes(moved.kind) && KINDS.includes(other.kind) && moved.kind !== other.kind) {
+        const wantMovedFirst = dir < 0;
+        for (const L of [...new Set(all.map(x => x.lang).filter(l => l && l !== moved.lang))]) {
+          const pick = k => all.filter(x => x.lang === L && x.placement === moved.placement && x.kind === k && x.active).sort((u, v) => group.indexOf(u) - group.indexOf(v))[0];
+          const m = pick(moved.kind), o = pick(other.kind);
+          if (!m || !o) continue;
+          const gm = group.indexOf(m), go = group.indexOf(o);
+          if ((gm < go) !== wantMovedFirst) { await api.setPromoSort(m.id, go); await api.setPromoSort(o.id, gm); }
+        }
+      }
+      promosAdmin(body);
+    } catch (x) { toast(errText(x), { error: true }); }
   };
   $$('[data-up]', body).forEach(b => b.onclick = () => move(b.dataset.up, -1));
   $$('[data-down]', body).forEach(b => b.onclick = () => move(b.dataset.down, 1));
