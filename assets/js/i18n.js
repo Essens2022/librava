@@ -1,6 +1,12 @@
-import { localize, loadRates } from './localprice.js?v=20261113144523';
-import { CONFIG } from './config.js?v=20261113144523';
-import { store } from './util.js?v=20261113144523';
+<<<<<<< HEAD
+import { localize, loadRates } from './localprice.js?v=20261113145247';
+import { CONFIG } from './config.js?v=20261113145247';
+import { store } from './util.js?v=20261113145247';
+=======
+import { localize, loadRates } from './localprice.js?v=20261113145247';
+import { CONFIG } from './config.js?v=20261113145247';
+import { store } from './util.js?v=20261113145247';
+>>>>>>> feat/promo-order-all-langs
 
 const D = {
   ro: {
@@ -5134,7 +5140,11 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261113144523`); D[l] = m.default; return true; }
+<<<<<<< HEAD
+  try { const m = await import(`./lang/${l}.js?v=20261113145247`); D[l] = m.default; return true; }
+=======
+  try { const m = await import(`./lang/${l}.js?v=20261113145247`); D[l] = m.default; return true; }
+>>>>>>> feat/promo-order-all-langs
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
