@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113151009';
-import { CONFIG } from './config.js?v=20261113151009';
-import { SOCIAL_PATHS } from './social.js?v=20261113151009';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113151009';
-import { esc, store, $, $$ } from './util.js?v=20261113151009';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113151159';
+import { CONFIG } from './config.js?v=20261113151159';
+import { SOCIAL_PATHS } from './social.js?v=20261113151159';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113151159';
+import { esc, store, $, $$ } from './util.js?v=20261113151159';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113151009';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113151009';
-import { track, trackPage } from './track.js?v=20261113151009';
-import { initGA, applyConsent } from './ga.js?v=20261113151009';
-import { consentStrings } from './consent-i18n.js?v=20261113151009';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113151009';
-import { api } from './api.js?v=20261113151009';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113151009';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113151159';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113151159';
+import { track, trackPage } from './track.js?v=20261113151159';
+import { initGA, applyConsent } from './ga.js?v=20261113151159';
+import { consentStrings } from './consent-i18n.js?v=20261113151159';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113151159';
+import { api } from './api.js?v=20261113151159';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113151159';
 
 // ---------------- icons ----------------
 const P = {
@@ -772,8 +772,8 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
   const priceOf = b => { const d = b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
     return b.price_cents ? `<b>${money(b.price_cents)}</b>${d ? ` <s>${money(b.list_price_cents)}</s> <span class="badge">-${d}%</span>` : ''}` : `<b>${esc(t('book.free'))}</b>`; };
   const one = bs.length === 1 ? `<div class="ntf-book"><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${bs[0].cover_url ? `<img src="${esc(bs[0].cover_url)}" alt="">` : ''}</a>
-      <div><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close class="ntf-bt">${esc(bs[0].title)}</a><span class="muted">${esc(t('book.by', { author: bs[0].author }))}</span><span class="ntf-price">${priceOf(bs[0])}</span>
-      <a class="btn btn-buy btn-sm" href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${esc(t('promo.ctaBook'))}</a></div></div>` : '';
+      <div><a href="#/book/${encodeURIComponent(bs[0].id)}" data-close class="ntf-bt">${esc(bs[0].title)}</a><span class="muted">${esc(isDigital(bs[0]) ? kindLabel(bs[0]) : t('book.by', { author: bs[0].author }))}</span><span class="ntf-price">${priceOf(bs[0])}</span>
+      <a class="btn btn-buy btn-sm" href="#/book/${encodeURIComponent(bs[0].id)}" data-close>${esc(t(isDigital(bs[0]) ? 'promo.cta' : 'promo.ctaBook'))}</a></div></div>` : '';
   const many = bs.length > 1 ? `<div class="ntf-books">${bs.map(b => `<a href="#/book/${encodeURIComponent(b.id)}" data-close title="${esc(b.title)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="${esc(b.title)}">` : `<span class="ph">${esc(b.title)}</span>`}<span class="ntf-price">${priceOf(b)}</span></a>`).join('')}</div>` : '';
   if (n.kind === 'gift' && bs.length === 1) {
     const b = bs[0];
@@ -781,7 +781,7 @@ export function ntfCardHTML(n, books = [], { preview = false } = {}) {
     <div class="ntf-top"><span class="ntf-brand">${logoHTML()}</span><small class="muted">${esc(ago(n.created_at))}</small></div>
     <div class="ntf-title">${esc(t('ntf.giftTitle'))}</div><p>${ntfRich(t('ntf.giftBody'))}</p>
     <div class="ntf-book"><a href="#/read/${encodeURIComponent(b.id)}" data-close>${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="">` : ''}</a>
-      <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
+      <div><span class="ntf-bt">${esc(b.title)}</span><span class="muted">${esc(isDigital(b) ? kindLabel(b) : t('book.by', { author: b.author }))}</span><span class="gift-tag">${esc(t('ntf.giftTag'))}</span>
       <a class="btn btn-buy btn-sm" href="#/${isDigital(b) ? 'library' : 'read/' + encodeURIComponent(b.id)}" data-close>${esc(t(isDigital(b) ? 'off.download' : 'book.readNow'))}</a></div></div></div></article>`;
   }
   return `<article class="ntf2 ${n.unread ? 'unread' : ''} ${n.old ? 'old' : ''}"><span class="ntf-ico">${icon(NTF_ICON[n.kind] || 'bell')}</span><div class="ntf-main">
