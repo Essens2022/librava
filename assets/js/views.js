@@ -207,8 +207,9 @@ export async function viewSearch(el, q) {
   const scope = bookLang ? everything.filter(b => b.language === bookLang) : everything;   // filters list only what exists in the page's own language
   const digitalOn = hasDigital(scope), types = digitalOn ? ['ebook', ...PTYPES.filter(p => scope.some(b => ptypeOf(b) === p))] : [];
   const fmts = ['pdf', 'epub', ...['xlsx', 'docx', 'zip'].filter(f => scope.some(b => b.format === f))];
+  const digCtx = !!opts.ptype && opts.ptype !== 'ebook' && !autoType;   // a digital products page: only its own language, no "see everything in all languages"
   const langNote = bookLang
-    ? `<div class="lang-note"><span class="chip">${icon('globe')} ${esc(t('lang.showing', { lang: langName(bookLang, true) }))}</span><a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
+    ? `<div class="lang-note"><span class="chip">${icon('globe')} ${esc(t('lang.showing', { lang: langName(bookLang, true) }))}</span>${digCtx ? '' : `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>`}</div>`
     : '';
 
   el.innerHTML = `<div class="wrap page"><div class="search-layout">
@@ -241,6 +242,7 @@ export async function viewSearch(el, q) {
       </div>
       ${books.length ? `<div class="results">${pageBooks.map(rcardHTML).join('')}</div>${pager}`
         : !everything.length ? `<div class="panel empty">${icon('search')}<p>${esc(t('sugg.error'))}</p><button class="btn btn-buy" data-reload>${esc(t('search.retry'))}</button></div>`
+        : digCtx ? `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p></div>`
         : bookLang && !everything.some(b => b.language === bookLang)
           ? `<div class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(bookLang, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
           : `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p>${bookLang ? `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>` : ''}</div>`}
