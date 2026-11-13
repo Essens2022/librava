@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113140327';
-import { askWhy } from './why.js?v=20261113140327';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113140327';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113140327';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113140327';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113140327';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113140327';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113140327';
-import { couponLive } from './welcome.js?v=20261113140327';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113140327';
-import { track } from './track.js?v=20261113140327';
-import { gaEvent } from './ga.js?v=20261113140327';
-import { guessLang } from './langdetect.js?v=20261113140327';
-import { didYouMean } from './search.js?v=20261113140327';
-import { api, editionsOf } from './api.js?v=20261113140327';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113140327';
+import { CONFIG } from './config.js?v=20261113141152';
+import { askWhy } from './why.js?v=20261113141152';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113141152';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113141152';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113141152';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113141152';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113141152';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113141152';
+import { couponLive } from './welcome.js?v=20261113141152';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113141152';
+import { track } from './track.js?v=20261113141152';
+import { gaEvent } from './ga.js?v=20261113141152';
+import { guessLang } from './langdetect.js?v=20261113141152';
+import { didYouMean } from './search.js?v=20261113141152';
+import { api, editionsOf } from './api.js?v=20261113141152';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113141152';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -60,7 +60,7 @@ export async function viewHome(el) {
     <div class="shelf-track">${books.map(cardHTML).join('')}</div></section>`;
   await catOrdP;
   // digital products (planners, calendars…) appear on the home page only once the store has some
-  let digi = all.filter(isDigital), digiAll = false; if (!digi.length) { digi = everything.filter(isDigital); digiAll = digi.length > 0; }
+  const digi = all.filter(isDigital), digiAll = false;   // each language page shows only its own products: no digital band while there are none in this language
   const digiTypes = PTYPES.filter(p => digi.some(b => ptypeOf(b) === p));
   const digiNew = digi.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 14);
   const typeStrip = !digi.length ? '' : `
@@ -204,8 +204,9 @@ export async function viewSearch(el, q) {
   const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : (opts.ptype && !opts.category && !autoType) ? t('search.inCat', { n: books.length, cat: esc(t('ptype.' + opts.ptype)) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
   const sortSel = ['relevance', 'bestsellers', 'newest', 'priceAsc', 'priceDesc', 'rating'].map(s => `<option value="${s}" ${(opts.sort || (opts.q ? 'relevance' : 'bestsellers')) === s ? 'selected' : ''}>${esc(t('search.s.' + s))}</option>`).join('');
   const hasFilters = ['cat', 'type', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
-  const digitalOn = hasDigital(everything), types = digitalOn ? ['ebook', ...PTYPES.filter(p => everything.some(b => ptypeOf(b) === p))] : [];
-  const fmts = ['pdf', 'epub', ...['xlsx', 'docx', 'zip'].filter(f => everything.some(b => b.format === f))];
+  const scope = bookLang ? everything.filter(b => b.language === bookLang) : everything;   // filters list only what exists in the page's own language
+  const digitalOn = hasDigital(scope), types = digitalOn ? ['ebook', ...PTYPES.filter(p => scope.some(b => ptypeOf(b) === p))] : [];
+  const fmts = ['pdf', 'epub', ...['xlsx', 'docx', 'zip'].filter(f => scope.some(b => b.format === f))];
   const langNote = bookLang
     ? `<div class="lang-note"><span class="chip">${icon('globe')} ${esc(t('lang.showing', { lang: langName(bookLang, true) }))}</span><a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
     : '';
@@ -1410,7 +1411,6 @@ export async function viewDigital(el) {
   const L = getLang();
   let list = (await api.listBooks({ lang: L })).filter(isDigital);
   let allLangs = false;
-  if (!list.length) { list = (await api.listBooks({})).filter(isDigital); allLangs = list.length > 0; }
   document.title = t('digital.title') + ' · ' + CONFIG.siteName;
   if (!list.length) { el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('box')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('digital.title'))}</h2><p>${esc(t('digital.empty'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`; return; }
   const n = Object.fromEntries(PTYPES.map(p => [p, list.filter(b => ptypeOf(b) === p).length]));

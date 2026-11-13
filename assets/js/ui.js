@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113140327';
-import { CONFIG } from './config.js?v=20261113140327';
-import { SOCIAL_PATHS } from './social.js?v=20261113140327';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113140327';
-import { esc, store, $, $$ } from './util.js?v=20261113140327';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113141152';
+import { CONFIG } from './config.js?v=20261113141152';
+import { SOCIAL_PATHS } from './social.js?v=20261113141152';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113141152';
+import { esc, store, $, $$ } from './util.js?v=20261113141152';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113140327';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113140327';
-import { track, trackPage } from './track.js?v=20261113140327';
-import { initGA, applyConsent } from './ga.js?v=20261113140327';
-import { consentStrings } from './consent-i18n.js?v=20261113140327';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113140327';
-import { api } from './api.js?v=20261113140327';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113140327';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113141152';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113141152';
+import { track, trackPage } from './track.js?v=20261113141152';
+import { initGA, applyConsent } from './ga.js?v=20261113141152';
+import { consentStrings } from './consent-i18n.js?v=20261113141152';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113141152';
+import { api } from './api.js?v=20261113141152';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113141152';
 
 // ---------------- icons ----------------
 const P = {
@@ -147,7 +147,7 @@ function refreshTopCats() {
   loadCatOrder(); loadLabels();
   api.listBooks({ limit: 1 }).then(() => {
     const all = api._catalog || [], seen = new Map();
-    if (all && all.length) showDigital(hasDigital(all));
+    if (all && all.length) showDigital(hasDigital(all.filter(b => b.language === getLang())));   // the menu entry exists only when this language has digital products
     for (const b of all) { if ((b.status && b.status !== 'published') || b.deleted_at) continue; for (const c of new Set([b.category, ...(b.categories || [])].filter(Boolean))) { const k = c + '|' + (b.work_id || b.id); seen.set(k, c); } }
     const n = {}; for (const c of seen.values()) n[c] = (n[c] || 0) + 1;
     const list = CATS.filter(c => n[c] >= 3).sort((a, b) => n[b] - n[a]).slice(0, 12);
