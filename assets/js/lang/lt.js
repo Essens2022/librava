@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ ir kiti",
   "nav.digital": "Skaitmeniniai produktai",
   "digital.title": "Skaitmeniniai produktai",
-  "digital.intro": "Planuokliai, kalendoriai, organizatoriai, skaičiuoklės ir šablonai – parsisiųskite ir naudokite iškart.",
+  "digital.intro": "Planuokliai, žaidimai, spalvinimo knygelės, darbo lapai, plakatai, atvirukai ir kvietimai, skaičiuoklės, šablonai – parsisiųskite ir naudokite iškart.",
   "digital.anyDevice": "Bet kuriame įrenginyje",
   "digital.tag": "Atsisiųsk · Atsispausdink · Naudok",
   "digital.about": "Apie šį produktą",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Naršyti pagal tipą",
   "lib.download": "Paruošta parsisiųsti",
   "book.dcS3d": "Atsisiųskite ir naudokite bet kuriame įrenginyje",
-  "book.dcFootD": "Jūsų failas lieka jūsų bibliotekoje ir bet kada paruoštas atsisiųsti iš naujo."
+  "book.dcFootD": "Jūsų failas lieka jūsų bibliotekoje ir bet kada paruoštas atsisiųsti iš naujo.",
+  "ptype.game": "Žaidimai",
+  "ptype1.game": "Žaidimas",
+  "ptype.coloring": "Spalvinimo knygelės",
+  "ptype1.coloring": "Spalvinimo knygelė",
+  "ptype.kids": "Darbo lapai",
+  "ptype1.kids": "Darbo lapas",
+  "ptype.wallart": "Plakatai",
+  "ptype1.wallart": "Plakatas",
+  "ptype.cards": "Atvirukai ir kvietimai",
+  "ptype1.cards": "Atvirukas"
 };

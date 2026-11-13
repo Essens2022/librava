@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ další",
   "nav.digital": "Digitální produkty",
   "digital.title": "Digitální produkty",
-  "digital.intro": "Plánovače, kalendáře, organizéry, tabulky a šablony — připravené ke stažení a okamžitému použití.",
+  "digital.intro": "Plánovače, hry, omalovánky, pracovní listy, plakáty, přání a pozvánky, tabulky, šablony — připravené ke stažení a okamžitému použití.",
   "digital.anyDevice": "Každé zařízení",
   "digital.tag": "Stáhni · Vytiskni · Používej",
   "digital.about": "O tomto produktu",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Procházet podle typu",
   "lib.download": "Připraveno ke stažení",
   "book.dcS3d": "Stáhněte si ji a používejte na jakémkoli zařízení",
-  "book.dcFootD": "Váš soubor zůstává ve vaší knihovně a můžete si ho kdykoli znovu stáhnout."
+  "book.dcFootD": "Váš soubor zůstává ve vaší knihovně a můžete si ho kdykoli znovu stáhnout.",
+  "ptype.game": "Hry",
+  "ptype1.game": "Hra",
+  "ptype.coloring": "Omalovánky",
+  "ptype1.coloring": "Omalovánka",
+  "ptype.kids": "Pracovní listy",
+  "ptype1.kids": "Pracovní list",
+  "ptype.wallart": "Plakáty",
+  "ptype1.wallart": "Plakát",
+  "ptype.cards": "Přání a pozvánky",
+  "ptype1.cards": "Přání"
 };

@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ un citi",
   "nav.digital": "Digitālie produkti",
   "digital.title": "Digitālie produkti",
-  "digital.intro": "Plānotāji, kalendāri, organizatori, izklājlapas un veidnes – lejupielādējiet un izmantojiet uzreiz.",
+  "digital.intro": "Plānotāji, spēles, krāsojamās lapas, darba lapas, plakāti, apsveikumi un ielūgumi, izklājlapas, veidnes – lejupielādējiet un izmantojiet uzreiz.",
   "digital.anyDevice": "Jebkurā ierīcē",
   "digital.tag": "Lejupielādē · Izdrukā · Lieto",
   "digital.about": "Par šo produktu",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Pārlūkot pēc veida",
   "lib.download": "Gatavs lejupielādei",
   "book.dcS3d": "Lejupielādējiet un izmantojiet jebkurā ierīcē",
-  "book.dcFootD": "Jūsu fails paliek jūsu bibliotēkā, gatavs lejupielādei jebkurā laikā."
+  "book.dcFootD": "Jūsu fails paliek jūsu bibliotēkā, gatavs lejupielādei jebkurā laikā.",
+  "ptype.game": "Spēles",
+  "ptype1.game": "Spēle",
+  "ptype.coloring": "Krāsojamās lapas",
+  "ptype1.coloring": "Krāsojamā lapa",
+  "ptype.kids": "Darba lapas",
+  "ptype1.kids": "Darba lapa",
+  "ptype.wallart": "Plakāti",
+  "ptype1.wallart": "Plakāts",
+  "ptype.cards": "Apsveikumi un ielūgumi",
+  "ptype1.cards": "Apsveikuma kartīte"
 };

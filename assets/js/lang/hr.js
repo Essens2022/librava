@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ i više",
   "nav.digital": "Digitalni proizvodi",
   "digital.title": "Digitalni proizvodi",
-  "digital.intro": "Planeri, kalendari, organizatori, proračunske tablice i predlošci — spremni za preuzimanje i trenutačno korištenje.",
+  "digital.intro": "Planeri, igre, bojanke, radni listovi, plakati, čestitke i pozivnice, proračunske tablice, predlošci — spremni za preuzimanje i trenutačno korištenje.",
   "digital.anyDevice": "Na svakom uređaju",
   "digital.tag": "Preuzmi · Ispiši · Koristi",
   "digital.about": "O ovom proizvodu",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Pregledaj po vrsti",
   "lib.download": "Spremno za preuzimanje",
   "book.dcS3d": "Preuzmite ga i koristite na bilo kojem uređaju",
-  "book.dcFootD": "Vaša datoteka ostaje u vašoj knjižnici, spremna za ponovno preuzimanje u bilo kojem trenutku."
+  "book.dcFootD": "Vaša datoteka ostaje u vašoj knjižnici, spremna za ponovno preuzimanje u bilo kojem trenutku.",
+  "ptype.game": "Igre",
+  "ptype1.game": "Igra",
+  "ptype.coloring": "Bojanke",
+  "ptype1.coloring": "Bojanka",
+  "ptype.kids": "Radni listovi",
+  "ptype1.kids": "Radni list",
+  "ptype.wallart": "Plakati",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Čestitke i pozivnice",
+  "ptype1.cards": "Čestitka"
 };

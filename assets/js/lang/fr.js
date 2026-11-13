@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ et plus",
   "nav.digital": "Produits numériques",
   "digital.title": "Produits numériques",
-  "digital.intro": "Planificateurs, calendriers, organisateurs, feuilles de calcul et modèles : prêts à télécharger et à utiliser immédiatement.",
+  "digital.intro": "Planificateurs, jeux, coloriages, fiches éducatives, affiches, cartes et invitations, feuilles de calcul, modèles : prêts à télécharger et à utiliser immédiatement.",
   "digital.anyDevice": "Sur tout appareil",
   "digital.tag": "Téléchargez · Imprimez · Utilisez",
   "digital.about": "À propos de ce produit",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Parcourir par type",
   "lib.download": "Prêt à télécharger",
   "book.dcS3d": "Téléchargez-le et utilisez-le sur n'importe quel appareil",
-  "book.dcFootD": "Votre fichier reste dans votre bibliothèque, prêt à être téléchargé à nouveau à tout moment."
+  "book.dcFootD": "Votre fichier reste dans votre bibliothèque, prêt à être téléchargé à nouveau à tout moment.",
+  "ptype.game": "Jeux",
+  "ptype1.game": "Jeu",
+  "ptype.coloring": "Coloriages",
+  "ptype1.coloring": "Coloriage",
+  "ptype.kids": "Fiches éducatives",
+  "ptype1.kids": "Fiche éducative",
+  "ptype.wallart": "Affiches",
+  "ptype1.wallart": "Affiche",
+  "ptype.cards": "Cartes et invitations",
+  "ptype1.cards": "Carte"
 };

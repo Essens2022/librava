@@ -625,7 +625,7 @@ export default {
   "pay.more": "+ und mehr",
   "nav.digital": "Digitale Produkte",
   "digital.title": "Digitale Produkte",
-  "digital.intro": "Planer, Kalender, Organizer, Tabellen und Vorlagen — sofort zum Download und Loslegen bereit.",
+  "digital.intro": "Planer, Spiele, Ausmalbilder, Lernblätter, Wandbilder, Karten & Einladungen, Tabellen, Vorlagen — sofort zum Download und Loslegen bereit.",
   "digital.anyDevice": "Auf jedem Gerät",
   "digital.tag": "Laden · Drucken · Nutzen",
   "digital.about": "Über dieses Produkt",
@@ -661,5 +661,15 @@ export default {
   "home.byType": "Nach Typ stöbern",
   "lib.download": "Bereit zum Download",
   "book.dcS3d": "Laden Sie es herunter und nutzen Sie es auf jedem Gerät",
-  "book.dcFootD": "Ihre Datei bleibt in Ihrer Bibliothek und steht jederzeit erneut zum Download bereit."
+  "book.dcFootD": "Ihre Datei bleibt in Ihrer Bibliothek und steht jederzeit erneut zum Download bereit.",
+  "ptype.game": "Spiele",
+  "ptype1.game": "Spiel",
+  "ptype.coloring": "Ausmalbilder",
+  "ptype1.coloring": "Ausmalbild",
+  "ptype.kids": "Lernblätter",
+  "ptype1.kids": "Lernblatt",
+  "ptype.wallart": "Wandbilder",
+  "ptype1.wallart": "Wandbild",
+  "ptype.cards": "Karten & Einladungen",
+  "ptype1.cards": "Karte"
 };

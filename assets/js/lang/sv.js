@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ och fler",
   "nav.digital": "Digitala produkter",
   "digital.title": "Digitala produkter",
-  "digital.intro": "Planerare, kalendrar, organisatörer, kalkylblad och mallar – ladda ner och använd direkt.",
+  "digital.intro": "Planerare, spel, målarbilder, arbetsblad, affischer, kort och inbjudningar, kalkylblad, mallar – ladda ner och använd direkt.",
   "digital.anyDevice": "På alla enheter",
   "digital.tag": "Ladda ner · Skriv ut · Använd",
   "digital.about": "Om den här produkten",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Bläddra efter typ",
   "lib.download": "Redo att ladda ner",
   "book.dcS3d": "Ladda ner den och använd den på vilken enhet som helst",
-  "book.dcFootD": "Din fil finns kvar i ditt bibliotek, redo att laddas ner igen när som helst."
+  "book.dcFootD": "Din fil finns kvar i ditt bibliotek, redo att laddas ner igen när som helst.",
+  "ptype.game": "Spel",
+  "ptype1.game": "Spel",
+  "ptype.coloring": "Målarbilder",
+  "ptype1.coloring": "Målarbild",
+  "ptype.kids": "Arbetsblad",
+  "ptype1.kids": "Arbetsblad",
+  "ptype.wallart": "Affischer",
+  "ptype1.wallart": "Affisch",
+  "ptype.cards": "Kort och inbjudningar",
+  "ptype1.cards": "Kort"
 };

@@ -3966,7 +3966,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pcover .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; text-align: center; font-weight: 700; background: linear-gradient(135deg, #17402a, #2f7d4a); color: #fff; }
 .ptag { position: absolute; left: 8px; top: 8px; z-index: 2; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px 4px 7px; border-radius: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: #17402a; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
 .ptag .ico { width: 13px; height: 13px; flex: none; }
-.ptag-calendar { background: #b45309; } .ptag-organizer { background: #6d28d9; } .ptag-spreadsheet { background: #15803d; } .ptag-template { background: #be185d; } .ptag-planner { background: #0e7490; }
+.ptag-calendar { background: #b45309; } .ptag-organizer { background: #6d28d9; } .ptag-spreadsheet { background: #15803d; } .ptag-template { background: #be185d; } .ptag-planner { background: #0e7490; } .ptag-game { background: #1d4ed8; } .ptag-coloring { background: #c2410c; } .ptag-kids { background: #0f766e; } .ptag-wallart { background: #4338ca; } .ptag-cards { background: #be123c; }
 .pfmt { position: absolute; left: 8px; bottom: 8px; z-index: 2; padding: 3px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: rgba(255,255,255,.94); color: #17402a; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .pbadge { position: absolute; right: 8px; top: 8px; z-index: 2; background: var(--deal); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
 .pbadge.free { background: var(--pista-strong); }
@@ -4094,9 +4094,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .dshop .pcard-sub, .dshop .pcard .rating-line { display: none; }
 .card.pcard .card-title { font-size: 14.5px; line-height: 1.3; }
 .ptag { font-size: 9.5px; padding: 4px 8px 4px 6px; border-radius: 7px; letter-spacing: .07em; top: 8px; left: 8px; background: rgba(21,17,46,.86); backdrop-filter: blur(4px); box-shadow: none; border: 1px solid rgba(255,255,255,.18); }
-.ptag-calendar, .ptag-organizer, .ptag-spreadsheet, .ptag-template, .ptag-planner { background: rgba(21,17,46,.86); }
+.ptag-calendar, .ptag-organizer, .ptag-spreadsheet, .ptag-template, .ptag-planner, .ptag-game, .ptag-coloring, .ptag-kids, .ptag-wallart, .ptag-cards { background: rgba(21,17,46,.86); }
 .ptag .ico { width: 12px; height: 12px; }
-.ptag-planner .ico { color: #5eead4; } .ptag-calendar .ico { color: #fdba74; } .ptag-organizer .ico { color: #c4b5fd; } .ptag-spreadsheet .ico { color: #86efac; } .ptag-template .ico { color: #f9a8d4; }
+.ptag-planner .ico { color: #5eead4; } .ptag-calendar .ico { color: #fdba74; } .ptag-organizer .ico { color: #c4b5fd; } .ptag-spreadsheet .ico { color: #86efac; } .ptag-template .ico { color: #f9a8d4; } .ptag-game .ico { color: #93c5fd; } .ptag-coloring .ico { color: #fdba74; } .ptag-kids .ico { color: #5eead4; } .ptag-wallart .ico { color: #a5b4fc; } .ptag-cards .ico { color: #fda4af; }
 .pfmt { font-size: 10px; padding: 3px 8px; background: rgba(255,255,255,.95); color: #1d1646; letter-spacing: .04em; }
 .pbadge { background: #f43f5e; font-size: 10.5px; padding: 3px 7px; border-radius: 7px; }
 .pcard-use { margin: 5px 12px 0; gap: 6px; }

@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ og flere",
   "nav.digital": "Digitale produkter",
   "digital.title": "Digitale produkter",
-  "digital.intro": "Planlæggere, kalendere, organizere, regneark og skabeloner — klar til download og brug med det samme.",
+  "digital.intro": "Planlæggere, spil, malebøger, arbejdsark, plakater, kort og invitationer, regneark, skabeloner — klar til download og brug med det samme.",
   "digital.anyDevice": "Alle enheder",
   "digital.tag": "Download · Print · Brug",
   "digital.about": "Om dette produkt",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Gennemse efter type",
   "lib.download": "Klar til download",
   "book.dcS3d": "Download den og brug den på enhver enhed",
-  "book.dcFootD": "Din fil bliver i dit bibliotek, klar til at blive downloadet igen når som helst."
+  "book.dcFootD": "Din fil bliver i dit bibliotek, klar til at blive downloadet igen når som helst.",
+  "ptype.game": "Spil",
+  "ptype1.game": "Spil",
+  "ptype.coloring": "Malebøger",
+  "ptype1.coloring": "Malebog",
+  "ptype.kids": "Arbejdsark",
+  "ptype1.kids": "Arbejdsark",
+  "ptype.wallart": "Plakater",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Kort og invitationer",
+  "ptype1.cards": "Kort"
 };

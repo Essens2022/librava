@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ y más",
   "nav.digital": "Productos digitales",
   "digital.title": "Productos digitales",
-  "digital.intro": "Planificadores, calendarios, organizadores, hojas de cálculo y plantillas: listos para descargar y usar al instante.",
+  "digital.intro": "Planificadores, juegos, dibujos para colorear, fichas educativas, pósters, tarjetas e invitaciones, hojas de cálculo, plantillas: listos para descargar y usar al instante.",
   "digital.anyDevice": "En cualquier dispositivo",
   "digital.tag": "Descarga · Imprime · Usa",
   "digital.about": "Acerca de este producto",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Explorar por tipo",
   "lib.download": "Listo para descargar",
   "book.dcS3d": "Descárgalo y úsalo en cualquier dispositivo",
-  "book.dcFootD": "Tu archivo permanece en tu biblioteca, listo para volver a descargarlo cuando quieras."
+  "book.dcFootD": "Tu archivo permanece en tu biblioteca, listo para volver a descargarlo cuando quieras.",
+  "ptype.game": "Juegos",
+  "ptype1.game": "Juego",
+  "ptype.coloring": "Dibujos para colorear",
+  "ptype1.coloring": "Dibujo para colorear",
+  "ptype.kids": "Fichas educativas",
+  "ptype1.kids": "Ficha educativa",
+  "ptype.wallart": "Pósters",
+  "ptype1.wallart": "Póster",
+  "ptype.cards": "Tarjetas e invitaciones",
+  "ptype1.cards": "Tarjeta"
 };
