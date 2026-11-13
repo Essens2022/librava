@@ -1,8 +1,8 @@
 // Librava search: forgiving like Amazon. Ignores accents and letter case, matches the beginning of words
 // ("yo" finds Yoga), tolerates small typos and common related words (diet = lose weight), looks in title, subtitle, series,
 // author, the 7 keyword phrases, categories, ISBN / Librava code and description, and ranks the strongest matches first.
-import { norm } from './util.js?v=20261113094829';
-import { t, getLang } from './i18n.js?v=20261113094829';
+import { norm } from './util.js?v=20261113120943';
+import { t, getLang } from './i18n.js?v=20261113120943';
 
 // connecting words never have to match ("yoga per principianti" finds "Yoga Principianti a Casa")
 const STOP = new Set(('a an and the of for to in on at by with from or is are de la le les des du un une et en el los las y del al il lo gli di da per con e o un una uno dei delle si din pe cu cartea carte der die das und von zu mit ein eine').split(' '));

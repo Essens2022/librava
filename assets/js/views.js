@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113094829';
-import { askWhy } from './why.js?v=20261113094829';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113094829';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113094829';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113094829';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113094829';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113094829';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113094829';
-import { couponLive } from './welcome.js?v=20261113094829';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113094829';
-import { track } from './track.js?v=20261113094829';
-import { gaEvent } from './ga.js?v=20261113094829';
-import { guessLang } from './langdetect.js?v=20261113094829';
-import { didYouMean } from './search.js?v=20261113094829';
-import { api, editionsOf } from './api.js?v=20261113094829';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113094829';
+import { CONFIG } from './config.js?v=20261113120943';
+import { askWhy } from './why.js?v=20261113120943';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113120943';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113120943';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113120943';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113120943';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113120943';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113120943';
+import { couponLive } from './welcome.js?v=20261113120943';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113120943';
+import { track } from './track.js?v=20261113120943';
+import { gaEvent } from './ga.js?v=20261113120943';
+import { guessLang } from './langdetect.js?v=20261113120943';
+import { didYouMean } from './search.js?v=20261113120943';
+import { api, editionsOf } from './api.js?v=20261113120943';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113120943';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1453,6 +1453,28 @@ function waiverConfirm(sum) {
     </div>`, {
       onMount: (m, closeFn) => {
         const go2 = m.querySelector('#w-go');
+        // with a long order the window opens at the top and glides down by itself: the buyer sees the products pass by and ends at the total and the pay button
+        // (any touch, wheel or key stops it at once, so the buyer is never fought)
+        try {
+          const dist = m.scrollHeight - m.clientHeight;
+          if (dist > 80 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            let stop = false, raf = 0;
+            const halt = () => { stop = true; cancelAnimationFrame(raf); ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.removeEventListener(ev, halt)); };
+            ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.addEventListener(ev, halt, { passive: true }));
+            const dur = Math.min(4200, Math.max(1800, dist * 2.4));
+            setTimeout(() => {
+              if (stop || !m.isConnected) return;
+              const t0 = performance.now(), ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+              const step = now => {
+                if (stop || !m.isConnected) return;
+                const p = Math.min(1, (now - t0) / dur);
+                m.scrollTop = (m.scrollHeight - m.clientHeight) * ease(p);   // measured each time: pictures arriving make the window taller
+                if (p < 1) raf = requestAnimationFrame(step); else halt();
+              };
+              raf = requestAnimationFrame(step);
+            }, 700);
+          }
+        } catch { }
         go2.onclick = () => { ok = true; closeFn(); resolve(true); };
         new MutationObserver((_, obs) => { if (!m.isConnected) { obs.disconnect(); if (!ok) resolve(false); } }).observe(document.body, { childList: true });
       },
