@@ -1,10 +1,10 @@
 // A tiny one-tap question for people who look at a book and do not add it to the cart:
 // "What is stopping you?" Asked once per visitor, anonymous, easy to close. Answers show in Admin → Statistics.
-import { api } from './api.js?v=20261113152607';
-import { track } from './track.js?v=20261113152607';
-import { store, esc } from './util.js?v=20261113152607';
-import { getLang } from './i18n.js?v=20261113152607';
-import { WHY_TEXT } from './why-i18n.js?v=20261113152607';
+import { api } from './api.js?v=20261113152750';
+import { track } from './track.js?v=20261113152750';
+import { store, esc } from './util.js?v=20261113152750';
+import { getLang } from './i18n.js?v=20261113152750';
+import { WHY_TEXT } from './why-i18n.js?v=20261113152750';
 
 const KEYS = ['price', 'value', 'look', 'trust', 'amazon', 'format'];
 // the free-text line under the answers: [placeholder, send button] in every language of the site

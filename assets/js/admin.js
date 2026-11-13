@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261113152607';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113152607';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261113152607';
-import { resetCompanyCache } from './views.js?v=20261113152607';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261113152607';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261113152607';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261113152607';
-import { optimizeBook } from './optimize.js?v=20261113152607';
-import { api } from './api.js?v=20261113152607';
-import { isDigital } from './ptypes.js?v=20261113152607';
-import { digitalAdmin } from './admin-digital.js?v=20261113152607';
-import { OF_STYLES } from './offerstyles.js?v=20261113152607';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261113152607';
+import { CONFIG } from './config.js?v=20261113152750';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113152750';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261113152750';
+import { resetCompanyCache } from './views.js?v=20261113152750';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261113152750';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261113152750';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261113152750';
+import { optimizeBook } from './optimize.js?v=20261113152750';
+import { api } from './api.js?v=20261113152750';
+import { isDigital } from './ptypes.js?v=20261113152750';
+import { digitalAdmin } from './admin-digital.js?v=20261113152750';
+import { OF_STYLES } from './offerstyles.js?v=20261113152750';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261113152750';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2331,7 +2331,7 @@ async function promosAdmin(body) {
   $('#pr-lang', body).onchange = e => { sessionStorage.setItem('librava:prLang', e.target.value); promosAdmin(body); };
   // moves a banner one place up/down among the banners you SEE (the language filter hides others); then every banner of that row is renumbered 0..n-1
   const move = async (id, dir) => {
-    const p = all.find(x => x.id === id); const group = all.filter(x => x.placement === p.placement), seen = list.filter(x => x.placement === p.placement);
+    const p = all.find(x => x.id === id); const group = all.filter(x => x.placement === p.placement), seen = list.filter(x => x.placement === p.placement && x.lang === p.lang);   // the neighbour is always a banner of the SAME language (with "all banners" shown, the next row can belong to another language)
     const a = seen.indexOf(p), b = a + dir; if (a < 0 || b < 0 || b >= seen.length) return;
     const ga = group.indexOf(seen[a]), gb = group.indexOf(seen[b]);
     [group[ga], group[gb]] = [group[gb], group[ga]];
