@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113145314';
-import { CONFIG } from './config.js?v=20261113145314';
-import { SOCIAL_PATHS } from './social.js?v=20261113145314';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113145314';
-import { esc, store, $, $$ } from './util.js?v=20261113145314';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113151009';
+import { CONFIG } from './config.js?v=20261113151009';
+import { SOCIAL_PATHS } from './social.js?v=20261113151009';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113151009';
+import { esc, store, $, $$ } from './util.js?v=20261113151009';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113145314';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113145314';
-import { track, trackPage } from './track.js?v=20261113145314';
-import { initGA, applyConsent } from './ga.js?v=20261113145314';
-import { consentStrings } from './consent-i18n.js?v=20261113145314';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113145314';
-import { api } from './api.js?v=20261113145314';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113145314';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113151009';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113151009';
+import { track, trackPage } from './track.js?v=20261113151009';
+import { initGA, applyConsent } from './ga.js?v=20261113151009';
+import { consentStrings } from './consent-i18n.js?v=20261113151009';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113151009';
+import { api } from './api.js?v=20261113151009';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113151009';
 
 // ---------------- icons ----------------
 const P = {
@@ -870,13 +870,14 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   if (p.kind === 'offers') return promoOffersHTML(p, list, placement);
   if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
-  const title = p.title || (b ? b.title : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
-  const cta = p.cta || t(b ? 'promo.ctaBook' : 'promo.cta');
+  const dig = !!(b && isDigital(b));   // a digital product in a banner: short name, product type, no author line, no "see the book"
+  const title = p.title || (b ? (dig ? String(b.title).split(/\s*[,|–—]\s*|\s-\s/)[0].trim() || b.title : b.title) : ''), sub = p.subtitle ?? (b ? b.subtitle || '' : '');
+  const cta = p.cta || t(b && !dig ? 'promo.ctaBook' : 'promo.cta');
   const look = promoLook(p), sty = placement === 'hero' && p.kind !== 'image' ? styleOf(p) : '';
   if (!sty) look.cls = look.cls.replace(/\btp(-\w+)?\b/g, '');
   const ssty = placement === 'strip' && p.kind !== 'image' && (b || p.kind === 'book') ? stripOf(p) : '';
   if (ssty) look.cls += ' sp sp-' + ssty.slice(2);
-  const attrs = `class="promo promo-${placement} promo-${p.kind} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}" href="${esc(link)}"${ext}`;
+  const attrs = `class="promo promo-${placement} promo-${p.kind}${dig ? ' promo-dig' : ''} ${look.cls}" style="${esc(look.style)}" data-promo="${esc(p.id)}" data-bk="${esc(b ? b.id : '')}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}" href="${esc(link)}"${ext}`;
   if (p.kind === 'image' && p.image_url) {
     return `<a ${attrs} aria-label="${esc(title || cta)}"><picture>${p.image_mobile_url ? `<source media="(max-width: 700px)" srcset="${esc(p.image_mobile_url)}">` : ''}<img src="${esc(p.image_url)}" alt="${esc(title)}" decoding="async"></picture>
       ${title || p.kicker ? `<span class="promo-over"><span class="wrap">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}${title ? `<b>${esc(title)}</b>` : ''}${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${p.cta ? `<span class="btn btn-buy">${esc(p.cta)}</span>` : ''}</span></span>` : ''}</a>`;
@@ -886,11 +887,11 @@ export function promoHTML(p, b, placement = p.placement, list = []) {
   const save = b && disc ? `<span class="promo-save">${esc(t('book.save', { amount: money(b.list_price_cents - b.price_cents), pct: disc }))}</span>` : '';
   const rating = b?.rating_count ? `<span class="promo-rating">${stars(b.rating_avg)} <span>${b.rating_count}</span></span>` : '';
   let X = sty ? tpExtras(sty, p, b, disc, rating) : { cover: '', tail: '' };
-  if (ssty) { const e = endOf(p), c = cdLeft(e), w = esc(p.kicker || t('book.instant')), it = `<span>${w}</span><span>${disc ? '-' + disc + '%' : '★'}</span><span>${esc(t('book.instant'))}</span><span>${esc(title)}</span>`;
+  if (ssty) { const e = endOf(p), c = cdLeft(e), w = esc(p.kicker || t('book.instant')), it = `<span>${w}</span><span>${disc ? '-' + disc + '%' : '★'}</span><span>${esc(t('book.instant'))}</span><span>${esc(dig ? kindLabel(b) : title)}</span>`;
     X = { cover: '', tail: `<span class="tp-x sp-d1"></span><span class="tp-x sp-d2"></span>${disc ? `<span class="tp-x sp-off">-${disc}%</span>` : ''}<span class="tp-x sp-count" data-end="${e.getTime()}"><i>${c[0]}</i>:<i>${c[1]}</i>:<i>${c[2]}</i></span><span class="tp-x sp-run"><span>${it.repeat(10)}</span></span>` }; }
   return `<a ${attrs.replace('class="promo ', 'class="promo promo-one ')}>${b?.cover_url ? `<span class="promo-bg" style="background-image:url('/book/${esc(b.id)}/thumb.webp')"></span>` : ''}<span class="wrap promo-in">
       <span class="promo-text">${p.kicker ? `<span class="promo-kicker">${esc(p.kicker)}</span>` : ''}<span class="promo-title">${esc(title)}</span>
-        ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : ''}${rating}</span>
+        ${sub ? `<span class="promo-sub">${esc(sub)}</span>` : ''}${b && !dig ? `<span class="promo-by">${esc(t('book.by', { author: b.author }))}</span>` : (dig ? `<span class="promo-by">${esc(kindLabel(b))}</span>` : '')}${rating}</span>
       ${b?.cover_url ? `<span class="promo-cover">${X.cover}<img src="/book/${esc(b.id)}/thumb.webp" srcset="/book/${esc(b.id)}/thumb.webp 320w, ${esc(b.cover_url)} 640w" sizes="(max-width: 760px) 170px, 260px" onerror="this.onerror=null;this.removeAttribute('srcset');this.src='${esc(b.cover_url)}'" alt="${esc(b.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async"></span>` : ''}
       <span class="promo-act">${price}${save}<span class="btn btn-buy promo-cta">${esc(cta)}</span><span class="promo-note">${icon('bolt')} ${esc(t('book.instant'))}</span></span>${X.tail}
     </span></a>`;

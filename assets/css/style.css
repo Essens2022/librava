@@ -4223,3 +4223,13 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
   .dshop-hero .dchip small { font-size: 10.5px; padding: 1px 5px; }
   .dshop-hero .dchip::after { font-size: 16px; }
 }
+/* banners for digital products: slightly smaller title on phones so the short name fits */
+@media (max-width: 700px) {
+  .promo-dig .promo-title { font-size: 22px; max-width: none; min-width: 0; }
+  .promo-dig.promo-strip .promo-title { font-size: 19px; -webkit-line-clamp: 3; }
+}
+@media (max-width: 700px) {
+  .promo-dig .promo-text { min-width: 0; }
+  .promo-dig.promo-strip .promo-cover { flex: none; width: auto; }
+  .promo-dig.promo-strip .promo-cover img { width: 130px !important; max-width: 130px !important; max-height: none !important; height: auto; }
+}
