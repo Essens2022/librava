@@ -4140,3 +4140,10 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pgrid .pcard-foot .quick-add.qa-wide svg, .rcard.prcard .pcard-foot .quick-add.qa-wide svg { width: 20px; height: 20px; flex: none; }
 .pgrid .pcard-foot .quick-add.qa-wide.in, .rcard.prcard .pcard-foot .quick-add.qa-wide.in { color: #fff; }
 .pgrid .pcard-foot .quick-add.qa-wide .qa-l, .rcard.prcard .pcard-foot .quick-add.qa-wide .qa-l { display: inline; }
+
+/* desktop: the wide add-to-cart pill gets its own full-width row under the price, so the whole label always fits */
+@media (min-width: 700px) {
+  .card.pcard .pcard-foot, .rcard.prcard .pcard-foot { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .card.pcard .pcard-foot:has(.qa-wide) .quick-add.qa-wide, .rcard.prcard .pcard-foot:has(.qa-wide) .quick-add.qa-wide { grid-column: 1 / -1; grid-row: 3; justify-self: stretch; width: 100%; margin-top: 6px; height: 40px; }
+  .card.pcard .pcard-foot:has(.qa-wide) .pcard-inst, .rcard.prcard .pcard-foot:has(.qa-wide) .pcard-inst { grid-column: 2; grid-row: 1 / 3; justify-self: end; align-self: center; margin: 0; text-align: right; }
+}

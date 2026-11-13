@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113130240';
-import { askWhy } from './why.js?v=20261113130240';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113130240';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113130240';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113130240';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113130240';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113130240';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113130240';
-import { couponLive } from './welcome.js?v=20261113130240';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113130240';
-import { track } from './track.js?v=20261113130240';
-import { gaEvent } from './ga.js?v=20261113130240';
-import { guessLang } from './langdetect.js?v=20261113130240';
-import { didYouMean } from './search.js?v=20261113130240';
-import { api, editionsOf } from './api.js?v=20261113130240';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113130240';
+import { CONFIG } from './config.js?v=20261113131133';
+import { askWhy } from './why.js?v=20261113131133';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113131133';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113131133';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113131133';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113131133';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113131133';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113131133';
+import { couponLive } from './welcome.js?v=20261113131133';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113131133';
+import { track } from './track.js?v=20261113131133';
+import { gaEvent } from './ga.js?v=20261113131133';
+import { guessLang } from './langdetect.js?v=20261113131133';
+import { didYouMean } from './search.js?v=20261113131133';
+import { api, editionsOf } from './api.js?v=20261113131133';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113131133';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1456,24 +1456,31 @@ function waiverConfirm(sum) {
         // with a long order the window opens at the top and glides down by itself: the buyer sees the products pass by and ends at the total and the pay button
         // (any touch, wheel or key stops it at once, so the buyer is never fought)
         try {
-          const dist = m.scrollHeight - m.clientHeight;
-          if (dist > 80 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            let stop = false, raf = 0;
-            const halt = () => { stop = true; cancelAnimationFrame(raf); ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.removeEventListener(ev, halt)); };
-            ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.addEventListener(ev, halt, { passive: true }));
-            const dur = Math.min(1400, Math.max(650, dist * 0.7));
-            setTimeout(() => {
-              if (stop || !m.isConnected) return;
-              m.style.willChange = 'scroll-position';
-              const t0 = performance.now(), ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
-              const step = now => {
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            let stop = false, raf = 0, started = false;
+            const evs = ['touchstart', 'wheel', 'pointerdown', 'keydown'];
+            const halt = () => { stop = true; cancelAnimationFrame(raf); evs.forEach(ev => m.removeEventListener(ev, halt)); m.removeEventListener('load', maybe, true); };
+            evs.forEach(ev => m.addEventListener(ev, halt, { passive: true }));
+            const begin = () => {
+              started = true;
+              const dur = Math.min(1400, Math.max(650, (m.scrollHeight - m.clientHeight) * 0.7));
+              setTimeout(() => {
                 if (stop || !m.isConnected) return;
-                const p = Math.min(1, (now - t0) / dur);
-                m.scrollTop = (m.scrollHeight - m.clientHeight) * ease(p);   // measured each time: pictures arriving make the window taller
-                if (p < 1) raf = requestAnimationFrame(step); else halt();
-              };
-              raf = requestAnimationFrame(step);
-            }, 60);
+                m.style.willChange = 'scroll-position';
+                const t0 = performance.now(), ease = x => 1 - Math.pow(1 - x, 3);
+                const step = now => {
+                  if (stop || !m.isConnected) return;
+                  const p = Math.min(1, (now - t0) / dur);
+                  m.scrollTop = (m.scrollHeight - m.clientHeight) * ease(p);   // measured each time: pictures arriving make the window taller
+                  if (p < 1) raf = requestAnimationFrame(step); else halt();
+                };
+                raf = requestAnimationFrame(step);
+              }, 60);
+            };
+            // on a big screen the window is taller than the content until the product pictures arrive: look again as they load
+            function maybe() { if (!started && !stop && m.isConnected && m.scrollHeight - m.clientHeight > 40) { m.removeEventListener('load', maybe, true); begin(); } }
+            if (m.scrollHeight - m.clientHeight > 80) begin();
+            else { m.addEventListener('load', maybe, true); setTimeout(maybe, 700); setTimeout(maybe, 1600); }
           }
         } catch { }
         go2.onclick = () => { ok = true; closeFn(); resolve(true); };
