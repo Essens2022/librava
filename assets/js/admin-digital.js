@@ -1,11 +1,11 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { t, getLang, LANGS } from './i18n.js?v=20261113192947';
-import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261113192947';
-import { api } from './api.js?v=20261113192947';
-import { icon, toast, errText, CATS, go } from './ui.js?v=20261113192947';
-import { aplusEditor } from './admin.js?v=20261113192947';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261113192947';
+import { t, getLang, LANGS } from './i18n.js?v=20261113194420';
+import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261113194420';
+import { api } from './api.js?v=20261113194420';
+import { icon, toast, errText, CATS, go } from './ui.js?v=20261113194420';
+import { aplusEditor } from './admin.js?v=20261113194420';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261113194420';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
@@ -14,7 +14,7 @@ const SVG = { back: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none"
 const ROUTE = '/admin/digital';
 const fmtEur = c => (c / 100).toFixed(2).replace('.', ',') + ' €';
 const langOf = c => (LANGS.find(l => l[0] === c) || [c, c])[1];
-const pageHead = (title, sub) => `<div class="dg-top"><a class="dg-back" href="#${ROUTE}">${SVG.back} Produse digitale</a><h2>${esc(title)}</h2>${sub ? `<p class="muted">${sub}</p>` : ''}</div>`;
+const pageHead = (title, sub) => `<div class="dg-top"><a class="dg-back" href="#${ROUTE}" aria-label="Înapoi">${SVG.back}</a><h2>${esc(title)}</h2>${sub ? `<p class="muted">${sub}</p>` : ''}</div>`;
 
 export async function digitalAdmin(body, sub, id) {
   body.classList.add('dg');
@@ -29,10 +29,10 @@ async function listPage(body) {
   const st = { q: '', status: 'all', lang: 'all' };
   const pub = all.filter(b => b.status === 'published').length;
   const langs = [...new Set(all.map(b => b.language))].sort();
-  body.innerHTML = `<div class="dg-stats"><div><b>${all.length}</b><span>produse</span></div><div><b>${pub}</b><span>publicate</span></div><div><b>${all.length - pub}</b><span>ciorne</span></div><div><b>${langs.length}</b><span>limbi</span></div></div>
-    ${all.length ? `<div class="dg-bar"><input class="input" id="dg-q" type="search" placeholder="Caută după titlu…" autocomplete="off">
-      <select class="input" id="dg-st"><option value="all">Toate</option><option value="published">Publicate</option><option value="draft">Ciorne</option></select>
-      <select class="input" id="dg-ln"><option value="all">Toate limbile</option>${langs.map(l => `<option value="${l}">${esc(langOf(l))}</option>`).join('')}</select></div>
+  body.innerHTML = `${all.length ? `<div class="dg-sum"><b>${all.length}</b> produse · <b>${pub}</b> publicate · <b>${all.length - pub}</b> ciorne · <b>${langs.length}</b> limbi</div>` : ''}
+    ${all.length ? `<div class="dg-bar"><input class="input" id="dg-q" type="search" placeholder="Caută…" autocomplete="off">
+      <select class="input" id="dg-st"><option value="all">Stare</option><option value="published">Publicate</option><option value="draft">Ciorne</option></select>
+      <select class="input" id="dg-ln"><option value="all">Limbi</option>${langs.map(l => `<option value="${l}">${esc(langOf(l))}</option>`).join('')}</select></div>
     <div id="dg-rows" class="dg-list"></div>` : `<div class="panel dg-empty"><div class="dg-empty-ico">${icon('box')}</div><h3>Nu ai încă produse digitale</h3><p class="muted">Adaugă primul produs: planificator, calendar, organizator, foaie de calcul sau șablon. Clientul îl descarcă imediat după plată.</p><div class="dg-cta"><a class="btn btn-buy" href="#${ROUTE}/new">${icon('plus')} Adaugă produs digital</a><a class="btn btn-ghost" href="#${ROUTE}/import">${icon('upload')} Importă un produs gata făcut (.zip)</a></div></div>`}`;
   if (!all.length) return;
   const draw = () => {
@@ -42,9 +42,8 @@ async function listPage(body) {
       const isPub = b.status === 'published';
       return `<div class="dg-row"><a class="dg-thumb" href="#/admin/digital/edit/${esc(b.id)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : icon('box')}</a>
       <div class="dg-info"><a class="dg-ttl" href="#/admin/digital/edit/${esc(b.id)}">${esc(b.title)}</a>
-        <div class="dg-meta"><span class="dg-badge ${isPub ? 'ok' : 'draft'}">${isPub ? 'Publicat' : 'Ciornă'}</span><span>${esc(t('ptype1.' + ptypeOf(b)))}</span><span>${esc(String(b.format).toUpperCase())}</span><span>${esc(langOf(b.language))}</span></div>
-        <div class="dg-price">${b.price_cents ? fmtEur(b.price_cents) : 'Gratuit'}${b.list_price_cents ? ` <s class="muted">${fmtEur(b.list_price_cents)}</s>` : ''}</div></div>
-      <div class="dg-act"><a class="btn btn-ghost btn-sm" href="#/admin/digital/edit/${esc(b.id)}">Modifică</a>${isPub ? `<a class="btn btn-ghost btn-sm" href="#/book/${encodeURIComponent(b.id)}" target="_blank" rel="noopener">Vezi în magazin</a>` : ''}<button class="btn btn-ghost btn-sm dg-del" data-del="${esc(b.id)}">Șterge</button></div></div>`;
+        <div class="dg-meta"><span class="dg-badge ${isPub ? 'ok' : 'draft'}">${isPub ? 'Publicat' : 'Ciornă'}</span><span>${esc(t('ptype1.' + ptypeOf(b)))} · ${esc(String(b.format).toUpperCase())} · ${esc(String(b.language).toUpperCase())}</span><b class="dg-price">${b.price_cents ? fmtEur(b.price_cents) : 'Gratuit'}</b></div></div>
+      <div class="dg-act"><a class="btn btn-ghost btn-sm" href="#/admin/digital/edit/${esc(b.id)}">Modifică</a>${isPub ? `<a class="dg-ic" title="Vezi în magazin" aria-label="Vezi în magazin" href="#/book/${encodeURIComponent(b.id)}" target="_blank" rel="noopener">↗</a>` : ''}<button class="dg-ic dg-del" title="Șterge" aria-label="Șterge" data-del="${esc(b.id)}">🗑</button></div></div>`;
     }).join('') : '<p class="muted" style="padding:18px 4px">Niciun produs nu se potrivește filtrelor.</p>';
     $$('[data-del]', body).forEach(x => x.onclick = async () => {
       const b = all.find(y => y.id === x.dataset.del); if (!b) return;
@@ -59,7 +58,7 @@ async function listPage(body) {
 }
 
 function importPage(body) {
-  body.innerHTML = `${pageHead('Importă produse dintr-un fișier', 'Un singur fișier .zip = un produs complet: titlu, subtitlu, descriere, cuvinte-cheie, preț, fișierul de descărcat, coperta și imaginile A+. Îl poți modifica sau șterge oricând după import.')}
+  body.innerHTML = `${pageHead('Importă produse dintr-un fișier', 'Un fișier .zip = un produs complet (text, preț, fișier, copertă, imagini A+). Îl poți modifica sau șterge oricând.')}
     <label class="dg-drop" id="dg-drop"><input type="file" id="dg-imp" accept=".zip,application/zip" multiple hidden>
       <span class="dg-drop-ico">${icon('upload')}</span><b>Alege fișierele .zip sau trage-le aici</b><span class="muted">Poți încărca mai multe produse deodată</span></label>
     <div id="dg-imp-list"></div>
@@ -94,7 +93,7 @@ function form(body, b) {
       <div class="dg-grid2"><label class="field"><span>Preț de vânzare (€) *</span><input class="input" id="dg-price" inputmode="decimal" placeholder="ex. 4,99" value="${v.price_cents ? (v.price_cents / 100).toFixed(2) : ''}"></label>
       <label class="field"><span>Preț întreg tăiat (€) <small class="muted">opțional</small></span><input class="input" id="dg-list" inputmode="decimal" placeholder="ex. 9,99" value="${v.list_price_cents ? (v.list_price_cents / 100).toFixed(2) : ''}"></label></div><p class="muted dg-hint">Minim 0,49 €. Lasă 0 pentru produs gratuit.</p></section>
     <section class="panel dg-sec"><h3><i>4</i> Descriere și căutare</h3>
-      <label class="field"><span>Descriere *</span><textarea class="input" id="dg-desc" rows="7">${esc(v.description || '')}</textarea></label>
+      <label class="field"><span>Descriere *</span><textarea class="input" id="dg-desc" rows="4">${esc(v.description || '')}</textarea></label>
       <div class="field"><span>Cuvinte-cheie <small class="muted">max. 7, nu repeta titlul</small></span><div class="dg-kws">${kws.map((k, i) => `<input class="input dg-kw" maxlength="50" placeholder="Cuvânt ${i + 1}" value="${esc(k)}">`).join('')}</div></div></section>
     <section class="panel dg-sec"><h3><i>5</i> Pagina de produs <small class="muted">imagini și text, ca la cărți (A+)</small></h3><div id="dg-aplus"></div></section>
     </div>
@@ -106,7 +105,8 @@ function form(body, b) {
   const checks = () => [['Titlu', !!val('dg-title')], ['Descriere', !!val('dg-desc')], ['Fișier', !!(b || files.file)], ['Copertă', !!(b?.cover_url || files.cover)], ['Preț', (() => { const c = cents(val('dg-price')); return c >= 49 || (c === 0 && val('dg-price') !== ''); })()]];
   const paint = () => {
     $$('.dg-cnt', body).forEach(c => { const n = $('#' + c.dataset.for, body).value.length; c.textContent = n + ' / ' + c.dataset.max; });
-    $('#dg-check', body).innerHTML = checks().map(([n, ok]) => `<span class="${ok ? 'ok' : ''}">${ok ? '✓' : '○'} ${n}</span>`).join('');
+    const ck = checks(), miss = ck.filter(x => !x[1]).map(x => x[0]);
+    $('#dg-check', body).innerHTML = miss.length ? `<span>Mai lipsește: ${miss.join(', ')}</span>` : '<span class="ok">✓ Gata de publicare</span>';
   };
   body.addEventListener('input', paint); paint();
   $('#dg-file', body).onchange = e => { files.file = e.target.files[0]; if (files.file) $('#dg-filename', body).textContent = files.file.name + ' · ' + (files.file.size / 1048576).toFixed(1).replace('.', ',') + ' MB'; paint(); };
