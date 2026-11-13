@@ -4169,3 +4169,45 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 }
 
 .dshop-ico-d { display: none; }
+
+/* digital hub header: slim — title + tag (+ benefits on wide screens), then the types as one sideways-scrolling row of clear buttons */
+.dshop-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding: 14px 14px 14px; }
+.dshop-hero .dshop-head, .dshop-hero .dshop-tag, .dshop-hero .dh-how, .dshop-hero .dshop-chips { grid-column: 1 / -1; }
+.dshop-hero .dshop-head { grid-row: 1; margin: 0; } .dshop-hero .dshop-tag { grid-row: 2; } .dshop-hero .dh-how { grid-row: 3; } .dshop-hero .dshop-chips { grid-row: 4; }
+.dshop-hero h1 { font-size: 22px; line-height: 1.15; margin: 0; display: flex; align-items: center; gap: 9px; }
+.dshop-hero .dshop-tag { margin: 4px 0 12px !important; font-size: 12.5px; }
+.dshop-hero .dh-how { display: none; }
+.dshop-hero .dshop-chips { display: flex; flex-wrap: nowrap; gap: 8px; margin: 0 -14px; padding: 2px 14px 4px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.dshop-hero .dshop-chips::-webkit-scrollbar { display: none; }
+.dshop-hero .dchip { flex: none; scroll-snap-align: start; display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 12px 0 11px; border-radius: 999px; font-size: 14px; line-height: 1; white-space: nowrap; background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.32); box-shadow: 0 2px 6px rgba(0,0,0,.25); cursor: pointer; transition: background .15s, transform .15s; }
+.dshop-hero .dchip:hover { background: rgba(255,255,255,.24); transform: translateY(-1px); }
+.dshop-hero .dchip:active { transform: scale(.97); }
+.dshop-hero .dchip .ico { width: 19px; height: 19px; flex: none; }
+.dshop-hero .dchip b { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.dshop-hero .dchip small { font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: rgba(255,255,255,.16); color: #fff; }
+.dshop-hero .dchip::after { content: '›'; font-size: 19px; font-weight: 700; line-height: 1; margin-left: 1px; color: #fbbf24; }
+@media (min-width: 700px) {
+  .dshop-hero { padding: 16px 22px 16px; }
+  .dshop-hero .dshop-chips { margin: 0 -22px; padding: 2px 22px 4px; }
+  .dshop-hero h1 { font-size: 26px; }
+}
+@media (min-width: 1000px) {
+  .dshop-hero { grid-template-columns: minmax(0, auto) minmax(0, 1fr); column-gap: 28px; align-items: center; }
+  .dshop-hero .dshop-head { grid-column: 1; grid-row: 1; } .dshop-hero .dshop-tag { grid-column: 1; grid-row: 2; margin-bottom: 0 !important; }
+  .dshop-hero .dh-how { display: flex; grid-column: 2; grid-row: 1 / span 2; justify-content: flex-end; gap: 22px; flex-wrap: wrap; }
+  .dshop-hero .dh-how li { font-size: 13px; line-height: 1.25; gap: 8px; max-width: 190px; color: #e9e5ff; }
+  .dshop-hero .dshop-chips { grid-column: 1 / -1; grid-row: 3; margin-top: 12px; flex-wrap: wrap; overflow: visible; }
+}
+
+/* hub header, livelier: white button tiles with a coloured icon disc per type, and a richer panel */
+.dshop-hero { background: radial-gradient(120% 140% at 100% 0%, #6d4bd8 0%, rgba(109,75,216,0) 55%), radial-gradient(90% 120% at 0% 100%, #0e7490 0%, rgba(14,116,144,0) 50%), linear-gradient(135deg, #150f3a 0%, #2a1a6b 100%); border: 1px solid rgba(255,255,255,.14); }
+.dshop-hero h1 { letter-spacing: -.01em; }
+.dshop-hero .dshop-tag { color: #fcd34d; font-weight: 700; letter-spacing: .02em; }
+.dshop-hero .dchip { --c: #6d4bd8; background: #fff; color: #1b1440; border: 0; box-shadow: 0 3px 10px rgba(0,0,0,.28); padding: 0 12px 0 6px; min-height: 46px; gap: 9px; font-weight: 700; }
+.dshop-hero .dchip:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.35), 0 0 0 2px var(--c); }
+.dshop-hero .dchip .ico { width: 32px; height: 32px; padding: 7px; border-radius: 50%; background: var(--c); color: #fff; box-sizing: border-box; }
+.dshop-hero .dchip small { background: color-mix(in srgb, var(--c) 14%, #fff); color: var(--c); }
+.dshop-hero .dchip::after { color: var(--c); }
+.dshop-hero .dc-planner { --c: #0e7490; } .dshop-hero .dc-calendar { --c: #2563eb; } .dshop-hero .dc-organizer { --c: #ea580c; } .dshop-hero .dc-spreadsheet { --c: #16a34a; } .dshop-hero .dc-template { --c: #7c3aed; }
+.dshop-hero .dc-game { --c: #db2777; } .dshop-hero .dc-coloring { --c: #d97706; } .dshop-hero .dc-kids { --c: #0284c7; } .dshop-hero .dc-wallart { --c: #be123c; } .dshop-hero .dc-cards { --c: #dc2626; }
+@media (min-width: 1000px) { .dshop-hero .dchip { gap: 7px; padding: 0 9px 0 5px; min-height: 42px; font-size: 13.5px; } .dshop-hero .dchip .ico { width: 28px; height: 28px; padding: 6px; } .dshop-hero .dshop-chips { gap: 7px; } .dshop-hero .dchip small { padding: 1px 6px; } }
