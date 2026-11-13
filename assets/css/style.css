@@ -4150,3 +4150,22 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 
 /* a book the customer already owns: the tick is always the same round green button, on every card and from the very first paint */
 .pgrid .pcard-foot .quick-add.qa-wide.owned, .rcard.prcard .pcard-foot .quick-add.qa-wide.owned, .pgrid .card.pcard .pcard-foot .quick-add.qa-wide.owned { width: 42px; min-width: 42px; height: 42px; padding: 0; border-radius: 50%; gap: 0; justify-self: center; background: var(--pista-strong); color: #fff; font-size: 24px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,.28); }
+
+/* home "Digital products" band on big screens: a tidy left panel (icon, title, tagline, even chip grid, button at the bottom) next to the product row */
+@media (min-width: 900px) {
+  .dshop-slim:not(.dshop-hero) { grid-template-columns: 330px minmax(0, 1fr); grid-template-rows: auto auto auto 1fr auto; column-gap: 32px; row-gap: 0; align-items: stretch; padding: 26px 26px 24px; }
+  .dshop-slim:not(.dshop-hero) .dshop-head { display: contents; }
+  .dshop-slim:not(.dshop-hero) h2 { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin: 0; font-size: 30px; line-height: 1.12; }
+  .dshop-slim:not(.dshop-hero) h2 .ico { display: none; }
+  /* the file symbol fills the empty cell next to the last category when the count is odd (hidden otherwise) */
+  .dshop-slim:not(.dshop-hero) .dchip:nth-child(odd) + .dshop-ico-d { display: grid; place-items: center; justify-self: center; width: 46px; height: 46px; border-radius: 13px; background: rgba(251, 191, 36, .14); color: #fbbf24; }
+  .dshop-slim:not(.dshop-hero) .dshop-ico-d .ico { width: 26px; height: 26px; }
+  .dshop-slim:not(.dshop-hero) .dshop-tag { grid-column: 1; grid-row: 2; margin: 10px 0 20px !important; font-size: 13px !important; }
+  .dshop-slim:not(.dshop-hero) .dshop-chips { grid-column: 1; grid-row: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; overflow: visible; }
+  .dshop-slim:not(.dshop-hero) .dchip { justify-content: flex-start; min-height: 42px; padding: 6px 10px; font-size: 13.5px; line-height: 1.2; white-space: normal; border-radius: 12px; }
+  .dshop-slim:not(.dshop-hero) .dchip b { min-width: 0; overflow-wrap: anywhere; }
+  .dshop-slim:not(.dshop-hero) .dshop-all { grid-column: 1; grid-row: 5; align-self: end; display: flex; align-items: center; justify-content: center; height: 44px; margin-top: 20px; font-size: 15px; border-radius: 12px; }
+  .dshop-slim:not(.dshop-hero) .dshop-track { grid-column: 2; grid-row: 1 / -1; margin-top: 0; align-self: center; }
+}
+
+.dshop-ico-d { display: none; }
