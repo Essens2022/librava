@@ -1,10 +1,6 @@
 // Product types: every title is an "ebook" unless the product_type column says otherwise.
 // Digital products (planners, calendars, organizers, spreadsheets, templates, printable games, coloring pages, kids worksheets, wall art, cards) are files that are downloaded and used, not read in the reader.
-<<<<<<< HEAD
-import { t } from './i18n.js?v=20261113145247';
-=======
-import { t } from './i18n.js?v=20261113145247';
->>>>>>> feat/promo-order-all-langs
+import { t } from './i18n.js?v=20261113144523';
 
 export const PTYPES = ['planner', 'calendar', 'organizer', 'spreadsheet', 'template', 'game', 'coloring', 'kids', 'wallart', 'cards'];
 export const ptypeOf = b => (b && PTYPES.includes(b.product_type)) ? b.product_type : 'ebook';
