@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113131133';
-import { CONFIG } from './config.js?v=20261113131133';
-import { SOCIAL_PATHS } from './social.js?v=20261113131133';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113131133';
-import { esc, store, $, $$ } from './util.js?v=20261113131133';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113133046';
+import { CONFIG } from './config.js?v=20261113133046';
+import { SOCIAL_PATHS } from './social.js?v=20261113133046';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113133046';
+import { esc, store, $, $$ } from './util.js?v=20261113133046';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113131133';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113131133';
-import { track, trackPage } from './track.js?v=20261113131133';
-import { initGA, applyConsent } from './ga.js?v=20261113131133';
-import { consentStrings } from './consent-i18n.js?v=20261113131133';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113131133';
-import { api } from './api.js?v=20261113131133';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113131133';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113133046';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113133046';
+import { track, trackPage } from './track.js?v=20261113133046';
+import { initGA, applyConsent } from './ga.js?v=20261113133046';
+import { consentStrings } from './consent-i18n.js?v=20261113133046';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113133046';
+import { api } from './api.js?v=20261113133046';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113133046';
 
 // ---------------- icons ----------------
 const P = {
@@ -437,7 +437,7 @@ const quickAdd = (b, wide = false) => {
   const own = ownCache().has(b.id), inC = !own && cart.has(b.id);
   const lab = t(own ? 'cart.owned' : inC ? 'book.inCart' : 'book.addToCart');
   // wide = the big digital cards: the button shows its words next to the icon (the small round one on the home strip hides them)
-  return `<button type="button" class="quick-add ${wide ? 'qa-wide ' : ''}${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}${wide ? `<span class="qa-l">${esc(lab)}</span>` : ''}</button>`;
+  return `<button type="button" class="quick-add ${wide ? 'qa-wide ' : ''}${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}${wide && !own ? `<span class="qa-l">${esc(lab)}</span>` : ''}</button>`;
 };
 // "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
 export function fullTitle(b) {

@@ -4144,6 +4144,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 /* desktop: the wide add-to-cart pill gets its own full-width row under the price, so the whole label always fits */
 @media (min-width: 700px) {
   .card.pcard .pcard-foot, .rcard.prcard .pcard-foot { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto; }
-  .card.pcard .pcard-foot:has(.qa-wide) .quick-add.qa-wide, .rcard.prcard .pcard-foot:has(.qa-wide) .quick-add.qa-wide { grid-column: 1 / -1; grid-row: 3; justify-self: stretch; width: 100%; margin-top: 6px; height: 40px; }
-  .card.pcard .pcard-foot:has(.qa-wide) .pcard-inst, .rcard.prcard .pcard-foot:has(.qa-wide) .pcard-inst { grid-column: 2; grid-row: 1 / 3; justify-self: end; align-self: center; margin: 0; text-align: right; }
+  .card.pcard .pcard-foot:has(.qa-wide:not(.owned)) .quick-add.qa-wide:not(.owned), .rcard.prcard .pcard-foot:has(.qa-wide:not(.owned)) .quick-add.qa-wide:not(.owned) { grid-column: 1 / -1; grid-row: 3; justify-self: stretch; width: 100%; margin-top: 6px; height: 40px; }
+  .card.pcard .pcard-foot:has(.qa-wide:not(.owned)) .pcard-inst, .rcard.prcard .pcard-foot:has(.qa-wide:not(.owned)) .pcard-inst { grid-column: 2; grid-row: 1 / 3; justify-self: end; align-self: center; margin: 0; text-align: right; }
 }
+
+/* a book the customer already owns: the tick is always the same round green button, on every card and from the very first paint */
+.pgrid .pcard-foot .quick-add.qa-wide.owned, .rcard.prcard .pcard-foot .quick-add.qa-wide.owned, .card.pcard .pcard-foot .quick-add.qa-wide.owned { width: 42px; min-width: 42px; height: 42px; padding: 0; border-radius: 50%; gap: 0; justify-self: center; background: var(--pista-strong); color: #fff; font-size: 24px; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,.28); }
