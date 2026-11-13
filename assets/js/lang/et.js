@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ ja veel",
   "nav.digital": "Digitaalsed tooted",
   "digital.title": "Digitaalsed tooted",
-  "digital.intro": "Planeerijad, kalendrid, korrastajad, tabelid ja mallid — valmis alla laadimiseks ja kohe kasutamiseks.",
+  "digital.intro": "Planeerijad, mängud, värvimislehed, töölehed, plakatid, kaardid ja kutsed, tabelid, mallid — valmis alla laadimiseks ja kohe kasutamiseks.",
   "digital.anyDevice": "Igas seadmes",
   "digital.tag": "Laadi alla · Prindi · Kasuta",
   "digital.about": "Selle toote kohta",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Sirvi tüübi järgi",
   "lib.download": "Valmis allalaadimiseks",
   "book.dcS3d": "Laadi alla ja kasuta igal seadmel",
-  "book.dcFootD": "Sinu fail jääb sinu raamatukokku ja on igal ajal valmis uuesti allalaadimiseks."
+  "book.dcFootD": "Sinu fail jääb sinu raamatukokku ja on igal ajal valmis uuesti allalaadimiseks.",
+  "ptype.game": "Mängud",
+  "ptype1.game": "Mäng",
+  "ptype.coloring": "Värvimislehed",
+  "ptype1.coloring": "Värvimisleht",
+  "ptype.kids": "Töölehed",
+  "ptype1.kids": "Tööleht",
+  "ptype.wallart": "Plakatid",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Kaardid ja kutsed",
+  "ptype1.cards": "Kaart"
 };

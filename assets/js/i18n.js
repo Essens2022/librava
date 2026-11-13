@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261113121834';
-import { CONFIG } from './config.js?v=20261113121834';
-import { store } from './util.js?v=20261113121834';
+import { localize, loadRates } from './localprice.js?v=20261113133046';
+import { CONFIG } from './config.js?v=20261113133046';
+import { store } from './util.js?v=20261113133046';
 
 const D = {
   ro: {
@@ -862,7 +862,7 @@ const D = {
     'book.dcFootD': 'Fișierul rămâne în biblioteca ta și îl poți descărca din nou oricând.',
     'nav.digital': 'Produse digitale',
     'digital.title': 'Produse digitale',
-    'digital.intro': 'Planificatoare, calendare, organizatoare, foi de calcul și șabloane — gata de descărcat și folosit imediat.',
+    'digital.intro': 'Planificatoare, jocuri, planșe de colorat, fișe educative, postere, invitații și felicitări, foi de calcul și șabloane — gata de descărcat și folosit imediat.',
     'digital.anyDevice': 'Orice dispozitiv',
     'digital.tag': 'Descarci · Printezi · Folosești',
     'digital.about': 'Despre acest produs',
@@ -887,6 +887,16 @@ const D = {
     'ptype1.organizer': 'Organizator',
     'ptype1.spreadsheet': 'Foaie de calcul',
     'ptype1.template': 'Șablon',
+    'ptype.game': 'Jocuri',
+    'ptype1.game': 'Joc',
+    'ptype.coloring': 'Planșe de colorat',
+    'ptype1.coloring': 'Planșă de colorat',
+    'ptype.kids': 'Fișe educative',
+    'ptype1.kids': 'Fișă educativă',
+    'ptype.wallart': 'Postere',
+    'ptype1.wallart': 'Poster',
+    'ptype.cards': 'Invitații și felicitări',
+    'ptype1.cards': 'Felicitare',
     'search.type': 'Tip produs',
     'book.format.xlsx': 'Fișier digital (Excel)',
     'book.format.docx': 'Fișier digital (Word)',
@@ -2550,7 +2560,7 @@ const D = {
     'book.dcFootD': 'Il file resta nella tua libreria, pronto da scaricare di nuovo in qualsiasi momento.',
     'nav.digital': 'Prodotti digitali',
     'digital.title': 'Prodotti digitali',
-    'digital.intro': 'Planner, calendari, organizer, fogli di calcolo e modelli — pronti da scaricare e usare subito.',
+    'digital.intro': 'Planner, giochi, disegni da colorare, schede didattiche, poster, biglietti e inviti, fogli di calcolo e modelli — pronti da scaricare e usare subito.',
     'digital.anyDevice': 'Su ogni dispositivo',
     'digital.tag': 'Scarica · Stampa · Usa',
     'digital.about': 'Informazioni su questo prodotto',
@@ -2575,6 +2585,16 @@ const D = {
     'ptype1.organizer': 'Organizer',
     'ptype1.spreadsheet': 'Foglio di calcolo',
     'ptype1.template': 'Modello',
+    'ptype.game': 'Giochi',
+    'ptype1.game': 'Gioco',
+    'ptype.coloring': 'Disegni da colorare',
+    'ptype1.coloring': 'Disegno da colorare',
+    'ptype.kids': 'Schede didattiche',
+    'ptype1.kids': 'Scheda didattica',
+    'ptype.wallart': 'Poster',
+    'ptype1.wallart': 'Poster',
+    'ptype.cards': 'Biglietti e inviti',
+    'ptype1.cards': 'Biglietto',
     'search.type': 'Tipo di prodotto',
     'book.format.xlsx': 'File digitale (Excel)',
     'book.format.docx': 'File digitale (Word)',
@@ -4238,7 +4258,7 @@ const D = {
     'book.dcFootD': 'Your file stays in your library, ready to download again anytime.',
     'nav.digital': 'Digital products',
     'digital.title': 'Digital products',
-    'digital.intro': 'Planners, calendars, organizers, spreadsheets and templates — ready to download and use right away.',
+    'digital.intro': 'Planners, games, coloring pages, learning worksheets, wall art, cards, spreadsheets and templates — ready to download and use right away.',
     'digital.anyDevice': 'Any device',
     'digital.tag': 'Download · Print · Use',
     'digital.about': 'About this product',
@@ -4263,6 +4283,16 @@ const D = {
     'ptype1.organizer': 'Organizer',
     'ptype1.spreadsheet': 'Spreadsheet',
     'ptype1.template': 'Template',
+    'ptype.game': 'Games',
+    'ptype1.game': 'Game',
+    'ptype.coloring': 'Coloring pages',
+    'ptype1.coloring': 'Coloring page',
+    'ptype.kids': 'Learning worksheets',
+    'ptype1.kids': 'Learning worksheet',
+    'ptype.wallart': 'Wall art',
+    'ptype1.wallart': 'Wall art',
+    'ptype.cards': 'Cards & invitations',
+    'ptype1.cards': 'Card',
     'search.type': 'Product type',
     'book.format.xlsx': 'Digital file (Excel)',
     'book.format.docx': 'Digital file (Word)',
@@ -5104,7 +5134,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261113121834`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261113133046`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

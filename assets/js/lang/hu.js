@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ és más",
   "nav.digital": "Digitális termékek",
   "digital.title": "Digitális termékek",
-  "digital.intro": "Tervezők, naptárak, szervezők, táblázatok és sablonok — letöltésre és azonnali használatra készen.",
+  "digital.intro": "Tervezők, játékok, színezők, munkalapok, poszterek, képeslapok és meghívók, táblázatok, sablonok — letöltésre és azonnali használatra készen.",
   "digital.anyDevice": "Bármely eszközön",
   "digital.tag": "Töltsd le · Nyomtasd ki · Használd",
   "digital.about": "A termékről",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Böngészés típus szerint",
   "lib.download": "Letöltésre kész",
   "book.dcS3d": "Töltse le, és használja bármilyen eszközön",
-  "book.dcFootD": "A fájl a könyvtárában marad, és bármikor újra letölthető."
+  "book.dcFootD": "A fájl a könyvtárában marad, és bármikor újra letölthető.",
+  "ptype.game": "Játékok",
+  "ptype1.game": "Játék",
+  "ptype.coloring": "Színezők",
+  "ptype1.coloring": "Színező",
+  "ptype.kids": "Munkalapok",
+  "ptype1.kids": "Munkalap",
+  "ptype.wallart": "Poszterek",
+  "ptype1.wallart": "Poszter",
+  "ptype.cards": "Képeslapok és meghívók",
+  "ptype1.cards": "Képeslap"
 };

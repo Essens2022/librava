@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ ja muita",
   "nav.digital": "Digitaaliset tuotteet",
   "digital.title": "Digitaaliset tuotteet",
-  "digital.intro": "Suunnittelijat, kalenterit, järjestäjät, taulukot ja mallit — valmiina ladattavaksi ja heti käyttöön.",
+  "digital.intro": "Suunnittelijat, pelit, värityskuvat, tehtävämonisteet, julisteet, kortit ja kutsut, taulukot, mallit — valmiina ladattavaksi ja heti käyttöön.",
   "digital.anyDevice": "Kaikilla laitteilla",
   "digital.tag": "Lataa · Tulosta · Käytä",
   "digital.about": "Tietoa tuotteesta",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Selaa tyypin mukaan",
   "lib.download": "Valmis ladattavaksi",
   "book.dcS3d": "Lataa se ja käytä millä tahansa laitteella",
-  "book.dcFootD": "Tiedostosi pysyy kirjastossasi valmiina ladattavaksi uudelleen milloin tahansa."
+  "book.dcFootD": "Tiedostosi pysyy kirjastossasi valmiina ladattavaksi uudelleen milloin tahansa.",
+  "ptype.game": "Pelit",
+  "ptype1.game": "Peli",
+  "ptype.coloring": "Värityskuvat",
+  "ptype1.coloring": "Värityskuva",
+  "ptype.kids": "Tehtävämonisteet",
+  "ptype1.kids": "Tehtävämoniste",
+  "ptype.wallart": "Julisteet",
+  "ptype1.wallart": "Juliste",
+  "ptype.cards": "Kortit ja kutsut",
+  "ptype1.cards": "Kortti"
 };

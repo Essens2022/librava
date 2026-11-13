@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ i więcej",
   "nav.digital": "Produkty cyfrowe",
   "digital.title": "Produkty cyfrowe",
-  "digital.intro": "Planery, kalendarze, organizery, arkusze kalkulacyjne i szablony – pobierz i korzystaj od razu.",
+  "digital.intro": "Planery, gry, kolorowanki, karty pracy, plakaty, kartki i zaproszenia, arkusze kalkulacyjne, szablony – pobierz i korzystaj od razu.",
   "digital.anyDevice": "Na każdym urządzeniu",
   "digital.tag": "Pobierz · Wydrukuj · Używaj",
   "digital.about": "O tym produkcie",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Przeglądaj według typu",
   "lib.download": "Gotowe do pobrania",
   "book.dcS3d": "Pobierz i korzystaj na dowolnym urządzeniu",
-  "book.dcFootD": "Twój plik pozostaje w Twojej bibliotece i w każdej chwili możesz pobrać go ponownie."
+  "book.dcFootD": "Twój plik pozostaje w Twojej bibliotece i w każdej chwili możesz pobrać go ponownie.",
+  "ptype.game": "Gry",
+  "ptype1.game": "Gra",
+  "ptype.coloring": "Kolorowanki",
+  "ptype1.coloring": "Kolorowanka",
+  "ptype.kids": "Karty pracy",
+  "ptype1.kids": "Karta pracy",
+  "ptype.wallart": "Plakaty",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Kartki i zaproszenia",
+  "ptype1.cards": "Kartka"
 };

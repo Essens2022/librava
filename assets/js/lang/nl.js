@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ en meer",
   "nav.digital": "Digitale producten",
   "digital.title": "Digitale producten",
-  "digital.intro": "Planners, kalenders, organizers, spreadsheets en sjablonen – direct te downloaden en te gebruiken.",
+  "digital.intro": "Planners, spelletjes, kleurplaten, werkbladen, posters, kaarten & uitnodigingen, spreadsheets, sjablonen – direct te downloaden en te gebruiken.",
   "digital.anyDevice": "Op elk apparaat",
   "digital.tag": "Download · Print · Gebruik",
   "digital.about": "Over dit product",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Bladeren op type",
   "lib.download": "Klaar om te downloaden",
   "book.dcS3d": "Download het en gebruik het op elk apparaat",
-  "book.dcFootD": "Je bestand blijft in je bibliotheek staan en is altijd opnieuw te downloaden."
+  "book.dcFootD": "Je bestand blijft in je bibliotheek staan en is altijd opnieuw te downloaden.",
+  "ptype.game": "Spelletjes",
+  "ptype1.game": "Spelletje",
+  "ptype.coloring": "Kleurplaten",
+  "ptype1.coloring": "Kleurplaat",
+  "ptype.kids": "Werkbladen",
+  "ptype1.kids": "Werkblad",
+  "ptype.wallart": "Posters",
+  "ptype1.wallart": "Poster",
+  "ptype.cards": "Kaarten & uitnodigingen",
+  "ptype1.cards": "Kaart"
 };

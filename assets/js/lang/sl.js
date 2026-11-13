@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ in več",
   "nav.digital": "Digitalni izdelki",
   "digital.title": "Digitalni izdelki",
-  "digital.intro": "Planerji, koledarji, organizatorji, preglednice in predloge – prenesite in uporabite takoj.",
+  "digital.intro": "Planerji, igre, pobarvanke, delovni listi, plakati, voščilnice in vabila, preglednice, predloge – prenesite in uporabite takoj.",
   "digital.anyDevice": "Na vsaki napravi",
   "digital.tag": "Prenesi · Natisni · Uporabljaj",
   "digital.about": "O tem izdelku",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Brskaj po vrsti",
   "lib.download": "Pripravljeno za prenos",
   "book.dcS3d": "Prenesite jo in uporabljajte na kateri koli napravi",
-  "book.dcFootD": "Vaša datoteka ostane v vaši knjižnici, pripravljena za ponovni prenos kadar koli."
+  "book.dcFootD": "Vaša datoteka ostane v vaši knjižnici, pripravljena za ponovni prenos kadar koli.",
+  "ptype.game": "Igre",
+  "ptype1.game": "Igra",
+  "ptype.coloring": "Pobarvanke",
+  "ptype1.coloring": "Pobarvanka",
+  "ptype.kids": "Delovni listi",
+  "ptype1.kids": "Delovni list",
+  "ptype.wallart": "Plakati",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Voščilnice in vabila",
+  "ptype1.cards": "Voščilnica"
 };

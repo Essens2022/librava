@@ -509,7 +509,7 @@ export default {
   "pay.more": "+ og flere",
   "nav.digital": "Digitale produkter",
   "digital.title": "Digitale produkter",
-  "digital.intro": "Planleggere, kalendere, organiserere, regneark og maler – last ned og bruk med en gang.",
+  "digital.intro": "Planleggere, spill, fargeleggingsbilder, arbeidsark, plakater, kort og invitasjoner, regneark, maler – last ned og bruk med en gang.",
   "digital.anyDevice": "Alle enheter",
   "digital.tag": "Last ned · Skriv ut · Bruk",
   "digital.about": "Om dette produktet",
@@ -545,5 +545,15 @@ export default {
   "home.byType": "Bla etter type",
   "lib.download": "Klar til nedlasting",
   "book.dcS3d": "Last det ned og bruk det på hvilken som helst enhet",
-  "book.dcFootD": "Filen din blir værende i biblioteket ditt, klar til å lastes ned igjen når som helst."
+  "book.dcFootD": "Filen din blir værende i biblioteket ditt, klar til å lastes ned igjen når som helst.",
+  "ptype.game": "Spill",
+  "ptype1.game": "Spill",
+  "ptype.coloring": "Fargeleggingsbilder",
+  "ptype1.coloring": "Fargeleggingsbilde",
+  "ptype.kids": "Arbeidsark",
+  "ptype1.kids": "Arbeidsark",
+  "ptype.wallart": "Plakater",
+  "ptype1.wallart": "Plakat",
+  "ptype.cards": "Kort og invitasjoner",
+  "ptype1.cards": "Kort"
 };

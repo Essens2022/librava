@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113121834';
-import { CONFIG } from './config.js?v=20261113121834';
-import { SOCIAL_PATHS } from './social.js?v=20261113121834';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113121834';
-import { esc, store, $, $$ } from './util.js?v=20261113121834';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113133046';
+import { CONFIG } from './config.js?v=20261113133046';
+import { SOCIAL_PATHS } from './social.js?v=20261113133046';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113133046';
+import { esc, store, $, $$ } from './util.js?v=20261113133046';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113121834';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113121834';
-import { track, trackPage } from './track.js?v=20261113121834';
-import { initGA, applyConsent } from './ga.js?v=20261113121834';
-import { consentStrings } from './consent-i18n.js?v=20261113121834';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113121834';
-import { api } from './api.js?v=20261113121834';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113121834';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113133046';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113133046';
+import { track, trackPage } from './track.js?v=20261113133046';
+import { initGA, applyConsent } from './ga.js?v=20261113133046';
+import { consentStrings } from './consent-i18n.js?v=20261113133046';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113133046';
+import { api } from './api.js?v=20261113133046';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113133046';
 
 // ---------------- icons ----------------
 const P = {
@@ -29,6 +29,11 @@ const P = {
   pt_planner: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   pt_organizer: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
   pt_spreadsheet: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>',
+  pt_game: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3"/><circle cx="15.5" cy="8.5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="8.5" cy="15.5" r="1.3"/><circle cx="15.5" cy="15.5" r="1.3"/>',
+  pt_coloring: '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.3-1-1.6-1-2.7 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7" r="1.2"/>',
+  pt_kids: '<path d="M4 20 18 6l2.5 2.5L6.5 22.5 3 23z" transform="translate(0 -3)"/><path d="M15.5 6.5 18 9"/><path d="M4 4h6M4 8h4"/>',
+  pt_wallart: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><rect x="7" y="6" width="10" height="12" rx=".8"/><path d="m8 16 3-4 2 2.5 1.5-2L17 16"/>',
+  pt_cards: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M12 17.2c-1.8-1.2-3-2-3-3.1a1.5 1.5 0 0 1 3-.3 1.5 1.5 0 0 1 3 .3c0 1.1-1.2 1.9-3 3.1Z" transform="translate(0 -.5) scale(.9) translate(1.3 1.2)"/>',
   pt_template: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M10 9v12"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
@@ -432,7 +437,7 @@ const quickAdd = (b, wide = false) => {
   const own = ownCache().has(b.id), inC = !own && cart.has(b.id);
   const lab = t(own ? 'cart.owned' : inC ? 'book.inCart' : 'book.addToCart');
   // wide = the big digital cards: the button shows its words next to the icon (the small round one on the home strip hides them)
-  return `<button type="button" class="quick-add ${wide ? 'qa-wide ' : ''}${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}${wide ? `<span class="qa-l">${esc(lab)}</span>` : ''}</button>`;
+  return `<button type="button" class="quick-add ${wide ? 'qa-wide ' : ''}${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}${wide && !own ? `<span class="qa-l">${esc(lab)}</span>` : ''}</button>`;
 };
 // "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
 export function fullTitle(b) {
