@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113121526';
-import { askWhy } from './why.js?v=20261113121526';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113121526';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113121526';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113121526';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113121526';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113121526';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113121526';
-import { couponLive } from './welcome.js?v=20261113121526';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113121526';
-import { track } from './track.js?v=20261113121526';
-import { gaEvent } from './ga.js?v=20261113121526';
-import { guessLang } from './langdetect.js?v=20261113121526';
-import { didYouMean } from './search.js?v=20261113121526';
-import { api, editionsOf } from './api.js?v=20261113121526';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113121526';
+import { CONFIG } from './config.js?v=20261113121834';
+import { askWhy } from './why.js?v=20261113121834';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113121834';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113121834';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113121834';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113121834';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113121834';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113121834';
+import { couponLive } from './welcome.js?v=20261113121834';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113121834';
+import { track } from './track.js?v=20261113121834';
+import { gaEvent } from './ga.js?v=20261113121834';
+import { guessLang } from './langdetect.js?v=20261113121834';
+import { didYouMean } from './search.js?v=20261113121834';
+import { api, editionsOf } from './api.js?v=20261113121834';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113121834';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -453,7 +453,7 @@ export async function viewBook(el, id) {
     const from = window.scrollY, dist = target() - from;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(dist) < 40) { window.scrollTo(0, target()); return; }
     const dur = Math.min(1100, Math.max(650, Math.abs(dist) * 0.22));
-    const ease = x => 1 - Math.pow(1 - x, 2.4);   // leaves at once and slows gently at the end
+    const ease = x => 1 - Math.pow(1 - x, 3);   // leaves at once and slows gently at the end
     let stop = false; const halt = () => { stop = true; };
     ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(ev => window.addEventListener(ev, halt, { once: true, passive: true }));
     const t0 = performance.now();
@@ -1461,9 +1461,10 @@ function waiverConfirm(sum) {
             let stop = false, raf = 0;
             const halt = () => { stop = true; cancelAnimationFrame(raf); ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.removeEventListener(ev, halt)); };
             ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.addEventListener(ev, halt, { passive: true }));
-            const dur = Math.min(2000, Math.max(900, dist * 1.1));
+            const dur = Math.min(1400, Math.max(650, dist * 0.7));
             setTimeout(() => {
               if (stop || !m.isConnected) return;
+              m.style.willChange = 'scroll-position';
               const t0 = performance.now(), ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
               const step = now => {
                 if (stop || !m.isConnected) return;
