@@ -4117,3 +4117,10 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pcard-use .ico { width: 11px; height: 11px; }
 .panel .card.pcard, .panel .card.pcard:hover { text-decoration: none; }
 .panel .card.pcard .card-title { text-decoration: none; color: var(--fg, #0f1111); }
+
+/* drawer v2: accordion departments (Amazon-style) */
+.drawer .drawer-all-toggle{font-size:16px;padding:15px 20px;border-bottom:1px solid var(--border,#e6e6e0)}
+.drawer .drawer-all-toggle[aria-expanded="true"]{background:var(--surface-2)}
+.drawer .drawer-subs .drawer-sub{padding:11px 20px 11px 36px;font-size:14.5px}
+.drawer .drawer-subs .drawer-sub-main{font-weight:700}
+.drawer [data-digital-drawer] .drawer-all-toggle{color:#5b3fd9}

@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261112224230';
-import { CONFIG } from './config.js?v=20261112224230';
-import { SOCIAL_PATHS } from './social.js?v=20261112224230';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261112224230';
-import { esc, store, $, $$ } from './util.js?v=20261112224230';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113022127';
+import { CONFIG } from './config.js?v=20261113022127';
+import { SOCIAL_PATHS } from './social.js?v=20261113022127';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113022127';
+import { esc, store, $, $$ } from './util.js?v=20261113022127';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261112224230';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261112224230';
-import { track, trackPage } from './track.js?v=20261112224230';
-import { initGA, applyConsent } from './ga.js?v=20261112224230';
-import { consentStrings } from './consent-i18n.js?v=20261112224230';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261112224230';
-import { api } from './api.js?v=20261112224230';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261112224230';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113022127';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113022127';
+import { track, trackPage } from './track.js?v=20261113022127';
+import { initGA, applyConsent } from './ga.js?v=20261113022127';
+import { consentStrings } from './consent-i18n.js?v=20261113022127';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113022127';
+import { api } from './api.js?v=20261113022127';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113022127';
 
 // ---------------- icons ----------------
 const P = {
@@ -259,12 +259,16 @@ export function renderChrome() {
     <div class="drawer-head"><span class="drawer-hello">${icon('user')} ${hello}</span>${langBtn('drawer-lang')}</div>
     <div class="drawer-body">
       <h3>${esc(t('nav.browse'))}</h3>
-      <button type="button" class="dlink drawer-all-toggle" aria-expanded="false" data-drawer-all>${esc(t('nav.allBooks'))} ${icon('chevD', 'ico chev')}</button>
+      <button type="button" class="dlink drawer-all-toggle" aria-expanded="false" data-drawer-all>${esc(t('ptype.ebook'))} ${icon('chevD', 'ico chev')}</button>
       <div class="drawer-subs" hidden>
-        <a href="#/search" class="drawer-sub">${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))} ${icon('chevR')}</a>
-        <a href="#/search?lang=all" class="drawer-sub">${esc(t('nav.inAllLangs'))} ${icon('chevR')}</a></div>
-      ${CATS.map(c => `<a href="#/search?cat=${c}">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}
-      <div data-digital-drawer${digitalKnown() ? '' : ' hidden'}><hr><h3>${esc(t('nav.digital'))}</h3>${PTYPES.map(p => `<a href="#/search?type=${p}">${esc(t('ptype.' + p))} ${icon('chevR')}</a>`).join('')}</div>
+        <a href="#/search" class="drawer-sub drawer-sub-main">${esc(t('nav.inSiteLang', { lang: langName(getLang(), true) }))} ${icon('chevR')}</a>
+        <a href="#/search?lang=all" class="drawer-sub">${esc(t('nav.inAllLangs'))} ${icon('chevR')}</a>
+        ${CATS.map(c => `<a href="#/search?cat=${c}" class="drawer-sub">${esc(t('cat.' + c))} ${icon('chevR')}</a>`).join('')}</div>
+      <div data-digital-drawer${digitalKnown() ? '' : ' hidden'}>
+        <button type="button" class="dlink drawer-all-toggle" aria-expanded="false" data-drawer-all>${esc(t('nav.digital'))} ${icon('chevD', 'ico chev')}</button>
+        <div class="drawer-subs" hidden>
+          <a href="#/digital" class="drawer-sub drawer-sub-main">${esc(t('home.seeAll'))} ${icon('chevR')}</a>
+          ${PTYPES.filter(p => p !== 'ebook').map(p => `<a href="#/search?type=${p}" class="drawer-sub">${esc(t('ptype.' + p))} ${icon('chevR')}</a>`).join('')}</div></div>
       <hr>
       <a href="#/search?sort=newest">${esc(t('nav.new'))}</a>
       <a href="#/search?deals=1">${esc(t('nav.deals'))}</a>
@@ -650,7 +654,7 @@ export function bindGlobal() {
     }
     if (e.target.closest('[data-cookie-settings]')) { e.preventDefault(); showConsent(true); return; }
     const da = e.target.closest('[data-drawer-all]');
-    if (da) { const open = da.getAttribute('aria-expanded') !== 'true'; da.setAttribute('aria-expanded', open); da.nextElementSibling.hidden = !open; return; }
+    if (da) { const open = da.getAttribute('aria-expanded') !== 'true'; document.querySelectorAll('#drawer [data-drawer-all]').forEach(b => { b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; }); da.setAttribute('aria-expanded', open); da.nextElementSibling.hidden = !open; return; }
     const ab = e.target.closest('[data-allbooks]');
     if (ab) { e.preventDefault(); allBooksMenu(ab); return; }
     if (!e.target.closest('.allbooks-menu')) document.querySelector('.allbooks-menu')?.remove();
