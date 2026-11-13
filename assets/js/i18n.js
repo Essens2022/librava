@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261113071040';
-import { CONFIG } from './config.js?v=20261113071040';
-import { store } from './util.js?v=20261113071040';
+import { localize, loadRates } from './localprice.js?v=20261113092629';
+import { CONFIG } from './config.js?v=20261113092629';
+import { store } from './util.js?v=20261113092629';
 
 const D = {
   ro: {
@@ -110,10 +110,10 @@ const D = {
     'fbt.addSome': 'Adaugă {n} în coș',
     'fbt.thisItem': 'Această carte:',
     'fbt.added': '{n} cărți adăugate în coș',
-    'cart.nudgeQty': 'Mai adaugă {n} carte/cărți și primești {p}% reducere',
-    'cart.nudgeFree': 'Mai adaugă {n} carte/cărți și una e gratuită',
-    'cart.nudgeBxgy': 'Mai adaugă {n} carte/cărți și primești {p}% la una',
-    'cart.nudgeSave': 'Mai adaugă {n} carte/cărți și economisești încă {amount}',
+    'cart.nudgeQty': 'Mai adaugă {n} articol/e și primești {p}% reducere',
+    'cart.nudgeFree': 'Mai adaugă {n} articol/e și unul e gratuit',
+    'cart.nudgeBxgy': 'Mai adaugă {n} articol/e și primești {p}% la unul',
+    'cart.nudgeSave': 'Mai adaugă {n} articol/e și economisești încă {amount}',
     'cart.bestOnly': 'Ofertele nu se adună: aplicăm automat oferta cea mai avantajoasă pentru tine.',
     'imp.tab': 'Importă carte',
     'imp.title': 'Importă o carte dintr-un fișier .zip',
@@ -158,7 +158,7 @@ const D = {
     'opt.saving': 'Salvez fișierul ușor…',
     'opt.done': 'Făcut mai ușor: {from} → {to}. Pozele arată la fel; originalul mare e păstrat separat.',
     'opt.doneMore': 'Făcut mai ușor: {from} → {to}. Sub 5 MB nu se putea fără să se vadă diferența la poze, așa că am păstrat calitatea. Originalul mare e păstrat separat.',
-    'cart.items': 'Cărți ({n})',
+    'cart.items': 'Articole ({n})',
     'cart.coupon': 'Cupon',
     'cart.total': 'Total comandă',
     'cart.haveCode': 'Ai un cod de reducere?',
@@ -1798,10 +1798,10 @@ const D = {
     'fbt.addSome': 'Aggiungi {n} al carrello',
     'fbt.thisItem': 'Questo libro:',
     'fbt.added': '{n} libri aggiunti al carrello',
-    'cart.nudgeQty': 'Aggiungi ancora {n} libro/i e ottieni il {p}% di sconto',
-    'cart.nudgeFree': 'Aggiungi ancora {n} libro/i e uno è gratis',
-    'cart.nudgeBxgy': 'Aggiungi ancora {n} libro/i e ottieni il {p}% su uno',
-    'cart.nudgeSave': 'Aggiungi ancora {n} libro/i e risparmi altri {amount}',
+    'cart.nudgeQty': 'Aggiungi ancora {n} articolo/i e ottieni il {p}% di sconto',
+    'cart.nudgeFree': 'Aggiungi ancora {n} articolo/i e uno è gratis',
+    'cart.nudgeBxgy': 'Aggiungi ancora {n} articolo/i e ottieni il {p}% su uno',
+    'cart.nudgeSave': 'Aggiungi ancora {n} articolo/i e risparmi altri {amount}',
     'cart.bestOnly': 'Le offerte non si sommano: applichiamo automaticamente quella più conveniente per te.',
     'imp.tab': 'Importa libro',
     'imp.title': 'Importa un libro da un file .zip',
@@ -1846,7 +1846,7 @@ const D = {
     'opt.saving': 'Salvo il file leggero…',
     'opt.done': 'Reso più leggero: {from} → {to}. Le immagini sono identiche; l\'originale grande è conservato a parte.',
     'opt.doneMore': 'Reso più leggero: {from} → {to}. Sotto 5 MB le immagini avrebbero perso qualità, quindi l\'ho mantenuta. L\'originale grande è conservato a parte.',
-    'cart.items': 'Libri ({n})',
+    'cart.items': 'Articoli ({n})',
     'cart.coupon': 'Coupon',
     'cart.total': 'Totale ordine',
     'cart.haveCode': 'Hai un codice sconto?',
@@ -3486,10 +3486,10 @@ const D = {
     'fbt.addSome': 'Add {n} to cart',
     'fbt.thisItem': 'This book:',
     'fbt.added': '{n} books added to the cart',
-    'cart.nudgeQty': 'Add {n} more book(s) and get {p}% off',
-    'cart.nudgeFree': 'Add {n} more book(s) and get one free',
-    'cart.nudgeBxgy': 'Add {n} more book(s) and get {p}% off one',
-    'cart.nudgeSave': 'Add {n} more book(s) and save {amount} more',
+    'cart.nudgeQty': 'Add {n} more item(s) and get {p}% off',
+    'cart.nudgeFree': 'Add {n} more item(s) and get one free',
+    'cart.nudgeBxgy': 'Add {n} more item(s) and get {p}% off one',
+    'cart.nudgeSave': 'Add {n} more item(s) and save {amount} more',
     'cart.bestOnly': 'Offers don\'t add up: we automatically apply the one that saves you the most.',
     'imp.tab': 'Import book',
     'imp.title': 'Import a book from a .zip file',
@@ -3534,7 +3534,7 @@ const D = {
     'opt.saving': 'Saving the light file…',
     'opt.done': 'Made lighter: {from} → {to}. Pictures look the same; the full-size original is kept apart.',
     'opt.doneMore': 'Made lighter: {from} → {to}. Under 5 MB the pictures would lose quality, so quality was kept. The full-size original is kept apart.',
-    'cart.items': 'Books ({n})',
+    'cart.items': 'Items ({n})',
     'cart.coupon': 'Coupon',
     'cart.total': 'Order total',
     'cart.haveCode': 'Have a discount code?',
@@ -5104,7 +5104,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261113071040`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261113092629`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

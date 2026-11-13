@@ -4053,8 +4053,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pf-price .price { font-size: 22px; font-weight: 800; }
 .pf-price .price-old { margin: 0; font-size: 13px; }
 .pf-buy { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: none; }
-.pcard-foot .quick-add { position: static; width: 46px; height: 46px; box-shadow: 0 4px 12px rgba(251,113,133,.45); }
-.pcard-foot .quick-add svg { width: 24px; height: 24px; }
+.pcard-foot .quick-add { position: static; width: 42px; height: 42px; }
+.pcard-foot .quick-add svg { width: 26px; height: 26px; }
 .pcard-inst { font-size: 10.5px; color: #15803d; white-space: nowrap; }
 .pcard-inst .ico { color: #f59e0b; }
 .rcard.prcard .pcard-foot { margin-top: 8px; }
@@ -4070,8 +4070,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pf-price .price-old { grid-column: 1; grid-row: 2; justify-self: start; }
 .pcard-foot .quick-add { grid-column: 2; grid-row: 1; justify-self: center; }
 .pcard-foot .pcard-inst { grid-column: 2; grid-row: 2; justify-self: center; }
-.pcard-foot .quick-add:not(.in):not(.owned) { background: linear-gradient(135deg, #f59e0b, #fb7185 60%, #d946ef); color: #fff; }
-.pcard-foot .quick-add:not(.in):not(.owned):hover { filter: brightness(1.08); }
 .gift-books img.wide { width: min(100%, 300px); aspect-ratio: 4 / 3; border-radius: 12px; }
 /* ---- digital v4: premium dark-indigo band, clean white cards, compact on phones (replaces the v3 colours) ---- */
 .dshop { background: radial-gradient(90% 130% at 100% 0%, rgba(124,92,255,.5) 0%, rgba(124,92,255,0) 62%), radial-gradient(70% 90% at 0% 100%, rgba(45,212,191,.14) 0%, rgba(45,212,191,0) 62%), linear-gradient(160deg, #15112e 0%, #1d1646 58%, #2a1f63 100%); border: 1px solid rgba(255,255,255,.07); box-shadow: 0 14px 38px rgba(21,17,46,.32); }
@@ -4106,9 +4104,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pcard-use .ico { width: 12px; height: 12px; }
 .pf-price .price { font-size: 20px; }
 .pf-price .price-old { font-size: 12px; color: #8b8aa3; }
-.pcard-foot .quick-add { width: 42px; height: 42px; box-shadow: 0 6px 14px rgba(109,74,255,.4); }
-.pcard-foot .quick-add svg { width: 22px; height: 22px; }
-.pcard-foot .quick-add:not(.in):not(.owned) { background: linear-gradient(135deg, #6d4aff, #9a6bff); color: #fff; }
 .pcard-inst { color: #0f766e; font-size: 10px; } .pcard-inst .ico { color: #f59e0b; width: 12px; height: 12px; }
 @media (max-width: 600px) { .card.pcard { width: 188px; } .dshop-slim h2, .dshop-slim h1 { font-size: 19px; } .pcard-use span { padding: 3px 6px; } }
 .gift-books img.wide { width: min(100%, 300px); aspect-ratio: 16 / 11; }
@@ -4133,3 +4128,15 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .card.pcard .pcard-use span { white-space: normal; max-width: 100%; }
 .card.pcard .pcard-foot .quick-add { grid-row: 1 / 3; }
 .card.pcard .pcard-foot .pcard-inst { grid-column: 1 / -1; grid-row: 3; justify-self: start; margin-top: 4px; white-space: normal; }
+
+/* digital products in the cart: a clear thumbnail (no tags over the small picture) */
+.cart-item:has(.pcover) { grid-template-columns: 120px minmax(0, 1fr) auto; }
+.cart-item .pcover { aspect-ratio: 4 / 3; border-radius: 8px; }
+.cart-item .pcover .ptag, .cart-item .pcover .pfmt { display: none; }
+@media (max-width: 700px) { .cart-item:has(.pcover) { grid-template-columns: 104px minmax(0, 1fr); } }
+/* digital products: the big cards (full lists) get a wide green button with icon + words, like "Read now"; the small home-strip cards keep the round icon */
+.pcard-foot .quick-add.qa-wide { width: auto; min-width: 0; height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.18); color: #15240f; white-space: nowrap; }
+.pcard-foot .quick-add.qa-wide svg { width: 20px; height: 20px; flex: none; }
+.pcard-foot .quick-add.qa-wide.in { color: #fff; }
+.dshop-track .pcard-foot .quick-add.qa-wide { width: 42px; min-width: 0; height: 42px; padding: 0; border-radius: 50%; }
+.dshop-track .pcard-foot .quick-add.qa-wide .qa-l { display: none; }

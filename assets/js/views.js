@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113071040';
-import { askWhy } from './why.js?v=20261113071040';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113071040';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113071040';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113071040';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113071040';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113071040';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113071040';
-import { couponLive } from './welcome.js?v=20261113071040';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113071040';
-import { track } from './track.js?v=20261113071040';
-import { gaEvent } from './ga.js?v=20261113071040';
-import { guessLang } from './langdetect.js?v=20261113071040';
-import { didYouMean } from './search.js?v=20261113071040';
-import { api, editionsOf } from './api.js?v=20261113071040';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113071040';
+import { CONFIG } from './config.js?v=20261113092629';
+import { askWhy } from './why.js?v=20261113092629';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113092629';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113092629';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113092629';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113092629';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113092629';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113092629';
+import { couponLive } from './welcome.js?v=20261113092629';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113092629';
+import { track } from './track.js?v=20261113092629';
+import { gaEvent } from './ga.js?v=20261113092629';
+import { guessLang } from './langdetect.js?v=20261113092629';
+import { didYouMean } from './search.js?v=20261113092629';
+import { api, editionsOf } from './api.js?v=20261113092629';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113092629';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -147,6 +147,12 @@ export async function viewSearch(el, q) {
     rating: Number(q.get('rating')) || 0, sort: q.get('sort') || '', deals: q.get('deals') === '1',
   };
   // book language: the visitor's language unless they pick another one or "all languages"
+  // lists reached from banners, menus, offers and the cart suggestions show books; digital products have their own page
+  // (a text search and the "Type" filter still reach every kind: type=all)
+  const typeAll = q.get('type') === 'all';
+  const autoType = !opts.ptype && !opts.q && !typeAll;
+  if (autoType) opts.ptype = 'ebook';
+  if (typeAll) opts.ptype = '';
   const UI = getLang();
   const langParam = q.get('lang') || '';
   const bookLang = langParam === 'all' ? '' : (langParam || UI);
@@ -180,6 +186,11 @@ export async function viewSearch(el, q) {
     const on = (q.get(key) || '') === val;
     return `<a class="fopt ${on ? 'on' : ''}" href="${mk({ [key]: val })}" role="radio" aria-checked="${on}">${on ? icon('check', 'ico') : '<span style="width:22px;display:inline-block"></span>'}${esc(label)}</a>`;
   };
+  // "Any" = every kind (type=all); with nothing chosen and no text search the page shows books
+  const typeRadio = (val, label) => {
+    const cur = q.get('type') || (opts.q ? 'all' : 'ebook'), on = cur === val;
+    return `<a class="fopt ${on ? 'on' : ''}" href="${mk({ type: val === 'ebook' && !opts.q ? '' : val })}" role="radio" aria-checked="${on}">${on ? icon('check', 'ico') : '<span style="width:22px;display:inline-block"></span>'}${esc(label)}</a>`;
+  };
   if (opts.q) track('search', { q: opts.q, results: books.length });
   // results in pages of 48, like Amazon: the page stays fast with thousands of books
   const PER = 48, pages = Math.max(1, Math.ceil(books.length / PER)), pg = Math.min(pages, Math.max(1, parseInt(q.get('pg')) || 1));
@@ -190,7 +201,7 @@ export async function viewSearch(el, q) {
     ${pnums.map((n, i) => `${i && n - pnums[i - 1] > 1 ? '<span class="pg-gap">…</span>' : ''}${n === pg ? `<span class="pg-num on" aria-current="page">${n}</span>` : `<a class="pg-num" href="${mk({ pg: n === 1 ? '' : n })}">${n}</a>`}`).join('')}
     ${pg < pages ? `<a class="pg-btn" href="${mk({ pg: pg + 1 })}" rel="next">${esc(t('search.next'))} ›</a>` : `<span class="pg-btn off">${esc(t('search.next'))} ›</span>`}
   </nav>`;
-  const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : (opts.ptype && !opts.category) ? t('search.inCat', { n: books.length, cat: esc(t('ptype.' + opts.ptype)) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
+  const head = opts.q ? t('search.results', { n: books.length, q: esc(opts.q) }) : (opts.ptype && !opts.category && !autoType) ? t('search.inCat', { n: books.length, cat: esc(t('ptype.' + opts.ptype)) }) : opts.category ? t('search.inCat', { n: books.length, cat: esc(t('cat.' + opts.category)) }) : t('search.resultsAll', { n: books.length });
   const sortSel = ['relevance', 'bestsellers', 'newest', 'priceAsc', 'priceDesc', 'rating'].map(s => `<option value="${s}" ${(opts.sort || (opts.q ? 'relevance' : 'bestsellers')) === s ? 'selected' : ''}>${esc(t('search.s.' + s))}</option>`).join('');
   const hasFilters = ['cat', 'type', 'format', 'price', 'rating', 'deals'].some(k => q.get(k));
   const digitalOn = hasDigital(everything), types = digitalOn ? ['ebook', ...PTYPES.filter(p => everything.some(b => ptypeOf(b) === p))] : [];
@@ -201,7 +212,7 @@ export async function viewSearch(el, q) {
 
   el.innerHTML = `<div class="wrap page"><div class="search-layout">
     <aside class="filters panel" id="filters" aria-label="${esc(t('search.filters'))}">
-      ${types.length > 1 ? `<h4>${esc(t('search.type'))}</h4>${radio('t', 'type', '', t('search.any'))}${types.map(p => radio('t', 'type', p, t('ptype.' + p))).join('')}` : ''}
+      ${types.length > 1 ? `<h4>${esc(t('search.type'))}</h4>${typeRadio('all', t('search.any'))}${types.map(p => typeRadio(p, t('ptype.' + p))).join('')}` : ''}
       <h4>${esc(t('search.category'))}</h4>
       ${radio('c', 'cat', '', t('search.any'))}${CATS.slice(0, 10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}
       <details class="more-cats" ${CATS.indexOf(q.get('cat')) >= 10 ? 'open' : ''}><summary>${esc(t('search.moreCats', { n: CATS.length - 10 }))}</summary>${CATS.slice(10).map(c => radio('c', 'cat', c, t('cat.' + c))).join('')}</details>

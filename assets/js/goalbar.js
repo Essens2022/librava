@@ -1,10 +1,10 @@
 // The goal bar: while there are books in the cart it stays on screen on every page and shows the next reward
 // ("one more book and the 4th is -80%"). Reuses the cart's own texts, so it is already in every language.
-import { api } from './api.js?v=20261113071040';
-import { t, money, getLang } from './i18n.js?v=20261113071040';
-import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261113071040';
-import { applyOffers, appliedLabel } from './offers.js?v=20261113071040';
-import { esc, store } from './util.js?v=20261113071040';
+import { api } from './api.js?v=20261113092629';
+import { t, money, getLang } from './i18n.js?v=20261113092629';
+import { cart, go, currentPath, GIFT_SVG } from './ui.js?v=20261113092629';
+import { applyOffers, appliedLabel } from './offers.js?v=20261113092629';
+import { esc, store } from './util.js?v=20261113092629';
 
 const UN = { en: 'Unlocked!', ro: 'Deblocat!', it: 'Sbloccato!', fr: 'Débloqué !', de: 'Freigeschaltet!', es: '¡Desbloqueado!', pt: 'Desbloqueado!', nl: 'Ontgrendeld!', pl: 'Odblokowane!', cs: 'Odemčeno!', sk: 'Odomknuté!', hu: 'Feloldva!', bg: 'Отключено!', hr: 'Otključano!', sl: 'Odklenjeno!', el: 'Ξεκλειδώθηκε!', da: 'Låst op!', sv: 'Upplåst!', no: 'Låst opp!', fi: 'Avattu!', et: 'Avatud!', lv: 'Atbloķēts!', lt: 'Atrakinta!', uk: 'Розблоковано!' };
 let prevSaving = null, prevCount = 0;
@@ -19,6 +19,8 @@ function pop(label, saving, next) {
   document.body.appendChild(el);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 700); }, 1400);
 }
+// the bar leaves AND the space reserved for it is given back (before, an empty gap stayed under the header)
+const drop = bar => { bar?.remove(); document.documentElement.style.setProperty('--gb-h', '0px'); lastH = null; lastTop = null; };
 let seq = 0, offersC = null; const bookC = new Map();
 async function draw() {
   const my = ++seq; let bar = document.getElementById('goal-bar');
@@ -26,7 +28,7 @@ async function draw() {
   const onCart = /(^|\/)cart\b/.test(currentPath()) || /^#\/(read|admin)/.test(location.hash) || /^\/(read|admin)/.test(location.pathname);
   if (!ids.length) { prevSaving = null; prevCount = 0; }
   const guided = !!store.get('welcome-bonus', '') && store.get('welcome-until', 0) > Date.now();   // the side panel guides the visitor while the timed gift runs
-  if (!ids.length || onCart || guided) { bar?.remove(); return; }
+  if (!ids.length || onCart || guided) { drop(bar); return; }
   try {
     if (!offersC) offersC = api.offers ? await api.offers().catch(() => []) : [];
     // instant: the light catalogue the page already holds has the price and category; only a book missing from it is fetched
@@ -35,17 +37,17 @@ async function draw() {
     if (need.length) await Promise.all(need.map(id => api.getBook(id).then(b => { if (b) bookC.set(id, b); }).catch(() => null)));
     if (my !== seq) return;
     const books = ids.map(id => bookC.get(id)).filter(b => b && b.price_cents > 0);
-    if (!books.length) { bar?.remove(); return; }
+    if (!books.length) { drop(bar); return; }
     const r = applyOffers(books, offersC.filter(o => o.kind !== 'coupon'), {}), n = r.nudges[0];
     const saving = r.discount || 0, grew = prevSaving !== null && books.length > prevCount && saving > prevSaving;
     const top = r.applied.find(a => a.kind !== 'coupon');
     prevSaving = saving; prevCount = books.length;
     if (grew && top) {
-      if (!n && bar) { bar.remove(); bar = null; }   // goal reached: the bar leaves and the notice takes its place
+      if (!n && bar) { drop(bar); bar = null; }   // goal reached: the bar leaves and the notice takes its place
       const nx = n ? (n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent })) : '';
       try { pop(appliedLabel(top, t, c => t('cat.' + c)), saving, nx); } catch { }   // a failing pop-up must never block the bar
     }
-    if (!n) { bar?.remove(); return; }
+    if (!n) { drop(bar); return; }
     const txt = n.kind === 'bxgy' && n.percent >= 100 ? t('cart.nudgeFree', { n: n.more }) : n.gain > 0 ? t('cart.nudgeSave', { n: n.more, amount: money(n.gain) }) : n.kind === 'qty' ? t('cart.nudgeQty', { n: n.more, p: n.percent }) : t('cart.nudgeBxgy', { n: n.more, p: n.percent });
     const total = Math.min(books.length + n.more, 8);
     const pct = Math.round(100 * books.length / total);

@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113071040';
-import { CONFIG } from './config.js?v=20261113071040';
-import { SOCIAL_PATHS } from './social.js?v=20261113071040';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113071040';
-import { esc, store, $, $$ } from './util.js?v=20261113071040';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113092629';
+import { CONFIG } from './config.js?v=20261113092629';
+import { SOCIAL_PATHS } from './social.js?v=20261113092629';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113092629';
+import { esc, store, $, $$ } from './util.js?v=20261113092629';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113071040';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113071040';
-import { track, trackPage } from './track.js?v=20261113071040';
-import { initGA, applyConsent } from './ga.js?v=20261113071040';
-import { consentStrings } from './consent-i18n.js?v=20261113071040';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113071040';
-import { api } from './api.js?v=20261113071040';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113071040';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113092629';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113092629';
+import { track, trackPage } from './track.js?v=20261113092629';
+import { initGA, applyConsent } from './ga.js?v=20261113092629';
+import { consentStrings } from './consent-i18n.js?v=20261113092629';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113092629';
+import { api } from './api.js?v=20261113092629';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113092629';
 
 // ---------------- icons ----------------
 const P = {
@@ -423,9 +423,11 @@ let _ownRaw = null, _ownSet = new Set();
 const ownCache = () => { try { const raw = localStorage.getItem(OWN_KEY) || ''; const uid = api.user?.()?.id; if (raw !== _ownRaw || !uid) { _ownRaw = raw; const o = raw ? JSON.parse(raw) : null; _ownSet = o && uid && o.uid === uid ? new Set(o.ids) : new Set(); } return _ownSet; } catch { return new Set(); } };
 const ownSave = (uid, set) => { try { localStorage.setItem(OWN_KEY, JSON.stringify({ uid, ids: [...set] })); } catch { } };
 const qaIcon = k => `<svg viewBox="1.5 2.4 20 20" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.2l2.3 10.3a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L20.5 7H6"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>${k === 'in' ? '<path d="M10.3 9.6l2 2 3.6-4"/>' : '<path d="M13.2 6v5.4M10.5 8.7h5.4"/>'}</svg>`;
-const quickAdd = b => {
+const quickAdd = (b, wide = false) => {
   const own = ownCache().has(b.id), inC = !own && cart.has(b.id);
-  return `<button type="button" class="quick-add ${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}</button>`;
+  const lab = t(own ? 'cart.owned' : inC ? 'book.inCart' : 'book.addToCart');
+  // wide = the big digital cards: the button shows its words next to the icon (the small round one on the home strip hides them)
+  return `<button type="button" class="quick-add ${wide ? 'qa-wide ' : ''}${own ? 'owned' : inC ? 'in' : ''}" data-quick-add="${esc(b.id)}" aria-label="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}" title="${esc(t(own ? 'cart.owned' : 'book.addToCart'))}">${own ? '✓' : qaIcon(inC ? 'in' : 'add')}${wide ? `<span class="qa-l">${esc(lab)}</span>` : ''}</button>`;
 };
 // "Title: Subtitle", like Amazon (no double colon when the title already ends with punctuation)
 export function fullTitle(b) {
@@ -440,7 +442,7 @@ export function cardHTML(b) {
     ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
     ${ratingHTML(b)}
     <div class="pcard-use"><span>${icon('devices', 'ico')}${esc(t('digital.anyDevice'))}</span><span>${icon('print', 'ico')}${esc(t('digital.printA4'))}</span></div>
-    <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
+    <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b, true)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
   </a>`;
   return `<a class="card" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b, { thumb: true })}${quickAdd(b)}</div>
@@ -459,7 +461,7 @@ export function rcardHTML(b) {
       ${b.subtitle ? `<div class="pcard-sub">${esc(String(b.subtitle).replace(/^\s*[:—–-]\s*/, ''))}</div>` : ''}
       ${ratingHTML(b)}
       <div class="pcard-use"><span>${icon('devices', 'ico')}${esc(t('digital.anyDevice'))}</span><span>${icon('print', 'ico')}${esc(t('digital.printA4'))}</span></div>
-      <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
+      <div class="pcard-foot"><div class="pf-price">${priceHTML(b)}</div><div class="pf-buy">${quickAdd(b, true)}<span class="pcard-inst">${icon('bolt', 'ico')}${esc(t('book.tile1'))}</span></div></div>
     </div>
   </a>`;
   return `<a class="rcard" href="#/book/${encodeURIComponent(b.id)}">
@@ -633,7 +635,7 @@ export function bindGlobal() {
       if (await api.owns(id).catch(() => null)) { toast(t('cart.owned')); return; }
       if (cart.has(id)) { toast(t('book.inCart')); return; }
       cart.add(id); toast(t('cart.added'));
-      $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.innerHTML = qaIcon('in'); });
+      $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.innerHTML = qaIcon('in') + (b.classList.contains('qa-wide') ? `<span class="qa-l">${esc(t('book.inCart'))}</span>` : ''); });
       return;
     }
   }, true);
@@ -898,7 +900,7 @@ function promoOffersHTML(p, data, placement) {
   const offers = Array.isArray(data) ? data : (data && data.offers) || [], books = Array.isArray(data) ? [] : (data && data.books) || [];
   const only = p.book_ids || []; let sl = offerSlides(offers); if (only.length) sl = sl.filter(x => only.includes(x.o.id));
   const n = sl.length, st = ofStyleOf(p), flags = String(p.theme || '').split('~')[2] || '', withBooks = !/nb/.test(flags) && books.length > 0, still = n === 1;
-  const link = safeLink(p.link) || '#/search', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const cat = c => t('cat.' + c), sec = still ? Math.min(30, Math.max(5, +p.seconds || 8)) : Math.min(30, Math.max(6, Math.round(n * 3.4) + 1));
   const idx = Math.max(0, OF_STYLES.indexOf(st));
   const catF = (/c-([\w-]+)/.exec(flags) || [])[1], pickIds = (String(p.theme || '').split('~')[3] || '').split(',').filter(Boolean);
@@ -1283,5 +1285,25 @@ new MutationObserver(() => { if (document.querySelector('.promo-books .promo-she
 }
 
 // covers fade in softly when they arrive; if a small copy is not there yet, the full cover is used
+// the offers banner shows book covers on a laptop, tablet and phone: pressing a device opens THAT book (the rest of the banner opens the deals)
+document.addEventListener('click', e => {
+  const d = e.target.closest?.('.promo-offers .of-s.cur .dvx'); if (!d) return;
+  const im = d.querySelector('img'), m = im && /\/book\/([^/?#]+)\/thumb\.webp/.exec(im.getAttribute('src') || im.currentSrc || '');
+  if (!m) return;
+  e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); go('/book/' + decodeURIComponent(m[1]));
+}, true);
 document.addEventListener('load', e => { const i = e.target; if (i.tagName === 'IMG' && i.closest?.('.cover, .guide-card')) i.classList.add('ld'); }, true);
+// a cover that no longer exists (the product was updated since this phone saved its list): read the fresh list once and use the new cover
+let coverHeal = null;
+document.addEventListener('error', async e => {
+  const i = e.target; if (i.tagName !== 'IMG' || i.dataset.healed || i.dataset.full) return;
+  const box = i.closest?.('.pcover, .cover'), id = box && (box.dataset.id || box.dataset.b); if (!id) return;
+  i.dataset.healed = '1';
+  try {
+    coverHeal = coverHeal || (api.freshCatalog ? api.freshCatalog(0) : Promise.resolve()).catch(() => { });
+    await coverHeal; setTimeout(() => { coverHeal = null; }, 30000);
+    const b = (await api.listBooks({})).find(x => x.id === id);
+    if (b?.cover_url && b.cover_url !== i.src) i.src = b.cover_url;
+  } catch { }
+}, true);
 document.addEventListener('error', e => { const i = e.target; if (i.tagName === 'IMG' && i.dataset?.full && i.src !== i.dataset.full) { i.removeAttribute('srcset'); i.src = i.dataset.full; } }, true);
