@@ -4128,3 +4128,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .card.pcard .pcover, .pgrid .card.pcard .pcover { aspect-ratio: 4 / 3; }
 .card.pcard .pcover .ptag { top: 6px; left: 6px; }
 .card.pcard .pcover .pfmt { left: auto; right: 8px; bottom: 8px; }
+/* digital cards v6: long translations never overflow — chips wrap, delivery note gets its own full-width row */
+.card.pcard .pcard-use { flex-wrap: wrap; }
+.card.pcard .pcard-use span { white-space: normal; max-width: 100%; }
+.card.pcard .pcard-foot .quick-add { grid-row: 1 / 3; }
+.card.pcard .pcard-foot .pcard-inst { grid-column: 1 / -1; grid-row: 3; justify-self: start; margin-top: 4px; white-space: normal; }
