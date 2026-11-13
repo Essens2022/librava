@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113120943';
-import { askWhy } from './why.js?v=20261113120943';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113120943';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113120943';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113120943';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113120943';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113120943';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113120943';
-import { couponLive } from './welcome.js?v=20261113120943';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113120943';
-import { track } from './track.js?v=20261113120943';
-import { gaEvent } from './ga.js?v=20261113120943';
-import { guessLang } from './langdetect.js?v=20261113120943';
-import { didYouMean } from './search.js?v=20261113120943';
-import { api, editionsOf } from './api.js?v=20261113120943';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113120943';
+import { CONFIG } from './config.js?v=20261113121217';
+import { askWhy } from './why.js?v=20261113121217';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113121217';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113121217';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113121217';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113121217';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113121217';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113121217';
+import { couponLive } from './welcome.js?v=20261113121217';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113121217';
+import { track } from './track.js?v=20261113121217';
+import { gaEvent } from './ga.js?v=20261113121217';
+import { guessLang } from './langdetect.js?v=20261113121217';
+import { didYouMean } from './search.js?v=20261113121217';
+import { api, editionsOf } from './api.js?v=20261113121217';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113121217';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1461,7 +1461,7 @@ function waiverConfirm(sum) {
             let stop = false, raf = 0;
             const halt = () => { stop = true; cancelAnimationFrame(raf); ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.removeEventListener(ev, halt)); };
             ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(ev => m.addEventListener(ev, halt, { passive: true }));
-            const dur = Math.min(4200, Math.max(1800, dist * 2.4));
+            const dur = Math.min(2000, Math.max(900, dist * 1.1));
             setTimeout(() => {
               if (stop || !m.isConnected) return;
               const t0 = performance.now(), ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
@@ -1472,7 +1472,7 @@ function waiverConfirm(sum) {
                 if (p < 1) raf = requestAnimationFrame(step); else halt();
               };
               raf = requestAnimationFrame(step);
-            }, 700);
+            }, 350);
           }
         } catch { }
         go2.onclick = () => { ok = true; closeFn(); resolve(true); };
