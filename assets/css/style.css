@@ -4134,9 +4134,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .cart-item .pcover { aspect-ratio: 4 / 3; border-radius: 8px; }
 .cart-item .pcover .ptag, .cart-item .pcover .pfmt { display: none; }
 @media (max-width: 700px) { .cart-item:has(.pcover) { grid-template-columns: 104px minmax(0, 1fr); } }
-/* digital products: the big cards (full lists) get a wide green button with icon + words, like "Read now"; the small home-strip cards keep the round icon */
-.pcard-foot .quick-add.qa-wide { width: auto; min-width: 0; height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.18); color: #15240f; white-space: nowrap; }
-.pcard-foot .quick-add.qa-wide svg { width: 20px; height: 20px; flex: none; }
-.pcard-foot .quick-add.qa-wide.in { color: #fff; }
-.dshop-track .pcard-foot .quick-add.qa-wide { width: 42px; min-width: 0; height: 42px; padding: 0; border-radius: 50%; }
-.dshop-track .pcard-foot .quick-add.qa-wide .qa-l { display: none; }
+/* digital products: the wide green button (icon + words) only where the card is big (the full lists); every small card (home strip, "same category" row…) keeps the round icon */
+.pcard-foot .quick-add.qa-wide .qa-l { display: none; }
+.pgrid .pcard-foot .quick-add.qa-wide, .rcard.prcard .pcard-foot .quick-add.qa-wide { width: auto; min-width: 0; height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 14px; font-weight: 700; color: #15240f; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.18); }
+.pgrid .pcard-foot .quick-add.qa-wide svg, .rcard.prcard .pcard-foot .quick-add.qa-wide svg { width: 20px; height: 20px; flex: none; }
+.pgrid .pcard-foot .quick-add.qa-wide.in, .rcard.prcard .pcard-foot .quick-add.qa-wide.in { color: #fff; }
+.pgrid .pcard-foot .quick-add.qa-wide .qa-l, .rcard.prcard .pcard-foot .quick-add.qa-wide .qa-l { display: inline; }
