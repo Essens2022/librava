@@ -354,7 +354,6 @@ export async function viewBook(el, id) {
         <div class="pd">
           <div class="pd-col"><h3>${esc(t(isDigital(b) ? 'digital.about' : 'book.d.groupBook'))}</h3><dl>
             ${pdRow('book.d.publisher', 'Librava')}
-            ${b.published_at ? pdRow('book.d.published', esc(fmtDate(b.published_at)), true) : ''}
             ${b.series_name ? pdRow('book.series', `<a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(b.series_name)}${b.series_number ? ' · ' + esc(t('book.bookN', { n: b.series_number })) : ''}</a>`, true) : ''}
             ${b.edition ? pdRow('book.edition', String(b.edition)) : ''}
             ${pdRow('book.d.language', langName(b.language))}
