@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113042036';
-import { CONFIG } from './config.js?v=20261113042036';
-import { SOCIAL_PATHS } from './social.js?v=20261113042036';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113042036';
-import { esc, store, $, $$ } from './util.js?v=20261113042036';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113071040';
+import { CONFIG } from './config.js?v=20261113071040';
+import { SOCIAL_PATHS } from './social.js?v=20261113071040';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113071040';
+import { esc, store, $, $$ } from './util.js?v=20261113071040';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113042036';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113042036';
-import { track, trackPage } from './track.js?v=20261113042036';
-import { initGA, applyConsent } from './ga.js?v=20261113042036';
-import { consentStrings } from './consent-i18n.js?v=20261113042036';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113042036';
-import { api } from './api.js?v=20261113042036';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113042036';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261113071040';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113071040';
+import { track, trackPage } from './track.js?v=20261113071040';
+import { initGA, applyConsent } from './ga.js?v=20261113071040';
+import { consentStrings } from './consent-i18n.js?v=20261113071040';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113071040';
+import { api } from './api.js?v=20261113071040';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113071040';
 
 // ---------------- icons ----------------
 const P = {
@@ -54,6 +54,7 @@ const P = {
   download: '<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  dproduct: '<path d="M9 3h6.5L20 7.5V17H9z"/><path d="M15.5 3v4.5H20"/><path d="M5 7v14h11"/><path d="M12 11.5h5M12 14.5h5"/>',
   print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   devices: '<rect x="2" y="5" width="13" height="10" rx="1.5"/><path d="M5 19h7"/><rect x="16" y="8" width="6" height="12" rx="1.5"/>',

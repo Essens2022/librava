@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261113042036';
-import { askWhy } from './why.js?v=20261113042036';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113042036';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113042036';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113042036';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113042036';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113042036';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113042036';
-import { couponLive } from './welcome.js?v=20261113042036';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113042036';
-import { track } from './track.js?v=20261113042036';
-import { gaEvent } from './ga.js?v=20261113042036';
-import { guessLang } from './langdetect.js?v=20261113042036';
-import { didYouMean } from './search.js?v=20261113042036';
-import { api, editionsOf } from './api.js?v=20261113042036';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113042036';
+import { CONFIG } from './config.js?v=20261113071040';
+import { askWhy } from './why.js?v=20261113071040';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113071040';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261113071040';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261113071040';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261113071040';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113071040';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261113071040';
+import { couponLive } from './welcome.js?v=20261113071040';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261113071040';
+import { track } from './track.js?v=20261113071040';
+import { gaEvent } from './ga.js?v=20261113071040';
+import { guessLang } from './langdetect.js?v=20261113071040';
+import { didYouMean } from './search.js?v=20261113071040';
+import { api, editionsOf } from './api.js?v=20261113071040';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261113071040';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -65,7 +65,7 @@ export async function viewHome(el) {
   const digiNew = digi.slice().sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 14);
   const typeStrip = !digi.length ? '' : `
     <section class="dshop dshop-slim">
-      <div class="dshop-head"><h2>${icon('bolt', 'ico')} ${esc(t('digital.title'))}</h2>
+      <div class="dshop-head"><h2>${icon('dproduct', 'ico')} ${esc(t('digital.title'))}</h2>
         <a class="dshop-all" href="#/digital${digiAll ? '?lang=all' : ''}">${esc(t('home.seeAll'))} →</a></div>
       <p class="dshop-tag">${esc(t('digital.tag'))}</p>
       <div class="dshop-chips">${digiTypes.map(p => `<a class="dchip" href="#/search?type=${p}${digiAll ? '&lang=all' : ''}">${icon('pt_' + p, 'ico')}<b>${esc(t('ptype.' + p))}</b></a>`).join('')}</div>
@@ -1412,7 +1412,7 @@ export async function viewDigital(el) {
   const sorted = list.slice().sort((x, y) => (y.sales_count || 0) - (x.sales_count || 0) || String(y.published_at || '').localeCompare(String(x.published_at || '')));
   const body = list.length <= 8 ? `<section class="panel dsec"><div class="pgrid">${sorted.map(cardHTML).join('')}</div></section>` : sections;
   el.innerHTML = `<div class="wrap page digital-hub">
-    <section class="dshop dshop-slim dshop-hero"><div class="dshop-head"><h1>${icon('bolt', 'ico')} ${esc(t('digital.title'))}</h1></div><p class="dshop-tag">${esc(t('digital.tag'))}</p>
+    <section class="dshop dshop-slim dshop-hero"><div class="dshop-head"><h1>${icon('dproduct', 'ico')} ${esc(t('digital.title'))}</h1></div><p class="dshop-tag">${esc(t('digital.tag'))}</p>
       <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul>
       <div class="dshop-chips">${chips}</div></section>
     ${body}
