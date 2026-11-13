@@ -4137,7 +4137,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 /* digital products: the wide green button (icon + words) only where the card is big (the full lists); every small card (home strip, "same category" row…) keeps the round icon */
 .pcard-foot .quick-add.qa-wide .qa-l { display: none; }
 .pgrid .pcard-foot .quick-add.qa-wide, .rcard.prcard .pcard-foot .quick-add.qa-wide { width: auto; min-width: 0; height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 14px; font-weight: 700; color: #15240f; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.18); }
-.pgrid .pcard-foot .quick-add.qa-wide svg, .rcard.prcard .pcard-foot .quick-add.qa-wide svg { width: 20px; height: 20px; flex: none; }
+.pgrid .pcard-foot .quick-add.qa-wide svg, .rcard.prcard .pcard-foot .quick-add.qa-wide svg { width: 25px; height: 25px; flex: none; }
 .pgrid .pcard-foot .quick-add.qa-wide.in, .rcard.prcard .pcard-foot .quick-add.qa-wide.in { color: #fff; }
 .pgrid .pcard-foot .quick-add.qa-wide .qa-l, .rcard.prcard .pcard-foot .quick-add.qa-wide .qa-l { display: inline; }
 
