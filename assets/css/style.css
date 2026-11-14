@@ -4466,3 +4466,12 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
  .bf-st:has(.bf-c4) .bf-c3{--ch:72%;left:68%;right:auto;top:28%}
 }
 @media(max-width:1000px){.bf-c3,.bf-c4,.bf-c5{display:none!important}}
+/* ---- hero covers: gentle "accordion" peek, back covers rise a little then slide back ---- */
+@keyframes bfpk{0%,46%,100%{translate:0 0}14%{translate:0 -20px}30%{translate:0 -4px}}
+.bf-a .bf-st img{animation:bfpk 6.4s cubic-bezier(.45,0,.25,1) infinite;animation-delay:0s}
+.bf-a .bf-st .bf-c4{animation-delay:.45s}.bf-a .bf-st .bf-c2{animation-delay:.9s}.bf-a .bf-st .bf-c5{animation-delay:1.35s}.bf-a .bf-st .bf-c3{animation-delay:1.8s}
+@media(max-width:820px){@keyframes bfpk{0%,46%,100%{translate:0 0}14%{translate:0 -12px}30%{translate:0 -3px}}}
+@media(prefers-reduced-motion:reduce){.bf-a .bf-st img{animation:none}}
+@keyframes bfpk2{0%,46%,100%{translate:0 0}14%{translate:0 -8px}30%{translate:0 -2px}}
+.bf-a .bf-st .bf-c2{animation-name:bfpk2}
+@media(prefers-reduced-motion:reduce){.bf-a .bf-st img{animation:none}}
