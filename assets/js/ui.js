@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114154145';
-import { CONFIG } from './config.js?v=20261114154145';
-import { SOCIAL_PATHS } from './social.js?v=20261114154145';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114154145';
-import { esc, store, $, $$ } from './util.js?v=20261114154145';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114154851';
+import { CONFIG } from './config.js?v=20261114154851';
+import { SOCIAL_PATHS } from './social.js?v=20261114154851';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114154851';
+import { esc, store, $, $$ } from './util.js?v=20261114154851';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114154145';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114154145';
-import { track, trackPage } from './track.js?v=20261114154145';
-import { initGA, applyConsent } from './ga.js?v=20261114154145';
-import { consentStrings } from './consent-i18n.js?v=20261114154145';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114154145';
-import { api } from './api.js?v=20261114154145';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114154145';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114154851';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114154851';
+import { track, trackPage } from './track.js?v=20261114154851';
+import { initGA, applyConsent } from './ga.js?v=20261114154851';
+import { consentStrings } from './consent-i18n.js?v=20261114154851';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114154851';
+import { api } from './api.js?v=20261114154851';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114154851';
 
 // ---------------- icons ----------------
 const P = {
@@ -1042,7 +1042,7 @@ export async function fillSlots(root) {
       } catch { }
     }
     if (!heroS.length && !stripS.length) continue;
-    el.innerHTML = (heroS.length ? `<section class="hero hero-promos">${carouselHTML(heroS, 'hero')}<div class="hero-fade"></div></section>` : '') + stripS.map(h => `<div class="promo-strip-wrap">${h}</div>`).join('');
+    el.innerHTML = (heroS.length ? `<section class="hero hero-promos">${carouselHTML(heroS, 'hero')}<div class="hero-fade"></div></section>` : '') + (stripS.length ? `<div class="promo-strip-wrap">${carouselHTML(stripS, 'strip')}</div>` : '');
     mountPromos(el);
   }
 }
