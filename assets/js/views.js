@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261114151118';
-import { askWhy } from './why.js?v=20261114151118';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114151118';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114151118';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114151118';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114151118';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114151118';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114151118';
-import { couponLive } from './welcome.js?v=20261114151118';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114151118';
-import { track } from './track.js?v=20261114151118';
-import { gaEvent } from './ga.js?v=20261114151118';
-import { guessLang } from './langdetect.js?v=20261114151118';
-import { didYouMean } from './search.js?v=20261114151118';
-import { api, editionsOf } from './api.js?v=20261114151118';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114151118';
+import { CONFIG } from './config.js?v=20261114151217';
+import { askWhy } from './why.js?v=20261114151217';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114151217';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114151217';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114151217';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114151217';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114151217';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114151217';
+import { couponLive } from './welcome.js?v=20261114151217';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114151217';
+import { track } from './track.js?v=20261114151217';
+import { gaEvent } from './ga.js?v=20261114151217';
+import { guessLang } from './langdetect.js?v=20261114151217';
+import { didYouMean } from './search.js?v=20261114151217';
+import { api, editionsOf } from './api.js?v=20261114151217';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114151217';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -45,7 +45,16 @@ function recsFor(pool, seen, lib) {
     return [b, sc];
   });
   scored.sort((a, c) => c[1] - a[1]);
-  return scored.slice(0, 20).map(x => x[0]);
+  return scored.slice(0, 60).map(x => x[0]);
+}
+// a shelf shows books and digital products in turn, from different kinds, never one kind only
+function mixShelf(list, n = 20) {
+  const eb = list.filter(b => !isDigital(b)), byType = {};
+  list.filter(isDigital).forEach(b => (byType[ptypeOf(b)] = byType[ptypeOf(b)] || []).push(b));
+  const dg = []; const gs = Object.values(byType);
+  for (let i = 0; gs.some(g => g[i]); i++) gs.forEach(g => g[i] && dg.push(g[i]));
+  const out = []; for (let i = 0; out.length < n && (eb[i] || dg[i]); i++) { if (eb[i]) out.push(eb[i]); if (dg[i] && out.length < n) out.push(dg[i]); }
+  return out.slice(0, n);
 }
 export async function viewHome(el) {
   // the store shows only books in the visitor's language
@@ -53,10 +62,10 @@ export async function viewHome(el) {
   const promosP = api.promos ? api.promos(L).catch(() => []) : Promise.resolve([]); // loads together with the books
   const catOrdP = loadCatOrder();   // also in parallel, not one after another
   const [featured, newest, free, deals, all, everything] = await Promise.all([
-    api.listBooks({ lang: L, ptype: 'ebook', featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
-    api.listBooks({ lang: L, ptype: 'ebook', sort: 'newest', limit: 14 }),
-    api.listBooks({ lang: L, ptype: 'ebook', free: true, sort: 'bestsellers', limit: 20 }),
-    api.listBooks({ lang: L, ptype: 'ebook', deals: true, sort: 'bestsellers', limit: 20 }),
+    api.listBooks({ lang: L, featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
+    api.listBooks({ lang: L, sort: 'newest', limit: 60 }),
+    api.listBooks({ lang: L, free: true, sort: 'bestsellers', limit: 60 }),
+    api.listBooks({ lang: L, deals: true, sort: 'bestsellers', limit: 400 }),
     api.listBooks({ lang: L }),
     api.listBooks({ sort: 'bestsellers' }),
   ]);
@@ -134,7 +143,7 @@ export async function viewHome(el) {
         <a class="btn btn-cart btn-sm" href="#/read/${encodeURIComponent(cont.book.id)}">${icon('book')} ${esc(t('book.readNow'))}</a></div>
       </div></section>` : ''}
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
-    ${shelf(t('home.featured'), recsFor(all.filter(b => !isDigital(b)), store.get('viewedBooks', []) || [], ownedBooks), '#/search?sort=bestsellers')}
+    ${shelf(t('home.featured'), mixShelf(recsFor(all, store.get('viewedBooks', []) || [], ownedBooks)), '#/search?sort=bestsellers')}
     <div class="promo-slot" data-slot="home-2"></div>
     ${strips[0] || ''}
     ${typeStrip}
@@ -143,13 +152,13 @@ export async function viewHome(el) {
     ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
     <div class="promo-slot" data-slot="home-4"></div>
     ${strips[1] || ''}
-    ${shelf(t('home.new'), newest.filter(b => !isDigital(b)), '#/search?sort=newest')}
+    ${shelf(t('home.new'), mixShelf(newest, 14), '#/search?sort=newest')}
     <div class="promo-slot" data-slot="home-5"></div>
     ${strips[2] || ''}
-    ${shelf(t('home.deals'), deals.filter(b => !isDigital(b)), '#/search?deals=1')}
+    ${shelf(t('home.deals'), mixShelf(deals), '#/search?deals=1')}
     <div class="promo-slot" data-slot="home-6"></div>
     ${strips.slice(3).join('')}
-    ${shelf(t('home.free'), free.filter(b => !isDigital(b)), '#/search?price=free')}
+    ${shelf(t('home.free'), mixShelf(free), '#/search?price=free')}
     <div class="promo-slot" data-slot="home-7"></div>
   </div>`;
   mountPromos(el);
