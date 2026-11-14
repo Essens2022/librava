@@ -4323,3 +4323,5 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .promo-slot .hero-promos{margin:0 0 14px}
 .pr-sg{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.pr-sg>b{font-size:14px}
 .pr-sg>b,.pr-sg .check{color:var(--fg)}.pr-sg .check{align-items:center}
+.promo-slot .promo-strip-wrap,.promo-strip-wrap{margin-top:6px;margin-bottom:20px}
+@media(max-width:820px){.promo-slot .promo-strip-wrap,.promo-strip-wrap{margin-bottom:16px}}
