@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261114152909';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114152909';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261114152909';
-import { resetCompanyCache } from './views.js?v=20261114152909';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261114152909';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261114152909';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261114152909';
-import { optimizeBook } from './optimize.js?v=20261114152909';
-import { api } from './api.js?v=20261114152909';
-import { isDigital } from './ptypes.js?v=20261114152909';
-import { digitalAdmin } from './admin-digital.js?v=20261114152909';
-import { OF_STYLES } from './offerstyles.js?v=20261114152909';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261114152909';
+import { CONFIG } from './config.js?v=20261114153411';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114153411';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261114153411';
+import { resetCompanyCache } from './views.js?v=20261114153411';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261114153411';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261114153411';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261114153411';
+import { optimizeBook } from './optimize.js?v=20261114153411';
+import { api } from './api.js?v=20261114153411';
+import { isDigital } from './ptypes.js?v=20261114153411';
+import { digitalAdmin } from './admin-digital.js?v=20261114153411';
+import { OF_STYLES } from './offerstyles.js?v=20261114153411';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261114153411';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2300,8 +2300,9 @@ const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at
 const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
 const PR_SLOT_GROUPS = [
   ['Pagina principală', [['home-hero', 'Sus: bannerul mare (în rotație)'], ['home-1', 'Sub bara de încredere, înainte de rafturi'], ['home-2', 'După raftul „Recomandate pentru tine” (primul raft de cărți)'], ['home-3', 'După secțiunea Produse digitale'], ['home-4', 'După „Cumpără după categorie”, înainte de „Noutăți”'], ['home-5', 'După raftul „Noutăți”'], ['home-6', 'După raftul „La reducere”'], ['home-7', 'Jos, după „Gratuite de citit acum”']]],
-  ['Produse digitale', [['digital-top', 'Sus, sub titlu'], ['digital-bottom', 'Jos']]],
-  ['Căutare și liste', [['search-top', 'Sus, deasupra rezultatelor'], ['search-bottom', 'Jos, sub rezultate']]],
+  ['Secțiunea Cărți (căutare și liste de cărți)', [['search-ebooks-top', 'Sus, deasupra cărților'], ['search-ebooks-bottom', 'Jos, sub cărți']]],
+  ['Secțiunea Produse digitale (pagina produselor și filtrele lor)', [['search-digital-top', 'Sus, deasupra produselor'], ['search-digital-bottom', 'Jos, sub produse'], ['digital-top', 'Pagina „Produse digitale”, sus'], ['digital-bottom', 'Pagina „Produse digitale”, jos']]],
+  ['Căutare, orice listă (cărți și produse împreună)', [['search-top', 'Sus, deasupra rezultatelor'], ['search-bottom', 'Jos, sub rezultate']]],
   ['Pagina unei cărți', [['book-below', 'Sub informațiile cărții']]],
   ['Coș', [['cart-below', 'Sub produsele din coș']]]];
 async function promosAdmin(body) {

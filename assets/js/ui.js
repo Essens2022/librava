@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114152909';
-import { CONFIG } from './config.js?v=20261114152909';
-import { SOCIAL_PATHS } from './social.js?v=20261114152909';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114152909';
-import { esc, store, $, $$ } from './util.js?v=20261114152909';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114153411';
+import { CONFIG } from './config.js?v=20261114153411';
+import { SOCIAL_PATHS } from './social.js?v=20261114153411';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114153411';
+import { esc, store, $, $$ } from './util.js?v=20261114153411';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114152909';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114152909';
-import { track, trackPage } from './track.js?v=20261114152909';
-import { initGA, applyConsent } from './ga.js?v=20261114152909';
-import { consentStrings } from './consent-i18n.js?v=20261114152909';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114152909';
-import { api } from './api.js?v=20261114152909';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114152909';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114153411';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114153411';
+import { track, trackPage } from './track.js?v=20261114153411';
+import { initGA, applyConsent } from './ga.js?v=20261114153411';
+import { consentStrings } from './consent-i18n.js?v=20261114153411';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114153411';
+import { api } from './api.js?v=20261114153411';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114153411';
 
 // ---------------- icons ----------------
 const P = {
@@ -1017,7 +1017,7 @@ async function offerChips(root) {
 }
 
 // ---- places where a banner can be shown (Admin → Advertising → "Where it appears"): empty list = the old fixed places
-export const PROMO_SLOTS = ['home-hero', 'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'search-top', 'search-bottom', 'digital-top', 'digital-bottom', 'book-below', 'cart-below'];
+export const PROMO_SLOTS = ['home-hero', 'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'search-top', 'search-bottom', 'search-ebooks-top', 'search-ebooks-bottom', 'search-digital-top', 'search-digital-bottom', 'digital-top', 'digital-bottom', 'book-below', 'cart-below'];
 export const slotOk = s => PROMO_SLOTS.includes(s) || /^cat:[\w-]+$/.test(s);
 const slotMemo = { t: 0, l: '', v: null };
 export async function fillSlots(root) {

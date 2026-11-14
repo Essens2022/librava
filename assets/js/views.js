@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261114152909';
-import { askWhy } from './why.js?v=20261114152909';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114152909';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114152909';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114152909';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114152909';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114152909';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114152909';
-import { couponLive } from './welcome.js?v=20261114152909';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114152909';
-import { track } from './track.js?v=20261114152909';
-import { gaEvent } from './ga.js?v=20261114152909';
-import { guessLang } from './langdetect.js?v=20261114152909';
-import { didYouMean } from './search.js?v=20261114152909';
-import { api, editionsOf } from './api.js?v=20261114152909';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114152909';
+import { CONFIG } from './config.js?v=20261114153411';
+import { askWhy } from './why.js?v=20261114153411';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114153411';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114153411';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114153411';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114153411';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114153411';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114153411';
+import { couponLive } from './welcome.js?v=20261114153411';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114153411';
+import { track } from './track.js?v=20261114153411';
+import { gaEvent } from './ga.js?v=20261114153411';
+import { guessLang } from './langdetect.js?v=20261114153411';
+import { didYouMean } from './search.js?v=20261114153411';
+import { api, editionsOf } from './api.js?v=20261114153411';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114153411';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -284,14 +284,14 @@ export async function viewSearch(el, q) {
           <select id="sort-sel">${sortSel}</select>
         </span>
       </div>
-      <div class="promo-slot" data-slot="search-top"></div>${q.get('cat') ? `<div class="promo-slot" data-slot="cat:${esc(q.get('cat'))}"></div>` : ''}
+      <div class="promo-slot" data-slot="search-top"></div><div class="promo-slot" data-slot="search-${q.get('type') && q.get('type') !== 'ebook' ? 'digital' : 'ebooks'}-top"></div>${q.get('cat') ? `<div class="promo-slot" data-slot="cat:${esc(q.get('cat'))}"></div>` : ''}
       ${books.length ? `<div class="results">${pageBooks.map(rcardHTML).join('')}</div>${pager}`
         : !everything.length ? `<div class="panel empty">${icon('search')}<p>${esc(t('sugg.error'))}</p><button class="btn btn-buy" data-reload>${esc(t('search.retry'))}</button></div>`
         : digCtx ? `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p></div>`
         : bookLang && !everything.some(b => b.language === bookLang)
           ? `<div class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(bookLang, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
           : `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p>${bookLang ? `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>` : ''}</div>`}
-      <div class="promo-slot" data-slot="search-bottom"></div>
+      <div class="promo-slot" data-slot="search-bottom"></div><div class="promo-slot" data-slot="search-${q.get('type') && q.get('type') !== 'ebook' ? 'digital' : 'ebooks'}-bottom"></div>
     </div>
   </div></div>`;
   $('#sort-sel', el).onchange = e => go(mk({ sort: e.target.value }).slice(1));
