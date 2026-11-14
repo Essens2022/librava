@@ -1,15 +1,15 @@
-import { CONFIG } from './config.js?v=20261114171604';
-import { t, getLang, setLang } from './i18n.js?v=20261114171604';
-import { esc, $, $$ } from './util.js?v=20261114171604';
-import { api, chooseBackend } from './api.js?v=20261114171604';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, fillSlots, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261114171604';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewContact, viewDigital, viewLegal, spinner } from './views.js?v=20261114171604';
-import { cartBack } from './cartback.js?v=20261114171604';
-import { goalBar } from './goalbar.js?v=20261114171604';
-import { welcomeGift } from './welcome.js?v=20261114171604';
-import { trackPage } from './track.js?v=20261114171604';
-import { offline } from './offline.js?v=20261114171604';
-import { viewReader } from './reader.js?v=20261114171604';
+import { CONFIG } from './config.js?v=20261114172414';
+import { t, getLang, setLang } from './i18n.js?v=20261114172414';
+import { esc, $, $$ } from './util.js?v=20261114172414';
+import { api, chooseBackend } from './api.js?v=20261114172414';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, fillSlots, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261114172414';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewContact, viewDigital, viewLegal, spinner } from './views.js?v=20261114172414';
+import { cartBack } from './cartback.js?v=20261114172414';
+import { goalBar } from './goalbar.js?v=20261114172414';
+import { welcomeGift } from './welcome.js?v=20261114172414';
+import { trackPage } from './track.js?v=20261114172414';
+import { offline } from './offline.js?v=20261114172414';
+import { viewReader } from './reader.js?v=20261114172414';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -112,7 +112,7 @@ async function route() {
       case 'library': res = await viewLibrary(el, q); break;
       case 'welcome': res = await viewWelcome(el, q); break;
       case 'read': res = await viewReader(el, parts[1], q); break;
-      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261114171604'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
+      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261114172414'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
       case 'help': res = viewHelp(el); break;
       case 'contact': res = viewContact(el); break;
       case 'digital': res = await viewDigital(el); break;
