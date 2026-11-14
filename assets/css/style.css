@@ -4454,3 +4454,17 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @media(min-width:821px) and (max-width:1000px){.bf-c3{display:none}.bf-c1{left:6%}.bf-c2{left:40%}}
 @media(max-width:820px){.bf-c2{left:44%}.bf-st{padding-right:8px}}
 @media(min-width:821px) and (max-width:1000px){.bf-c2{top:18%;--ch:80%}.bf-c1{top:36%;--ch:62%}}
+/* ---- hero covers: bigger and closer, up to five in a fan on wide screens ---- */
+.bf-c4,.bf-c5{display:none}
+@media(min-width:1001px){
+ .bf-c1{--ch:72%;left:9%;top:28%}.bf-c2{--ch:100%;left:30%;top:0}.bf-c3{--ch:72%;left:auto;right:13%;top:28%}
+}
+@media(min-width:1100px){
+ .bf-st:has(.bf-c4){--n:5}
+ .bf-st:has(.bf-c4) .bf-c1{--ch:62%;left:1%;top:36%}
+ .bf-st:has(.bf-c4) .bf-c4{display:block;--ch:80%;left:15%;top:14%;rotate:-4deg;z-index:1}
+ .bf-st:has(.bf-c4) .bf-c2{--ch:100%;left:33%;top:0;z-index:3}
+ .bf-st:has(.bf-c5) .bf-c5{display:block;--ch:80%;left:54%;top:14%;rotate:5deg;z-index:2}
+ .bf-st:has(.bf-c4) .bf-c3{--ch:62%;left:auto;right:2%;top:36%}
+}
+@media(max-width:1000px){.bf-c3,.bf-c4,.bf-c5{display:none!important}}

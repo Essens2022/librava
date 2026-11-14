@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114163853';
-import { CONFIG } from './config.js?v=20261114163853';
-import { SOCIAL_PATHS } from './social.js?v=20261114163853';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114163853';
-import { esc, store, $, $$ } from './util.js?v=20261114163853';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114164429';
+import { CONFIG } from './config.js?v=20261114164429';
+import { SOCIAL_PATHS } from './social.js?v=20261114164429';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114164429';
+import { esc, store, $, $$ } from './util.js?v=20261114164429';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114163853';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114163853';
-import { track, trackPage } from './track.js?v=20261114163853';
-import { initGA, applyConsent } from './ga.js?v=20261114163853';
-import { consentStrings } from './consent-i18n.js?v=20261114163853';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114163853';
-import { api } from './api.js?v=20261114163853';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114163853';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114164429';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114164429';
+import { track, trackPage } from './track.js?v=20261114164429';
+import { initGA, applyConsent } from './ga.js?v=20261114164429';
+import { consentStrings } from './consent-i18n.js?v=20261114164429';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114164429';
+import { api } from './api.js?v=20261114164429';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114164429';
 
 // ---------------- icons ----------------
 const P = {
@@ -837,7 +837,7 @@ const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponen
 const isBF = p => p.kind !== 'offers' && p.kind !== 'image' && /^(s_)?bf$/.test(String(p.theme || '').split('~')[1] || p.style || '');
 const cdParts = end => { let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); s %= 60; return [d, h, m, s].map(n => String(n).padStart(2, '0')); };
 function promoBF(p, b, list, placement) {
-  const books = (p.kind === 'book' ? [b] : list).filter(Boolean).slice(0, 3);
+  const books = (p.kind === 'book' ? [b] : list).filter(Boolean).slice(0, placement === 'hero' ? 5 : 3);
   const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
   const hexs = c => /^#[0-9a-f]{6}$/i.test(c || '') ? c : '', custom = String(p.theme || '').startsWith('custom');
   const bg = (custom && hexs(p.bg_from)) || '#12072b', ac = (custom && hexs(p.bg_to)) || '#ff2f7d';
@@ -848,7 +848,7 @@ function promoBF(p, b, list, placement) {
   const units = [t('bf.d'), t('bf.h'), t('bf.m'), t('bf.s')];
   const attrs = `class="promo promo-${placement} promo-bf" style="--bfbg:${bg};--bfac:${ac}" data-promo="${esc(p.id)}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}"`;
   if (placement === 'strip') return `<div ${attrs}><a class="bf-s" href="${esc(link)}"${ext}><b class="bf-sh">${esc(title)}${sub ? ` <em>${esc(sub)}</em>` : ''}</b>${c ? `<span class="bf-sc" data-end="${e.getTime()}"><i>${+c[0]}</i> ${esc(units[0])} <i>${c[1]}</i>:<i>${c[2]}</i>:<i>${c[3]}</i></span>` : ''}<span class="bf-sgo">${esc(cta)}</span></a></div>`;
-  const cov = books.map((x, k) => x.cover_url ? `<img class="bf-c${k + 1}" src="/book/${esc(x.id)}/thumb.webp" alt="${esc(x.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : '').join('');
+  const cov = books.map((x, k) => x.cover_url ? `<img class="bf-c${k + 1}" src="/book/${esc(x.id)}/thumb.webp" alt="${esc(x.title)}" ${placement === 'hero' && k < 2 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : '').join('');
   return `<div ${attrs}><a class="bf-a" href="${esc(link)}"${ext}><span class="bf-bgc"></span><span class="bf-grid"><span class="bf-tx"><span class="bf-h">${esc(title)}</span>${sub ? `<span class="bf-pr">${pre ? `<span>${esc(pre)}</span>` : ''}<b>${esc(num)}</b></span>` : ''}
     ${c ? `<span class="bf-cd" data-end="${e.getTime()}">${c.map((v, k) => `<span><b>${v}</b><i>${esc(units[k])}</i></span>`).join('')}</span>` : ''}<span class="bf-btn">${esc(cta)}</span></span>
     <span class="bf-st">${p.kicker ? `<span class="bf-off">${esc(p.kicker)}</span>` : ''}${cov}</span></span></a></div>`;
