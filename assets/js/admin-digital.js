@@ -1,11 +1,11 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { t, getLang, LANGS } from './i18n.js?v=20261114134138';
-import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261114134138';
-import { api } from './api.js?v=20261114134138';
-import { icon, toast, errText, CATS, go } from './ui.js?v=20261114134138';
-import { aplusEditor } from './admin.js?v=20261114134138';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261114134138';
+import { t, getLang, LANGS } from './i18n.js?v=20261114134703';
+import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261114134703';
+import { api } from './api.js?v=20261114134703';
+import { icon, toast, errText, CATS, go } from './ui.js?v=20261114134703';
+import { aplusEditor } from './admin.js?v=20261114134703';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261114134703';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;

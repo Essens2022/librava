@@ -4322,3 +4322,4 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .promo-slot:empty{display:none}
 .promo-slot .hero-promos{margin:0 0 14px}
 .pr-sg{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.pr-sg>b{font-size:14px}
+.pr-sg>b,.pr-sg .check{color:var(--fg)}.pr-sg .check{align-items:center}
