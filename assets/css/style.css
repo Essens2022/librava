@@ -4391,3 +4391,16 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
  .bf-grid{grid-template-columns:1.22fr .78fr}
  .bf-cd{gap:4px;max-width:100%}.bf-cd>span{padding:5px 0;border-radius:9px}.bf-cd b{font-size:17px}.bf-cd i{font-size:10px}
 }
+/* covers sized by the height of their box so they always fit; the discount badge stays off the covers */
+.bf-st img{width:auto!important;max-width:none;height:var(--ch)!important}
+.bf-st{--h:250px}
+@media(min-width:821px){
+ .bf-st{height:clamp(220px,19vw,280px)}
+ .bf-c1{--ch:68%;left:3%;top:24%}.bf-c2{--ch:94%;left:30%;top:3%}.bf-c3{--ch:64%;left:auto;right:3%;top:30%}
+ .bf-off{top:-6px;right:-4px;height:84px;min-width:84px;width:84px;font-size:24px}
+}
+@media(max-width:820px){
+ .bf-st{height:172px}
+ .bf-c1{--ch:60%;left:0;top:4%}.bf-c2{--ch:84%;left:36%;top:6%}.bf-c3{display:none}
+ .bf-off{top:auto;bottom:-2px;left:-4px;right:auto;width:58px;height:58px;min-width:58px;font-size:13px;line-height:.95;padding:0 4px}
+}
