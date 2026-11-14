@@ -4431,3 +4431,4 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
  .dg-form{grid-template-columns:1fr 1fr;align-items:start}
  .dg-form>.dg-sec:nth-child(1),.dg-form>.dg-sec:nth-child(4),.dg-form>.dg-sec:nth-child(5),.dg-form>:not(.dg-sec){grid-column:1/-1}
 }
+@media(max-width:820px){.bf-c1{left:9%}.bf-c2{left:42%}.bf-cd{position:relative;z-index:6}}
