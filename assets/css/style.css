@@ -4463,6 +4463,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
  .bf-st:has(.bf-c4) .bf-c4{display:block;--ch:84%;left:16%;top:14%;rotate:-4deg;z-index:1}
  .bf-st:has(.bf-c4) .bf-c2{--ch:100%;left:32%;top:0;z-index:3}
  .bf-st:has(.bf-c5) .bf-c5{display:block;--ch:84%;left:50%;top:12%;rotate:5deg;z-index:2}
- .bf-st:has(.bf-c4) .bf-c3{--ch:72%;left:auto;right:3%;top:28%}
+ .bf-st:has(.bf-c4) .bf-c3{--ch:72%;left:68%;right:auto;top:28%}
 }
 @media(max-width:1000px){.bf-c3,.bf-c4,.bf-c5{display:none!important}}
