@@ -4475,3 +4475,13 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 @keyframes bfpk2{0%,46%,100%{translate:0 0}14%{translate:0 -8px}30%{translate:0 -2px}}
 .bf-a .bf-st .bf-c2{animation-name:bfpk2}
 @media(prefers-reduced-motion:reduce){.bf-a .bf-st img{animation:none}}
+/* ---- hero accordion v2: centre cover floats up/down, side covers drift sideways and come back ---- */
+@keyframes bfC{0%,100%{translate:0 0}50%{translate:0 -10px}}
+@keyframes bfL{0%,100%{translate:0 0}50%{translate:calc(var(--dx,26px)*-1) 0}}
+@keyframes bfR{0%,100%{translate:0 0}50%{translate:var(--dx,26px) 0}}
+.bf-a .bf-st img{animation-duration:5.2s;animation-timing-function:ease-in-out;animation-delay:0s!important}
+.bf-a .bf-st .bf-c2{animation-name:bfC}
+.bf-a .bf-st .bf-c1{animation-name:bfL;--dx:30px}.bf-a .bf-st .bf-c4{animation-name:bfL;--dx:20px}
+.bf-a .bf-st .bf-c5{animation-name:bfR;--dx:20px}.bf-a .bf-st .bf-c3{animation-name:bfR;--dx:30px}
+@media(max-width:820px){.bf-a .bf-st .bf-c1{--dx:10px}.bf-a .bf-st .bf-c3{--dx:10px}.bf-a .bf-st .bf-c2{animation-name:bfC}}
+@media(prefers-reduced-motion:reduce){.bf-a .bf-st img{animation:none}}
