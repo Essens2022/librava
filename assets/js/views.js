@@ -1,35 +1,62 @@
-import { CONFIG } from './config.js?v=20261114150541';
-import { askWhy } from './why.js?v=20261114150541';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114150541';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114150541';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114150541';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114150541';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114150541';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114150541';
-import { couponLive } from './welcome.js?v=20261114150541';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114150541';
-import { track } from './track.js?v=20261114150541';
-import { gaEvent } from './ga.js?v=20261114150541';
-import { guessLang } from './langdetect.js?v=20261114150541';
-import { didYouMean } from './search.js?v=20261114150541';
-import { api, editionsOf } from './api.js?v=20261114150541';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114150541';
+import { CONFIG } from './config.js?v=20261114151118';
+import { askWhy } from './why.js?v=20261114151118';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114151118';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114151118';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114151118';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114151118';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114151118';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114151118';
+import { couponLive } from './welcome.js?v=20261114151118';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114151118';
+import { track } from './track.js?v=20261114151118';
+import { gaEvent } from './ga.js?v=20261114151118';
+import { guessLang } from './langdetect.js?v=20261114151118';
+import { didYouMean } from './search.js?v=20261114151118';
+import { api, editionsOf } from './api.js?v=20261114151118';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114151118';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
 // =====================================================================
 //  HOME
 // =====================================================================
+
+// "Recomandate pentru tine": ranked by what this visitor looked at, searched for or owns; with no history, the store's picks and bestsellers
+const norm1 = x => String(x || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function recsFor(pool, seen, lib) {
+  const byId = Object.fromEntries(pool.map(b => [b.id, b]));
+  const liked = [...seen.map(id => byId[id]), ...lib].filter(Boolean);
+  const searches = (store.get('recentSearches', []) || []).map(norm1).filter(q => q.length > 2);
+  const cats = {}, words = {}, authors = {};
+  liked.forEach((b, i) => { const w = 1 / (1 + i * 0.15);
+    [b.category, ...(b.categories || [])].filter(Boolean).forEach(c => cats[c] = (cats[c] || 0) + w);
+    (b.keywords || []).forEach(k => { k = norm1(k); if (k) words[k] = (words[k] || 0) + w; });
+    if (b.author) authors[b.author] = (authors[b.author] || 0) + w; });
+  const skip = new Set([...seen, ...lib.map(b => b.id)]);
+  const personal = liked.length || searches.length;
+  const scored = pool.filter(b => !skip.has(b.id)).map(b => {
+    let sc = 0;
+    [b.category, ...(b.categories || [])].filter(Boolean).forEach(c => sc += (cats[c] || 0) * 3);
+    (b.keywords || []).forEach(k => { sc += (words[norm1(k)] || 0) * 1.5; });
+    sc += (authors[b.author] || 0) * 2;
+    const hay = norm1([b.title, b.subtitle, ...(b.keywords || [])].join(' '));
+    searches.forEach(q => { if (hay.includes(q)) sc += 6; else q.split(/\s+/).filter(w => w.length > 3).forEach(w => { if (hay.includes(w)) sc += 2; }); });
+    sc += (b.is_featured ? 1.5 : 0) + Math.min(2, (b.sales_count || 0) / 20) + Math.min(1, (b.rating_avg || 0) / 5);
+    return [b, sc];
+  });
+  scored.sort((a, c) => c[1] - a[1]);
+  return scored.slice(0, 20).map(x => x[0]);
+}
 export async function viewHome(el) {
   // the store shows only books in the visitor's language
   const L = getLang();
   const promosP = api.promos ? api.promos(L).catch(() => []) : Promise.resolve([]); // loads together with the books
   const catOrdP = loadCatOrder();   // also in parallel, not one after another
   const [featured, newest, free, deals, all, everything] = await Promise.all([
-    api.listBooks({ lang: L, featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
-    api.listBooks({ lang: L, sort: 'newest', limit: 14 }),
-    api.listBooks({ lang: L, free: true, sort: 'bestsellers', limit: 20 }),
-    api.listBooks({ lang: L, deals: true, sort: 'bestsellers', limit: 20 }),
+    api.listBooks({ lang: L, ptype: 'ebook', featured: true, sort: 'bestsellers', limit: 20 }),   // shelves stay short with thousands of books
+    api.listBooks({ lang: L, ptype: 'ebook', sort: 'newest', limit: 14 }),
+    api.listBooks({ lang: L, ptype: 'ebook', free: true, sort: 'bestsellers', limit: 20 }),
+    api.listBooks({ lang: L, ptype: 'ebook', deals: true, sort: 'bestsellers', limit: 20 }),
     api.listBooks({ lang: L }),
     api.listBooks({ sort: 'bestsellers' }),
   ]);
@@ -49,9 +76,10 @@ export async function viewHome(el) {
   const heroSlides = promos.filter(p => p.placement === 'hero' && (!(p.slots || []).length || p.slots.includes('home-hero')) && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', lst(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
   const strips = promos.filter(p => p.placement === 'strip' && !(p.slots || []).length && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', lst(p))}</div>`);
   const noBooks = !all.length;
-  let cont = null;
+  let cont = null, ownedBooks = [];
   if (api.user()) {
     const lib = await api.library();
+    ownedBooks = lib.map(x => x.book || x).filter(b => b && b.id);
     cont = lib.filter(x => x.progress && x.progress.percent < 0.99).sort((a, b) => String(b.progress.updated_at).localeCompare(String(a.progress.updated_at)))[0];
   }
   const fan = (featured.length >= 4 ? featured : all.length >= 4 ? all : everything).slice(0, 4);
@@ -106,7 +134,7 @@ export async function viewHome(el) {
         <a class="btn btn-cart btn-sm" href="#/read/${encodeURIComponent(cont.book.id)}">${icon('book')} ${esc(t('book.readNow'))}</a></div>
       </div></section>` : ''}
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
-    ${shelf(t('home.featured'), featured.filter(b => !isDigital(b)), '#/search?sort=bestsellers')}
+    ${shelf(t('home.featured'), recsFor(all.filter(b => !isDigital(b)), store.get('viewedBooks', []) || [], ownedBooks), '#/search?sort=bestsellers')}
     <div class="promo-slot" data-slot="home-2"></div>
     ${strips[0] || ''}
     ${typeStrip}
@@ -286,6 +314,7 @@ export async function viewBook(el, id) {
   }
   document.title = `${b.title} — ${CONFIG.siteName}`;
   track('book_view', { book_id: b.id });
+  try { store.set('viewedBooks', [b.id, ...(store.get('viewedBooks', []) || []).filter(x => x !== b.id)].slice(0, 30)); } catch { }
   askWhy(b);
   // the other formats of this book (EPUB, PDF…), each with its own price — shown like Amazon's format tiles
   const eds = b.work_id ? editionsOf(await api.listBooks({ allFormats: true }), b) : [b];
