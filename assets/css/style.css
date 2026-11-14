@@ -4379,3 +4379,11 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
  .bf-btn{padding:11px 16px;font-size:15px}
  .bf-st{height:172px}.bf-c1{top:78px}.bf-c2{top:14px}
 }
+/* arrow exactly in the middle of its circle (drawn, not a text character) */
+@media(max-width:820px){
+ .bf-sgo{display:block;position:relative;font-size:0}
+ .bf-sgo:after{content:"";position:absolute;inset:0;width:auto;height:auto;font-size:0;animation:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M13 5l7 7-7 7'/%3E%3C/svg%3E") center/17px 17px no-repeat}
+ .bf-sgo{animation:bfpulse 1.8s ease-in-out infinite}
+}
+@keyframes bfpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.bf-sgo{animation:none}}
