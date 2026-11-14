@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114160046';
-import { CONFIG } from './config.js?v=20261114160046';
-import { SOCIAL_PATHS } from './social.js?v=20261114160046';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114160046';
-import { esc, store, $, $$ } from './util.js?v=20261114160046';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114161907';
+import { CONFIG } from './config.js?v=20261114161907';
+import { SOCIAL_PATHS } from './social.js?v=20261114161907';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114161907';
+import { esc, store, $, $$ } from './util.js?v=20261114161907';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114160046';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114160046';
-import { track, trackPage } from './track.js?v=20261114160046';
-import { initGA, applyConsent } from './ga.js?v=20261114160046';
-import { consentStrings } from './consent-i18n.js?v=20261114160046';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114160046';
-import { api } from './api.js?v=20261114160046';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114160046';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114161907';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114161907';
+import { track, trackPage } from './track.js?v=20261114161907';
+import { initGA, applyConsent } from './ga.js?v=20261114161907';
+import { consentStrings } from './consent-i18n.js?v=20261114161907';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114161907';
+import { api } from './api.js?v=20261114161907';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114161907';
 
 // ---------------- icons ----------------
 const P = {
@@ -1021,31 +1021,52 @@ async function offerChips(root) {
 export const PROMO_SLOTS = ['home-hero', 'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'search-top', 'search-bottom', 'search-ebooks-top', 'search-ebooks-bottom', 'search-digital-top', 'search-digital-bottom', 'digital-top', 'digital-bottom', 'book-below', 'cart-below'];
 export const slotOk = s => PROMO_SLOTS.includes(s) || /^cat:[\w-]+$/.test(s);
 const slotMemo = { t: 0, l: '', v: null };
+const PCACHE = 'librava:promosNow';
+const cachedPromos = L => { try { const j = JSON.parse(localStorage.getItem(PCACHE) || 'null'); if (j && j.l === L && Array.isArray(j.v)) return j.v.filter(p => !p.ends_at || new Date(p.ends_at) > new Date()); } catch { } return null; };
+const saveCache = (L, v) => { try { localStorage.setItem(PCACHE, JSON.stringify({ l: L, v })); } catch { } };
+// banners in the places chosen in Admin: painted at once from the last copy (no waiting), then checked against the server and repainted only if something changed
 export async function fillSlots(root) {
   const els = [...root.querySelectorAll('.promo-slot[data-slot]')];
   if (!els.length) return;
   const L = getLang();
+  let every = null; const all = async () => every || (every = await api.listBooks({ allFormats: true }).catch(() => []));
+  const paint = (promos, byId, offers) => {
+    for (const el of els) {
+      const mine = promos.filter(p => (p.slots || []).includes(el.dataset.slot));
+      const heroS = [], stripS = [];
+      for (const p of mine) {
+        try {
+          let b = null, list = [];
+          if (p.kind === 'books') { list = (p.book_ids || []).map(id => byId[id]).filter(Boolean); if (list.length < 2) continue; }
+          else if (p.kind === 'book') { b = p.book_id ? byId[p.book_id] : null; if (!b) continue; }
+          else if (p.kind === 'image') { if (!p.image_url) continue; }
+          else if (p.kind === 'offers') { if (!offers || !offerSlides(offers).length) continue; list = { offers, books: Object.values(byId) }; }
+          (p.placement === 'hero' ? heroS : stripS).push(promoHTML(p, b, p.placement, list));
+        } catch { }
+      }
+      const html = (heroS.length ? `<section class="hero hero-promos">${carouselHTML(heroS, 'hero')}<div class="hero-fade"></div></section>` : '') + (stripS.length ? `<div class="promo-strip-wrap">${carouselHTML(stripS, 'strip')}</div>` : '');
+      const sig = html ? mine.map(q => JSON.stringify(q)).join('|') + '#' + (heroS.length + ':' + stripS.length) : '';
+      if (sig === el.dataset.sig) continue;
+      el.dataset.sig = sig; el.innerHTML = html;
+      if (html) mountPromos(el);
+    }
+  };
+  const idMap = list => Object.fromEntries((list || []).map(b => [b.id, b]));
+  // 1) instant: last known banners + the books already in memory
+  const c0 = cachedPromos(L);
+  if (c0 && c0.length && api._catalog) paint(c0, idMap(api._catalog));
+  // 2) the real list
   let promos = [];
   try { if (slotMemo.v && slotMemo.l === L && Date.now() - slotMemo.t < 60000) promos = slotMemo.v; else { promos = await api.promos(L); slotMemo.v = promos; slotMemo.l = L; slotMemo.t = Date.now(); } } catch { return; }
-  const pend = els.map(el => [el, promos.filter(p => (p.slots || []).includes(el.dataset.slot))]).filter(x => x[1].length);
-  if (!pend.length) return;
-  let every = null; const all = async () => every || (every = await api.listBooks({ allFormats: true }).catch(() => []));
-  for (const [el, mine] of pend) {
-    const heroS = [], stripS = [];
-    for (const p of mine) {
-      try {
-        let b = null, list = [];
-        if (p.kind === 'books') { list = (await Promise.all((p.book_ids || []).map(id => api.getBook(id).catch(() => null)))).filter(Boolean); if (list.length < 2) continue; }
-        else if (p.kind === 'book') { b = p.book_id ? await api.getBook(p.book_id).catch(() => null) : null; if (!b) continue; }
-        else if (p.kind === 'image') { if (!p.image_url) continue; }
-        else if (p.kind === 'offers') { const offers = await api.offers().catch(() => []); if (!offerSlides(offers).length) continue; list = { offers, books: await all() }; }
-        (p.placement === 'hero' ? heroS : stripS).push(promoHTML(p, b, p.placement, list));
-      } catch { }
-    }
-    if (!heroS.length && !stripS.length) continue;
-    el.innerHTML = (heroS.length ? `<section class="hero hero-promos">${carouselHTML(heroS, 'hero')}<div class="hero-fade"></div></section>` : '') + (stripS.length ? `<div class="promo-strip-wrap">${carouselHTML(stripS, 'strip')}</div>` : '');
-    mountPromos(el);
-  }
+  saveCache(L, promos);
+  if (!root.isConnected) return;
+  const need = promos.filter(p => els.some(el => (p.slots || []).includes(el.dataset.slot)));
+  if (!need.length) { els.forEach(el => { if (el.dataset.sig) { el.dataset.sig = ''; el.innerHTML = ''; } }); return; }
+  const byId = idMap(await all());
+  const ids = [...new Set(need.flatMap(p => [p.book_id, ...(p.book_ids || [])]).filter(Boolean))].filter(id => !byId[id]);
+  if (ids.length) (await Promise.all(ids.map(id => api.getBook(id).catch(() => null)))).filter(Boolean).forEach(b => byId[b.id] = b);
+  const offers = need.some(p => p.kind === 'offers') ? await api.offers().catch(() => []) : null;
+  paint(promos, byId, offers);
 }
 export function mountPromos(root) {
   offerChips(root); offersBanners(root);
