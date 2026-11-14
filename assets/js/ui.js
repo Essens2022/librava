@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114125723';
-import { CONFIG } from './config.js?v=20261114125723';
-import { SOCIAL_PATHS } from './social.js?v=20261114125723';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114125723';
-import { esc, store, $, $$ } from './util.js?v=20261114125723';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114130029';
+import { CONFIG } from './config.js?v=20261114130029';
+import { SOCIAL_PATHS } from './social.js?v=20261114130029';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114130029';
+import { esc, store, $, $$ } from './util.js?v=20261114130029';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114125723';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114125723';
-import { track, trackPage } from './track.js?v=20261114125723';
-import { initGA, applyConsent } from './ga.js?v=20261114125723';
-import { consentStrings } from './consent-i18n.js?v=20261114125723';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114125723';
-import { api } from './api.js?v=20261114125723';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114125723';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114130029';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114130029';
+import { track, trackPage } from './track.js?v=20261114130029';
+import { initGA, applyConsent } from './ga.js?v=20261114130029';
+import { consentStrings } from './consent-i18n.js?v=20261114130029';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114130029';
+import { api } from './api.js?v=20261114130029';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114130029';
 
 // ---------------- icons ----------------
 const P = {
@@ -842,7 +842,7 @@ function promoBF(p, b, list, placement) {
   const hexs = c => /^#[0-9a-f]{6}$/i.test(c || '') ? c : '', custom = String(p.theme || '').startsWith('custom');
   const bg = (custom && hexs(p.bg_from)) || '#12072b', ac = (custom && hexs(p.bg_to)) || '#ff2f7d';
   const title = p.title || 'Black Friday', sub = String(p.subtitle || ''), cta = p.cta || t('promo.cta');
-  const i = sub.search(/\d/), pre = i > 0 ? sub.slice(0, i).trim() : '', num = i >= 0 ? sub.slice(i).trim() : sub;
+  const i = sub.search(/[\d€$£]/), pre = i > 0 ? sub.slice(0, i).trim() : '', num = i >= 0 ? sub.slice(i).trim() : sub;
   const e = p.ends_at && new Date(p.ends_at) > new Date() ? new Date(p.ends_at) : null, c = e ? cdParts(e) : null;
   const units = [t('bf.d'), t('bf.h'), t('bf.m'), t('bf.s')];
   const attrs = `class="promo promo-${placement} promo-bf" style="--bfbg:${bg};--bfac:${ac}" data-promo="${esc(p.id)}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}"`;
