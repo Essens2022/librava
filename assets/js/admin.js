@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261114130029';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114130029';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261114130029';
-import { resetCompanyCache } from './views.js?v=20261114130029';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261114130029';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261114130029';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261114130029';
-import { optimizeBook } from './optimize.js?v=20261114130029';
-import { api } from './api.js?v=20261114130029';
-import { isDigital } from './ptypes.js?v=20261114130029';
-import { digitalAdmin } from './admin-digital.js?v=20261114130029';
-import { OF_STYLES } from './offerstyles.js?v=20261114130029';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261114130029';
+import { CONFIG } from './config.js?v=20261114134138';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114134138';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261114134138';
+import { resetCompanyCache } from './views.js?v=20261114134138';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261114134138';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261114134138';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261114134138';
+import { optimizeBook } from './optimize.js?v=20261114134138';
+import { api } from './api.js?v=20261114134138';
+import { isDigital } from './ptypes.js?v=20261114134138';
+import { digitalAdmin } from './admin-digital.js?v=20261114134138';
+import { OF_STYLES } from './offerstyles.js?v=20261114134138';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261114134138';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2298,6 +2298,12 @@ async function notificationsAdmin(body) {
 const PROMO_SPEC = { hero: { w: 2400, h: 400, mw: 1200, mh: 750 }, strip: { w: 1940, h: 300, mw: 900, mh: 300 } };
 const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at) > new Date() ? 'soon' : p.ends_at && new Date(p.ends_at) <= new Date() ? 'ended' : 'live';
 const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
+const PR_SLOT_GROUPS = [
+  ['Pagina principală', [['home-hero', 'Sus: bannerul mare (în rotație)'], ['home-1', 'Sub bara de încredere, înainte de rafturi'], ['home-2', 'După raftul „Cele mai căutate”'], ['home-3', 'După secțiunea Produse digitale'], ['home-4', 'După categorii, înainte de „Noutăți”'], ['home-5', 'După raftul „Noutăți”'], ['home-6', 'După raftul „Oferte”'], ['home-7', 'Jos, după „Gratuite”']]],
+  ['Produse digitale', [['digital-top', 'Sus, sub titlu'], ['digital-bottom', 'Jos']]],
+  ['Căutare și liste', [['search-top', 'Sus, deasupra rezultatelor'], ['search-bottom', 'Jos, sub rezultate']]],
+  ['Pagina unei cărți', [['book-below', 'Sub informațiile cărții']]],
+  ['Coș', [['cart-below', 'Sub produsele din coș']]]];
 async function promosAdmin(body) {
   const filter = sessionStorage.getItem('librava:prLang') || '';
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
@@ -2311,7 +2317,7 @@ async function promosAdmin(body) {
     return `<div class="pr-row">
       <div class="pr-prev ${esc(p.placement)}"><div class="pr-scale">${p.kind === 'image' && p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : promoHTML(p, b, p.placement, p.kind === 'offers' ? { offers: ofl, books: books.filter(x => x.cover_url && x.status === 'published').slice(0, 8) } : (p.book_ids || []).map(id => byId[id]))}</div></div>
       <div class="pr-info"><b>${esc(p.title || b?.title || (p.kind === 'offers' ? t('pr.kind.offers') : p.kind === 'books' ? t('pr.booksN', { n: (p.book_ids || []).length }) : t('pr.untitled')))}</b>
-        <span class="muted">${esc(t('pr.place.' + p.placement))} · ${esc(langLabel(p.lang))} · ${esc(t('pr.kind.' + p.kind))}</span>
+        <span class="muted">${esc(t('pr.place.' + p.placement))} · ${esc(langLabel(p.lang))} · ${esc(t('pr.kind.' + p.kind))}${(p.slots || []).length ? ` · ${p.slots.length} locuri` : ''}</span>
         <span><span class="status ${st === 'live' ? 'live' : 'draft'}">${esc(t('pr.st.' + st))}</span>
           ${p.starts_at || p.ends_at ? `<span class="muted" style="font-size:13px">${esc(p.starts_at ? fmtDate(p.starts_at) : '…')} → ${esc(p.ends_at ? fmtDate(p.ends_at) : '…')}</span>` : ''}</span>
         <span class="pr-stats"><span>${esc(t('pr.views'))}: <b>${p.views || 0}</b></span><span>${esc(t('pr.clicks'))}: <b>${p.clicks || 0}</b></span><span>CTR: <b>${ctr}</b></span></span></div>
@@ -2384,6 +2390,9 @@ async function promoForm(body, id) {
       <div class="kdp-fields">
         <div class="radios">${['hero', 'strip'].map(v => `<label class="check"><input type="radio" name="pl" value="${v}" ${p.placement === v ? 'checked' : ''}> ${esc(t('pr.place.' + v))}</label>`).join('')}</div>
         <label class="field"><span>${esc(t('pr.lang'))} *</span><select id="pr-l"><option value="">${esc(t('pr.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}" ${p.lang === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select><small>${esc(t('pr.langHelp'))}</small></label></div></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>Unde apare</h3><p>Bifează toate locurile unde vrei bannerul. Dacă nu bifezi nimic, apare în locurile obișnuite de pe pagina principală.</p></div>
+      <div class="kdp-fields" id="pr-slots">${PR_SLOT_GROUPS.map(([g, items]) => `<div class="pr-sg"><b>${esc(g)}</b>${items.map(([id, name]) => `<label class="check"><input type="checkbox" name="slot" value="${esc(id)}" ${(p.slots || []).includes(id) ? 'checked' : ''}> ${esc(name)}</label>`).join('')}</div>`).join('')}
+        <div class="pr-sg"><b>Pagini de categorie (sus)</b>${CATS.map(c => `<label class="check"><input type="checkbox" name="slot" value="cat:${esc(c)}" ${(p.slots || []).includes('cat:' + c) ? 'checked' : ''}> ${esc(t('cat.' + c))}</label>`).join('')}</div></div></div>
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
       <div class="kdp-fields">
         <div class="radios">${['book', 'books', 'image', 'offers'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
@@ -2446,6 +2455,7 @@ async function promoForm(body, id) {
   const current = () => ({
     ...p, placement: rad('pl'), lang: val('#pr-l') || null, kind: rad('kd'), book_id: rad('kd') === 'book' ? val('#pr-book') || null : null, book_ids: rad('kd') === 'books' ? chosen.slice() : [],
     book_ids: rad('kd') === 'offers' ? [...f.querySelectorAll('input[name=ofo]:checked')].map(x => x.value) : rad('kd') === 'books' ? chosen.slice() : [], ofStyle, ofBooks: !!$('#pr-ofbooks', f)?.checked, ofCat: val('#pr-ofcat') || '', ofPick: obk.slice(),
+    slots: [...f.querySelectorAll('input[name=slot]:checked')].map(x => x.value),
     theme: rad('th') || 'forest', bg_from: $('#pr-c1', f).value, bg_to: $('#pr-c2', f).value, font: rad('pf') || null, style: stSel, kicker: val('#pr-kicker') || null, title: val('#pr-title') || null, subtitle: val('#pr-sub') || null, cta: val('#pr-cta') || null,
     link: pick.value === 'custom' ? val('#pr-link') || null : pick.value || null,
     starts_at: val('#pr-start') ? new Date(val('#pr-start')).toISOString() : null, ends_at: val('#pr-end') ? new Date(val('#pr-end')).toISOString() : null,
@@ -2556,7 +2566,7 @@ async function promoForm(body, id) {
     if (c.kind === 'books' && c.book_ids.length < 2) return fail(t('pr.needBooks'));
     if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
     if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
-    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.kind === 'offers' ? ofTheme(c) : c.style && c.style !== 'classic' && c.style !== 's_classic' ? c.theme + '~' + c.style : c.theme, bg_from: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_from : null, bg_to: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
+    const row = { id: p.id, slots: c.slots, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.kind === 'offers' ? ofTheme(c) : c.style && c.style !== 'classic' && c.style !== 's_classic' ? c.theme + '~' + c.style : c.theme, bg_from: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_from : null, bg_to: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
     if (!row.id) delete row.id;
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
     try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }

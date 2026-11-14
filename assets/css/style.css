@@ -4318,3 +4318,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .bf-pr{flex-wrap:wrap;row-gap:0}
 .bf-off{white-space:normal;text-align:center;line-height:.95;border-radius:50%;width:118px;height:118px;min-width:0;padding:0 14px;font-size:27px}
 @media(max-width:820px){.bf-off{width:70px;height:70px;font-size:15px;padding:0 6px;border-radius:50%}}
+
+.promo-slot:empty{display:none}
+.promo-slot .hero-promos{margin:0 0 14px}
+.pr-sg{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.pr-sg>b{font-size:14px}

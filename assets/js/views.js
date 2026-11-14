@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261114130029';
-import { askWhy } from './why.js?v=20261114130029';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114130029';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114130029';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114130029';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114130029';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114130029';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114130029';
-import { couponLive } from './welcome.js?v=20261114130029';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114130029';
-import { track } from './track.js?v=20261114130029';
-import { gaEvent } from './ga.js?v=20261114130029';
-import { guessLang } from './langdetect.js?v=20261114130029';
-import { didYouMean } from './search.js?v=20261114130029';
-import { api, editionsOf } from './api.js?v=20261114130029';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114130029';
+import { CONFIG } from './config.js?v=20261114134138';
+import { askWhy } from './why.js?v=20261114134138';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114134138';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261114134138';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261114134138';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261114134138';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114134138';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261114134138';
+import { couponLive } from './welcome.js?v=20261114134138';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261114134138';
+import { track } from './track.js?v=20261114134138';
+import { gaEvent } from './ga.js?v=20261114134138';
+import { guessLang } from './langdetect.js?v=20261114134138';
+import { didYouMean } from './search.js?v=20261114134138';
+import { api, editionsOf } from './api.js?v=20261114134138';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261114134138';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -46,8 +46,8 @@ export async function viewHome(el) {
   // an offers banner may name its own books (theme part 4); make sure those are in the list even if the bestseller list doesn't hold them
   const pickOf = p => (String(p.theme || '').split('~')[3] || '').split(',').filter(Boolean).map(id => byId[id] ? null : anyEd[id]).filter(Boolean);
   const lst = p => p.kind === 'offers' ? { offers: liveOffers, books: [...everything, ...pickOf(p)] } : many(p);
-  const heroSlides = promos.filter(p => p.placement === 'hero' && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', lst(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
-  const strips = promos.filter(p => p.placement === 'strip' && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', lst(p))}</div>`);
+  const heroSlides = promos.filter(p => p.placement === 'hero' && (!(p.slots || []).length || p.slots.includes('home-hero')) && ok(p)).map((p, i) => { const h = promoHTML(p, shown(p.book_id), 'hero', lst(p)); return i ? h.replace('fetchpriority="high"', 'loading="lazy"') : h; });   // only the first slide is urgent
+  const strips = promos.filter(p => p.placement === 'strip' && !(p.slots || []).length && ok(p)).map(p => `<div class="promo-strip-wrap">${promoHTML(p, shown(p.book_id), 'strip', lst(p))}</div>`);
   const noBooks = !all.length;
   let cont = null;
   if (api.user()) {
@@ -95,6 +95,7 @@ export async function viewHome(el) {
       <div>${icon('shield')} ${esc(t('home.trust2'))}</div>
       <div>${icon('devices')} ${esc(t('home.trust3'))}</div>
     </div>
+    <div class="promo-slot" data-slot="home-1"></div>
     ${cont ? `<section class="panel continue">
       <a href="#/read/${encodeURIComponent(cont.book.id)}">${coverHTML(cont.book, { badge: false })}</a>
       <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
@@ -106,16 +107,22 @@ export async function viewHome(el) {
       </div></section>` : ''}
     ${noBooks ? `<section class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(L, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="#/search?lang=all">${esc(t('lang.seeAll'))}</a></section>` : ''}
     ${shelf(t('home.featured'), featured.filter(b => !isDigital(b)), '#/search?sort=bestsellers')}
+    <div class="promo-slot" data-slot="home-2"></div>
     ${strips[0] || ''}
     ${typeStrip}
+    <div class="promo-slot" data-slot="home-3"></div>
     <section class="panel"><h2 class="section-title">${esc(t('home.catCardTitle'))}</h2><div class="cat-grid">${catTiles}</div></section>
     ${L === 'en' ? `<section class="panel guide-home"><h2 class="section-title">Free guides: learn first, then pick the book</h2><p class="muted" style="margin:0 0 14px">Short, practical guides on everyday questions. Each one points to the full book behind it.</p><div class="guide-rail" id="guide-rail"></div><div class="guide-btns"><a class="btn btn-buy" href="/en/guide/">See all free guides</a><a class="btn btn-ghost" href="/en/guide/ebook-catalogue/">Complete eBook catalogue</a></div></section>` : ''}
+    <div class="promo-slot" data-slot="home-4"></div>
     ${strips[1] || ''}
     ${shelf(t('home.new'), newest.filter(b => !isDigital(b)), '#/search?sort=newest')}
+    <div class="promo-slot" data-slot="home-5"></div>
     ${strips[2] || ''}
     ${shelf(t('home.deals'), deals.filter(b => !isDigital(b)), '#/search?deals=1')}
+    <div class="promo-slot" data-slot="home-6"></div>
     ${strips.slice(3).join('')}
     ${shelf(t('home.free'), free.filter(b => !isDigital(b)), '#/search?price=free')}
+    <div class="promo-slot" data-slot="home-7"></div>
   </div>`;
   mountPromos(el);
   if (L === 'en') mountGuideRail(el);
@@ -240,12 +247,14 @@ export async function viewSearch(el, q) {
           <select id="sort-sel">${sortSel}</select>
         </span>
       </div>
+      <div class="promo-slot" data-slot="search-top"></div>${q.get('cat') ? `<div class="promo-slot" data-slot="cat:${esc(q.get('cat'))}"></div>` : ''}
       ${books.length ? `<div class="results">${pageBooks.map(rcardHTML).join('')}</div>${pager}`
         : !everything.length ? `<div class="panel empty">${icon('search')}<p>${esc(t('sugg.error'))}</p><button class="btn btn-buy" data-reload>${esc(t('search.retry'))}</button></div>`
         : digCtx ? `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p></div>`
         : bookLang && !everything.some(b => b.language === bookLang)
           ? `<div class="panel empty">${icon('globe')}<h2 style="font-size:20px;color:var(--fg)">${esc(t('lang.noBooks', { lang: langName(bookLang, true) }))}</h2><p>${esc(t('lang.noBooksHint'))}</p><a class="btn btn-buy" href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a></div>`
           : `<div class="panel empty">${icon('search')}<p>${esc(t('search.none'))}</p>${bookLang ? `<a href="${mk({ lang: 'all' })}">${esc(t('lang.seeAll'))}</a>` : ''}</div>`}
+      <div class="promo-slot" data-slot="search-bottom"></div>
     </div>
   </div></div>`;
   $('#sort-sel', el).onchange = e => go(mk({ sort: e.target.value }).slice(1));
@@ -380,6 +389,7 @@ export async function viewBook(el, id) {
       </aside>
     </div>
 
+    <div class="promo-slot" data-slot="book-below"></div>
     <div id="series-box"></div>
     ${related.length ? `<section class="panel" style="margin-top:26px"><h2 class="section-title">${esc(t('book.related'))}</h2><div class="shelf-track">${related.map(cardHTML).join('')}</div></section>` : ''}
 
@@ -967,6 +977,7 @@ export async function viewCart(el) {
         <div class="cprice">${line(b)}</div>
       </div>`).join('')}
       <div style="text-align:right;margin-top:12px;font-size:18px">${esc(t('cart.subtotal', { n: books.length }))} <b>${money(r.total)}</b></div>
+      <div class="promo-slot" data-slot="cart-below"></div>
     </section>
     <aside class="panel cart-sum">
       ${r.nudges.length ? `<div class="nudges nudges-side">${r.nudges.map(nudge).join('')}</div>` : ''}
@@ -1427,7 +1438,9 @@ export async function viewDigital(el) {
     <section class="dshop dshop-slim dshop-hero"><div class="dshop-head"><h1>${icon('dproduct', 'ico')} ${esc(t('digital.title'))}</h1></div><p class="dshop-tag">${esc(t('digital.tag'))}</p>
       <ul class="dh-how">${['how1', 'how2', 'how3'].map((k, i) => `<li>${icon(['bolt', 'devices', 'library'][i], 'ico')}<span>${esc(t('digital.' + k))}</span></li>`).join('')}</ul>
       <div class="dshop-chips">${chips}</div></section>
+    <div class="promo-slot" data-slot="digital-top"></div>
     ${body}
+    <div class="promo-slot" data-slot="digital-bottom"></div>
   </div>`;
 }
 

@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114130029';
-import { CONFIG } from './config.js?v=20261114130029';
-import { SOCIAL_PATHS } from './social.js?v=20261114130029';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114130029';
-import { esc, store, $, $$ } from './util.js?v=20261114130029';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114134138';
+import { CONFIG } from './config.js?v=20261114134138';
+import { SOCIAL_PATHS } from './social.js?v=20261114134138';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114134138';
+import { esc, store, $, $$ } from './util.js?v=20261114134138';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261114130029';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114130029';
-import { track, trackPage } from './track.js?v=20261114130029';
-import { initGA, applyConsent } from './ga.js?v=20261114130029';
-import { consentStrings } from './consent-i18n.js?v=20261114130029';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114130029';
-import { api } from './api.js?v=20261114130029';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114130029';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114134138';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114134138';
+import { track, trackPage } from './track.js?v=20261114134138';
+import { initGA, applyConsent } from './ga.js?v=20261114134138';
+import { consentStrings } from './consent-i18n.js?v=20261114134138';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114134138';
+import { api } from './api.js?v=20261114134138';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114134138';
 
 // ---------------- icons ----------------
 const P = {
@@ -1014,6 +1014,37 @@ async function offerChips(root) {
       host.insertAdjacentHTML('afterbegin', `<span class="promo-offer">${icon('bolt')} ${esc(describeOffer(o, t, catName))}</span>`);
     }
   } catch { }
+}
+
+// ---- places where a banner can be shown (Admin → Advertising → "Where it appears"): empty list = the old fixed places
+export const PROMO_SLOTS = ['home-hero', 'home-1', 'home-2', 'home-3', 'home-4', 'home-5', 'home-6', 'home-7', 'search-top', 'search-bottom', 'digital-top', 'digital-bottom', 'book-below', 'cart-below'];
+export const slotOk = s => PROMO_SLOTS.includes(s) || /^cat:[\w-]+$/.test(s);
+const slotMemo = { t: 0, l: '', v: null };
+export async function fillSlots(root) {
+  const els = [...root.querySelectorAll('.promo-slot[data-slot]')];
+  if (!els.length) return;
+  const L = getLang();
+  let promos = [];
+  try { if (slotMemo.v && slotMemo.l === L && Date.now() - slotMemo.t < 60000) promos = slotMemo.v; else { promos = await api.promos(L); slotMemo.v = promos; slotMemo.l = L; slotMemo.t = Date.now(); } } catch { return; }
+  const pend = els.map(el => [el, promos.filter(p => (p.slots || []).includes(el.dataset.slot))]).filter(x => x[1].length);
+  if (!pend.length) return;
+  let every = null; const all = async () => every || (every = await api.listBooks({ allFormats: true }).catch(() => []));
+  for (const [el, mine] of pend) {
+    const heroS = [], stripS = [];
+    for (const p of mine) {
+      try {
+        let b = null, list = [];
+        if (p.kind === 'books') { list = (await Promise.all((p.book_ids || []).map(id => api.getBook(id).catch(() => null)))).filter(Boolean); if (list.length < 2) continue; }
+        else if (p.kind === 'book') { b = p.book_id ? await api.getBook(p.book_id).catch(() => null) : null; if (!b) continue; }
+        else if (p.kind === 'image') { if (!p.image_url) continue; }
+        else if (p.kind === 'offers') { const offers = await api.offers().catch(() => []); if (!offerSlides(offers).length) continue; list = { offers, books: await all() }; }
+        (p.placement === 'hero' ? heroS : stripS).push(promoHTML(p, b, p.placement, list));
+      } catch { }
+    }
+    if (!heroS.length && !stripS.length) continue;
+    el.innerHTML = (heroS.length ? `<section class="hero hero-promos">${carouselHTML(heroS, 'hero')}<div class="hero-fade"></div></section>` : '') + stripS.map(h => `<div class="promo-strip-wrap">${h}</div>`).join('');
+    mountPromos(el);
+  }
 }
 export function mountPromos(root) {
   offerChips(root); offersBanners(root);
