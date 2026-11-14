@@ -1,5 +1,9 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "bf.d": "dager",
+  "bf.h": "timer",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Du har fått en bok i gave!",
   "ntf.giftBody": "Gratulerer! Boken ligger allerede i biblioteket ditt, og du kan lese den når du vil.",
   "ntf.giftTag": "En gave til deg",

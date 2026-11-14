@@ -1,5 +1,9 @@
 // Estonian interface strings for Librava
 export default {
+  "bf.d": "päeva",
+  "bf.h": "tundi",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Saite raamatu kingituseks!",
   "ntf.giftBody": "Palju õnne! Raamat on juba teie raamatukogus ja saate seda lugeda millal iganes.",
   "ntf.giftTag": "Kingitus teile",

@@ -1,19 +1,19 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261113204717';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261113204717';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261113204717';
-import { resetCompanyCache } from './views.js?v=20261113204717';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261113204717';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261113204717';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261113204717';
-import { optimizeBook } from './optimize.js?v=20261113204717';
-import { api } from './api.js?v=20261113204717';
-import { isDigital } from './ptypes.js?v=20261113204717';
-import { digitalAdmin } from './admin-digital.js?v=20261113204717';
-import { OF_STYLES } from './offerstyles.js?v=20261113204717';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261113204717';
+import { CONFIG } from './config.js?v=20261114125723';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261114125723';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261114125723';
+import { resetCompanyCache } from './views.js?v=20261114125723';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261114125723';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261114125723';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261114125723';
+import { optimizeBook } from './optimize.js?v=20261114125723';
+import { api } from './api.js?v=20261114125723';
+import { isDigital } from './ptypes.js?v=20261114125723';
+import { digitalAdmin } from './admin-digital.js?v=20261114125723';
+import { OF_STYLES } from './offerstyles.js?v=20261114125723';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261114125723';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2440,7 +2440,7 @@ async function promoForm(body, id) {
   const pick = $('#pr-linkpick', f), known = [...pick.options].map(o => o.value);
   if (p.link && known.includes(p.link)) pick.value = p.link; else if (p.link) { pick.value = 'custom'; $('#pr-linkbox', f).hidden = false; }
   pick.onchange = () => { $('#pr-linkbox', f).hidden = pick.value !== 'custom'; draw(); };
-  const stList = pl => pl === 'strip' ? STRIP_STYLES : PROMO_STYLES;
+  const stList = (pl, k) => k === 'books' ? (pl === 'strip' ? ['s_classic', 's_bf'] : ['classic', 'bf']) : pl === 'strip' ? STRIP_STYLES : PROMO_STYLES;
   let stSel = p.style || 'classic', stKey = '';
   setTimeout(() => { const pop = $('#pr-stylepop', f); $('#pr-styleopen', f).onclick = () => { pop.hidden = false; document.body.classList.add('st-lock'); stKey = ''; draw(); }; $('#pr-styleclose', f).onclick = () => { pop.hidden = true; document.body.classList.remove('st-lock'); }; }, 0);
   const current = () => ({
@@ -2468,7 +2468,7 @@ async function promoForm(body, id) {
     const c = current(), spec = PROMO_SPEC[c.placement] || PROMO_SPEC.hero;
     $('#pr-bookbox', f).hidden = c.kind !== 'book'; $('#pr-imgbox', f).hidden = c.kind !== 'image';
     $('#pr-offbox', f).hidden = c.kind !== 'offers'; if (c.kind === 'offers') drawOfGrid();
-    $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image' || c.kind === 'offers'; $('#pr-stylebox', f).hidden = c.kind !== 'book';
+    $('#pr-booksbox', f).hidden = c.kind !== 'books'; $('#pr-cta', f).placeholder = t(c.kind === 'books' ? 'promo.ctaBooks' : c.kind === 'book' ? 'promo.ctaBook' : 'promo.cta'); $('#pr-themebox', f).hidden = c.kind === 'image' || c.kind === 'offers'; $('#pr-stylebox', f).hidden = c.kind !== 'book' && c.kind !== 'books';
     drawPick(); drawOb();
     $('#pr-guide', f).innerHTML = ['desk', 'mob'].map(k => { const w = k === 'desk' ? spec.w : spec.mw, h = k === 'desk' ? spec.h : spec.mh; return `<div class="pr-g"><b>${esc(t(k === 'desk' ? 'pr.gDesk' : 'pr.gMob'))}: ${w} × ${h} px</b><div class="pr-g-box" style="aspect-ratio:${w}/${h}"><i></i><span>${esc(t('pr.gSafe'))}</span></div></div>`; }).join('') + `<p>${esc(t('pr.gRule'))}</p>`;
     $('#spec-wide', f).textContent = t('pr.specWide', { w: spec.w, h: spec.h });
@@ -2477,13 +2477,13 @@ async function promoForm(body, id) {
     $('#pr-title-ph', f).textContent = c.kind === 'book' ? t('pr.titleAuto') : '';
     const bl = $('#pr-booklang', f); bl.textContent = b && c.lang && b.language && b.language !== c.lang ? t('pr.bookOtherLang', { a: (b.language || '').toUpperCase(), b: c.lang.toUpperCase() }) : '';
     const grid = $('#pr-stylegrid', f), pop = $('#pr-stylepop', f);
-    if (!stList(c.placement).includes(stSel)) stSel = stList(c.placement)[0];
+    if (!stList(c.placement, c.kind).includes(stSel)) stSel = stList(c.placement, c.kind)[0];
     $('#pr-stylename', f).textContent = t('pr.st.' + stSel);
-    if (c.kind === 'book' && !pop.hidden) {
-      const gb = b || pub[0], key = JSON.stringify([gb && gb.id, c.theme, c.bg_from, c.bg_to, c.font, c.kicker, c.title, c.subtitle, c.cta, c.placement, c.lang]);
+    if ((c.kind === 'book' || c.kind === 'books') && !pop.hidden) {
+      const gl = c.book_ids.map(id => pub.find(x => x.id === id)).filter(Boolean), gb = c.kind === 'books' ? gl[0] : b || pub[0], key = JSON.stringify([gb && gb.id, gl.map(x => x.id), c.kind, c.theme, c.bg_from, c.bg_to, c.font, c.kicker, c.title, c.subtitle, c.cta, c.placement, c.lang]);
       if (key !== stKey && gb) {
         stKey = key;
-        grid.innerHTML = stList(c.placement).map(k => `<label class="st-tile"><input type="radio" name="st" value="${k}"><span class="st-view" aria-hidden="true"><span class="${c.placement === 'hero' ? 'hero hero-promos' : 'promo-strip-wrap'}" style="padding:0;display:block">${promoHTML({ ...c, kind: 'book', style: k }, gb, c.placement, [])}</span></span><b>${esc(t('pr.st.' + k))}</b></label>`).join('');
+        grid.innerHTML = stList(c.placement, c.kind).map(k => `<label class="st-tile"><input type="radio" name="st" value="${k}"><span class="st-view" aria-hidden="true"><span class="${c.placement === 'hero' ? 'hero hero-promos' : 'promo-strip-wrap'}" style="padding:0;display:block">${promoHTML({ ...c, kind: c.kind, style: k }, gb, c.placement, gl)}</span></span><b>${esc(t('pr.st.' + k))}</b></label>`).join('');
         const iw = window.innerWidth > 760 ? 1100 : 390;
         requestAnimationFrame(() => grid.querySelectorAll('.st-view').forEach(v => { const sc = v.clientWidth / iw; v.style.setProperty('--iw', iw + 'px'); v.style.setProperty('--sc', sc); v.style.height = Math.round(v.firstElementChild.offsetHeight * sc) + 'px'; }));
       }
@@ -2556,7 +2556,7 @@ async function promoForm(body, id) {
     if (c.kind === 'books' && c.book_ids.length < 2) return fail(t('pr.needBooks'));
     if (c.link && !safeLink(c.link)) return fail(t('pr.badLink'));
     if (c.starts_at && c.ends_at && c.ends_at <= c.starts_at) return fail(t('pr.badDates'));
-    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.kind === 'offers' ? ofTheme(c) : c.style && c.style !== 'classic' ? c.theme + '~' + c.style : c.theme, bg_from: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_from : null, bg_to: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
+    const row = { id: p.id, placement: c.placement, lang: c.lang, kind: c.kind, book_id: c.book_id, book_ids: c.book_ids, theme: c.kind === 'offers' ? ofTheme(c) : c.style && c.style !== 'classic' && c.style !== 's_classic' ? c.theme + '~' + c.style : c.theme, bg_from: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_from : null, bg_to: c.theme === 'custom' && c.kind !== 'offers' ? c.bg_to : null, font: c.font, kicker: c.kicker, title: c.title, subtitle: c.subtitle, cta: c.cta, link: c.link, starts_at: c.starts_at, ends_at: c.ends_at, active: c.active, seconds: c.seconds, transition: c.transition, sort: p.sort ?? all.length };
     if (!row.id) delete row.id;
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
     try { await api.savePromo(row, { image: c.kind === 'image' ? files.image : null, mobile: c.kind === 'image' ? files.mobile : null, removeMobile: !!files.removeMobile }); toast(t('pr.saved')); go('/admin/promos'); }

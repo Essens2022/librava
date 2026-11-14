@@ -1,5 +1,9 @@
 // Slovak interface strings for Librava
 export default {
+  "bf.d": "dní",
+  "bf.h": "hod",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Dostali ste knihu ako darček!",
   "ntf.giftBody": "Gratulujeme! Kniha je už vo vašej knižnici a môžete ju čítať kedykoľvek.",
   "ntf.giftTag": "Darček pre vás",

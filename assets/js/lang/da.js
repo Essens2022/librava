@@ -1,5 +1,9 @@
 // Danish interface strings for Librava
 export default {
+  "bf.d": "dage",
+  "bf.h": "timer",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Du har fået en bog i gave!",
   "ntf.giftBody": "Tillykke! Bogen er allerede i dit bibliotek, og du kan læse den når som helst.",
   "ntf.giftTag": "En gave til dig",

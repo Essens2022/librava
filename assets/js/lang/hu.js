@@ -1,5 +1,9 @@
 // Hungarian interface strings for Librava
 export default {
+  "bf.d": "nap",
+  "bf.h": "óra",
+  "bf.m": "perc",
+  "bf.s": "mp",
   "ntf.giftTitle": "Ajándékba kaptál egy könyvet!",
   "ntf.giftBody": "Gratulálunk! A könyv már a könyvtáradban van, bármikor elolvashatod.",
   "ntf.giftTag": "Ajándék neked",

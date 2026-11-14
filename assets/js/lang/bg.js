@@ -1,5 +1,9 @@
 // Bulgarian interface strings for Librava
 export default {
+  "bf.d": "дни",
+  "bf.h": "часа",
+  "bf.m": "мин",
+  "bf.s": "сек",
   "ntf.giftTitle": "Получихте книга като подарък!",
   "ntf.giftBody": "Поздравления! Книгата вече е във вашата библиотека и можете да я четете по всяко време.",
   "ntf.giftTag": "Подарък за вас",

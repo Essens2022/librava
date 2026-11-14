@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261113204717';
-import { CONFIG } from './config.js?v=20261113204717';
-import { store } from './util.js?v=20261113204717';
+import { localize, loadRates } from './localprice.js?v=20261114125723';
+import { CONFIG } from './config.js?v=20261114125723';
+import { store } from './util.js?v=20261114125723';
 
 const D = {
   ro: {
@@ -363,6 +363,9 @@ const D = {
     'pr.st.wave': 'Valuri',
     'pr.st.circle': 'Cerc',
     'pr.st.bold': 'Culori aprinse',
+    'pr.st.bf': "Black Friday (mare, cu contor)",
+    'pr.st.s_bf': "Black Friday (bandă, cu contor)",
+    'pr.st.s_classic': "Simplu",
     'pr.st.s_aurora': "Aurora",
     'pr.st.s_mint': "Mentă proaspătă",
     'pr.st.s_sunset': "Apus de soare",
@@ -431,6 +434,10 @@ const D = {
     'pr.st.mesh': 'Gradient viu',
     'pr.st.minimal': 'Minimal',
     'promo.endsIn': 'Se termină în',
+    'bf.d': 'zile',
+    'bf.h': 'ore',
+    'bf.m': 'min',
+    'bf.s': 'sec',
     'pr.gDesk': 'Calculator',
     'pr.gMob': 'Telefon',
     'pr.gSafe': 'ZONĂ SIGURĂ – pune aici textul, prețul, fața cărții',
@@ -2061,6 +2068,9 @@ const D = {
     'pr.st.wave': 'Onde',
     'pr.st.circle': 'Cerchio',
     'pr.st.bold': 'Colori vivi',
+    'pr.st.bf': "Black Friday (grande, con timer)",
+    'pr.st.s_bf': "Black Friday (striscia, con timer)",
+    'pr.st.s_classic': "Semplice",
     'pr.st.s_aurora': "Aurora",
     'pr.st.s_mint': "Menta fresca",
     'pr.st.s_sunset': "Tramonto",
@@ -2129,6 +2139,10 @@ const D = {
     'pr.st.mesh': 'Gradiente vivo',
     'pr.st.minimal': 'Minimal',
     'promo.endsIn': 'Termina tra',
+    'bf.d': 'giorni',
+    'bf.h': 'ore',
+    'bf.m': 'min',
+    'bf.s': 'sec',
     'pr.gDesk': 'Computer',
     'pr.gMob': 'Telefono',
     'pr.gSafe': 'ZONA SICURA – metti qui testo, prezzo, copertina',
@@ -3759,6 +3773,9 @@ const D = {
     'pr.st.wave': 'Waves',
     'pr.st.circle': 'Circle',
     'pr.st.bold': 'Bold colours',
+    'pr.st.bf': "Black Friday (large, countdown)",
+    'pr.st.s_bf': "Black Friday (strip, countdown)",
+    'pr.st.s_classic': "Plain",
     'pr.st.s_aurora': "Aurora",
     'pr.st.s_mint': "Fresh mint",
     'pr.st.s_sunset': "Sunset",
@@ -3827,6 +3844,10 @@ const D = {
     'pr.st.mesh': 'Live gradient',
     'pr.st.minimal': 'Minimal',
     'promo.endsIn': 'Ends in',
+    'bf.d': 'days',
+    'bf.h': 'hours',
+    'bf.m': 'min',
+    'bf.s': 'sec',
     'pr.gDesk': 'Computer',
     'pr.gMob': 'Phone',
     'pr.gSafe': 'SAFE ZONE – keep text, price, cover here',
@@ -5134,7 +5155,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261113204717`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261114125723`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

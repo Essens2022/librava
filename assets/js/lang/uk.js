@@ -1,5 +1,9 @@
 // Ukrainian interface strings for Librava
 export default {
+  "bf.d": "дні",
+  "bf.h": "год",
+  "bf.m": "хв",
+  "bf.s": "сек",
   "ntf.giftTitle": "Ви отримали книгу в подарунок!",
   "ntf.giftBody": "Вітаємо! Книга вже у вашій бібліотеці, її можна читати будь-коли.",
   "ntf.giftTag": "Подарунок для вас",

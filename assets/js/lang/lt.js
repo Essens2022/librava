@@ -1,5 +1,9 @@
 // Lithuanian interface strings for Librava
 export default {
+  "bf.d": "d.",
+  "bf.h": "val.",
+  "bf.m": "min.",
+  "bf.s": "sek.",
   "ntf.giftTitle": "Gavote knygą dovanų!",
   "ntf.giftBody": "Sveikiname! Knyga jau yra jūsų bibliotekoje, ją galite skaityti bet kada.",
   "ntf.giftTag": "Dovana jums",

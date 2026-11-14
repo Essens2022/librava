@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261113204717';
-import { CONFIG } from './config.js?v=20261113204717';
-import { SOCIAL_PATHS } from './social.js?v=20261113204717';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261113204717';
-import { esc, store, $, $$ } from './util.js?v=20261113204717';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261114125723';
+import { CONFIG } from './config.js?v=20261114125723';
+import { SOCIAL_PATHS } from './social.js?v=20261114125723';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261114125723';
+import { esc, store, $, $$ } from './util.js?v=20261114125723';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261113204717';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261113204717';
-import { track, trackPage } from './track.js?v=20261113204717';
-import { initGA, applyConsent } from './ga.js?v=20261113204717';
-import { consentStrings } from './consent-i18n.js?v=20261113204717';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261113204717';
-import { api } from './api.js?v=20261113204717';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261113204717';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261114125723';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261114125723';
+import { track, trackPage } from './track.js?v=20261114125723';
+import { initGA, applyConsent } from './ga.js?v=20261114125723';
+import { consentStrings } from './consent-i18n.js?v=20261114125723';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261114125723';
+import { api } from './api.js?v=20261114125723';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261114125723';
 
 // ---------------- icons ----------------
 const P = {
@@ -807,8 +807,8 @@ export async function openBell() {
 // ---------------------------------------------------------------- promotions (banners chosen by the shop owner)
 export const PROMO_THEMES = ['forest', 'night', 'sunset', 'berry', 'ocean', 'sand', 'store', 'midnight', 'orange', 'coral', 'wine', 'gold', 'emerald', 'royal', 'slate', 'mint', 'sky', 'blush', 'lavender', 'cream', 'aurora', 'glass', 'neon', 'spotlight', 'sunrise', 'peach', 'carbon', 'tropic'];
 // light backgrounds get dark text
-export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal', 'steps', 'savings', 'devices', 'bookshelf', 'stars', 'book3d', 'pastel', 'retro', 'comic', 'blueprint', 'paper', 'cinema', 'wave', 'circle', 'bold'];
-export const STRIP_STYLES = ["s_aurora", "s_mint", "s_sunset", "s_midnight", "s_candy", "s_lime", "s_ocean", "s_coral", "s_slate", "s_cream", "s_gold", "s_royal", "s_forest", "s_rose", "s_sky", "s_ember", "s_mono", "s_neon_pink", "s_neon_cyan", "s_sticker", "s_comic", "s_stripes", "s_ticker", "s_countdown", "s_sale_tag", "s_ribbon", "s_split2", "s_glass", "s_spotlight", "s_duotone", "s_retro", "s_blueprint", "s_paper", "s_cinema", "s_wave", "s_bubbles", "s_confetti", "s_gradborder", "s_shine", "s_emerald", "s_sand", "s_lavender", "s_peach", "s_charcoal", "s_teal", "s_burgundy", "s_ice", "s_progress", "s_arrows", "s_gift"];
+export const PROMO_STYLES = ['classic', 'flash', 'spotlight', 'ticker', 'fan', 'poster', 'split', 'glass', 'neon', 'editorial', 'sticker', 'gold', 'duo', 'mesh', 'minimal', 'steps', 'savings', 'devices', 'bookshelf', 'stars', 'book3d', 'pastel', 'retro', 'comic', 'blueprint', 'paper', 'cinema', 'wave', 'circle', 'bold', 'bf'];
+export const STRIP_STYLES = ["s_bf", "s_aurora", "s_mint", "s_sunset", "s_midnight", "s_candy", "s_lime", "s_ocean", "s_coral", "s_slate", "s_cream", "s_gold", "s_royal", "s_forest", "s_rose", "s_sky", "s_ember", "s_mono", "s_neon_pink", "s_neon_cyan", "s_sticker", "s_comic", "s_stripes", "s_ticker", "s_countdown", "s_sale_tag", "s_ribbon", "s_split2", "s_glass", "s_spotlight", "s_duotone", "s_retro", "s_blueprint", "s_paper", "s_cinema", "s_wave", "s_bubbles", "s_confetti", "s_gradborder", "s_shine", "s_emerald", "s_sand", "s_lavender", "s_peach", "s_charcoal", "s_teal", "s_burgundy", "s_ice", "s_progress", "s_arrows", "s_gift"];
 export const LIGHT_THEMES = ['sand', 'mint', 'sky', 'blush', 'lavender', 'cream', 'sunrise', 'peach'];
 // title fonts for banners: Literata is Librava's own; Inter/Figtree are close to Amazon's clean sans
 export const PROMO_FONTS = [['literata', "'Literata', Georgia, serif"], ['figtree', "'Figtree', system-ui, sans-serif"], ['inter', "'Inter', system-ui, sans-serif"], ['montserrat', "'Montserrat', system-ui, sans-serif"],
@@ -832,6 +832,26 @@ export function promoLook(p0) {
 }
 export const safeLink = l => { const s = String(l || '').trim(); return /^#\//.test(s) || /^https:\/\//i.test(s) ? s : ''; };
 const promoLink = (p, b) => safeLink(p.link) || (b ? `#/book/${encodeURIComponent(b.id)}` : '#/search');
+
+// ---- "Black Friday" ready-made banner (hero + strip): big words, up to 3 chosen covers, discount badge (kicker), live countdown to ends_at
+const isBF = p => p.kind !== 'offers' && p.kind !== 'image' && /^(s_)?bf$/.test(String(p.theme || '').split('~')[1] || p.style || '');
+const cdParts = end => { let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); s %= 60; return [d, h, m, s].map(n => String(n).padStart(2, '0')); };
+function promoBF(p, b, list, placement) {
+  const books = (p.kind === 'book' ? [b] : list).filter(Boolean).slice(0, 3);
+  const link = safeLink(p.link) || '#/search?deals=1', ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';
+  const hexs = c => /^#[0-9a-f]{6}$/i.test(c || '') ? c : '', custom = String(p.theme || '').startsWith('custom');
+  const bg = (custom && hexs(p.bg_from)) || '#12072b', ac = (custom && hexs(p.bg_to)) || '#ff2f7d';
+  const title = p.title || 'Black Friday', sub = String(p.subtitle || ''), cta = p.cta || t('promo.cta');
+  const i = sub.search(/\d/), pre = i > 0 ? sub.slice(0, i).trim() : '', num = i >= 0 ? sub.slice(i).trim() : sub;
+  const e = p.ends_at && new Date(p.ends_at) > new Date() ? new Date(p.ends_at) : null, c = e ? cdParts(e) : null;
+  const units = [t('bf.d'), t('bf.h'), t('bf.m'), t('bf.s')];
+  const attrs = `class="promo promo-${placement} promo-bf" style="--bfbg:${bg};--bfac:${ac}" data-promo="${esc(p.id)}" data-sec="${+p.seconds || 7}" data-tr="${esc(p.transition || 'fade')}"`;
+  if (placement === 'strip') return `<div ${attrs}><a class="bf-s" href="${esc(link)}"${ext}><b class="bf-sh">${esc(title)}${sub ? ` <em>${esc(sub)}</em>` : ''}</b>${c ? `<span class="bf-sc" data-end="${e.getTime()}"><i>${+c[0]}</i> ${esc(units[0])} <i>${c[1]}</i>:<i>${c[2]}</i>:<i>${c[3]}</i></span>` : ''}<span class="bf-sgo">${esc(cta)}</span></a></div>`;
+  const cov = books.map((x, k) => x.cover_url ? `<img class="bf-c${k + 1}" src="/book/${esc(x.id)}/thumb.webp" alt="${esc(x.title)}" ${placement === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">` : '').join('');
+  return `<div ${attrs}><a class="bf-a" href="${esc(link)}"${ext}><span class="bf-bgc"></span><span class="bf-grid"><span class="bf-tx"><span class="bf-h">${esc(title)}</span>${sub ? `<span class="bf-pr">${pre ? `<span>${esc(pre)}</span>` : ''}<b>${esc(num)}</b></span>` : ''}
+    ${c ? `<span class="bf-cd" data-end="${e.getTime()}">${c.map((v, k) => `<span><b>${v}</b><i>${esc(units[k])}</i></span>`).join('')}</span>` : ''}<span class="bf-btn">${esc(cta)}</span></span>
+    <span class="bf-st">${p.kicker ? `<span class="bf-off">${esc(p.kicker)}</span>` : ''}${cov}</span></span></a></div>`;
+}
 // one slide; `b` is the book when the banner promotes a book
 // extra pieces that make each ready-made design different (timer, stickers, ticker, floating chips…)
 const cdLeft = end => { let s = Math.max(0, Math.floor((end - Date.now()) / 1000)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); s %= 60; return [h, m, s].map(n => String(n).padStart(2, '0')); };
@@ -865,8 +885,10 @@ function tpExtras(sty, p, b, disc, rating) {
     default: return { cover: '', tail: '' };
   }
 }
+if (typeof document !== 'undefined') setInterval(() => { document.querySelectorAll('.bf-cd').forEach(el => { const c = cdParts(+el.dataset.end), n = el.querySelectorAll('b'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }); document.querySelectorAll('.bf-sc').forEach(el => { const c = cdParts(+el.dataset.end), n = el.querySelectorAll('i'); [+c[0], c[1], c[2], c[3]].forEach((v, k) => { if (n[k] && n[k].textContent !== String(v)) n[k].textContent = v; }); }); }, 1000);
 if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('.tp-count,.sp-count').forEach(el => { const c = cdLeft(+el.dataset.end), n = el.querySelectorAll('i'); c.forEach((v, k) => { if (n[k] && n[k].textContent !== v) n[k].textContent = v; }); }), 1000);
 export function promoHTML(p, b, placement = p.placement, list = []) {
+  if (isBF(p)) return promoBF(p, b, list, placement);
   if (p.kind === 'offers') return promoOffersHTML(p, list, placement);
   if (p.kind === 'books') return promoBooksHTML(p, list, placement);
   const link = promoLink(p, b), ext = /^https:/i.test(link) ? ' target="_blank" rel="noopener"' : '';

@@ -1,5 +1,9 @@
 // Croatian interface strings for Librava
 export default {
+  "bf.d": "dana",
+  "bf.h": "sati",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Dobili ste knjigu na dar!",
   "ntf.giftBody": "Čestitamo! Knjiga je već u vašoj knjižnici i možete je čitati kad god želite.",
   "ntf.giftTag": "Dar za vas",

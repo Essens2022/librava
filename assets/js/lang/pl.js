@@ -1,5 +1,9 @@
 // Polish interface strings for Librava
 export default {
+  "bf.d": "dni",
+  "bf.h": "godz",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Otrzymałeś książkę w prezencie!",
   "ntf.giftBody": "Gratulacje! Książka jest już w Twojej bibliotece i możesz ją czytać, kiedy chcesz.",
   "ntf.giftTag": "Prezent dla Ciebie",

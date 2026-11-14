@@ -1,5 +1,9 @@
 // Swedish interface strings for Librava
 export default {
+  "bf.d": "dagar",
+  "bf.h": "timmar",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Du har fått en bok i present!",
   "ntf.giftBody": "Grattis! Boken finns redan i ditt bibliotek och du kan läsa den när du vill.",
   "ntf.giftTag": "En present till dig",

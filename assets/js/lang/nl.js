@@ -1,5 +1,9 @@
 // Dutch interface strings for Librava
 export default {
+  "bf.d": "dagen",
+  "bf.h": "uur",
+  "bf.m": "min",
+  "bf.s": "sec",
   "ntf.giftTitle": "Je hebt een boek cadeau gekregen!",
   "ntf.giftBody": "Gefeliciteerd! Het boek staat al in je bibliotheek en je kunt het altijd lezen.",
   "ntf.giftTag": "Een cadeau voor jou",

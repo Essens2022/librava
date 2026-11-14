@@ -1,5 +1,9 @@
 // Finnish interface strings for Librava
 export default {
+  "bf.d": "päivää",
+  "bf.h": "tuntia",
+  "bf.m": "min",
+  "bf.s": "s",
   "ntf.giftTitle": "Sait kirjan lahjaksi!",
   "ntf.giftBody": "Onnittelut! Kirja on jo kirjastossasi, ja voit lukea sen milloin vain.",
   "ntf.giftTag": "Lahja sinulle",

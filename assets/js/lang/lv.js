@@ -1,5 +1,9 @@
 // Latvian interface strings for Librava
 export default {
+  "bf.d": "dienas",
+  "bf.h": "stundas",
+  "bf.m": "min",
+  "bf.s": "sek",
   "ntf.giftTitle": "Jūs saņēmāt grāmatu dāvanā!",
   "ntf.giftBody": "Apsveicam! Grāmata jau ir jūsu bibliotēkā, un to varat lasīt jebkurā laikā.",
   "ntf.giftTag": "Dāvana jums",
