@@ -4491,3 +4491,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 
 /* Speed on phones: animations only run while visible (nothing changes on screen) */
 .is-off, .is-off *, .is-off *::before, .is-off *::after, .promo-slide:not(.on), .promo-slide:not(.on) *, .promo-slide:not(.on) *::before, .promo-slide:not(.on) *::after { animation-play-state: paused !important; }
+
+/* notifications: show the whole cover, never cropped (digital covers are landscape, ebooks portrait) */
+.ntf-book { grid-template-columns: auto minmax(0, 1fr); }
+.ntf-book img, .ntf-books img { aspect-ratio: auto; object-fit: contain; width: auto; height: auto; max-width: 132px; max-height: 120px; }
+.ntf-books a { width: max-content; max-width: 132px; align-items: flex-start; }
+@media (max-width: 480px) { .ntf-book img { max-width: 92px; max-height: 96px; } .ntf-books img { max-width: 100px; max-height: 100px; } .ntf-books a { max-width: 100px; } .ntf-book { gap: 10px; } }
