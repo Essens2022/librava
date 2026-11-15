@@ -3824,7 +3824,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .of-still .promo-carousel.single > .promo-offers { height: var(--ih, 404px); }
 
 /* category tiles: same book-like edge as .cover (wrapper carries the shading) */
-.cat-tile .thumbs .tc { position: relative; display: flex; flex: 1 1 0; min-width: 0; max-width: 46%; max-height: 100%; align-self: flex-end; border-radius: 5px 2px 2px 5px; overflow: hidden; filter: drop-shadow(0 2px 4px rgba(0,0,0,.22)); }
+.cat-tile .thumbs .tc { position: relative; display: flex; flex: 1 1 0; min-width: 0; max-width: 46%; max-height: 100%; align-self: flex-end; border-radius: 5px 2px 2px 5px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,.22); }
 .cat-tile .thumbs .tc img { flex: 1 1 0; max-width: 100% !important; width: 100%; filter: none !important; border-radius: 0 !important; box-shadow: none !important; }
 .cat-tile .thumbs .tc:not(.baked)::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,.36) 0, rgba(0,0,0,.10) 3%, rgba(255,255,255,.26) 4.6%, rgba(255,255,255,0) 7.5%, rgba(0,0,0,0) 93%, rgba(0,0,0,.13) 100%); }
 .cat-tile .thumbs .tc.baked { border-radius: 0; }
@@ -4093,7 +4093,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .card.pcard .pcover { aspect-ratio: 16 / 11; border-radius: 16px 16px 0 0; }
 .dshop .pcard-sub, .dshop .pcard .rating-line { display: none; }
 .card.pcard .card-title { font-size: 14.5px; line-height: 1.3; }
-.ptag { font-size: 9.5px; padding: 4px 8px 4px 6px; border-radius: 7px; letter-spacing: .07em; top: 8px; left: 8px; background: rgba(21,17,46,.86); backdrop-filter: blur(4px); box-shadow: none; border: 1px solid rgba(255,255,255,.18); }
+.ptag { font-size: 9.5px; padding: 4px 8px 4px 6px; border-radius: 7px; letter-spacing: .07em; top: 8px; left: 8px; background: rgba(21,17,46,.86); box-shadow: none; border: 1px solid rgba(255,255,255,.18); }
 .ptag-calendar, .ptag-organizer, .ptag-spreadsheet, .ptag-template, .ptag-planner, .ptag-game, .ptag-coloring, .ptag-kids, .ptag-wallart, .ptag-cards { background: rgba(21,17,46,.86); }
 .ptag .ico { width: 12px; height: 12px; }
 .ptag-planner .ico { color: #5eead4; } .ptag-calendar .ico { color: #fdba74; } .ptag-organizer .ico { color: #c4b5fd; } .ptag-spreadsheet .ico { color: #86efac; } .ptag-template .ico { color: #f9a8d4; } .ptag-game .ico { color: #93c5fd; } .ptag-coloring .ico { color: #fdba74; } .ptag-kids .ico { color: #5eead4; } .ptag-wallart .ico { color: #a5b4fc; } .ptag-cards .ico { color: #fda4af; }
@@ -4485,3 +4485,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .bf-a .bf-st .bf-c5{animation-name:bfR;--dx:20px}.bf-a .bf-st .bf-c3{animation-name:bfR;--dx:30px}
 @media(max-width:820px){.bf-a .bf-st .bf-c1{--dx:10px}.bf-a .bf-st .bf-c3{--dx:10px}.bf-a .bf-st .bf-c2{animation-name:bfC}}
 @media(prefers-reduced-motion:reduce){.bf-a .bf-st img{animation:none}}
+
+/* Speed on phones: skip rendering of home shelves that are off-screen (looks identical) */
+.home-stack > .panel, .home-stack > .dshop { content-visibility: auto; contain-intrinsic-size: auto 440px; }
