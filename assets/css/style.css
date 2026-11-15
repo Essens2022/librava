@@ -4488,3 +4488,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 
 /* Speed on phones: skip rendering of home shelves that are off-screen (looks identical) */
 .home-stack > .panel, .home-stack > .dshop { content-visibility: auto; contain-intrinsic-size: auto 440px; }
+
+/* Speed on phones: animations only run while visible (nothing changes on screen) */
+.is-off, .is-off *, .is-off *::before, .is-off *::after, .promo-slide:not(.on), .promo-slide:not(.on) *, .promo-slide:not(.on) *::before, .promo-slide:not(.on) *::after { animation-play-state: paused !important; }
