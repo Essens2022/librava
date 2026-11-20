@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261120174425';
-import { askWhy } from './why.js?v=20261120174425';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120174425';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120174425';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120174425';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120174425';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120174425';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120174425';
-import { couponLive } from './welcome.js?v=20261120174425';
-import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261120174425';
-import { track } from './track.js?v=20261120174425';
-import { gaEvent } from './ga.js?v=20261120174425';
-import { guessLang } from './langdetect.js?v=20261120174425';
-import { didYouMean } from './search.js?v=20261120174425';
-import { api, editionsOf } from './api.js?v=20261120174425';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120174425';
+import { CONFIG } from './config.js?v=20261120175614';
+import { askWhy } from './why.js?v=20261120175614';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120175614';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120175614';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120175614';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120175614';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120175614';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120175614';
+import { couponLive } from './welcome.js?v=20261120175614';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261120175614';
+import { track } from './track.js?v=20261120175614';
+import { gaEvent } from './ga.js?v=20261120175614';
+import { guessLang } from './langdetect.js?v=20261120175614';
+import { didYouMean } from './search.js?v=20261120175614';
+import { api, editionsOf } from './api.js?v=20261120175614';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120175614';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -1509,7 +1509,10 @@ async function waiverConfirm(sum) {
   return new Promise(resolve => {
     let ok = false;
     const L = legalText(getLang());
-    const bk = sum?.books || [], r = sum?.r;
+    const r = sum?.r;
+    // the products with a discount sit next to the pay button: no discount first, then a bigger and bigger discount, the free ones last (same discount = cart order)
+    const cut = b => { const f = r?.final?.[b.id] ?? b.price_cents; return b.price_cents > 0 ? 1 - f / b.price_cents : 0; };
+    const bk = (sum?.books || []).map((b, i) => [b, i]).sort((a, c) => cut(a[0]) - cut(c[0]) || a[1] - c[1]).map(x => x[0]);
     const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false }).replace('loading="lazy"', 'loading="eager"')}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${(() => { const f = r.final?.[b.id] ?? b.price_cents; return `<span>${f ? money(f) : esc(t('book.free'))}</span>${f < b.price_cents ? `<s class="pay-item-old">${money(b.price_cents)}</s>` : ''}`; })()}</div></div>`).join('') : '';
     const summary = r ? `<section class="pay-sum" aria-label="${esc(t('pay.yourOrder'))}"><h3>${esc(t('pay.yourOrder'))}</h3>${items}
         <div class="pay-total"><span>${esc(t('pay.totalVat'))}</span><b>${money(r.total)}</b></div></section>` : '';
