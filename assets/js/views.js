@@ -7,7 +7,7 @@ import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=202611201638
 import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120163821';
 import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120163821';
 import { couponLive } from './welcome.js?v=20261120163821';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261120163821';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261120163821';
 import { track } from './track.js?v=20261120163821';
 import { gaEvent } from './ga.js?v=20261120163821';
 import { guessLang } from './langdetect.js?v=20261120163821';
@@ -999,12 +999,20 @@ export async function viewCart(el) {
       if (w) { const g = +w.config.get || 3; steps.push({ n: (+w.config.buy || 3) + g, p: +w.config.percent || 100, wow: g }); }
     } catch { }
     if (steps.length < 2) return '';
-    const have = books.length, top = steps[steps.length - 1].n, reached = steps.filter(x => have >= x.n).length;
+    const paidN = books.filter(b => b.price_cents > 0).length, top = steps[steps.length - 1].n, hasWow = steps.some(x => x.wow);
+    // the steps repeat in rounds: after the top step (free) the ladder starts again for the next products (not while the timed welcome gift is shown)
+    const ls = ladderState(ladderSteps(offers.filter(o => offerRunning(o))), paidN), cyc = !hasWow && ls.top === top && paidN >= 1;
+    const pos = cyc ? (ls.pos === 0 ? top : ls.pos) : books.length, lit = x => pos >= x.n;
     // only ONE automatic offer applies (the best): its step is lit, the other reached steps are shown dimmed
-    const ap = r.applied.find(a => a.kind === 'bxgy'), apN = ap ? (+ap.offer?.config?.buy || 1) + (+ap.offer?.config?.get || 1) : 0;
-    const fill = Math.min(100, Math.round(100 * (have - 1) / (top - 1)));
-    const hasWow = steps.some(x => x.wow);
-    return `<div class="ladder" aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${have >= x.n ? (!apN || apN === x.n ? ' on' : ' skip') : ''}${have + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>`;
+    const ap = cyc ? null : r.applied.find(a => a.kind === 'bxgy'), apN = cyc ? (ls.pos === 0 ? top : ls.cur ? ls.cur.size : 0) : (ap ? (+ap.offer?.config?.buy || 1) + (+ap.offer?.config?.get || 1) : 0);
+    const fill = Math.min(100, Math.round(100 * Math.max(0, pos - 1) / (top - 1)));
+    const lbl = x => x.percent >= 100 ? t('book.free').toLowerCase() : '−' + x.percent + '%';
+    let say = '';
+    if (cyc && ls.rounds >= 1) {
+      if (ls.pos === 0) say = steps[steps.length - 1].p >= 100 ? t('cart.lad.won', { n: ls.rounds }) : '';
+      else if (ls.next) say = ls.pos === 1 || !ls.cur ? t('cart.lad.again1', { n: ls.next.size - ls.pos, next: lbl(ls.next) }) : t('cart.lad.again2', { cur: lbl(ls.cur), n: ls.next.size - ls.pos, next: lbl(ls.next) });
+    }
+    return `<div class="ladder"><div aria-hidden="true"><div class="ladder-bar"><i style="width:${fill}%"></i></div><div class="ladder-steps">${steps.map(x => `<div class="ladder-s${lit(x) ? (!apN || apN === x.n ? ' on' : ' skip') : ''}${pos + 1 === x.n ? ' next' : ''}${x.wow ? ' wow' : ''}"><b>${x.wow ? GIFT_SVG.replace('width="20" height="20"', 'width="20" height="20"') : x.n}</b><span>${x.wow ? x.wow + ' × ' : ''}${x.p >= 100 ? esc(t('book.free')) : '−' + x.p + '%'}</span></div>`).join('')}</div></div>${say ? `<div class="ladder-say" role="status">${esc(say)}</div>` : ''}</div>`;
   };
   const cmsg = { invalid: 'cart.cInvalid', min: 'cart.cMin', used: 'cart.cUsed', new: 'cart.cNew', notBest: 'cart.cNotBest', ok: 'cart.cOk' }[r.couponState];
   el.innerHTML = `<div class="wrap page">${ladder()}<div class="cart-layout">
@@ -1029,7 +1037,7 @@ export async function viewCart(el) {
       ${r.nudges.length ? `<div class="nudges nudges-side">${r.nudges.map(nudge).join('')}</div>` : ''}
       <div class="sum-rows">
         <div><span>${esc(t('cart.items', { n: books.length }))}</span><span>${money(r.subtotal)}</span></div>
-        ${r.applied.map(a => { const nf = a.kind === 'bxgy' && (a.offer?.config?.percent ?? 100) >= 100 ? books.filter(b => r.final[b.id] === 0).length : 0;
+        ${r.applied.map(a => { const nf = a.detail?.ladder ? a.detail.free : a.kind === 'bxgy' && (a.offer?.config?.percent ?? 100) >= 100 ? books.filter(b => r.final[b.id] === 0).length : 0;
           return `<div class="sum-off${a.kind === 'coupon' ? ' sum-code' : ''}"><span>${a.kind === 'coupon' ? icon('tag') : GIFT_SVG.replace('width="20" height="20"', 'width="15" height="15"')} ${esc(appliedLabel(a, t, c => t('cat.' + c)))}${nf ? `<small class="sum-sub">${nf} × ${esc(t('book.free'))}</small>` : ''}</span><span>−${money(a.saving)}</span></div>`; }).join('')}
         ${r.applied.some(a => a.kind !== 'coupon') && offers.filter(o => o.kind !== 'coupon' && !o.stackable).length > 1 ? `<div class="muted sum-note">${esc(t('cart.bestOnly'))}</div>` : ''}
         <div class="sum-total"><span>${esc(t('cart.total'))}</span><b>${money(r.total)}</b></div>

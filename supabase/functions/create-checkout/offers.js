@@ -20,6 +20,34 @@ export function offerRunning(o, now = new Date()) {
 const inCat = (b, c) => !c || b.category === c || (b.categories || []).includes(c);
 const pct = (cents, p) => Math.round(cents * Math.min(100, Math.max(0, +p || 0)) / 100);
 
+// ---- rounds ladder ("buy 1 get 1 -30%", "buy 2 get 1 -45%" … "buy 4 get 1 free"): the steps repeat in rounds ----
+// Every full round (top step, e.g. 5 products) gives its last product at the top step's discount (e.g. free); the products
+// left over start a new round and get the discount of the step they reach (2nd product -30%, 3rd -45% …).
+// The cheapest products of the cart are the discounted ones. Offers with a category, timed welcome gifts and
+// "get more than one" are not part of the ladder: they are separate offers.
+export const isStep = o => o && o.kind === 'bxgy' && !o.config?.category && !o.config?.welcome && (+o.config?.get || 1) === 1 && !o.stackable;
+export function ladderSteps(offers) {
+  return (offers || []).filter(isStep).map(o => ({ size: (+o.config.buy || 1) + 1, percent: +(o.config.percent ?? 100), offer: o })).sort((a, b) => a.size - b.size);
+}
+// where a cart with n products stands: completed rounds, products in the current round, the step reached
+export function ladderState(steps, n) {
+  if (!steps.length || n < 1) return { top: 0, rounds: 0, pos: 0, cur: null, next: null };
+  const top = steps[steps.length - 1].size, rounds = Math.floor(n / top), pos = n % top;
+  const cur = [...steps].reverse().find(x => x.size <= pos) || null;
+  const next = steps.find(x => x.size > pos) || null;
+  return { top, rounds, pos, cur, next };
+}
+function ladderSaving(steps, paid) {
+  const per = {}, lines = [];
+  if (!steps.length) return { saving: 0, per, lines };
+  const st = ladderState(steps, paid.length), topStep = steps[steps.length - 1];
+  const asc = [...paid].sort((a, b) => a.price_cents - b.price_cents || String(a.id).localeCompare(String(b.id)));
+  const give = (item, step, round, free) => { const v = pct(item.price_cents, step.percent); if (v > 0) { per[item.id] = (per[item.id] || 0) + v; lines.push({ step, round, saving: v, free }); } };
+  for (let k = 0; k < st.rounds; k++) give(asc[k], topStep, k + 1, topStep.percent >= 100);
+  if (st.cur) give(asc[st.rounds], st.cur, st.rounds + 1, false);
+  return { saving: Object.values(per).reduce((a, b) => a + b, 0), per, lines };
+}
+
 // what one offer saves on the given items (each item: {id, price_cents, category, categories}); returns {saving, per:{id:cents}}
 export function offerSaving(o, items, ctx = {}) {
   const c = o.config || {}, per = {}; let detail = {};
@@ -70,9 +98,16 @@ export function applyOffers(items, offers, ctx = {}) {
   const applied = [];
   const take = (o, r) => { for (const id in r.per) { const v = Math.min(r.per[id], price[id]); price[id] -= v; } applied.push({ id: o.id, kind: o.kind, name: o.name || '', offer: o, detail: r.detail || {}, saving: Object.values(r.per).reduce((a, b) => a + b, 0) }); };
   const stacks = o => o.stackable || o.kind === 'coupon';
-  const solo = run.filter(o => !stacks(o)).map(o => [o, offerSaving(o, paid, ctx)]).filter(([, r]) => r.saving > 0)
+  const steps = ladderSteps(run);
+  const lad = steps.length ? ladderSaving(steps, paid) : null;
+  const solo = run.filter(o => !stacks(o) && !isStep(o)).map(o => [o, offerSaving(o, paid, ctx)]).filter(([, r]) => r.saving > 0)
+    .concat(lad && lad.saving > 0 ? [[{ ...steps[steps.length - 1].offer, __ladder: true }, lad]] : [])
     .sort((a, b) => b[1].saving - a[1].saving || (b[0].priority || 0) - (a[0].priority || 0));
-  if (solo[0]) take(solo[0][0], solo[0][1]);
+  if (solo[0] && solo[0][0].__ladder) {
+    // one line per round: "5 for the price of 4" for every full round, then the step the leftover products reached
+    for (const id in lad.per) price[id] -= Math.min(lad.per[id], price[id]);
+    for (const l of lad.lines) applied.push({ id: l.step.offer.id, kind: 'bxgy', name: l.step.offer.name || '', offer: l.step.offer, detail: { round: l.round, free: l.free ? 1 : 0, ladder: true }, saving: l.saving });
+  } else if (solo[0]) take(solo[0][0], solo[0][1]);
   for (const o of run.filter(stacks).sort((a, b) => ((a.kind === 'coupon') - (b.kind === 'coupon')) || (b.priority || 0) - (a.priority || 0))) {
     const r = offerSaving(o, paid.map(i => ({ ...i, price_cents: price[i.id] })), ctx);
     if (r.saving > 0) take(o, r);
@@ -105,7 +140,7 @@ function nudges(paid, run, offers, ctx, discountNow, applied = []) {
   const have = k => Math.max(0, ...applied.filter(a => a.kind === k).map(a => k === 'qty' ? +(a.detail?.percent || 0) : +(a.offer?.config?.percent ?? 100)));
   for (const o of run) {
     const c = o.config || {};
-    if (o.kind === 'bxgy' && have('bxgy') >= (c.percent ?? 100)) continue;
+    if (o.kind === 'bxgy' && !isStep(o) && have('bxgy') >= (c.percent ?? 100)) continue;
     let n0 = null;
     if (o.kind === 'qty') {
       const n = paid.filter(i => inCat(i, c.category) && (!c.book_ids?.length || c.book_ids.includes(i.id))).length;
@@ -113,7 +148,10 @@ function nudges(paid, run, offers, ctx, discountNow, applied = []) {
       if (next && +next.percent > have('qty') && +next.min - n <= 2) n0 = { id: o.id, kind: 'qty', more: +next.min - n, percent: +next.percent, category: c.category || null };
     } else if (o.kind === 'bxgy') {
       // always the NEXT step up: a better offer than the one the customer has now, that needs the fewest more books
-      const n = paid.filter(i => inCat(i, c.category)).length, size = (+c.buy || 2) + (+c.get || 1);
+      const total = paid.filter(i => inCat(i, c.category)).length, size = (+c.buy || 2) + (+c.get || 1);
+      // ladder steps repeat in rounds: only the products of the current round count
+      const lt = isStep(o) ? ladderState(ladderSteps(run), total).top : 0;
+      const n = lt ? total % lt : total;
       if (n > 0 && size > n) { out.push({ id: o.id, kind: 'bxgy', more: size - n, buy: +c.buy || 2, get: +c.get || 1, percent: c.percent ?? 100, category: c.category || null }); }
       continue;
     }
