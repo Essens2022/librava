@@ -3886,7 +3886,9 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pay-item-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .pay-item-t b { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .pay-item-t small { color: var(--muted); font-size: 12px; }
-.pay-item-p { font-weight: 600; font-size: 14px; white-space: nowrap; }
+.pay-item-p { font-weight: 600; font-size: 14px; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+.pay-item-old { color: #d32f2f; font-size: 12px; font-weight: 400; text-decoration: line-through; text-decoration-thickness: 1px; }
+:root[data-theme="dark"] .pay-item-old { color: #ff6b6b; }
 .pay-total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); margin-top: 8px; padding-top: 10px; font-size: 15px; }
 .pay-total b { font-size: 20px; }
 .pay-next { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; }

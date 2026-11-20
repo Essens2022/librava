@@ -1490,7 +1490,7 @@ function waiverConfirm(sum) {
     let ok = false;
     const L = legalText(getLang());
     const bk = sum?.books || [], r = sum?.r;
-    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${money(r.final?.[b.id] ?? b.price_cents)}</div></div>`).join('') : '';
+    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${(() => { const f = r.final?.[b.id] ?? b.price_cents; return `<span>${f ? money(f) : esc(t('book.free'))}</span>${f < b.price_cents ? `<s class="pay-item-old">${money(b.price_cents)}</s>` : ''}`; })()}</div></div>`).join('') : '';
     const summary = r ? `<section class="pay-sum" aria-label="${esc(t('pay.yourOrder'))}"><h3>${esc(t('pay.yourOrder'))}</h3>${items}
         <div class="pay-total"><span>${esc(t('pay.totalVat'))}</span><b>${money(r.total)}</b></div></section>` : '';
     const close = modal(`<div class="pay-modal">
