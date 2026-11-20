@@ -4499,3 +4499,10 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .ntf-book img, .ntf-books img { aspect-ratio: auto; object-fit: contain; width: auto; height: auto; max-width: 132px; max-height: 120px; }
 .ntf-books a { width: max-content; max-width: 132px; align-items: flex-start; }
 @media (max-width: 480px) { .ntf-book img { max-width: 92px; max-height: 96px; } .ntf-books img { max-width: 100px; max-height: 100px; } .ntf-books a { max-width: 100px; } .ntf-book { gap: 10px; } }
+
+/* payment window: opens smoothly (soft fade and a small glide up) instead of popping in */
+@keyframes pay-wrap-in { from { background-color: rgba(5, 10, 10, 0); } to { background-color: rgba(5, 10, 10, .6); } }
+@keyframes pay-card-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.modal-wrap:has(.pay-modal) { animation: pay-wrap-in .22s ease-out backwards; }
+.modal-wrap:has(.pay-modal) > .modal { animation: pay-card-in .26s cubic-bezier(.2, .8, .2, 1) backwards; }
+@media (prefers-reduced-motion: reduce) { .modal-wrap:has(.pay-modal), .modal-wrap:has(.pay-modal) > .modal { animation: none; } }

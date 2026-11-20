@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261120160956';
-import { askWhy } from './why.js?v=20261120160956';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120160956';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120160956';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120160956';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120160956';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120160956';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120160956';
-import { couponLive } from './welcome.js?v=20261120160956';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261120160956';
-import { track } from './track.js?v=20261120160956';
-import { gaEvent } from './ga.js?v=20261120160956';
-import { guessLang } from './langdetect.js?v=20261120160956';
-import { didYouMean } from './search.js?v=20261120160956';
-import { api, editionsOf } from './api.js?v=20261120160956';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120160956';
+import { CONFIG } from './config.js?v=20261120161944';
+import { askWhy } from './why.js?v=20261120161944';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120161944';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120161944';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120161944';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120161944';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120161944';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120161944';
+import { couponLive } from './welcome.js?v=20261120161944';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261120161944';
+import { track } from './track.js?v=20261120161944';
+import { gaEvent } from './ga.js?v=20261120161944';
+import { guessLang } from './langdetect.js?v=20261120161944';
+import { didYouMean } from './search.js?v=20261120161944';
+import { api, editionsOf } from './api.js?v=20261120161944';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120161944';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -659,7 +659,14 @@ export async function viewBook(el, id) {
 // =====================================================================
 //  CHECKOUT (shared by cart & buy now)
 // =====================================================================
+// one payment window at a time: a quick double tap on the button must not open two stacked windows
+let _checkingOut = false;
 export async function startCheckout(ids) {
+  if (_checkingOut) return;
+  _checkingOut = true;
+  try { await _startCheckout(ids); } finally { _checkingOut = false; }
+}
+async function _startCheckout(ids) {
   // no account needed to pay: the account is created on the success page (viewWelcome)
   if (!api.user() && !api.guestInfo) { sessionStorage.setItem('librava:after', '/cart'); go('/account'); return; }
   // drop already owned books
@@ -972,6 +979,7 @@ export async function viewCart(el) {
   let code = sessionStorage.getItem(COUPON) || '';
   if (code && !couponLive(code)) { sessionStorage.removeItem(COUPON); code = ''; }
   const [offers, coupon] = await Promise.all([api.offers ? api.offers().catch(() => []) : [], code && api.findCoupon ? api.findCoupon(code).catch(() => null) : null]);
+  warmCovers(books.map(b => b.cover_url));   // so the payment window opens instantly with the pictures already there
   const r = applyOffers(books, [...offers, ...(coupon ? [coupon] : [])], { coupon: code });
   const desc = o => describeOffer(o, t, c => t('cat.' + c));
   const line = b => { const f = r.final[b.id]; return f != null && f < b.price_cents ? `<span class="price">${f ? money(f) : esc(t('book.free'))}</span><span class="price-old">${money(b.price_cents)}</span>` : priceHTML(b); };
@@ -1485,12 +1493,16 @@ export async function viewDigital(el) {
 // EU: for digital content delivered immediately the buyer must agree and accept losing the 14-day withdrawal right
 // consent is given by pressing the pay button, whose wording states the loss of the withdrawal right right above it; the server still gets waiver === true and stores waiver_at
 export const payChipsHTML = () => `<span class="pay-chips" role="img" aria-label="${esc(t('pay.methods'))}">${PAY_LOGOS.map(([n, f]) => `<img class="pay-logo" src="${payLogo(f)}" alt="${esc(n)}" title="${esc(n)}" height="26" loading="lazy" decoding="async">`).join('')}<span class="pay-more">${esc(t('pay.more'))}</span></span>`;
-function waiverConfirm(sum) {
+async function waiverConfirm(sum) {
+  // the cart already downloaded the pictures in advance; this only makes sure they are decoded (waits at most 0.12 s), so the window opens at once without empty squares
+  try {
+    await Promise.race([Promise.all((sum?.books || []).filter(b => b.cover_url).map(b => { const im = new Image(); im.decoding = 'async'; im.src = b.cover_url; return (im.decode ? im.decode() : Promise.resolve()).catch(() => { }); })), new Promise(r => setTimeout(r, 120))]);
+  } catch { }
   return new Promise(resolve => {
     let ok = false;
     const L = legalText(getLang());
     const bk = sum?.books || [], r = sum?.r;
-    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false })}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${(() => { const f = r.final?.[b.id] ?? b.price_cents; return `<span>${f ? money(f) : esc(t('book.free'))}</span>${f < b.price_cents ? `<s class="pay-item-old">${money(b.price_cents)}</s>` : ''}`; })()}</div></div>`).join('') : '';
+    const items = r ? bk.map(b => `<div class="pay-item">${coverHTML(b, { badge: false }).replace('loading="lazy"', 'loading="eager"')}<div class="pay-item-t"><b>${esc(b.title)}</b><small>${esc(kindLabel(b))}</small></div><div class="pay-item-p">${(() => { const f = r.final?.[b.id] ?? b.price_cents; return `<span>${f ? money(f) : esc(t('book.free'))}</span>${f < b.price_cents ? `<s class="pay-item-old">${money(b.price_cents)}</s>` : ''}`; })()}</div></div>`).join('') : '';
     const summary = r ? `<section class="pay-sum" aria-label="${esc(t('pay.yourOrder'))}"><h3>${esc(t('pay.yourOrder'))}</h3>${items}
         <div class="pay-total"><span>${esc(t('pay.totalVat'))}</span><b>${money(r.total)}</b></div></section>` : '';
     const close = modal(`<div class="pay-modal">
@@ -1527,7 +1539,7 @@ function waiverConfirm(sum) {
                   if (p < 1) raf = requestAnimationFrame(step); else halt();
                 };
                 raf = requestAnimationFrame(step);
-              }, 60);
+              }, 300);   // right after the opening animation has settled
             };
             // on a big screen the window is taller than the content until the product pictures arrive: look again as they load
             function maybe() { if (!started && !stop && m.isConnected && m.scrollHeight - m.clientHeight > 40) { m.removeEventListener('load', maybe, true); begin(); } }
