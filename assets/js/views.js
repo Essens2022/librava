@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261120161944';
-import { askWhy } from './why.js?v=20261120161944';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120161944';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120161944';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120161944';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120161944';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120161944';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120161944';
-import { couponLive } from './welcome.js?v=20261120161944';
-import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261120161944';
-import { track } from './track.js?v=20261120161944';
-import { gaEvent } from './ga.js?v=20261120161944';
-import { guessLang } from './langdetect.js?v=20261120161944';
-import { didYouMean } from './search.js?v=20261120161944';
-import { api, editionsOf } from './api.js?v=20261120161944';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120161944';
+import { CONFIG } from './config.js?v=20261120163821';
+import { askWhy } from './why.js?v=20261120163821';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261120163821';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261120163821';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261120163821';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261120163821';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120163821';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261120163821';
+import { couponLive } from './welcome.js?v=20261120163821';
+import { applyOffers, describeOffer, offersForBook, appliedLabel } from './offers.js?v=20261120163821';
+import { track } from './track.js?v=20261120163821';
+import { gaEvent } from './ga.js?v=20261120163821';
+import { guessLang } from './langdetect.js?v=20261120163821';
+import { didYouMean } from './search.js?v=20261120163821';
+import { api, editionsOf } from './api.js?v=20261120163821';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261120163821';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -522,7 +522,7 @@ export async function viewBook(el, id) {
   $('[data-preview]', el)?.addEventListener('click', () => go('/read/' + encodeURIComponent(b.id) + '?preview=1'));
   // get the end-of-preview recommendations ready while the visitor looks at this page
   if ($('[data-preview]', el)) setTimeout(() => { warmCovers([b.cover_url]); alsoReadFor(b, 12).catch(() => { }); }, 600);
-  $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); toast(t('cart.added')); });
+  $('[data-add]', el)?.addEventListener('click', e => { cart.add(b.id); e.currentTarget.disabled = true; e.currentTarget.textContent = t('book.inCart'); addedPop(); });
   $('[data-buy]', el)?.addEventListener('click', () => { cart.add(b.id); startCheckout([b.id]); });
   // offers that depend on the cart: the card keeps one fixed structure (current offer + next step) and only its
   // contents change, with soft transitions, so the box never jumps. Redraws on every cart change.

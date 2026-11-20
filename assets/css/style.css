@@ -4506,3 +4506,26 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .modal-wrap:has(.pay-modal) { animation: pay-wrap-in .22s ease-out backwards; }
 .modal-wrap:has(.pay-modal) > .modal { animation: pay-card-in .26s cubic-bezier(.2, .8, .2, 1) backwards; }
 @media (prefers-reduced-motion: reduce) { .modal-wrap:has(.pay-modal), .modal-wrap:has(.pay-modal) > .modal { animation: none; } }
+
+/* added to cart: an elegant green check mark in the middle of the screen: it draws itself, then dissolves */
+.added-pop { position: fixed; inset: 0; z-index: 310; display: grid; place-items: center; pointer-events: none; }
+.added-ring { display: grid; place-items: center; color: #4F7F33; animation: added-in .12s ease-out backwards; transition: opacity .6s ease, transform .6s ease, filter .6s ease; }
+.added-ring .ico { width: 64px; height: 64px; stroke-width: 1.7; stroke-linecap: round; filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, .85)) drop-shadow(0 3px 8px rgba(20, 40, 15, .22)); }
+.added-ring .ico path { stroke-dasharray: 22; stroke-dashoffset: 22; animation: added-draw .16s ease-out forwards; }
+.added-pop.out .added-ring { opacity: 0; transform: scale(1.06); filter: blur(3px); }
+@keyframes added-in { from { opacity: .4; transform: scale(.94); } }
+@keyframes added-draw { to { stroke-dashoffset: 0; } }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .added-ring, .added-ring .ico path { animation: none; } .added-ring .ico path { stroke-dashoffset: 0; } }
+
+/* wow background: a soft green light blooms behind the check, a few fine sparks drift out, a faint veil calms the page */
+.added-pop::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 55%); animation: added-veil 1.05s ease-out both; }
+:root[data-theme="dark"] .added-pop::before { background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .45), rgba(0, 0, 0, 0) 55%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .added-pop::before { background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .45), rgba(0, 0, 0, 0) 55%); } :root:not([data-theme="light"]) .added-ring { color: #7fbf55; } }
+:root[data-theme="dark"] .added-ring { color: #7fbf55; }
+.added-glow { position: absolute; width: 260px; height: 260px; left: 50%; top: 50%; margin: -130px 0 0 -130px; border-radius: 50%; background: radial-gradient(circle, rgba(120, 190, 80, .42) 0%, rgba(120, 190, 80, .16) 38%, rgba(120, 190, 80, 0) 68%); filter: blur(6px); animation: added-glow 1.1s cubic-bezier(.2, .7, .2, 1) both; }
+.added-spark { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #8fcf5e; box-shadow: 0 0 6px 1px rgba(143, 207, 94, .7); opacity: 0; animation: added-spark .8s cubic-bezier(.15, .7, .2, 1) calc(var(--d, .1s) * .3) both; }
+@keyframes added-veil { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes added-glow { 0% { opacity: .9; transform: scale(.55); } 100% { opacity: 0; transform: scale(1.25); } }
+@keyframes added-spark { 0% { opacity: 0; transform: translate(0, 0) scale(.4); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(.2); } }
+@media (prefers-reduced-motion: reduce) { .added-pop::before, .added-glow, .added-spark { animation: none; opacity: 0; } }

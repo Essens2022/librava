@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261120161944';
-import { CONFIG } from './config.js?v=20261120161944';
-import { SOCIAL_PATHS } from './social.js?v=20261120161944';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261120161944';
-import { esc, store, $, $$ } from './util.js?v=20261120161944';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261120163821';
+import { CONFIG } from './config.js?v=20261120163821';
+import { SOCIAL_PATHS } from './social.js?v=20261120163821';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261120163821';
+import { esc, store, $, $$ } from './util.js?v=20261120163821';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261120161944';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261120161944';
-import { track, trackPage } from './track.js?v=20261120161944';
-import { initGA, applyConsent } from './ga.js?v=20261120161944';
-import { consentStrings } from './consent-i18n.js?v=20261120161944';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120161944';
-import { api } from './api.js?v=20261120161944';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261120161944';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261120163821';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261120163821';
+import { track, trackPage } from './track.js?v=20261120163821';
+import { initGA, applyConsent } from './ga.js?v=20261120163821';
+import { consentStrings } from './consent-i18n.js?v=20261120163821';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261120163821';
+import { api } from './api.js?v=20261120163821';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261120163821';
 
 // ---------------- icons ----------------
 const P = {
@@ -497,6 +497,17 @@ export function toast(msg, { error = false, ms = 3200 } = {}) {
   box.appendChild(el);
   setTimeout(() => { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 320); }, ms);
 }
+// "added to cart": a round check mark in the middle of the screen (no words, so it reads the same in every language) that fades out by itself
+export function addedPop() {
+  const old = document.querySelector('.added-pop'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'added-pop';
+  el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="added-glow"></span>${[[-84,-30,.12],[78,-44,.18],[-52,-76,.1],[58,70,.22],[-70,50,.16],[22,-90,.2],[92,18,.14],[-20,88,.24]].map(([x, y, d]) => `<i class="added-spark" style="--x:${x}px;--y:${y}px;--d:${d}s"></i>`).join('')}<span class="added-ring">${icon('check')}</span><span class="sr-only">${esc(t('cart.added'))}</span>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add('out'), 900);
+  setTimeout(() => el.remove(), 1600);
+}
 // while a window is open the page behind it does not move (also on iPhone, where overflow:hidden alone is not enough)
 let locks = 0, lockY = 0;
 function lockScroll(on) {
@@ -644,7 +655,7 @@ export function bindGlobal() {
       const id = qa.dataset.quickAdd;
       if (await api.owns(id).catch(() => null)) { toast(t('cart.owned')); return; }
       if (cart.has(id)) { toast(t('book.inCart')); return; }
-      cart.add(id); toast(t('cart.added'));
+      cart.add(id); addedPop();
       $$(`[data-quick-add="${CSS.escape(id)}"]`).forEach(b => { b.classList.add('in', 'pop'); b.innerHTML = qaIcon('in') + (b.classList.contains('qa-wide') ? `<span class="qa-l">${esc(t('book.inCart'))}</span>` : ''); });
       return;
     }
