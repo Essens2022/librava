@@ -298,6 +298,8 @@ class DemoAPI {
   }
   async editionsOf(workId) { await this._loadCatalog(); return this._catalog.filter(b => b.work_id === workId && !b.deleted_at).map(b => ({ ...b, file_path: b._file_path || b.file_path })); }
   async updateBook(id, patch) { await this.saveBook({ id, ...patch }); }
+  async langSiblings() { return []; }
+  async setPrices() { return 0; }
   async newEdition(src, format, extra = {}, files = {}) {
     const work = src.work_id || src.id;
     if (!src.work_id) await this.saveBook({ id: src.id, work_id: work });
@@ -888,6 +890,13 @@ class SupabaseAPI {
   // the formats of one book (EPUB, PDF), drafts included — for Admin
   async editionsOf(workId) {
     const { data, error } = await this.sb.from('books').select('id,format,price_cents,list_price_cents,status,file_path,sample_path').eq('work_id', workId).is('deleted_at', null);
+    this._err(error); return data || [];
+  }
+  // the same product in the other languages (they share a lang_group), for Admin: change one price in several languages
+  async langSiblings(id) {
+    const me = await this.sb.from('books').select('lang_group').eq('id', id).maybeSingle(); this._err(me.error);
+    if (!me.data?.lang_group) return [];
+    const { data, error } = await this.sb.from('books').select('id,language,title,price_cents,list_price_cents,status').eq('lang_group', me.data.lang_group).neq('id', id).is('deleted_at', null).order('language');
     this._err(error); return data || [];
   }
   async updateBook(id, patch) {

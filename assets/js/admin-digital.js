@@ -91,7 +91,8 @@ function form(body, b) {
       <div class="field"><span>Coperta * <small class="muted">imagine verticală</small></span><label class="dg-pick dg-cover" id="dg-coverbox"><input type="file" id="dg-cover" accept="image/*" hidden><img id="dg-coverimg" alt="" ${v.cover_url ? `src="${esc(v.cover_url)}"` : 'hidden'}><b id="dg-covername">${v.cover_url ? 'Schimbă coperta' : 'Alege coperta'}</b></label></div></div></section>
     <section class="panel dg-sec"><h3><i>3</i> Preț</h3>
       <div class="dg-grid2"><label class="field"><span>Preț de vânzare (€) *</span><input class="input" id="dg-price" inputmode="decimal" placeholder="ex. 4,99" value="${v.price_cents ? (v.price_cents / 100).toFixed(2) : ''}"></label>
-      <label class="field"><span>Preț întreg tăiat (€) <small class="muted">opțional</small></span><input class="input" id="dg-list" inputmode="decimal" placeholder="ex. 9,99" value="${v.list_price_cents ? (v.list_price_cents / 100).toFixed(2) : ''}"></label></div><p class="muted dg-hint">Minim 0,49 €. Lasă 0 pentru produs gratuit.</p></section>
+      <label class="field"><span>Preț întreg tăiat (€) <small class="muted">opțional</small></span><input class="input" id="dg-list" inputmode="decimal" placeholder="ex. 9,99" value="${v.list_price_cents ? (v.list_price_cents / 100).toFixed(2) : ''}"></label></div><p class="muted dg-hint">Minim 0,49 €. Lasă 0 pentru produs gratuit.</p>
+      <div class="dg-sib" id="dg-sib" hidden></div></section>
     <section class="panel dg-sec"><h3><i>4</i> Descriere și căutare</h3>
       <label class="field"><span>Descriere *</span><textarea class="input" id="dg-desc" rows="4">${esc(v.description || '')}</textarea></label>
       <div class="field"><span>Cuvinte-cheie <small class="muted">max. 7, nu repeta titlul</small></span><div class="dg-kws">${kws.map((k, i) => `<input class="input dg-kw" maxlength="50" placeholder="Cuvânt ${i + 1}" value="${esc(k)}">`).join('')}</div></div></section>
@@ -109,6 +110,17 @@ function form(body, b) {
     $('#dg-check', body).innerHTML = miss.length ? `<span>Mai lipsește: ${miss.join(', ')}</span>` : '<span class="ok">✓ Gata de publicare</span>';
   };
   body.addEventListener('input', paint); paint();
+  // the same product in other languages: tick where the same price should be applied too
+  let sibs = [];
+  if (b?.id && api.langSiblings) api.langSiblings(b.id).then(list => {
+    sibs = list; if (!list.length) return;
+    const box = $('#dg-sib', body), m = c => (c / 100).toFixed(2).replace('.', ',') + ' €';
+    box.innerHTML = `<b>Același produs în alte limbi</b><small class="muted">Bifează unde vrei să se aplice același preț (și prețul tăiat) când salvezi.</small>
+      ${list.map(x => `<label class="dg-sibrow"><input type="checkbox" value="${esc(x.id)}"><span class="dg-sibl">${esc(String(x.language).toUpperCase())}</span><span class="dg-sibt">${esc(x.title)}</span><span class="dg-sibp">${m(x.price_cents)}${x.list_price_cents > x.price_cents ? ' <s>' + m(x.list_price_cents) + '</s>' : ''}</span></label>`).join('')}
+      <button type="button" class="btn btn-ghost dg-siball" id="dg-siball">Bifează toate</button>`;
+    box.hidden = false;
+    $('#dg-siball', body).onclick = () => { const cs = $$('#dg-sib input', body), all = cs.every(c => c.checked); cs.forEach(c => { c.checked = !all; }); };
+  }).catch(() => {});
   $('#dg-file', body).onchange = e => { files.file = e.target.files[0]; if (files.file) $('#dg-filename', body).textContent = files.file.name + ' · ' + (files.file.size / 1048576).toFixed(1).replace('.', ',') + ' MB'; paint(); };
   $('#dg-cover', body).onchange = e => { files.cover = e.target.files[0]; if (files.cover) { const im = $('#dg-coverimg', body); im.src = URL.createObjectURL(files.cover); im.hidden = false; $('#dg-covername', body).textContent = 'Schimbă coperta'; } paint(); };
   const save = async (status, btn) => {
@@ -127,9 +139,19 @@ function form(body, b) {
       allow_download: true, stamp_downloads: false, status, rights: 'own',
       published_at: b?.published_at || new Date().toISOString().slice(0, 10),
     };
-    const old = btn.textContent; btn.disabled = true; btn.textContent = 'Se salvează…';
-    try { await api.saveBook(data, files); toast(status === 'published' ? 'Produs publicat' : 'Ciornă salvată'); go(ROUTE); }
-    catch (e) { fail(errText(e)); btn.disabled = false; btn.textContent = old; }
+    const ids = $$('#dg-sib input:checked', body).map(c => c.value);
+    if (ids.length && !(price === 0 || (price >= 49 && (!data.list_price_cents || data.list_price_cents > price)))) return fail('Prețul nu se poate aplica la celelalte limbi: minim 0,49 € (sau 0 pentru gratuit), iar prețul tăiat trebuie să fie mai mare decât prețul. Corectează sau debifează limbile.');
+    const old = btn.textContent; $$('#dg-pub, #dg-draft', body).forEach(x => { x.disabled = true; }); btn.textContent = 'Se salvează…';
+    try {
+      await api.saveBook(data, files);
+      let extra = '';
+      if (ids.length) {
+        try { if (!api.setPrices) throw new Error('indisponibil'); await api.setPrices(ids.map(id => ({ id, price, list: data.list_price_cents }))); extra = ' · prețul aplicat și la ' + ids.length + ' limbi'; }
+        catch (e) { toast('Produsul a fost salvat, dar prețul nu s-a putut aplica la celelalte limbi: ' + errText(e), { error: true }); go(ROUTE); return; }
+      }
+      toast((status === 'published' ? 'Produs publicat' : 'Ciornă salvată') + extra); go(ROUTE);
+    }
+    catch (e) { fail(errText(e)); $$('#dg-pub, #dg-draft', body).forEach(x => { x.disabled = false; }); btn.textContent = old; }
   };
   $('#dg-pub', body).onclick = e => save('published', e.target);
   $('#dg-draft', body).onclick = e => save('draft', e.target);
@@ -218,7 +240,7 @@ async function importCard(body, zipFile, books) {
       const ok = btn.dataset.st === 'published' && pkg.price != null && (pkg.price === 0 || pkg.price >= 49);
       const data = { id, title: String(m.title).trim(), subtitle: m.subtitle || null, keywords: (m.keywords || []).slice(0, 7), aplus, author: 'Librava', description: m.description,
         product_type: m.product_type, language: m.language, category: m.category, categories: [m.category], price_cents: pkg.price ?? 0, list_price_cents: pkg.list,
-        allow_download: true, stamp_downloads: false, status: ok ? 'published' : 'draft', rights: 'own', published_at: new Date().toISOString().slice(0, 10) };
+        allow_download: true, stamp_downloads: false, status: ok ? 'published' : 'draft', rights: 'own', published_at: new Date().toISOString().slice(0, 10), ...(/^[0-9a-f-]{36}$/i.test(m.group || '') ? { lang_group: m.group } : {}) };
       say('Salvez produsul…'); await api.saveBook(data, { file: pkg.file, cover });
       card.innerHTML = `<div style="color:#15803d">✓ ${esc(m.title)} — ${ok ? 'publicat' : 'salvat ca ciornă'}. <a href="#${ROUTE}">Vezi produsele</a></div>`;
     } catch (e) { say('Eroare: ' + errText(e)); $$('[data-st]', card).forEach(b => b.disabled = false); }
