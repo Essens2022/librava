@@ -444,3 +444,7 @@ grant execute on function public.admin_set_order(uuid, text) to authenticated;
 -- migration reviews_any_member (applied): any signed-in member can review; reviews.verified is set by triggers from purchases
 -- (reviews_set_verified before insert/update, purchase_verifies_review after a purchase); insert policy no longer requires a purchase
 -- promos.kind also accepts 'offers' (animated live-offers banner): migration 'promos_kind_offers'
+
+-- Same product in other languages share one lang_group (migration books_lang_group); the admin price form can apply one price to the ticked ones.
+alter table public.books add column if not exists lang_group uuid;
+create index if not exists books_lang_group_idx on public.books (lang_group) where lang_group is not null;
