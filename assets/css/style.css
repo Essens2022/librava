@@ -4534,3 +4534,14 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .ladder-say { margin-top: 12px; text-align: center; font-size: 14px; font-weight: 700; color: #2f7a1f; line-height: 1.3; }
 :root[data-theme="dark"] .ladder-say { color: #8fd36a; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ladder-say { color: #8fd36a; } }
+
+/* admin: the same product in other languages, with ticks to apply one price everywhere */
+.dg-sib { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 10px; display: grid; gap: 4px; background: var(--surface-2); }
+.dg-sib small { display: block; }
+.dg-sibrow { display: grid; grid-template-columns: 20px 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; min-height: 40px; }
+.dg-sibrow input { width: 20px; height: 20px; }
+.dg-sibl { font-weight: 700; }
+.dg-sibt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.dg-sibp { white-space: nowrap; }
+.dg-sibp s { color: var(--deal); font-size: 12px; }
+.dg-siball { justify-self: start; padding: 4px 12px; font-size: 13px; }
