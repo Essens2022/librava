@@ -1,11 +1,11 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { t, getLang, LANGS } from './i18n.js?v=20261121152338';
-import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261121152338';
-import { api } from './api.js?v=20261121152338';
-import { icon, toast, errText, CATS, go } from './ui.js?v=20261121152338';
-import { aplusEditor } from './admin.js?v=20261121152338';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261121152338';
+import { t, getLang, LANGS } from './i18n.js?v=20261121152353';
+import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261121152353';
+import { api } from './api.js?v=20261121152353';
+import { icon, toast, errText, CATS, go } from './ui.js?v=20261121152353';
+import { aplusEditor } from './admin.js?v=20261121152353';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261121152353';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
@@ -140,7 +140,7 @@ function form(body, b) {
       published_at: b?.published_at || new Date().toISOString().slice(0, 10),
     };
     const ids = $$('#dg-sib input:checked', body).map(c => c.value);
-    if (ids.length && !(price === 0 || (price >= 49 && (!data.list_price_cents || data.list_price_cents > price)))) return fail('Prețul nu se poate aplica la celelalte limbi: minim 0,49 € (sau 0 pentru gratuit), iar prețul tăiat trebuie să fie mai mare decât prețul. Corectează sau debifează limbile.');
+    if (ids.length && (val('dg-price') === '' || !(price === 0 || (price >= 49 && (!data.list_price_cents || data.list_price_cents > price))))) return fail('Prețul nu se poate aplica la celelalte limbi: minim 0,49 € (sau 0 pentru gratuit), iar prețul tăiat trebuie să fie mai mare decât prețul. Corectează sau debifează limbile.');
     const old = btn.textContent; $$('#dg-pub, #dg-draft', body).forEach(x => { x.disabled = true; }); btn.textContent = 'Se salvează…';
     try {
       await api.saveBook(data, files);
