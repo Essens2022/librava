@@ -4545,3 +4545,8 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .dg-sibp { white-space: nowrap; }
 .dg-sibp s { color: var(--deal); font-size: 12px; }
 .dg-siball { justify-self: start; padding: 4px 12px; font-size: 13px; }
+
+/* green "saving" text readable on dark */
+:root { --ok: #2E7D32; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #8FD36A; } }
+:root[data-theme="dark"] { --ok: #8FD36A; }
