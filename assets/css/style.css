@@ -4554,6 +4554,3 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .cart-secure { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--fg); }
 .cart-secure .ico { width: 20px; height: 20px; color: var(--pista-strong); flex: none; }
 
-.adm-lang { display: inline-flex; border: 1px solid var(--line, #d9ddd2); border-radius: 999px; overflow: hidden; margin-right: 6px; }
-.adm-lang button { border: 0; background: transparent; padding: 6px 12px; font: 700 13px inherit; cursor: pointer; color: inherit; }
-.adm-lang button.on { background: var(--pista-strong, #2f6b3a); color: #fff; }

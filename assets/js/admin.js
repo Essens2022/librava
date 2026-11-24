@@ -1,20 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261124224939';
-import { TA } from './admin-it.js?v=20261124224939';
-import { tAdmin as t, getAdminLang, setAdminLang, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124224939';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261124224939';
-import { resetCompanyCache } from './views.js?v=20261124224939';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261124224939';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261124224939';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261124224939';
-import { optimizeBook } from './optimize.js?v=20261124224939';
-import { api } from './api.js?v=20261124224939';
-import { isDigital } from './ptypes.js?v=20261124224939';
-import { digitalAdmin } from './admin-digital.js?v=20261124224939';
-import { OF_STYLES } from './offerstyles.js?v=20261124224939';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261124224939';
+import { CONFIG } from './config.js?v=20261124225628';
+import { TA } from './admin-it.js?v=20261124225628';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124225628';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261124225628';
+import { resetCompanyCache } from './views.js?v=20261124225628';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261124225628';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261124225628';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261124225628';
+import { optimizeBook } from './optimize.js?v=20261124225628';
+import { api } from './api.js?v=20261124225628';
+import { isDigital } from './ptypes.js?v=20261124225628';
+import { digitalAdmin } from './admin-digital.js?v=20261124225628';
+import { OF_STYLES } from './offerstyles.js?v=20261124225628';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261124225628';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -80,7 +80,7 @@ export async function viewAdmin(el, parts) {
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
-    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns"><span class="adm-lang" role="group" aria-label="Limba / Lingua">${['ro','it'].map(l => `<button type="button" data-alang="${l}" class="${getAdminLang() === l ? 'on' : ''}">${l.toUpperCase()}</button>`).join('')}</span>${tab === 'digital'
+    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns">${tab === 'digital'
       ? `<a class="btn btn-ghost btn-sm" href="#/admin/digital/import">${icon('upload')} ${TA('Importă produs')}</a><a class="btn btn-buy btn-sm" href="#/admin/digital/new">${icon('plus')} ${TA('Adaugă produs digital')}</a>`
       : `<a class="btn btn-ghost btn-sm" href="#/admin/import">${icon('upload')} ${esc(t('imp.tab'))}</a><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a>`}</span></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
@@ -89,7 +89,6 @@ export async function viewAdmin(el, parts) {
     </nav>
     <div id="adm-body"></div>
   </div>`;
-  el.querySelectorAll('[data-alang]').forEach(b => b.addEventListener('click', () => { setAdminLang(b.dataset.alang); location.reload(); }));
   // the tab bar scrolls sideways on phones: keep the open section in view (it used to jump back to the first tab)
   const nav = $('.adm-tabs', el), on = nav?.querySelector('a.on');
   // keep where the bar was scrolled between sections, and only re-centre when the open tab is out of sight
