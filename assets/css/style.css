@@ -4551,3 +4551,7 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 :root { --ok: #2E7D32; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #8FD36A; } }
 :root[data-theme="dark"] { --ok: #8FD36A; }
+
+.adm-lang { display: inline-flex; border: 1px solid var(--line, #d9ddd2); border-radius: 999px; overflow: hidden; margin-right: 6px; }
+.adm-lang button { border: 0; background: transparent; padding: 6px 12px; font: 700 13px inherit; cursor: pointer; color: inherit; }
+.adm-lang button.on { background: var(--pista-strong, #2f6b3a); color: #fff; }

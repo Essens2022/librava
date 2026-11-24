@@ -1,19 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261124222120';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124222120';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261124222120';
-import { resetCompanyCache } from './views.js?v=20261124222120';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261124222120';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261124222120';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261124222120';
-import { optimizeBook } from './optimize.js?v=20261124222120';
-import { api } from './api.js?v=20261124222120';
-import { isDigital } from './ptypes.js?v=20261124222120';
-import { digitalAdmin } from './admin-digital.js?v=20261124222120';
-import { OF_STYLES } from './offerstyles.js?v=20261124222120';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261124222120';
+import { CONFIG } from './config.js?v=20261124222308';
+import { TA } from './admin-it.js?v=20261124222308';
+import { tAdmin as t, getAdminLang, setAdminLang, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124222308';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261124222308';
+import { resetCompanyCache } from './views.js?v=20261124222308';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261124222308';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261124222308';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261124222308';
+import { optimizeBook } from './optimize.js?v=20261124222308';
+import { api } from './api.js?v=20261124222308';
+import { isDigital } from './ptypes.js?v=20261124222308';
+import { digitalAdmin } from './admin-digital.js?v=20261124222308';
+import { OF_STYLES } from './offerstyles.js?v=20261124222308';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261124222308';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -79,8 +80,8 @@ export async function viewAdmin(el, parts) {
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
-    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns">${tab === 'digital'
-      ? `<a class="btn btn-ghost btn-sm" href="#/admin/digital/import">${icon('upload')} Importă produs</a><a class="btn btn-buy btn-sm" href="#/admin/digital/new">${icon('plus')} Adaugă produs digital</a>`
+    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns"><span class="adm-lang" role="group" aria-label="Limba / Lingua">${['ro','it'].map(l => `<button type="button" data-alang="${l}" class="${getAdminLang() === l ? 'on' : ''}">${l.toUpperCase()}</button>`).join('')}</span>${tab === 'digital'
+      ? `<a class="btn btn-ghost btn-sm" href="#/admin/digital/import">${icon('upload')} ${TA('Importă produs')}</a><a class="btn btn-buy btn-sm" href="#/admin/digital/new">${icon('plus')} ${TA('Adaugă produs digital')}</a>`
       : `<a class="btn btn-ghost btn-sm" href="#/admin/import">${icon('upload')} ${esc(t('imp.tab'))}</a><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a>`}</span></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
     <nav class="tabs adm-tabs" aria-label="${esc(t('admin.title'))}">
@@ -88,6 +89,7 @@ export async function viewAdmin(el, parts) {
     </nav>
     <div id="adm-body"></div>
   </div>`;
+  el.querySelectorAll('[data-alang]').forEach(b => b.addEventListener('click', () => { setAdminLang(b.dataset.alang); location.reload(); }));
   // the tab bar scrolls sideways on phones: keep the open section in view (it used to jump back to the first tab)
   const nav = $('.adm-tabs', el), on = nav?.querySelector('a.on');
   // keep where the bar was scrolled between sections, and only re-centre when the open tab is out of sight
@@ -679,14 +681,14 @@ async function visitorsAdmin(body) {
   body.innerHTML = `<div class="panel">${rangeBarHTML(r)}<div id="vi-why"></div><div id="vi-sum"></div><div id="vi-list"><div class="spinner"></div></div></div>`;
   bindRange(body, () => visitorsAdmin(body));
   const who = v => v.user_id ? `<b>${esc(v.name || v.email || '')}</b><div class="muted" style="font-size:13px">${esc(v.email || '')}</div>` : `<span class="muted">${esc(t('admin.vis.guest'))}</span>`;
-  const WHY = { price: 'Prețul', value: 'Nu sunt sigur că merită', look: 'Doar se uitau', trust: 'Nu au încredere să plătească aici', amazon: 'Preferă tipărit / Amazon', format: 'Nu pot citi formatul', other: 'Altceva', text: 'Au scris singuri' };
+  const WHY = { price: TA('Prețul'), value: TA('Nu sunt sigur că merită'), look: TA('Doar se uitau'), trust: TA('Nu au încredere să plătească aici'), amazon: TA('Preferă tipărit / Amazon'), format: TA('Nu pot citi formatul'), other: 'Altceva', text: 'Au scris singuri' };
   const drawWhy = async () => {
     try {
       const rows = await api.adminWhy(cuISO(cuRange())), box = $('#vi-why', body); if (!box) return;
       const n = {}; rows.forEach(r => { const k = /why=(\w+)/.exec(r.meta?.note || '')?.[1]; if (k) n[k] = (n[k] || 0) + 1; });
       const written = rows.map(r => /why=text: (.+)/.exec(r.meta?.note || '')?.[1]).filter(Boolean);
       const tot = Object.values(n).reduce((a, b) => a + b, 0);
-      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>Ce îi oprește să cumpere</b> <span class="muted">(răspunsuri ale vizitatorilor: ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : '<p class="muted" style="margin:8px 0 0">Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.</p>'}${written.length ? `<div style="margin-top:12px"><b style="font-size:14px">Ce au scris ei</b>${written.slice(0, 20).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>`;
+      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>${TA('Ce îi oprește să cumpere')}</b> <span class="muted">${TA('(răspunsuri ale vizitatorilor:')} ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : ('<p class="muted" style="margin:8px 0 0">' + TA('Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.') + '</p>')}${written.length ? `<div style="margin-top:12px"><b style="font-size:14px">Ce au scris ei</b>${written.slice(0, 20).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>`;
     } catch { }
   };
   const draw = async () => {
@@ -2299,12 +2301,12 @@ const PROMO_SPEC = { hero: { w: 2400, h: 400, mw: 1200, mh: 750 }, strip: { w: 1
 const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at) > new Date() ? 'soon' : p.ends_at && new Date(p.ends_at) <= new Date() ? 'ended' : 'live';
 const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
 const PR_SLOT_GROUPS = [
-  ['Pagina principală', [['home-hero', 'Sus: bannerul mare (în rotație)'], ['home-1', 'Sub bara de încredere, înainte de rafturi'], ['home-2', 'După raftul „Recomandate pentru tine” (primul raft de cărți)'], ['home-3', 'După secțiunea Produse digitale'], ['home-4', 'După „Cumpără după categorie”, înainte de „Noutăți”'], ['home-5', 'După raftul „Noutăți”'], ['home-6', 'După raftul „La reducere”'], ['home-7', 'Jos, după „Gratuite de citit acum”']]],
-  ['Secțiunea Cărți (căutare și liste de cărți)', [['search-ebooks-top', 'Sus, deasupra cărților'], ['search-ebooks-bottom', 'Jos, sub cărți']]],
-  ['Secțiunea Produse digitale (pagina produselor și filtrele lor)', [['search-digital-top', 'Sus, deasupra produselor'], ['search-digital-bottom', 'Jos, sub produse'], ['digital-top', 'Pagina „Produse digitale”, sus'], ['digital-bottom', 'Pagina „Produse digitale”, jos']]],
-  ['Căutare, orice listă (cărți și produse împreună)', [['search-top', 'Sus, deasupra rezultatelor'], ['search-bottom', 'Jos, sub rezultate']]],
-  ['Pagina unei cărți', [['book-below', 'Sub informațiile cărții']]],
-  ['Coș', [['cart-below', 'Sub produsele din coș']]]];
+  [TA('Pagina principală'), [['home-hero', TA('Sus: bannerul mare (în rotație)')], ['home-1', TA('Sub bara de încredere, înainte de rafturi')], ['home-2', TA('După raftul „Recomandate pentru tine” (primul raft de cărți)')], ['home-3', TA('După secțiunea Produse digitale')], ['home-4', TA('După „Cumpără după categorie”, înainte de „Noutăți”')], ['home-5', TA('După raftul „Noutăți”')], ['home-6', TA('După raftul „La reducere”')], ['home-7', TA('Jos, după „Gratuite de citit acum”')]]],
+  [TA('Secțiunea Cărți (căutare și liste de cărți)'), [['search-ebooks-top', TA('Sus, deasupra cărților')], ['search-ebooks-bottom', TA('Jos, sub cărți')]]],
+  [TA('Secțiunea Produse digitale (pagina produselor și filtrele lor)'), [['search-digital-top', TA('Sus, deasupra produselor')], ['search-digital-bottom', TA('Jos, sub produse')], ['digital-top', TA('Pagina „Produse digitale”, sus')], ['digital-bottom', TA('Pagina „Produse digitale”, jos')]]],
+  [TA('Căutare, orice listă (cărți și produse împreună)'), [['search-top', TA('Sus, deasupra rezultatelor')], ['search-bottom', TA('Jos, sub rezultate')]]],
+  [TA('Pagina unei cărți'), [['book-below', TA('Sub informațiile cărții')]]],
+  [TA('Coș'), [['cart-below', TA('Sub produsele din coș')]]]];
 async function promosAdmin(body) {
   const filter = sessionStorage.getItem('librava:prLang') || '';
   const [all, books] = await Promise.all([api.adminPromos(), api.adminBooks()]);
@@ -2391,9 +2393,9 @@ async function promoForm(body, id) {
       <div class="kdp-fields">
         <div class="radios">${['hero', 'strip'].map(v => `<label class="check"><input type="radio" name="pl" value="${v}" ${p.placement === v ? 'checked' : ''}> ${esc(t('pr.place.' + v))}</label>`).join('')}</div>
         <label class="field"><span>${esc(t('pr.lang'))} *</span><select id="pr-l"><option value="">${esc(t('pr.allLangs'))}</option>${LANGS.map(([l, n]) => `<option value="${l}" ${p.lang === l ? 'selected' : ''}>${esc(langName(l))} · ${esc(n)}</option>`).join('')}</select><small>${esc(t('pr.langHelp'))}</small></label></div></div>
-    <div class="kdp-block"><div class="kdp-label"><h3>Unde apare</h3><p>Bifează toate locurile unde vrei bannerul. Dacă nu bifezi nimic, apare în locurile obișnuite de pe pagina principală.</p></div>
+    <div class="kdp-block"><div class="kdp-label"><h3>${TA('Unde apare')}</h3><p>${TA('Bifează toate locurile unde vrei bannerul. Dacă nu bifezi nimic, apare în locurile obișnuite de pe pagina principală.')}</p></div>
       <div class="kdp-fields" id="pr-slots">${PR_SLOT_GROUPS.map(([g, items]) => `<div class="pr-sg"><b>${esc(g)}</b>${items.map(([id, name]) => `<label class="check"><input type="checkbox" name="slot" value="${esc(id)}" ${(p.slots || []).includes(id) ? 'checked' : ''}> ${esc(name)}</label>`).join('')}</div>`).join('')}
-        <div class="pr-sg"><b>Pagini de categorie (sus)</b>${CATS.map(c => `<label class="check"><input type="checkbox" name="slot" value="cat:${esc(c)}" ${(p.slots || []).includes('cat:' + c) ? 'checked' : ''}> ${esc(t('cat.' + c))}</label>`).join('')}</div></div></div>
+        <div class="pr-sg"><b>${TA('Pagini de categorie (sus)')}</b>${CATS.map(c => `<label class="check"><input type="checkbox" name="slot" value="cat:${esc(c)}" ${(p.slots || []).includes('cat:' + c) ? 'checked' : ''}> ${esc(t('cat.' + c))}</label>`).join('')}</div></div></div>
     <div class="kdp-block"><div class="kdp-label"><h3>${esc(t('pr.what'))}</h3><p>${esc(t('pr.whatHelp'))}</p></div>
       <div class="kdp-fields">
         <div class="radios">${['book', 'books', 'image', 'offers'].map(v => `<label class="check"><input type="radio" name="kd" value="${v}" ${p.kind === v ? 'checked' : ''}> ${esc(t('pr.kind.' + v))}</label>`).join('')}</div>
