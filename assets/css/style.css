@@ -4551,3 +4551,5 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 :root { --ok: #2E7D32; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ok: #8FD36A; } }
 :root[data-theme="dark"] { --ok: #8FD36A; }
+.cart-secure { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--fg); }
+.cart-secure .ico { width: 20px; height: 20px; color: var(--pista-strong); flex: none; }

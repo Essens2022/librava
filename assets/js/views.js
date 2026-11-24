@@ -1049,7 +1049,7 @@ export async function viewCart(el) {
         <div class="coupon-row"><input id="cp" class="input" maxlength="40" autocomplete="off" autocapitalize="characters" value="${esc(code)}" placeholder="${esc(t('cart.codePh'))}">
         ${code ? `<button type="button" class="btn btn-ghost btn-sm" id="cp-rm">×</button>` : ''}<button class="btn btn-dark btn-sm" type="submit">${esc(t('cart.apply'))}</button></div>
         ${code && cmsg ? `<small class="${r.couponState === 'ok' ? 'save' : 'muted'}">${esc(t(cmsg))}</small>` : ''}</form>
-      <div class="note muted" style="font-size:13px;display:flex;gap:8px">${icon('shield', 'ico')} ${esc(t('home.trust2'))}</div>
+      <div class="cart-secure">${icon('shield', 'ico')} ${esc(t('home.trust2'))}</div>
     </aside>
   </div></div>`;
   $$('[data-rm]', el).forEach(btn => btn.onclick = () => { cart.remove(btn.dataset.rm); viewCart(el); });
