@@ -1,20 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261124225628';
-import { TA } from './admin-it.js?v=20261124225628';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124225628';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261124225628';
-import { resetCompanyCache } from './views.js?v=20261124225628';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261124225628';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261124225628';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261124225628';
-import { optimizeBook } from './optimize.js?v=20261124225628';
-import { api } from './api.js?v=20261124225628';
-import { isDigital } from './ptypes.js?v=20261124225628';
-import { digitalAdmin } from './admin-digital.js?v=20261124225628';
-import { OF_STYLES } from './offerstyles.js?v=20261124225628';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261124225628';
+import { CONFIG } from './config.js?v=20261126150851';
+import { TA } from './admin-it.js?v=20261126150851';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126150851';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261126150851';
+import { resetCompanyCache } from './views.js?v=20261126150851';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261126150851';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261126150851';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261126150851';
+import { optimizeBook } from './optimize.js?v=20261126150851';
+import { api } from './api.js?v=20261126150851';
+import { isDigital } from './ptypes.js?v=20261126150851';
+import { digitalAdmin } from './admin-digital.js?v=20261126150851';
+import { OF_STYLES } from './offerstyles.js?v=20261126150851';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261126150851';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -556,8 +556,11 @@ const evLine = e => {
   }
 };
 // where did this visit stop, and what probably happened (the same facts for the summary and the timeline)
+let paidOrders = []; // real paid orders of the customer being viewed (the site only sees "purchase" if they came back from Stripe)
+const paidInVisit = E => { if (!E.length || !paidOrders.length) return null; const ts = E.map(e => +new Date(e.created_at)), a = Math.min(...ts) - 60000, b = Math.max(...ts) + 3600000;
+  return paidOrders.find(o => { const p = +new Date(o.paid_at || o.created_at); return p >= a && p <= b; }) || null; };
 function diagnose(E) {
-  const has = ty => E.some(e => e.type === ty);
+  const has = ty => E.some(e => e.type === ty) || (ty === 'purchase' && !!paidInVisit(E));
   const cartPage = E.some(e => e.type === 'pageview' && /cart|cos|carrello/i.test(e.path || ''));
   const last = [...E].reverse().find(e => e.type === 'pageview');
   const lastP = last ? pageLabel(last.path) : '';
@@ -593,7 +596,9 @@ function tlHTML(E) {
     const cls = e.type === 'click' ? 'tl-click' : e.type === 'scroll' ? 'tl-scroll' : '';
     return `<li class="tl-ev tl-${esc(e.type)} ${cls}"><time>${esc(new Date(e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${back ? '<small class="muted">↩ ' + esc(t('admin.act2.ev.return')) + '</small> ' : ''}${txt}${dw}</span></li>`; }).join('');
   const [kind, dtxt] = diagnose(list);
-  return `<li class="tl-diag ${esc(kind)}"><b>${esc(t('admin.diag.title'))}:</b> ${esc(dtxt)}</li>` + html;
+  const po = !list.some(e => e.type === 'purchase') && paidInVisit(list);
+  const payRow = po ? `<li class="tl-ev tl-purchase"><time>${esc(new Date(po.paid_at || po.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))}</time><span>${esc(t('admin.act2.ev.purchase'))} · ${esc(po.reference)}</span></li>` : '';
+  return `<li class="tl-diag ${esc(kind)}"><b>${esc(t('admin.diag.title'))}:</b> ${esc(dtxt)}</li>` + html + payRow;
 }
 function activityHTML(E, r) {
   // group the steps by visit (sid); events arrive newest first
@@ -797,6 +802,7 @@ async function customer(body, id) {
   const cid = /^\d+$/.test(id) ? Number(id) : id;
   const rg = cuRange(), d = await api.adminCustomer(cid, cuISO(rg));
   const c = d.customer;
+  paidOrders = (d.orders || []).filter(o => o.status === 'paid');
   const owned = new Set(d.purchases.map(p => p.book.id));
   const catalog = (await api.adminBooks()).filter(b => !owned.has(b.id));
   const grItems = catalog.map(b => ({ id: b.id, label: b.title + ' (' + (b.language || '').toUpperCase() + ')' }));

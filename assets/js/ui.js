@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261124225628';
-import { CONFIG } from './config.js?v=20261124225628';
-import { SOCIAL_PATHS } from './social.js?v=20261124225628';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261124225628';
-import { esc, store, $, $$ } from './util.js?v=20261124225628';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261126150851';
+import { CONFIG } from './config.js?v=20261126150851';
+import { SOCIAL_PATHS } from './social.js?v=20261126150851';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261126150851';
+import { esc, store, $, $$ } from './util.js?v=20261126150851';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261124225628';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261124225628';
-import { track, trackPage } from './track.js?v=20261124225628';
-import { initGA, applyConsent } from './ga.js?v=20261124225628';
-import { consentStrings } from './consent-i18n.js?v=20261124225628';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261124225628';
-import { api } from './api.js?v=20261124225628';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261124225628';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261126150851';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261126150851';
+import { track, trackPage } from './track.js?v=20261126150851';
+import { initGA, applyConsent } from './ga.js?v=20261126150851';
+import { consentStrings } from './consent-i18n.js?v=20261126150851';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261126150851';
+import { api } from './api.js?v=20261126150851';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261126150851';
 
 // ---------------- icons ----------------
 const P = {

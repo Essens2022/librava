@@ -1,19 +1,19 @@
-import { CONFIG } from './config.js?v=20261124225628';
-import { askWhy } from './why.js?v=20261124225628';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261124225628';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261124225628';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261124225628';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261124225628';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261124225628';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261124225628';
-import { couponLive } from './welcome.js?v=20261124225628';
-import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261124225628';
-import { track } from './track.js?v=20261124225628';
-import { gaEvent } from './ga.js?v=20261124225628';
-import { guessLang } from './langdetect.js?v=20261124225628';
-import { didYouMean } from './search.js?v=20261124225628';
-import { api, editionsOf } from './api.js?v=20261124225628';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261124225628';
+import { CONFIG } from './config.js?v=20261126150851';
+import { askWhy } from './why.js?v=20261126150851';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126150851';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261126150851';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261126150851';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261126150851';
+import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261126150851';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261126150851';
+import { couponLive } from './welcome.js?v=20261126150851';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261126150851';
+import { track } from './track.js?v=20261126150851';
+import { gaEvent } from './ga.js?v=20261126150851';
+import { guessLang } from './langdetect.js?v=20261126150851';
+import { didYouMean } from './search.js?v=20261126150851';
+import { api, editionsOf } from './api.js?v=20261126150851';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261126150851';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
