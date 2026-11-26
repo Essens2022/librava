@@ -50,13 +50,18 @@ Deno.serve(async (req) => {
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
-      .select('id,title,author,price_cents,currency,category,categories,product_type')
+      .select('id,title,author,price_cents,currency,category,categories,product_type,sold_at,reserved_until,reserved_order')
       .in('id', ids).eq('status', 'published').is('deleted_at', null);
     if (error) throw error;
     const { data: owned } = guest ? { data: [] as { book_id: string }[] } : await admin.from('purchases').select('book_id').eq('user_id', user!.id).in('book_id', ids);
     const ownedSet = new Set((owned || []).map((p) => p.book_id));
     const toBuy = (books || []).filter((b) => b.price_cents > 0 && !ownedSet.has(b.id));
     if (!toBuy.length) return json({ error: 'cart.empty' }, 400);
+    // Publisher packages are sold to one buyer only: refuse a sold one or one another buyer is paying for right now
+    const pubs = toBuy.filter((b) => b.product_type === 'publisher');
+    for (const b of pubs) {
+      if (b.sold_at) return json({ error: 'pub.sold' }, 409);
+    }
 
     const currency = (toBuy[0].currency || 'eur').toLowerCase();
     // discounts are calculated here on the server, never trusted from the browser
@@ -78,6 +83,19 @@ Deno.serve(async (req) => {
       items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: calc.final[b.id] ?? b.price_cents, list_cents: b.price_cents })),
     }).select('id, reference').single();
     if (oErr) throw oErr;
+    // hold each package for 15 minutes; the update only succeeds if nobody else holds or bought it (atomic)
+    const held: string[] = [];
+    for (const b of pubs) {
+      const until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const { data: got } = await admin.from('books').update({ reserved_until: until, reserved_order: order.id })
+        .eq('id', b.id).is('sold_at', null).or(`reserved_until.is.null,reserved_until.lt.${new Date().toISOString()},reserved_order.eq.${order.id}`).select('id');
+      if (!got?.length) {
+        for (const id of held) await admin.from('books').update({ reserved_until: null, reserved_order: null }).eq('id', id).eq('reserved_order', order.id);
+        await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+        return json({ error: 'pub.reserved' }, 409);
+      }
+      held.push(b.id);
+    }
     // everything is covered by the offers (e.g. a 100% coupon): add the books straight away, no card needed
     if (amount === 0) {
       // free orders are added to an account, so a guest has to sign in for that
@@ -86,6 +104,7 @@ Deno.serve(async (req) => {
       const { error: pErr } = await admin.from('purchases').upsert(rows, { onConflict: 'user_id,book_id', ignoreDuplicates: true });
       if (pErr) throw pErr;
       await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', order.id);
+      if (pubs.length) await admin.from('books').update({ sold_at: new Date().toISOString(), reserved_until: null }).in('id', pubs.map((b) => b.id));
       if (usedCoupon) await countCoupon(admin, usedCoupon.id);
       return json({ mode: 'done' });
     }

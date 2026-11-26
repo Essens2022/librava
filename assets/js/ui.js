@@ -1,8 +1,8 @@
-import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261126150851';
-import { CONFIG } from './config.js?v=20261126150851';
-import { SOCIAL_PATHS } from './social.js?v=20261126150851';
-import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261126150851';
-import { esc, store, $, $$ } from './util.js?v=20261126150851';
+import { OF_STYLES, ofStyleOf } from './offerstyles.js?v=20261126224110';
+import { CONFIG } from './config.js?v=20261126224110';
+import { SOCIAL_PATHS } from './social.js?v=20261126224110';
+import { t, money, getLang, setLang, LANGS, langName } from './i18n.js?v=20261126224110';
+import { esc, store, $, $$ } from './util.js?v=20261126224110';
 
 // ---------------- theme: light by default, the visitor can switch ----------------
 export const THEMES = ['light', 'dark', 'auto'];
@@ -14,14 +14,14 @@ export function applyTheme(v = getTheme()) {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', dark ? '#111C1D' : '#1C2B2D');
 }
 export const themePills = () => `<div class="lang-pills">${THEMES.map(v => `<button class="pill ${v === getTheme() ? 'on' : ''}" data-theme-set="${v}">${esc(t('theme.' + v))}</button>`).join('')}</div>`;
-import { legalText, LEGAL_VERSION } from './legal.js?v=20261126150851';
-import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261126150851';
-import { track, trackPage } from './track.js?v=20261126150851';
-import { initGA, applyConsent } from './ga.js?v=20261126150851';
-import { consentStrings } from './consent-i18n.js?v=20261126150851';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261126150851';
-import { api } from './api.js?v=20261126150851';
-import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261126150851';
+import { legalText, LEGAL_VERSION } from './legal.js?v=20261126224110';
+import { smartSuggest, highlight, cutWords, cleanQuery } from './search.js?v=20261126224110';
+import { track, trackPage } from './track.js?v=20261126224110';
+import { initGA, applyConsent } from './ga.js?v=20261126224110';
+import { consentStrings } from './consent-i18n.js?v=20261126224110';
+import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261126224110';
+import { api } from './api.js?v=20261126224110';
+import { describeOffer, offersForBook, offerRunning } from './offers.js?v=20261126224110';
 
 // ---------------- icons ----------------
 const P = {
@@ -256,6 +256,7 @@ export function renderChrome() {
   <div class="hdr-sub"><nav class="wrap subnav" aria-label="${esc(t('nav.browse'))}">
     <button class="menu-btn" data-drawer>${icon('menu')} ${esc(t('nav.all'))}</button>
     <button type="button" class="allbooks-btn" data-allbooks aria-haspopup="true">${esc(t('nav.allBooks'))} ${icon('chevD', 'ico chev')}</button>
+    <a href="#/publisher" data-nav="publisher" class="nav-pub">${esc(t('pub.nav'))}</a>
     <a href="#/search?sort=newest" data-nav="new">${esc(t('nav.new'))}</a>
     <a href="#/search?deals=1" data-nav="deals">${esc(t('nav.deals'))}</a>
     <a href="#/search?price=free" data-nav="free">${esc(t('nav.free'))}</a>
@@ -409,11 +410,11 @@ export function pcoverHTML(b, { badge = true } = {}) {
   return `<div class="pcover pc-${ty}" data-id="${esc(b.id)}"><span class="ptag ptag-${ty}">${icon('pt_' + ty, 'ico')}${esc(t('ptype1.' + ty))}</span>${bd}${img}<span class="pfmt">${esc(t('book.formatShort.' + b.format))}</span></div>`;
 }
 export function coverHTML(b, { badge = true, thumb = false } = {}) {
-  if (isDigital(b)) return pcoverHTML(b, { badge });
+  if (isDigital(b) && !isPub(b)) return pcoverHTML(b, { badge });
   const disc = b.list_price_cents && b.list_price_cents > b.price_cents ? Math.round((1 - b.price_cents / b.list_price_cents) * 100) : 0;
   const bd = !badge ? '' : !b.price_cents ? `<span class="badge free">${esc(t('book.free'))}</span>` : disc ? `<span class="badge">-${disc}%</span>` : '';
   const img = b.cover_url ? `<img src="${thumb ? '/book/' + esc(b.id) + '/thumb.webp' : esc(b.cover_url)}"${thumb ? ` data-full="${esc(b.cover_url)}"` : ''} alt="${esc(b.title)}" loading="lazy" decoding="async">` : `<span class="ph">${esc(b.title)}</span>`;
-  const ptb = isDigital(b) ? `<span class="ptb ptb-${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</span>` : '';
+  const ptb = isDigital(b) && !isPub(b) ? `<span class="ptb ptb-${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</span>` : '';
   const baked = SPINE_BAKED.has(b.id) ? ' baked' : '';
   const fl = flagsHTML(b.id, b.language);
   return `<div class="cover${baked}${fl ? ' has-flg' : ''}"${badge ? ` data-b="${esc(b.id)}"` : ` data-id="${esc(b.id)}"`} data-lg="${esc(b.language || '')}">${fl}${badge ? lblHTML(b.id) : ''}${bd}${ptb}${img}</div>`;
@@ -463,7 +464,22 @@ export function cardHTML(b) {
     <div>${priceHTML(b)}</div>
   </a>`;
 }
+// Publisher package: a normal Librava list card (same cover, cart button and discount badge), plus what the package includes
+export function pubCardHTML(b) {
+  const sold = pubSold(b);
+  return `<a class="rcard pub-card${sold ? ' is-sold' : ''}" href="#/book/${encodeURIComponent(b.id)}">
+    <div class="cover-wrap">${coverHTML(b, { thumb: true })}${sold ? `<span class="pub-sold">${esc(t('pub.soldTag'))}</span>` : quickAdd(b)}</div>
+    <div class="rinfo">
+      <div class="card-title" title="${esc(fullTitle(b))}">${esc(fullTitle(b))}</div>
+      <div class="card-author">${esc(t('pub.forPublisher'))}</div>
+      <div class="card-meta"><span class="fmt">ZIP · DOCX · PDF · A+</span>${b.pages ? `<span>${b.pages} p.</span>` : ''}</div>
+      <div>${priceHTML(b)}</div>
+      <div class="pub-tags"><span class="pub-rights">© ${esc(t('pub.rightsYours'))}</span><span class="pub-one">★ ${esc(t('pub.oneBuyer'))}</span></div>
+    </div>
+  </a>`;
+}
 export function rcardHTML(b) {
+  if (isPub(b)) return pubCardHTML(b);
   if (isDigital(b)) return `<a class="rcard prcard" href="#/book/${encodeURIComponent(b.id)}">
     <div class="cover-wrap">${coverHTML(b)}</div>
     <div class="rinfo">

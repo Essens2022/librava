@@ -27,6 +27,9 @@ async function fulfill(admin: any, order: any, session: any) {
     .update({ status: 'paid', paid_at: new Date().toISOString(), email: email || order.email, livemode: session.livemode !== false })
     .eq('id', order.id).eq('status', 'pending').select('id');
   if (upd?.length) {
+    // Publisher packages: sold for good (one buyer only)
+    const ids = (order.items || []).map((i: { book_id: string }) => i.book_id);
+    await admin.from('books').update({ sold_at: new Date().toISOString(), reserved_until: null }).in('id', ids).eq('product_type', 'publisher');
     for (const a of (order.offers || []) as { id: string; kind: string }[]) {
       if (a.kind !== 'coupon') continue;
       const { data: o } = await admin.from('offers').select('uses,config').eq('id', a.id).maybeSingle();

@@ -3,12 +3,12 @@
 //   - DemoAPI: everything in this browser (localStorage + IndexedDB)
 //   - SupabaseAPI: real accounts, database, private file storage, Stripe
 // =====================================================================
-import { CONFIG } from './config.js?v=20261126150851';
-import { applyOffers, offerRunning } from './offers.js?v=20261126150851';
-import { scoreBook } from './search.js?v=20261126150851';
-import { getLang } from './i18n.js?v=20261126150851';
-import { FILE_FORMATS } from './ptypes.js?v=20261126150851';
-import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261126150851';
+import { CONFIG } from './config.js?v=20261126224110';
+import { applyOffers, offerRunning } from './offers.js?v=20261126224110';
+import { scoreBook } from './search.js?v=20261126224110';
+import { getLang } from './i18n.js?v=20261126224110';
+import { FILE_FORMATS } from './ptypes.js?v=20261126224110';
+import { store, uid, blobs, norm, loadScript, fileToDataURL } from './util.js?v=20261126224110';
 // Demo mode exists only for local development (localhost). The live site never loads fake books.
 export const DEMO_ALLOWED = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 let DEMO_BOOKS = [];
@@ -18,6 +18,8 @@ let DEMO_BOOKS = [];
 export function filterBooks(all, o = {}) {
   let list = all.slice();
   if (!o.includeDrafts) list = list.filter(b => b.status === 'published');
+  // Publisher packages live only in their own section (#/publisher): never mixed into shelves, search, recommendations
+  if (!o.includeDrafts && o.ptype !== 'publisher') list = list.filter(b => b.product_type !== 'publisher');
   if (o.category) list = list.filter(b => b.category === o.category || (b.categories || []).includes(o.category));
   if (o.format) list = list.filter(b => b.format === o.format);
   if (o.ptype) list = list.filter(b => (b.product_type || 'ebook') === o.ptype);
@@ -111,7 +113,7 @@ class DemoAPI {
   constructor() { this.listeners = []; this._user = null; this._catalog = null; this.isDemo = true; }
 
   async init() {
-    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261126150851')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
+    if (DEMO_ALLOWED && !DEMO_BOOKS.length) { try { DEMO_BOOKS = (await import('./demo-data.js?v=20261126224110')).DEMO_BOOKS; } catch { DEMO_BOOKS = []; } }
     // older versions created a built-in demo admin with a fixed password: remove it
     let users = store.get('demo:users', []);
     if (users.some(u => u.id === 'u_admin')) {

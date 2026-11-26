@@ -1,19 +1,20 @@
-import { CONFIG } from './config.js?v=20261126150851';
-import { askWhy } from './why.js?v=20261126150851';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126150851';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261126150851';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261126150851';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261126150851';
-import { PTYPES, ptypeOf, isDigital, kindLabel, hasDigital } from './ptypes.js?v=20261126150851';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261126150851';
-import { couponLive } from './welcome.js?v=20261126150851';
-import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261126150851';
-import { track } from './track.js?v=20261126150851';
-import { gaEvent } from './ga.js?v=20261126150851';
-import { guessLang } from './langdetect.js?v=20261126150851';
-import { didYouMean } from './search.js?v=20261126150851';
-import { api, editionsOf } from './api.js?v=20261126150851';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261126150851';
+import { CONFIG } from './config.js?v=20261126224110';
+import { askWhy } from './why.js?v=20261126224110';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126224110';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261126224110';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261126224110';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261126224110';
+import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261126224110';
+import { mountPubBanner } from './publisher.js?v=20261126224110';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261126224110';
+import { couponLive } from './welcome.js?v=20261126224110';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261126224110';
+import { track } from './track.js?v=20261126224110';
+import { gaEvent } from './ga.js?v=20261126224110';
+import { guessLang } from './langdetect.js?v=20261126224110';
+import { didYouMean } from './search.js?v=20261126224110';
+import { api, editionsOf } from './api.js?v=20261126224110';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261126224110';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -132,6 +133,7 @@ export async function viewHome(el) {
       <div>${icon('shield')} ${esc(t('home.trust2'))}</div>
       <div>${icon('devices')} ${esc(t('home.trust3'))}</div>
     </div>
+    <div class="pub-banner-slot" data-pub-banner></div>
     <div class="promo-slot" data-slot="home-1"></div>
     ${cont ? `<section class="panel continue">
       <a href="#/read/${encodeURIComponent(cont.book.id)}">${coverHTML(cont.book, { badge: false })}</a>
@@ -162,6 +164,7 @@ export async function viewHome(el) {
     <div class="promo-slot" data-slot="home-7"></div>
   </div>`;
   mountPromos(el);
+  mountPubBanner(el);
   if (L === 'en') mountGuideRail(el);
 }
 
@@ -358,8 +361,9 @@ export async function viewBook(el, id) {
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
       ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map((o, oi) => `<div class="offer-row${oi ? ' rot-hide' : ''}"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
+      ${isPub(b) && pubSold(b) ? `<div class="pub-sold-note">${esc(t('pub.soldNote'))}</div>` : `${isPub(b) ? `<div class="pub-lic"><span class="pub-rights">© ${esc(t('pub.rightsYours'))}</span> <span class="pub-one">★ ${esc(t('pub.oneBuyer'))}</span><p class="muted" style="font-size:13px;margin:6px 0 0">${esc(t('pub.lic'))}</p></div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
-      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>
+      <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`}
       <div class="deliv-card">
         <div class="dc-head"><span class="dc-bolt">${icon('bolt')}</span><div><b>${esc(t('book.dcHead'))}</b><span>${esc(t('book.dcSub'))}</span></div></div>
         <ol class="dc-steps"><li><i>1</i><span>${esc(t('book.dcS1'))}</span></li><li><i>2</i><span>${esc(t('book.dcS2'))}</span></li><li><i>3</i><span>${esc(t(isDigital(b) ? 'book.dcS3d' : 'book.dcS3'))}</span></li></ol>
@@ -373,7 +377,7 @@ export async function viewBook(el, id) {
       </div>`);
 
   el.innerHTML = `<div class="wrap page">
-    <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › ${isDigital(b) ? `<a href="#/search?type=${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</a>` : `<a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a>`}</nav>
+    <nav class="crumbs"><a href="#/">${esc(CONFIG.siteName)}</a> › ${isPub(b) ? `<a href="#/publisher">${esc(t('pub.nav'))}</a>` : isDigital(b) ? `<a href="#/search?type=${ptypeOf(b)}">${esc(t('ptype1.' + ptypeOf(b)))}</a>` : `<a href="#/search?cat=${b.category}">${esc(t('cat.' + b.category))}</a>`}</nav>
     <div class="book-layout">
       <div class="book-cover-col">
         ${coverHTML(b)}

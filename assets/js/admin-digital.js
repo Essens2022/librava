@@ -1,12 +1,12 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { tAdmin as t, getLang, LANGS } from './i18n.js?v=20261126150851';
-import { TA } from './admin-it.js?v=20261126150851';
-import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261126150851';
-import { api } from './api.js?v=20261126150851';
-import { icon, toast, errText, CATS, go } from './ui.js?v=20261126150851';
-import { aplusEditor } from './admin.js?v=20261126150851';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261126150851';
+import { tAdmin as t, getLang, LANGS } from './i18n.js?v=20261126224110';
+import { TA } from './admin-it.js?v=20261126224110';
+import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261126224110';
+import { api } from './api.js?v=20261126224110';
+import { icon, toast, errText, CATS, go } from './ui.js?v=20261126224110';
+import { aplusEditor } from './admin.js?v=20261126224110';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261126224110';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
@@ -84,7 +84,7 @@ function form(body, b) {
     <section class="panel dg-sec"><h3><i>1</i> ${TA('Informații de bază')}</h3>
       <label class="field"><span>${TA('Titlu *')} <small class="muted">${TA('cum caută oamenii pe internet')}</small></span><input class="input" id="dg-title" maxlength="140" value="${esc(v.title || '')}"><em class="dg-cnt" data-for="dg-title" data-max="140"></em></label>
       <label class="field"><span>Subtitlu <small class="muted">${TA('cifre concrete: câte pagini, câte foi, ce conține')}</small></span><input class="input" id="dg-sub" maxlength="200" value="${esc(v.subtitle || '')}"><em class="dg-cnt" data-for="dg-sub" data-max="200"></em></label>
-      <div class="dg-grid3"><label class="field"><span>${TA('Tip produs *')}</span><select class="input" id="dg-type">${PTYPES.map(p => `<option value="${p}" ${ptypeOf(v) === p ? 'selected' : ''}>${esc(t('ptype1.' + p))}</option>`).join('')}</select></label>
+      <div class="dg-grid3"><label class="field"><span>${TA('Tip produs *')}</span><select class="input" id="dg-type">${[...PTYPES, 'publisher'].map(p => `<option value="${p}" ${ptypeOf(v) === p ? 'selected' : ''}>${esc(t('ptype1.' + p))}</option>`).join('')}</select></label>
       <label class="field"><span>${TA('Limba produsului')}</span><select class="input" id="dg-lang">${LANGS.map(([c, n]) => `<option value="${c}" ${v.language === c ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
       <label class="field"><span>Categorie</span><select class="input" id="dg-cat">${CATS.map(c => `<option value="${c}" ${v.category === c ? 'selected' : ''}>${esc(t('cat.' + c))}</option>`).join('')}</select></label></div></section>
     <section class="panel dg-sec"><h3><i>2</i> ${TA('Fișierul și coperta')}</h3>
@@ -190,7 +190,7 @@ async function readProduct(zipFile) {
   const cover = await asFile(ce);
   if (!cover) err(TA('Lipsește coperta (cover.jpg).'));
   for (const [k, n] of [['title', 'titlul'], ['description', 'descrierea'], ['language', 'limba'], ['product_type', 'tipul produsului'], ['category', 'categoria']]) if (!String(meta[k] || '').trim()) err((TA('Lipsește') + ' ') + n + (' ' + TA('în product.json.')));
-  if (meta.product_type && !PTYPES.includes(meta.product_type)) err('Tip necunoscut: ' + meta.product_type + ' (acceptate: ' + PTYPES.join(', ') + ').');
+  if (meta.product_type && !PTYPES.includes(meta.product_type) && meta.product_type !== 'publisher') err('Tip necunoscut: ' + meta.product_type + ' (acceptate: ' + PTYPES.join(', ') + ').');
   if (meta.category && !CATS.includes(meta.category)) err((TA('Categorie necunoscută:') + ' ') + meta.category + '.');
   const num = v => v == null || v === '' ? null : Math.round(parseFloat(String(v).replace(',', '.')) * 100);
   const price = num(meta.price), list = num(meta.list_price);

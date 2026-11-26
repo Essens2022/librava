@@ -4554,3 +4554,43 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .cart-secure { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--fg); }
 .cart-secure .ico { width: 20px; height: 20px; color: var(--pista-strong); flex: none; }
 
+
+/* ---------- Publisher: complete book packages for one buyer (menu pill, strip, listing cards) ---------- */
+.subnav .nav-pub { background: linear-gradient(135deg, #3B2BFF, #7B2CFF); color: #fff !important; border-radius: 999px; padding: 4px 14px; font-weight: 800; box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset; }
+.subnav .nav-pub.on { box-shadow: 0 0 0 2px #FFE14A inset; }
+.pub-banner-slot:empty { display: none; }
+.pub-wow { display: block; position: relative; height: 110px; margin: 0 0 12px; border-radius: 18px; overflow: hidden; color: #fff; text-decoration: none; background: radial-gradient(circle at 75% 60%, #7B2CFF 0%, #2A1BFF 45%, #0A0A6E 100%); box-shadow: 0 6px 16px rgba(42,27,255,.33); }
+.pub-wow:hover { text-decoration: none; }
+.pw-rays { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.13) 0 8deg, transparent 8deg 22deg); animation: pw-spin 24s linear infinite; -webkit-mask-image: radial-gradient(circle, #000 10%, transparent 68%); mask-image: radial-gradient(circle, #000 10%, transparent 68%); }
+.pw-ttl { position: absolute; left: 14px; top: 9px; z-index: 2; font: 800 clamp(30px, 9.6vw, 40px)/1 Figtree, 'Arial Black', Impact, sans-serif; letter-spacing: -.5px; color: #fff; text-shadow: 0 1px 0 #d9d2ff, 0 2px 0 #b8aaff, 0 3px 0 #7a68f0, 0 4px 0 #5d4bd0, 0 7px 10px rgba(0,0,0,.53); }
+.pw-lw { position: absolute; left: 14px; bottom: 11px; z-index: 2; display: grid; gap: 5px; justify-items: start; }
+.pw-rv { font: 800 15px/1 Figtree, 'Arial Black', sans-serif; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.45); white-space: nowrap; }
+.pw-pl { background: #FFE14A; color: #151B1A; border-radius: 14px; padding: 5px 11px; font: 800 13px/1.1 Figtree, 'Arial Black', sans-serif; white-space: nowrap; }
+.pw-cv { position: absolute; right: 10px; top: 26px; width: 140px; height: 80px; z-index: 3; filter: drop-shadow(0 8px 10px rgba(0,0,0,.45)); }
+.pw-cv img, .pw-cv b { position: absolute; bottom: 10px; width: 34px; aspect-ratio: 5/8; height: auto; object-fit: cover; border-radius: 3px 6px 6px 3px; box-shadow: 0 4px 8px rgba(0,0,0,.53); animation: pw-fl 3s ease-in-out infinite; background: linear-gradient(160deg, #fff, #cfc8ff); }
+.pw-cv :nth-child(1) { left: 0; transform: rotate(-4deg); } .pw-cv :nth-child(2) { left: 35px; transform: rotate(2deg); animation-delay: .3s; z-index: 1; } .pw-cv :nth-child(3) { left: 70px; transform: rotate(-2deg); animation-delay: .6s; } .pw-cv :nth-child(4) { left: 105px; transform: rotate(4deg); animation-delay: .9s; }
+.pw-shelf { position: absolute; left: -4px; right: -4px; bottom: 6px; height: 4px; border-radius: 3px; background: linear-gradient(90deg, #FFE14A, #fff, #FFE14A); box-shadow: 0 0 12px #FFE14A; }
+.pw-exc { position: absolute; z-index: 4; right: 12px; top: 8px; background: linear-gradient(135deg, #FFE14A, #FFB300); color: #151B1A; border-radius: 8px; padding: 3px 8px; font: 800 11px Figtree, 'Arial Black', sans-serif; letter-spacing: .4px; text-transform: uppercase; transform: rotate(4deg); box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+.pw-sp { position: absolute; z-index: 1; color: #FFE14A; font-style: normal; animation: pw-tw 2s ease-in-out infinite; }
+.pw-sp.s1 { left: 58%; top: 8px; font-size: 14px; } .pw-sp.s2 { left: 6px; top: 50px; font-size: 11px; animation-delay: .7s; } .pw-sp.s3 { right: 60px; top: 70px; font-size: 14px; animation-delay: 1.2s; }
+.pub-wow::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.27) 50%, transparent 62%); transform: translateX(-120%); animation: pw-shine 3.4s infinite; }
+@keyframes pw-spin { to { transform: rotate(360deg); } } @keyframes pw-fl { 50% { translate: 0 -6px; } } @keyframes pw-tw { 50% { opacity: .2; transform: scale(.6); } } @keyframes pw-shine { to { transform: translateX(120%); } }
+@media (max-width: 360px) { .pw-ttl { font-size: 27px; } .pw-pl { font-size: 12px; padding: 5px 9px; } .pw-cv { width: 116px; right: 6px; } .pw-cv img, .pw-cv b { width: 28px; } .pw-cv :nth-child(2) { left: 29px; } .pw-cv :nth-child(3) { left: 58px; } .pw-cv :nth-child(4) { left: 87px; } .pw-exc { font-size: 10px; right: 8px; } }
+@media (prefers-reduced-motion: reduce) { .pw-rays, .pw-cv img, .pw-cv b, .pw-sp, .pub-wow::after { animation: none; } }
+.pub-page .pub-banner-slot { margin-bottom: 12px; }
+.pub-ben { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 12px 6px; text-align: center; font-size: 13px; font-weight: 600; line-height: 1.25; margin-bottom: 12px; }
+.pub-ben b { display: block; font-size: 22px; color: var(--pista-strong); margin-bottom: 2px; } .pub-ben .ico { width: 22px; height: 22px; }
+.pub-on { display: flex; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; white-space: nowrap; margin-bottom: 12px; }
+.pub-on-l { font-weight: 800; font-size: 14px; color: var(--muted); flex: none; }
+.pp { border-radius: 18px; padding: 7px 13px; font-weight: 800; font-size: 13px; color: #fff; flex: none; }
+.pp-a { background: #232F3E; } .pp-e { background: #F1641E; } .pp-k { background: #BF0000; } .pp-b { background: #111; } .pp-g { background: #1A73E8; }
+.pub-bar { margin-bottom: 12px; } .pub-count { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .pub-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.pub-card .cover-wrap { position: relative; }
+.pub-tags { display: grid; gap: 4px; justify-items: start; margin-top: 2px; }
+.pub-rights { background: #1B1BFF; color: #fff; border-radius: 7px; padding: 4px 9px; font-weight: 800; font-size: 13px; }
+.pub-one { color: #B26A00; font-weight: 800; font-size: 14px; }
+.pub-sold { position: absolute; right: 6px; bottom: 6px; background: #555; color: #fff; border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 13px; z-index: 2; }
+.pub-card.is-sold { opacity: .6; }
+.pub-fx { display: grid; gap: 8px; font-size: 14px; margin-top: 14px; } .pub-fx div { display: flex; gap: 8px; align-items: baseline; } .pub-fx b { flex: none; min-width: 92px; }
+.pub-ai { text-align: center; font-size: 12px; margin: 12px 0 0; }
+.pub-sold-note { background: #fdecea; color: #B42318; border-radius: 10px; padding: 12px 14px; font-weight: 700; }

@@ -1,16 +1,17 @@
-import { CONFIG } from './config.js?v=20261126150851';
-import { t, getLang, setLang } from './i18n.js?v=20261126150851';
-import { esc, $, $$ } from './util.js?v=20261126150851';
-import { api, chooseBackend } from './api.js?v=20261126150851';
-import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, fillSlots, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261126150851';
-import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewContact, viewDigital, viewLegal, spinner } from './views.js?v=20261126150851';
-import { cartBack } from './cartback.js?v=20261126150851';
-import { goalBar } from './goalbar.js?v=20261126150851';
-import { welcomeGift } from './welcome.js?v=20261126150851';
-import { trackPage } from './track.js?v=20261126150851';
-import { offline } from './offline.js?v=20261126150851';
-import { viewReader } from './reader.js?v=20261126150851';
-import { initPerf } from './perf.js?v=20261126150851';
+import { CONFIG } from './config.js?v=20261126224110';
+import { t, getLang, setLang } from './i18n.js?v=20261126224110';
+import { esc, $, $$ } from './util.js?v=20261126224110';
+import { api, chooseBackend } from './api.js?v=20261126224110';
+import { renderChrome, bindGlobal, icon, openDrawer, applyTheme, pathMode, setPathMode, currentPath, go, fillSlots, showConsent, catSlug, setupDropZones, navStack, saveNav } from './ui.js?v=20261126224110';
+import { viewHome, viewSearch, viewBook, viewCart, viewAccount, viewLibrary, viewWelcome, viewHelp, viewContact, viewDigital, viewLegal, spinner } from './views.js?v=20261126224110';
+import { viewPublisher } from './publisher.js?v=20261126224110';
+import { cartBack } from './cartback.js?v=20261126224110';
+import { goalBar } from './goalbar.js?v=20261126224110';
+import { welcomeGift } from './welcome.js?v=20261126224110';
+import { trackPage } from './track.js?v=20261126224110';
+import { offline } from './offline.js?v=20261126224110';
+import { viewReader } from './reader.js?v=20261126224110';
+import { initPerf } from './perf.js?v=20261126224110';
 
 // the store draws its pages itself: the browser must not jump to an old scroll position after a refresh
 try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch { }
@@ -113,10 +114,11 @@ async function route() {
       case 'library': res = await viewLibrary(el, q); break;
       case 'welcome': res = await viewWelcome(el, q); break;
       case 'read': res = await viewReader(el, parts[1], q); break;
-      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261126150851'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
+      case 'admin': { const { viewAdmin } = await import('./admin.js?v=20261126224110'); res = await viewAdmin(el, parts.slice(1)); break; }   // the admin panel is only downloaded when the administrator opens it
       case 'help': res = viewHelp(el); break;
       case 'contact': res = viewContact(el); break;
       case 'digital': res = await viewDigital(el); break;
+      case 'publisher': res = await viewPublisher(el); break;
       case 'legal': res = await viewLegal(el, parts[1]); break;
       case 'guide': res = await viewGuide(el, parts[1]); break;
       default: res = await viewHome(el);

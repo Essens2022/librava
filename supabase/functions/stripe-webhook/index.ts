@@ -57,6 +57,8 @@ Deno.serve(async (req) => {
   const { data: upd } = await admin.from('orders').update({ status: 'paid', paid_at: new Date().toISOString(), stripe_session_id: session.id, email: email || order.email, livemode: event.livemode !== false }).eq('id', order.id).eq('status', 'pending').select('id');
   // already confirmed a moment ago by confirm-payment: nothing more to do
   if (!upd?.length) return new Response('already processed', { status: 200 });
+  // Publisher packages: sold for good (one buyer only)
+  await admin.from('books').update({ sold_at: new Date().toISOString(), reserved_until: null }).in('id', (order.items as { book_id: string }[]).map((i) => i.book_id)).eq('product_type', 'publisher');
   // a coupon was used: count it (limits like "first 100 customers")
   for (const a of (order.offers || []) as { id: string; kind: string }[]) {
     if (a.kind !== 'coupon') continue;

@@ -1,10 +1,16 @@
 // Product types: every title is an "ebook" unless the product_type column says otherwise.
 // Digital products (planners, calendars, organizers, spreadsheets, templates, printable games, coloring pages, kids worksheets, wall art, cards) are files that are downloaded and used, not read in the reader.
-import { t } from './i18n.js?v=20261126150851';
+import { t } from './i18n.js?v=20261126224110';
 
 export const PTYPES = ['planner', 'calendar', 'organizer', 'spreadsheet', 'template', 'game', 'coloring', 'kids', 'wallart', 'cards'];
-export const ptypeOf = b => (b && PTYPES.includes(b.product_type)) ? b.product_type : 'ebook';
+// Publisher packages (ZIP with manuscript, covers, A+ images, license) are downloaded like digital products but sold as books to ONE buyer only
+export const PUB = 'publisher';
+export const isPub = b => !!b && b.product_type === PUB;
+export const pubSold = b => isPub(b) && (!!b.sold_at || (b.reserved_until && new Date(b.reserved_until) > new Date()));
+export const ptypeOf = b => (b && PTYPES.includes(b.product_type)) ? b.product_type : isPub(b) ? PUB : 'ebook';
 export const isDigital = b => ptypeOf(b) !== 'ebook';
+// digital products of the shop's digital section (publisher packages have their own section)
+export const isShopDigital = b => isDigital(b) && !isPub(b);
 // formats a digital product file can have (ebooks stay pdf / epub)
 export const FILE_FORMATS = ['pdf', 'epub', 'xlsx', 'docx', 'zip'];
 export const FORMAT_MIME = {
@@ -15,4 +21,7 @@ export const FORMAT_MIME = {
 // what the buyer sees on cards and pages: "Digital book (PDF)" for an ebook, "Planner · XLSX" for a digital product
 export const kindLabel = b => isDigital(b) ? `${t('ptype1.' + ptypeOf(b))} · ${t('book.formatShort.' + b.format)}` : t('book.format.' + b.format);
 // the catalogue has digital products at all? (used to show the menu entry only when there is something to show)
-export const hasDigital = list => (list || []).some(b => isDigital(b) && (!b.status || b.status === 'published') && !b.deleted_at);
+export const hasDigital = list => (list || []).some(b => isShopDigital(b) && (!b.status || b.status === 'published') && !b.deleted_at);
+
+// the Publisher section has packages (used to show the menu entry only when there is something to show)
+export const hasPublisher = list => (list || []).some(b => isPub(b) && (!b.status || b.status === 'published') && !b.deleted_at);
