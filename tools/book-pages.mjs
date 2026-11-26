@@ -54,7 +54,8 @@ async function readBooks() {
     if (page.length < 1000) return out;
   }
 }
-const books = await readBooks();
+// Publisher packages (one buyer only) have their own section: no static page, sitemap entry or feed row
+const books = (await readBooks()).filter(b => b.product_type !== 'publisher');
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const plain = s => String(s || '').replace(/<\s*(br|\/p|\/li|\/h\d)\s*\/?>/gi, '\n').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n\s*/g, '\n').trim();

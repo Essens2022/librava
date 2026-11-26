@@ -1,7 +1,7 @@
 // Receives Stripe events and adds paid books to the buyer's library.
 // Deploy:  supabase functions deploy stripe-webhook --no-verify-jwt
 // Secrets: STRIPE_WEBHOOK_SECRET  (from Stripe → Developers → Webhooks)
-// Stripe events to send: checkout.session.completed, checkout.session.async_payment_succeeded
+// Stripe events to send: checkout.session.completed, checkout.session.async_payment_succeeded, checkout.session.expired
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const enc = new TextEncoder();
@@ -32,6 +32,15 @@ Deno.serve(async (req) => {
   }
   const event = JSON.parse(raw);
   const type = event.type as string;
+  // a payment page that expired frees the Publisher packages it was holding
+  if (type === 'checkout.session.expired') {
+    const oid = event.data.object?.metadata?.order_id;
+    if (oid) {
+      const adm = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      await adm.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).eq('reserved_order', oid);
+    }
+    return new Response('released', { status: 200 });
+  }
   if (type !== 'checkout.session.completed' && type !== 'checkout.session.async_payment_succeeded') {
     return new Response('ignored', { status: 200 });
   }

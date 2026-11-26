@@ -1,20 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261126224110';
-import { TA } from './admin-it.js?v=20261126224110';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126224110';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261126224110';
-import { resetCompanyCache } from './views.js?v=20261126224110';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261126224110';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261126224110';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261126224110';
-import { optimizeBook } from './optimize.js?v=20261126224110';
-import { api } from './api.js?v=20261126224110';
-import { isDigital } from './ptypes.js?v=20261126224110';
-import { digitalAdmin } from './admin-digital.js?v=20261126224110';
-import { OF_STYLES } from './offerstyles.js?v=20261126224110';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261126224110';
+import { CONFIG } from './config.js?v=20261126224708';
+import { TA } from './admin-it.js?v=20261126224708';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126224708';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261126224708';
+import { resetCompanyCache } from './views.js?v=20261126224708';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261126224708';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261126224708';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261126224708';
+import { optimizeBook } from './optimize.js?v=20261126224708';
+import { api } from './api.js?v=20261126224708';
+import { isDigital } from './ptypes.js?v=20261126224708';
+import { digitalAdmin } from './admin-digital.js?v=20261126224708';
+import { OF_STYLES } from './offerstyles.js?v=20261126224708';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261126224708';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -2306,7 +2306,7 @@ const PROMO_SPEC = { hero: { w: 2400, h: 400, mw: 1200, mh: 750 }, strip: { w: 1
 const promoStatus = p => !p.active ? 'off' : p.starts_at && new Date(p.starts_at) > new Date() ? 'soon' : p.ends_at && new Date(p.ends_at) <= new Date() ? 'ended' : 'live';
 const langLabel = l => l ? `${langName(l)} (${l.toUpperCase()})` : t('pr.allLangs');
 const PR_SLOT_GROUPS = [
-  [TA('Pagina principală'), [['home-hero', TA('Sus: bannerul mare (în rotație)')], ['home-1', TA('Sub bara de încredere, înainte de rafturi')], ['home-2', TA('După raftul „Recomandate pentru tine” (primul raft de cărți)')], ['home-3', TA('După secțiunea Produse digitale')], ['home-4', TA('După „Cumpără după categorie”, înainte de „Noutăți”')], ['home-5', TA('După raftul „Noutăți”')], ['home-6', TA('După raftul „La reducere”')], ['home-7', TA('Jos, după „Gratuite de citit acum”')]]],
+  [TA('Pagina principală'), [['publisher-top', TA('Pagina „Publisher”, sus')], ['home-hero', TA('Sus: bannerul mare (în rotație)')], ['home-1', TA('Sub bara de încredere, înainte de rafturi')], ['home-2', TA('După raftul „Recomandate pentru tine” (primul raft de cărți)')], ['home-3', TA('După secțiunea Produse digitale')], ['home-4', TA('După „Cumpără după categorie”, înainte de „Noutăți”')], ['home-5', TA('După raftul „Noutăți”')], ['home-6', TA('După raftul „La reducere”')], ['home-7', TA('Jos, după „Gratuite de citit acum”')]]],
   [TA('Secțiunea Cărți (căutare și liste de cărți)'), [['search-ebooks-top', TA('Sus, deasupra cărților')], ['search-ebooks-bottom', TA('Jos, sub cărți')]]],
   [TA('Secțiunea Produse digitale (pagina produselor și filtrele lor)'), [['search-digital-top', TA('Sus, deasupra produselor')], ['search-digital-bottom', TA('Jos, sub produse')], ['digital-top', TA('Pagina „Produse digitale”, sus')], ['digital-bottom', TA('Pagina „Produse digitale”, jos')]]],
   [TA('Căutare, orice listă (cărți și produse împreună)'), [['search-top', TA('Sus, deasupra rezultatelor')], ['search-bottom', TA('Jos, sub rezultate')]]],

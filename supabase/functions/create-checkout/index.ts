@@ -13,6 +13,8 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
+// A package is held while its buyer pays. Stripe sessions live at least 30 minutes, so the hold and the session end together.
+const HOLD_MIN = 32, SESSION_MIN = 31;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function countCoupon(admin: any, id: string) {
@@ -50,7 +52,7 @@ Deno.serve(async (req) => {
 
     const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const { data: books, error } = await admin.from('books')
-      .select('id,title,author,price_cents,currency,category,categories,product_type,sold_at,reserved_until,reserved_order')
+      .select('id,title,author,price_cents,currency,category,categories,product_type,sold_at,reserved_until,reserved_order,reserved_user')
       .in('id', ids).eq('status', 'published').is('deleted_at', null);
     if (error) throw error;
     const { data: owned } = guest ? { data: [] as { book_id: string }[] } : await admin.from('purchases').select('book_id').eq('user_id', user!.id).in('book_id', ids);
@@ -86,17 +88,18 @@ Deno.serve(async (req) => {
     // hold each package for 15 minutes; the update only succeeds if nobody else holds or bought it (atomic)
     const held: string[] = [];
     for (const b of pubs) {
-      const until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-      const { data: got } = await admin.from('books').update({ reserved_until: until, reserved_order: order.id })
-        .eq('id', b.id).is('sold_at', null).or(`reserved_until.is.null,reserved_until.lt.${new Date().toISOString()},reserved_order.eq.${order.id}`).select('id');
+      const until = new Date(Date.now() + HOLD_MIN * 60 * 1000).toISOString();
+      const { data: got } = await admin.from('books').update({ reserved_until: until, reserved_order: order.id, reserved_user: user?.id ?? null })
+        .eq('id', b.id).is('sold_at', null).or(`reserved_until.is.null,reserved_until.lt.${new Date().toISOString()}${user ? `,reserved_user.eq.${user.id}` : ''}`).select('id');
       if (!got?.length) {
-        for (const id of held) await admin.from('books').update({ reserved_until: null, reserved_order: null }).eq('id', id).eq('reserved_order', order.id);
+        for (const id of held) await admin.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).eq('id', id).eq('reserved_order', order.id);
         await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
         return json({ error: 'pub.reserved' }, 409);
       }
       held.push(b.id);
     }
     // everything is covered by the offers (e.g. a 100% coupon): add the books straight away, no card needed
+    if (amount === 0 && pubs.length) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); await admin.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).in('id', pubs.map((b) => b.id)).eq('reserved_order', order.id); return json({ error: 'pub.sold' }, 409); }
     if (amount === 0) {
       // free orders are added to an account, so a guest has to sign in for that
       if (guest) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); return json({ error: 'lib.loginNeeded' }, 401); }
@@ -109,6 +112,7 @@ Deno.serve(async (req) => {
       return json({ mode: 'done' });
     }
 
+    const release = async () => { if (pubs.length) await admin.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).in('id', pubs.map((b) => b.id)).eq('reserved_order', order.id); };
     const base = SITE.endsWith('/') ? SITE : SITE + '/';
     const p = new URLSearchParams();
     p.set('mode', 'payment');
@@ -118,6 +122,7 @@ Deno.serve(async (req) => {
     if (user) p.set('client_reference_id', user.id);
     if (user?.email) p.set('customer_email', user.email);
     p.set('locale', 'auto');
+    if (pubs.length) p.set('expires_at', String(Math.floor(Date.now() / 1000) + SESSION_MIN * 60));
     p.set('metadata[order_id]', order.id);
     p.set('metadata[reference]', order.reference);
     p.set('payment_intent_data[metadata][order_id]', order.id);
@@ -142,7 +147,7 @@ Deno.serve(async (req) => {
       const cp = new URLSearchParams({ amount_off: String(calc.discount), currency, duration: 'once', max_redemptions: '1', name: label });
       const cr = await fetch('https://api.stripe.com/v1/coupons', { method: 'POST', headers: { Authorization: `Bearer ${STRIPE}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: cp });
       const cj = await cr.json();
-      if (!cr.ok) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); return json({ error: cj?.error?.message || 'Stripe error' }, 502); }
+      if (!cr.ok) { await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); await release(); return json({ error: cj?.error?.message || 'Stripe error' }, 502); }
       p.set('discounts[0][coupon]', cj.id);
     }
     const send = () => fetch('https://api.stripe.com/v1/checkout/sessions', {
@@ -159,7 +164,7 @@ Deno.serve(async (req) => {
       session = await res.json();
     }
     if (!res.ok) {
-      await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+      await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id); await release();
       return json({ error: session?.error?.message || 'Stripe error' }, 502);
     }
 

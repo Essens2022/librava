@@ -1,20 +1,20 @@
-import { CONFIG } from './config.js?v=20261126224110';
-import { askWhy } from './why.js?v=20261126224110';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126224110';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261126224110';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261126224110';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261126224110';
-import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261126224110';
-import { mountPubBanner } from './publisher.js?v=20261126224110';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261126224110';
-import { couponLive } from './welcome.js?v=20261126224110';
-import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261126224110';
-import { track } from './track.js?v=20261126224110';
-import { gaEvent } from './ga.js?v=20261126224110';
-import { guessLang } from './langdetect.js?v=20261126224110';
-import { didYouMean } from './search.js?v=20261126224110';
-import { api, editionsOf } from './api.js?v=20261126224110';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261126224110';
+import { CONFIG } from './config.js?v=20261126224708';
+import { askWhy } from './why.js?v=20261126224708';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261126224708';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261126224708';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261126224708';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261126224708';
+import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261126224708';
+import { mountPubBanner } from './publisher.js?v=20261126224708';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261126224708';
+import { couponLive } from './welcome.js?v=20261126224708';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261126224708';
+import { track } from './track.js?v=20261126224708';
+import { gaEvent } from './ga.js?v=20261126224708';
+import { guessLang } from './langdetect.js?v=20261126224708';
+import { didYouMean } from './search.js?v=20261126224708';
+import { api, editionsOf } from './api.js?v=20261126224708';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261126224708';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -361,7 +361,7 @@ export async function viewBook(el, id) {
       ${disc ? `<div><span class="muted" style="font-size:14px">${esc(t('book.listPrice'))} <s>${money(b.list_price_cents)}</s></span><div class="save">${esc(t('book.save', { amount: money(disc), pct: Math.round(disc / b.list_price_cents * 100) }))}</div></div>` : ''}
       <div class="muted" style="font-size:12px">${esc(t('book.vat'))}</div>
       ${badges.length ? `<div class="offer-badges offer-box${cart.get().some(id => id !== b.id) ? ' o-pending' : ''}"><div class="offer-head">${esc(t('book.offersHead'))}</div>${badges.map((o, oi) => `<div class="offer-row${oi ? ' rot-hide' : ''}"><span class="offer-ico">${icon('tag')}</span><span class="offer-main">${hot(esc(describeOffer(o, t, c => t('cat.' + c))))}</span></div>`).join('')}</div>` : ''}
-      ${isPub(b) && pubSold(b) ? `<div class="pub-sold-note">${esc(t('pub.soldNote'))}</div>` : `${isPub(b) ? `<div class="pub-lic"><span class="pub-rights">© ${esc(t('pub.rightsYours'))}</span> <span class="pub-one">★ ${esc(t('pub.oneBuyer'))}</span><p class="muted" style="font-size:13px;margin:6px 0 0">${esc(t('pub.lic'))}</p></div>` : ''}
+      ${isPub(b) && pubSold(b) ? `<div class="pub-sold-note">${esc(t('pub.soldNote'))} <a href="#/publisher">${esc(t('pub.nav'))} ›</a></div>` : `${isPub(b) ? `<div class="pub-lic"><span class="pub-rights">© ${esc(t('pub.rightsYours'))}</span> <span class="pub-one">★ ${esc(t('pub.oneBuyer'))}</span><p class="muted" style="font-size:13px;margin:6px 0 0">${esc(t('pub.lic'))}</p></div>` : ''}
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`}
       <div class="deliv-card">
@@ -422,7 +422,7 @@ export async function viewBook(el, id) {
             ${isDigital(b) ? '' : bookSpecs(b)}
           </dl></div>
         </div>
-        ${b.rights === 'public' ? '' : `<p class="copy-note">${esc(t('book.copyNote', { year: copyYear(b) }))}</p>`}
+        ${b.rights === 'public' || isPub(b) ? '' : `<p class="copy-note">${esc(t('book.copyNote', { year: copyYear(b) }))}</p>`}
       </div>
       <aside class="buybox">
         ${buy}
@@ -974,7 +974,7 @@ export async function viewCart(el) {
   const found = (await Promise.all(ids.map(id => api.getBook(id)))).filter(Boolean);
   // books already bought (or no longer for sale) leave the cart by themselves
   const mine = await Promise.all(found.map(b => api.owns(b.id).catch(() => null)));
-  const books = found.filter((b, i) => !mine[i]);
+  const books = found.filter((b, i) => !mine[i] && !(isPub(b) && b.sold_at));   // a sold one-buyer package leaves the cart too
   if (books.length !== ids.length) cart.set(books.map(b => b.id));
   if (!books.length) {
     el.innerHTML = `<div class="wrap page"><div class="panel empty">${icon('cart')}<h1 style="font-size:22px;color:var(--fg)">${esc(t('cart.empty'))}</h1><p>${esc(t('cart.emptyHint'))}</p><a class="btn btn-buy" href="#/">${esc(t('book.backHome'))}</a></div></div>`;
