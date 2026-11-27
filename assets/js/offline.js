@@ -4,7 +4,8 @@
 // =====================================================================
 import { blobs, store, loadScript } from './util.js?v=20261127145606';
 import { api } from './api.js?v=20261127145606';
-import { FORMAT_MIME } from './ptypes.js?v=20261127145606';
+import { FORMAT_MIME, isPub } from './ptypes.js?v=20261127145606';
+import { personalisePackage } from './pub-license.js?v=20261127145606';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
@@ -52,6 +53,7 @@ export async function downloadBook(book, onProgress) {
   let blob = await fetchBookFile(book, onProgress);
   if (!['pdf', 'epub'].includes(book.format) && FORMAT_MIME[book.format]) blob = new Blob([blob], { type: FORMAT_MIME[book.format] }); // planners, spreadsheets…: delivered unchanged
   const u = api.user();
+  if (isPub(book) && book.format === 'zip' && u) { const ref = (await api.owns?.(book.id).catch(() => null))?.order?.reference || ''; blob = await personalisePackage(blob, book, u, ref); }
   if (book.format === 'pdf' && book.stamp_downloads !== false && u && blob.size < 200 * 1048576) {
     try {
       await loadScript(VENDOR('pdf-lib.min.js'));
