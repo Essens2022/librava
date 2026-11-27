@@ -1,20 +1,20 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261127020156';
-import { TA } from './admin-it.js?v=20261127020156';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127020156';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261127020156';
-import { resetCompanyCache } from './views.js?v=20261127020156';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261127020156';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261127020156';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261127020156';
-import { optimizeBook } from './optimize.js?v=20261127020156';
-import { api } from './api.js?v=20261127020156';
-import { isDigital } from './ptypes.js?v=20261127020156';
-import { digitalAdmin } from './admin-digital.js?v=20261127020156';
-import { OF_STYLES } from './offerstyles.js?v=20261127020156';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261127020156';
+import { CONFIG } from './config.js?v=20261127024438';
+import { TA } from './admin-it.js?v=20261127024438';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127024438';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261127024438';
+import { resetCompanyCache } from './views.js?v=20261127024438';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261127024438';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261127024438';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261127024438';
+import { optimizeBook } from './optimize.js?v=20261127024438';
+import { api } from './api.js?v=20261127024438';
+import { isDigital } from './ptypes.js?v=20261127024438';
+import { digitalAdmin } from './admin-digital.js?v=20261127024438';
+import { OF_STYLES } from './offerstyles.js?v=20261127024438';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261127024438';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -22,6 +22,7 @@ const TABS = [
   ['stats', '/admin/stats', 'eye', 'st.title'],
   ['books', '/admin/books', 'library', 'admin.books'],
   ['digital', '/admin/digital', 'box', 'admin.tab.digital'],
+  ['publisher', '/admin/publisher', 'box', null], // Publisher packages: own section
   ['prices', '/admin/prices', 'tag', 'bp.tab'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['import', '/admin/import', 'upload', 'imp.tab'],
@@ -80,12 +81,14 @@ export async function viewAdmin(el, parts) {
   if (tab === 'sales') tab = 'overview';
   const active = tab === 'edit' ? 'new' : tab;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
-    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns">${tab === 'digital'
+    <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns">${tab === 'publisher'
+      ? `<a class="btn btn-ghost btn-sm" href="#/admin/publisher/import">${icon('upload')} ${TA('Importă pachet')}</a><a class="btn btn-buy btn-sm" href="#/admin/publisher/new">${icon('plus')} ${TA('Adaugă pachet')}</a>`
+      : tab === 'digital'
       ? `<a class="btn btn-ghost btn-sm" href="#/admin/digital/import">${icon('upload')} ${TA('Importă produs')}</a><a class="btn btn-buy btn-sm" href="#/admin/digital/new">${icon('plus')} ${TA('Adaugă produs digital')}</a>`
       : `<a class="btn btn-ghost btn-sm" href="#/admin/import">${icon('upload')} ${esc(t('imp.tab'))}</a><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a>`}</span></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
     <nav class="tabs adm-tabs" aria-label="${esc(t('admin.title'))}">
-      ${TABS.map(([k, href, ic, label]) => `<a class="${k === active ? 'on' : ''}" href="#${href}" ${k === active ? 'aria-current="page"' : ''}>${icon(ic, 'ico')} ${esc(tab === 'edit' && k === 'new' ? t('admin.edit') : t(label))}</a>`).join('')}
+      ${TABS.map(([k, href, ic, label]) => `<a class="${k === active ? 'on' : ''}" href="#${href}" ${k === active ? 'aria-current="page"' : ''}>${icon(ic, 'ico')} ${esc(tab === 'edit' && k === 'new' ? t('admin.edit') : (label ? t(label) : 'Publisher'))}</a>`).join('')}
     </nav>
     <div id="adm-body"></div>
   </div>`;
@@ -107,6 +110,7 @@ export async function viewAdmin(el, parts) {
     case 'edit': { const book = await api.getBook(parts[1]).catch(() => null); return bookForm(body, book || null, Math.min(4, Math.max(1, parseInt(parts[2]) || 1))); }  // the whole book, not the light list
     case 'books': return booksList(body);
     case 'digital': return digitalAdmin(body, parts[1], parts[2]);
+    case 'publisher': return digitalAdmin(body, parts[1], parts[2], '/admin/publisher');
     case 'prices': return pricesAdmin(body);
     case 'import': return importBooks(body);
     case 'kdp': return kdpAdmin(body);
