@@ -52,7 +52,7 @@ const CSS = `<style>
 .kc select,.kc input[type=number]{width:100%;padding:8px;border:1px solid #d5d9d9;border-radius:6px;font:inherit;background:#fff}
 .kc .kdrop{position:relative;border:2px dashed #c4cbcb;border-radius:8px;padding:12px;text-align:center;cursor:pointer;color:#565959;overflow-wrap:anywhere}
 .kc .kdrop.on{border-color:#067d62;color:#067d62;background:#e6f4f0}
-.kc .kdrop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 12px;margin:10px 0}.kc .kdrop .kti{font-size:20px;letter-spacing:.5px}.kc .kdrop .khint{font-size:13px}.kc .ki{border-color:#2563a8;color:#2563a8;background:#eef4fb}.kc .kcv{border-color:#d9822b;color:#b45f0c;background:#fdf3e7}.kc .kdrop.on{border-style:solid}.kc .ki.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc .kcv.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc .kdrop.over{border-color:#067d62;background:#f0f9f6}.kc .kdrop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.kc .kdrop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 12px;margin:10px 0}.kc .kdrop .kti{font-size:20px;letter-spacing:.5px}.kc .kdrop .khint{font-size:13px}.kc .ki{border-color:#2563a8;color:#2563a8;background:#eef4fb}.kc .kcv{border-color:#d9822b;color:#b45f0c;background:#fdf3e7}.kc .kdrop.on{border-style:solid}.kc .ki.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc .kcv.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc section{display:flex;flex-direction:column;min-width:0}.kc .kver{order:1}.kc .ktabs{order:2}.kc .kview{order:3}.kc #kc-chk{order:4;margin-top:14px}.kc .kdrop.over{border-color:#067d62;background:#f0f9f6}.kc .kdrop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
 .kc .kgo{width:100%;margin-top:14px}
 .kc .kver{border-radius:8px;padding:12px 14px;font-weight:700;margin-bottom:12px;background:#fff;border:1px solid #d5d9d9;color:#565959;font-weight:500}
 .kc .kver.ok{background:#e6f4f0;color:#067d62;border:0;font-weight:700}.kc .kver.er{background:#fdeceb;color:#b12704;border:0;font-weight:700}.kc .kver.wr{background:#fff4e0;color:#b36b00;border:0;font-weight:700}
@@ -97,7 +97,9 @@ export function kdpCheckAdmin(body) {
     ['dragenter', 'dragover'].forEach(t => d.addEventListener(t, () => d.classList.add('over')));
     ['dragleave', 'drop'].forEach(t => d.addEventListener(t, () => d.classList.remove('over')));
     i.onchange = () => i.files[0] && set(n, i.files[0]); };
-  const set = (n, f) => { F[n] = f; const d = q('#kc-d' + n); d.classList.add('on'); d.querySelector('.khint').textContent = '✓ ' + f.name + ' (' + (f.size / 1048576).toFixed(1) + ' MB)'; q('#kc-go').disabled = false; };
+  const set = (n, f) => { F[n] = f; const d = q('#kc-d' + n); d.classList.add('on'); d.querySelector('.khint').textContent = '✓ ' + f.name + ' (' + (f.size / 1048576).toFixed(1) + ' MB)'; q('#kc-go').disabled = false; clearTimeout(AT); AT = setTimeout(autoRun, 500); };
+  let AT = 0;
+  const autoRun = () => { const b = q('#kc-go'); if (b.disabled) AT = setTimeout(autoRun, 700); else b.click(); };
   bind(1); bind(2);
   const lib = async () => { if (pdfjs) return pdfjs; await loadScript(VENDOR('pdf.min.js')); pdfjs = window.pdfjsLib; pdfjs.GlobalWorkerOptions.workerSrc = VENDOR('pdf.worker.min.js'); return pdfjs; };
   const open = async f => (await lib()).getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise;
@@ -175,9 +177,9 @@ export function kdpCheckAdmin(body) {
     const p = await COV.getPage(1), W = COV._w, H = COV._h, s = Math.min(2200 / (W * 72), 1.6), v = p.getViewport({ scale: s }), c = q('#kc-cc'), x = c.getContext('2d');
     c.width = v.width; c.height = v.height; x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); await p.render({ canvasContext: x, viewport: v }).promise;
     const ppi = c.width / W, B = .125, tw = trim()[0], th = H - 2 * B, sp = COV._sp || (W - 2 * tw - .25), T = B, Lx = B, R = W - B, Bt = H - B, sL = Lx + tw, sR = sL + sp;
-    const box = (a, b, w, h, col, dash, fill) => { x.save(); x.strokeStyle = col; x.lineWidth = Math.max(2, ppi * .012); x.setLineDash(dash ? [ppi * .06, ppi * .04] : []); if (fill) { x.fillStyle = fill; x.fillRect(a * ppi, b * ppi, w * ppi, h * ppi); } x.strokeRect(a * ppi, b * ppi, w * ppi, h * ppi); x.restore(); };
-    if (q('#kc-g1').checked) { box(0, 0, W, H, '#e11', true); box(Lx, T, R - Lx, Bt - T, '#e11'); }
-    if (q('#kc-g2').checked) { const m = .125; box(Lx + m, T + m, tw - 2 * m, th - 2 * m, '#1a9'); box(sR + m, T + m, tw - 2 * m, th - 2 * m, '#1a9'); }
+    const box = (a, b, w, h, col, dash, fill) => { x.save(); const lw = Math.max(2.5, ppi * .016); x.setLineDash(dash ? [ppi * .06, ppi * .04] : []); if (fill) { x.fillStyle = fill; x.fillRect(a * ppi, b * ppi, w * ppi, h * ppi); } x.strokeStyle = '#000a'; x.lineWidth = lw + 2.5; x.strokeRect(a * ppi, b * ppi, w * ppi, h * ppi); x.strokeStyle = col; x.lineWidth = lw; x.strokeRect(a * ppi, b * ppi, w * ppi, h * ppi); x.restore(); };
+    if (q('#kc-g1').checked) { box(Lx, T, R - Lx, Bt - T, '#fff', true); }
+    if (q('#kc-g2').checked) { const m = .125; box(Lx + m, T + m, tw - 2 * m, th - 2 * m, '#ff2d2d', true); box(sR + m, T + m, tw - 2 * m, th - 2 * m, '#ff2d2d', true); }
     if (q('#kc-g3').checked) { box(sL, T, sp, th, '#27c', false, '#2277cc22'); if (sp > .12) box(sL + .0625, T + .125, sp - .125, th - .25, '#27c', true); }
     if (q('#kc-g4').checked) { box(sL - .25 - 2, Bt - .25 - 1.2, 2, 1.2, '#555', false, '#fffc'); }
   }
