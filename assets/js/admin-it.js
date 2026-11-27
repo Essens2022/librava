@@ -1,5 +1,5 @@
 // Italian and English texts for the admin screens that have fixed Romanian wording (key = Romanian text)
-import { getLang } from './i18n.js?v=20261127015131';
+import { getLang } from './i18n.js?v=20261127015820';
 const IT = {
  "Importă produs": "Importa prodotto",
  "Adaugă produs digital": "Aggiungi prodotto digitale",

@@ -1,11 +1,11 @@
 // Publisher: complete book packages (manuscript, covers, A+ images, listing texts, license) sold to ONE buyer only.
 // Same Librava header, cards, cart and offers; only the product is different. Packages are books with product_type = 'publisher'.
-import { api } from './api.js?v=20261127015131';
-import { t, getLang, langName } from './i18n.js?v=20261127015131';
-import { esc } from './util.js?v=20261127015131';
-import { icon, pubCardHTML } from './ui.js?v=20261127015131';
-import { isPub } from './ptypes.js?v=20261127015131';
-import { CONFIG } from './config.js?v=20261127015131';
+import { api } from './api.js?v=20261127015820';
+import { t, getLang, langName } from './i18n.js?v=20261127015820';
+import { esc } from './util.js?v=20261127015820';
+import { icon, pubCardHTML } from './ui.js?v=20261127015820';
+import { isPub } from './ptypes.js?v=20261127015820';
+import { CONFIG } from './config.js?v=20261127015820';
 
 // the electric-blue strip (home + Publisher page): same compact size as the other strips, readable on any phone
 export function pubBannerHTML(covers = []) {
@@ -13,10 +13,8 @@ export function pubBannerHTML(covers = []) {
   const imgs = covers.slice(0, 4);
   const books = imgs.length ? imgs.map(c => `<img src="${esc(c.thumb)}" alt="" decoding="async" onerror="this.onerror=null;this.src='${esc(c.full)}'">`).join('') : '<b></b><b></b><b></b><b></b>';
   return `<a class="pub-wow" href="#/publisher" aria-label="Publisher"><i class="pw-rays"></i><i class="pw-sp s1">✦</i><i class="pw-sp s2">✦</i><i class="pw-sp s3">✦</i>
-    <b class="pw-ttl">${esc(t('pub.nav')).toUpperCase()}</b>
-    <div class="pw-cv">${books}<i class="pw-shelf"></i></div>
-    <span class="pw-exc">★ ${esc(t('pub.exclusive'))}</span>
-    <div class="pw-lw"><span class="pw-rv">${esc(t('pub.buyResell'))}</span><span class="pw-pl">© ${esc(t('pub.rights'))}</span></div></a>`;
+    <div class="pw-in"><div class="pw-tx"><b class="pw-ttl">${esc(t('pub.nav')).toUpperCase()}</b><span class="pw-rv">${esc(t('pub.buyResell'))}</span><span class="pw-pl">© ${esc(t('pub.rights'))}</span></div>
+    <div class="pw-cv">${books}<i class="pw-shelf"></i><span class="pw-exc">★ ${esc(t('pub.exclusive'))}</span></div></div></a>`;
 }
 // fills the covers of the strip once the catalogue is known (the strip itself is on screen at once)
 export async function mountPubBanner(root) {
