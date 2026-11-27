@@ -1,20 +1,21 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261127041028';
-import { TA } from './admin-it.js?v=20261127041028';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127041028';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261127041028';
-import { resetCompanyCache } from './views.js?v=20261127041028';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261127041028';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261127041028';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261127041028';
-import { optimizeBook } from './optimize.js?v=20261127041028';
-import { api } from './api.js?v=20261127041028';
-import { isDigital } from './ptypes.js?v=20261127041028';
-import { digitalAdmin } from './admin-digital.js?v=20261127041028';
-import { OF_STYLES } from './offerstyles.js?v=20261127041028';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261127041028';
+import { CONFIG } from './config.js?v=20261127142129';
+import { TA } from './admin-it.js?v=20261127142129';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127142129';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261127142129';
+import { resetCompanyCache } from './views.js?v=20261127142129';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261127142129';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261127142129';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261127142129';
+import { optimizeBook } from './optimize.js?v=20261127142129';
+import { api } from './api.js?v=20261127142129';
+import { isDigital } from './ptypes.js?v=20261127142129';
+import { kdpCheckAdmin, kdpCheckTitle } from './admin-kdp-check.js?v=20261127142129';
+import { digitalAdmin } from './admin-digital.js?v=20261127142129';
+import { OF_STYLES } from './offerstyles.js?v=20261127142129';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261127142129';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -23,6 +24,7 @@ const TABS = [
   ['books', '/admin/books', 'library', 'admin.books'],
   ['digital', '/admin/digital', 'box', 'admin.tab.digital'],
   ['publisher', '/admin/publisher', 'box', null], // Publisher packages: own section
+  ['kdpcheck', '/admin/kdp-check', 'eye', null], // KDP size/margin checker
   ['prices', '/admin/prices', 'tag', 'bp.tab'],
   ['new', '/admin/new', 'plus', 'admin.add'],
   ['import', '/admin/import', 'upload', 'imp.tab'],
@@ -78,8 +80,9 @@ export async function viewAdmin(el, parts) {
   }
   if (!inAdmin) { inAdmin = true; try { sessionStorage.removeItem(CU_KEY); } catch { } }
   let tab = parts[0] || 'visitors';
+  const tabKey = tab === 'kdp-check' ? 'kdpcheck' : tab;
   if (tab === 'sales') tab = 'overview';
-  const active = tab === 'edit' ? 'new' : tab;
+  const active = tab === 'edit' ? 'new' : tabKey;
   el.innerHTML = `<div class="wrap page adm" style="max-width:1700px">
     <div class="adm-head"><h1>${esc(t('admin.title'))}</h1><span class="adm-head-btns">${tab === 'publisher'
       ? `<a class="btn btn-ghost btn-sm" href="#/admin/publisher/import">${icon('upload')} ${TA('Importă pachet')}</a><a class="btn btn-buy btn-sm" href="#/admin/publisher/new">${icon('plus')} ${TA('Adaugă pachet')}</a>`
@@ -88,7 +91,7 @@ export async function viewAdmin(el, parts) {
       : `<a class="btn btn-ghost btn-sm" href="#/admin/import">${icon('upload')} ${esc(t('imp.tab'))}</a><a class="btn btn-buy btn-sm" href="#/admin/new">${icon('plus')} ${esc(t('admin.add'))}</a>`}</span></div>
     ${api.isDemo ? `<div class="demo-note" style="margin-bottom:14px">${esc(t('admin.demoNote'))}</div>` : ''}
     <nav class="tabs adm-tabs" aria-label="${esc(t('admin.title'))}">
-      ${TABS.map(([k, href, ic, label]) => `<a class="${k === active ? 'on' : ''}" href="#${href}" ${k === active ? 'aria-current="page"' : ''}>${icon(ic, 'ico')} ${esc(tab === 'edit' && k === 'new' ? t('admin.edit') : (label ? t(label) : 'Publisher'))}</a>`).join('')}
+      ${TABS.map(([k, href, ic, label]) => `<a class="${k === active ? 'on' : ''}" href="#${href}" ${k === active ? 'aria-current="page"' : ''}>${icon(ic, 'ico')} ${esc(tab === 'edit' && k === 'new' ? t('admin.edit') : (label ? t(label) : (k === 'kdpcheck' ? kdpCheckTitle() : 'Publisher')))}</a>`).join('')}
     </nav>
     <div id="adm-body"></div>
   </div>`;
@@ -111,6 +114,7 @@ export async function viewAdmin(el, parts) {
     case 'books': return booksList(body);
     case 'digital': return digitalAdmin(body, parts[1], parts[2]);
     case 'publisher': return digitalAdmin(body, parts[1], parts[2], '/admin/publisher');
+    case 'kdp-check': return kdpCheckAdmin(body);
     case 'prices': return pricesAdmin(body);
     case 'import': return importBooks(body);
     case 'kdp': return kdpAdmin(body);
