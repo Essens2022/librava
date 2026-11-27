@@ -3,7 +3,7 @@
 alter table public.books drop constraint if exists books_product_type_check;
 alter table public.books add constraint books_product_type_check
   check (product_type in ('ebook','planner','calendar','organizer','spreadsheet','template','game','coloring','kids','wallart','cards','publisher'));
--- exclusivity: a package is sold once. While a buyer is paying it is held for 15 minutes.
+-- exclusivity: a package is sold once. While a buyer is paying it is held for 5 minutes.
 alter table public.books add column if not exists sold_at timestamptz;
 alter table public.books add column if not exists reserved_until timestamptz;
 alter table public.books add column if not exists reserved_order uuid;

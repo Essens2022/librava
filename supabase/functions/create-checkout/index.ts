@@ -13,8 +13,8 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
 
-// A package is held while its buyer pays. Stripe sessions live at least 30 minutes, so the hold and the session end together.
-const HOLD_MIN = 32, SESSION_MIN = 31;
+// A package is held 5 minutes while its buyer pays. Stripe pages live at least 30 minutes, so when a lapsed hold is taken over, the old payment page is closed in Stripe first.
+const HOLD_MIN = 5, SESSION_MIN = 31;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function countCoupon(admin: any, id: string) {
@@ -85,9 +85,21 @@ Deno.serve(async (req) => {
       items: toBuy.map((b) => ({ book_id: b.id, title: b.title, price_cents: calc.final[b.id] ?? b.price_cents, list_cents: b.price_cents })),
     }).select('id, reference').single();
     if (oErr) throw oErr;
-    // hold each package for 15 minutes; the update only succeeds if nobody else holds or bought it (atomic)
+    // hold each package for 5 minutes; the update only succeeds if nobody else holds or bought it (atomic)
     const held: string[] = [];
     for (const b of pubs) {
+      if (b.reserved_order && b.reserved_until && new Date(b.reserved_until) < new Date()) {
+        const { data: old } = await admin.from('orders').select('stripe_session_id,status').eq('id', b.reserved_order).maybeSingle();
+        if (old?.status === 'pending' && old.stripe_session_id) {
+          const xr = await fetch('https://api.stripe.com/v1/checkout/sessions/' + encodeURIComponent(old.stripe_session_id) + '/expire', { method: 'POST', headers: { Authorization: `Bearer ${STRIPE}` } });
+          if (!xr.ok) {
+            for (const id of held) await admin.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).eq('id', id).eq('reserved_order', order.id);
+            await admin.from('orders').update({ status: 'cancelled' }).eq('id', order.id);
+            return json({ error: 'pub.reserved' }, 409);
+          }
+        }
+        await admin.from('orders').update({ status: 'cancelled' }).eq('id', b.reserved_order).eq('status', 'pending');
+      }
       const until = new Date(Date.now() + HOLD_MIN * 60 * 1000).toISOString();
       const { data: got } = await admin.from('books').update({ reserved_until: until, reserved_order: order.id, reserved_user: user?.id ?? null })
         .eq('id', b.id).is('sold_at', null).or(`reserved_until.is.null,reserved_until.lt.${new Date().toISOString()}${user ? `,reserved_user.eq.${user.id}` : ''}`).select('id');
