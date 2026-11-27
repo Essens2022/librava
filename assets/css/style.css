@@ -4573,7 +4573,14 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pw-shelf { position: absolute; left: -4px; right: -4px; bottom: 6px; height: 4px; border-radius: 3px; background: linear-gradient(90deg, #FFE14A, #fff, #FFE14A); box-shadow: 0 0 12px #FFE14A; }
 .pw-exc { position: absolute; z-index: 4; right: -4px; top: 0; background: linear-gradient(135deg, #FFE14A, #FFB300); color: #151B1A; border-radius: 8px; padding: 3px 8px; font: 800 clamp(10px, .5vw + 8px, 14px) Figtree, 'Arial Black', sans-serif; letter-spacing: .4px; text-transform: uppercase; transform: rotate(4deg); box-shadow: 0 3px 8px rgba(0,0,0,.4); white-space: nowrap; }
 @media (min-width: 700px) { .pub-wow { height: 150px; } .pw-in { justify-content: center; padding: 10px 28px; } .pw-rays { width: 560px; height: 560px; margin: -280px 0 0 -280px; } }
-@media (min-width: 1100px) { .pub-wow { height: 172px; } .pw-in { gap: 72px; } }
+.pw-mid { display: none; }
+@media (min-width: 1000px) {
+  .pub-wow { height: 172px; } .pw-in { justify-content: space-between; gap: 32px; padding: 10px clamp(32px, 4vw, 72px); }
+  .pw-mid { display: flex; flex: 1 1 auto; min-width: 0; justify-content: center; gap: clamp(14px, 2.4vw, 44px); }
+  .pw-mid span { display: grid; justify-items: center; align-content: center; gap: 8px; max-width: 190px; text-align: center; font: 700 clamp(13px, .5vw + 8px, 16px)/1.25 Figtree, sans-serif; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .pw-mid b { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #FFE14A; color: #151B1A; font: 800 18px/1 Figtree, 'Arial Black', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+  .pw-cv img, .pw-cv b { width: clamp(52px, 3vw + 24px, 86px); }
+}
 .pw-sp { position: absolute; z-index: 1; color: #FFE14A; font-style: normal; animation: pw-tw 2s ease-in-out infinite; }
 .pw-sp.s1 { left: 58%; top: 8px; font-size: 14px; } .pw-sp.s2 { left: 6px; top: 50px; font-size: 11px; animation-delay: .7s; } .pw-sp.s3 { right: 60px; bottom: 8px; font-size: 14px; animation-delay: 1.2s; }
 .pub-wow::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.27) 50%, transparent 62%); transform: translateX(-120%); animation: pw-shine 3.4s infinite; }
