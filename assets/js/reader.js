@@ -2,14 +2,14 @@
 //  Built-in reader: colored fixed-page books (PDF via PDF.js) and
 //  reflowable eBooks (EPUB via epub.js). Opens full-screen on any device.
 // =====================================================================
-import { CONFIG } from './config.js?v=20261127145606';
-import { t } from './i18n.js?v=20261127145606';
-import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261127145606';
-import { offline } from './offline.js?v=20261127145606';
-import { api } from './api.js?v=20261127145606';
-import { icon, go, backOr, toast, addedPop, cart, errText, priceHTML, stars, isBakedCover } from './ui.js?v=20261127145606';
-import { isDigital } from './ptypes.js?v=20261127145606';
-import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261127145606';
+import { CONFIG } from './config.js?v=20261127150639';
+import { t } from './i18n.js?v=20261127150639';
+import { esc, $, $$, store, debounce, loadScript } from './util.js?v=20261127150639';
+import { offline } from './offline.js?v=20261127150639';
+import { api } from './api.js?v=20261127150639';
+import { icon, go, backOr, toast, addedPop, cart, errText, priceHTML, stars, isBakedCover } from './ui.js?v=20261127150639';
+import { isDigital } from './ptypes.js?v=20261127150639';
+import { startCheckout, alsoReadFor, warmCovers } from './views.js?v=20261127150639';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;

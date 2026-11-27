@@ -1,5 +1,5 @@
 // Italian and English texts for the admin screens that have fixed Romanian wording (key = Romanian text)
-import { getLang } from './i18n.js?v=20261127145606';
+import { getLang } from './i18n.js?v=20261127150639';
 const IT = {
  "Vândut": "Venduto",
  "Rezervat": "Riservato",
