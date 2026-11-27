@@ -1,7 +1,7 @@
 // Admin → "Verificator KDP": checks an interior PDF and a full-wrap cover PDF against Amazon KDP print rules,
 // entirely in the browser (files never leave the computer). Shows the cover with bleed/safe/spine/barcode guides and the interior page by page.
-import { getLang } from './i18n.js?v=20261127142026';
-import { esc, $, loadScript } from './util.js?v=20261127142026';
+import { getLang } from './i18n.js?v=20261127142129';
+import { esc, $, loadScript } from './util.js?v=20261127142129';
 
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
 const X = {
@@ -137,7 +137,7 @@ export function kdpCheckAdmin(body) {
         if (!n) C.push(['wr', 'nospine', '', '']); else {
           const sp = n * rate, W = 2 * tw + sp + .25, H = th + .25; COV._sp = sp; COV._W = W; COV._H = H;
           const dw = COV._w - W, dh = COV._h - H, ok = Math.abs(dw) <= .01 && Math.abs(dh) <= .01;
-          C.push([ok ? 'ok' : 'er', 'covsz', fm(COV._w) + ' × ' + fm(COV._h) + ' in', fm(W) + ' × ' + fm(H) + ' in (' + n + ') Δ ' + fm(dw) + ' / ' + fm(dh)]);
+          C.push([ok ? 'ok' : 'er', 'covsz', fm(COV._w) + ' × ' + fm(COV._h) + ' in', fm(W) + ' × ' + fm(H) + ' in (' + n + ') Δ ' + fm(Math.abs(dw)) + ' / ' + fm(Math.abs(dh))]);
           C.push(['in', 'spine', fm(sp) + ' in', n >= 79 ? 'OK ≥ 79' : '< 79']);
         }
       }
