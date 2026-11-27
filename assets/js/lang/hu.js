@@ -1,6 +1,6 @@
 // Hungarian interface strings for Librava
 export default {
-  "pub.copyTransfer": "A szerzői jogok átszállnak a vevőre",
+  "pub.copyTransfer": "A vásárlás után kizárólag a tiéd: minden szerzői és kiadói jog átszáll rád",
   "pub.relHead": "További kiadásra kész csomagok",
   "pub.dcHead": "Percek alatt kiadásra kész",
   "pub.dcSub": "Csak egy vevő, jogokkal együtt",

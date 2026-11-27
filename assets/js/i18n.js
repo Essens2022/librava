@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261127040757';
-import { CONFIG } from './config.js?v=20261127040757';
-import { store } from './util.js?v=20261127040757';
+import { localize, loadRates } from './localprice.js?v=20261127040839';
+import { CONFIG } from './config.js?v=20261127040839';
+import { store } from './util.js?v=20261127040839';
 
 const D = {
   ro: {
@@ -562,7 +562,7 @@ const D = {
     'pub.reserved': "Un alt cumpărător plătește acest pachet chiar acum. Încearcă din nou peste câteva minute.",
     'pub.sold': "Acest pachet a fost deja vândut.",
     'pub.ai': "Pentru crearea acestui produs s-a folosit AI",
-    'pub.copyTransfer': "Drepturile de autor se transferă cumpărătorului",
+    'pub.copyTransfer': "După cumpărare este doar al tău: toate drepturile de autor și de publicare ți se transferă",
     'pub.relHead': "Alte pachete gata de publicat",
     'pub.dcHead': "Gata de publicat în câteva minute",
     'pub.dcSub': "Un singur cumpărător, drepturi incluse",
@@ -2308,7 +2308,7 @@ const D = {
     'pub.reserved': "Un altro acquirente sta pagando questo pacchetto in questo momento. Riprova tra qualche minuto.",
     'pub.sold': "Questo pacchetto è già stato venduto.",
     'pub.ai': "È stata usata l'IA per creare questo prodotto",
-    'pub.copyTransfer': "Diritti d'autore trasferiti all'acquirente",
+    'pub.copyTransfer': "Dopo l'acquisto è solo tuo: tutti i diritti d'autore e di pubblicazione passano a te",
     'pub.relHead': "Altri pacchetti pronti da pubblicare",
     'pub.dcHead': "Pronto da pubblicare in pochi minuti",
     'pub.dcSub': "Un solo acquirente, diritti inclusi",
@@ -4054,7 +4054,7 @@ const D = {
     'pub.reserved': "Another buyer is paying for this package right now. Try again in a few minutes.",
     'pub.sold': "This package has already been sold.",
     'pub.ai': "AI was used to create this product",
-    'pub.copyTransfer': "Copyright transferred to the buyer",
+    'pub.copyTransfer': "After purchase it belongs only to you: all copyright and publishing rights transfer to you",
     'pub.relHead': "Other ready-to-publish packages",
     'pub.dcHead': "Ready to publish in minutes",
     'pub.dcSub': "One buyer only, rights included",
@@ -5278,7 +5278,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261127040757`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261127040839`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

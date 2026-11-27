@@ -1,6 +1,6 @@
 // Danish interface strings for Librava
 export default {
-  "pub.copyTransfer": "Ophavsretten overdrages til køberen",
+  "pub.copyTransfer": "Efter købet tilhører det kun dig: alle ophavs- og udgivelsesrettigheder overgår til dig",
   "pub.relHead": "Andre pakker klar til udgivelse",
   "pub.dcHead": "Klar til udgivelse på få minutter",
   "pub.dcSub": "Kun én køber, rettigheder inkluderet",

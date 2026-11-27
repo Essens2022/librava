@@ -1,6 +1,6 @@
 // Lithuanian interface strings for Librava
 export default {
-  "pub.copyTransfer": "Autorių teisės perduodamos pirkėjui",
+  "pub.copyTransfer": "Po pirkimo tai priklauso tik jums: visos autorių ir leidybos teisės perduodamos jums",
   "pub.relHead": "Kiti leidybai paruošti paketai",
   "pub.dcHead": "Paruošta leisti per kelias minutes",
   "pub.dcSub": "Tik vienas pirkėjas, teisės įskaičiuotos",

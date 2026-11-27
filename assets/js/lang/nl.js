@@ -1,6 +1,6 @@
 // Dutch interface strings for Librava
 export default {
-  "pub.copyTransfer": "Auteursrechten gaan over op de koper",
+  "pub.copyTransfer": "Na aankoop is het alleen van jou: alle auteurs- en publicatierechten gaan over op jou",
   "pub.relHead": "Andere publicatieklare pakketten",
   "pub.dcHead": "In enkele minuten klaar om te publiceren",
   "pub.dcSub": "Slechts één koper, rechten inbegrepen",

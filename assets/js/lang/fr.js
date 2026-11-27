@@ -1,6 +1,6 @@
 // French interface strings for Librava
 export default {
-  "pub.copyTransfer": "Droits d'auteur transférés à l'acheteur",
+  "pub.copyTransfer": "Après l'achat, il n'appartient qu'à vous : tous les droits d'auteur et de publication vous sont transférés",
   "pub.relHead": "Autres packs prêts à publier",
   "pub.dcHead": "Prêt à publier en quelques minutes",
   "pub.dcSub": "Un seul acheteur, droits inclus",

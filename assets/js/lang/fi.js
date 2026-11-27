@@ -1,6 +1,6 @@
 // Finnish interface strings for Librava
 export default {
-  "pub.copyTransfer": "Tekijänoikeudet siirtyvät ostajalle",
+  "pub.copyTransfer": "Oston jälkeen se kuuluu vain sinulle: kaikki tekijänoikeudet ja julkaisuoikeudet siirtyvät sinulle",
   "pub.relHead": "Muut julkaisuvalmiit paketit",
   "pub.dcHead": "Julkaisuvalmis muutamassa minuutissa",
   "pub.dcSub": "Vain yksi ostaja, oikeudet mukana",

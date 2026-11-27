@@ -1,6 +1,6 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
-  "pub.copyTransfer": "Opphavsretten overføres til kjøperen",
+  "pub.copyTransfer": "Etter kjøpet tilhører det bare deg: alle opphavs- og utgivelsesrettigheter overføres til deg",
   "pub.relHead": "Andre pakker klare til utgivelse",
   "pub.dcHead": "Klar til utgivelse på minutter",
   "pub.dcSub": "Bare én kjøper, rettigheter inkludert",

@@ -1,6 +1,6 @@
 // Latvian interface strings for Librava
 export default {
-  "pub.copyTransfer": "Autortiesības tiek nodotas pircējam",
+  "pub.copyTransfer": "Pēc pirkuma tas pieder tikai jums: visas autortiesības un izdošanas tiesības tiek nodotas jums",
   "pub.relHead": "Citi izdošanai gatavi komplekti",
   "pub.dcHead": "Gatavs izdošanai dažās minūtēs",
   "pub.dcSub": "Tikai viens pircējs, tiesības iekļautas",

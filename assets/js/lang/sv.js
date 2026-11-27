@@ -1,6 +1,6 @@
 // Swedish interface strings for Librava
 export default {
-  "pub.copyTransfer": "Upphovsrätten överförs till köparen",
+  "pub.copyTransfer": "Efter köpet tillhör det bara dig: all upphovsrätt och alla utgivningsrättigheter överförs till dig",
   "pub.relHead": "Andra paket redo att ges ut",
   "pub.dcHead": "Redo att ges ut på några minuter",
   "pub.dcSub": "Endast en köpare, rättigheter ingår",

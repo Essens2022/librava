@@ -1,6 +1,6 @@
 // Estonian interface strings for Librava
 export default {
-  "pub.copyTransfer": "Autoriõigused lähevad üle ostjale",
+  "pub.copyTransfer": "Pärast ostu kuulub see ainult sinule: kõik autori- ja avaldamisõigused lähevad üle sulle",
   "pub.relHead": "Muud avaldamisvalmis paketid",
   "pub.dcHead": "Avaldamisvalmis mõne minutiga",
   "pub.dcSub": "Ainult üks ostja, õigused kaasas",

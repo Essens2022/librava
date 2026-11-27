@@ -1,6 +1,6 @@
 // Slovenian interface strings for Librava
 export default {
-  "pub.copyTransfer": "Avtorske pravice se prenesejo na kupca",
+  "pub.copyTransfer": "Po nakupu pripada samo vam: vse avtorske in založniške pravice se prenesejo na vas",
   "pub.relHead": "Drugi paketi, pripravljeni za objavo",
   "pub.dcHead": "Pripravljeno za objavo v nekaj minutah",
   "pub.dcSub": "Samo en kupec, pravice vključene",
