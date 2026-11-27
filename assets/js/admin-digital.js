@@ -1,24 +1,26 @@
 // Admin → Digital products: a short form for planners, calendars, organizers, spreadsheets and templates.
 // (ebooks keep their own detailed form; this one has only what a downloadable file needs.)
-import { tAdmin as t, getLang, LANGS } from './i18n.js?v=20261127020156';
-import { TA } from './admin-it.js?v=20261127020156';
-import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261127020156';
-import { api } from './api.js?v=20261127020156';
-import { icon, toast, errText, CATS, go } from './ui.js?v=20261127020156';
-import { aplusEditor } from './admin.js?v=20261127020156';
-import { PTYPES, FILE_FORMATS, ptypeOf, isDigital } from './ptypes.js?v=20261127020156';
+import { tAdmin as t, getLang, LANGS } from './i18n.js?v=20261127024438';
+import { TA } from './admin-it.js?v=20261127024438';
+import { esc, $, $$, loadScript, norm, compressImage } from './util.js?v=20261127024438';
+import { api } from './api.js?v=20261127024438';
+import { icon, toast, errText, CATS, go } from './ui.js?v=20261127024438';
+import { aplusEditor } from './admin.js?v=20261127024438';
+import { PTYPES, FILE_FORMATS, ptypeOf, isDigital, isPub as isPubPkg } from './ptypes.js?v=20261127024438';
 
 const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase() || '';
 const cents = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100) || 0;
 
 const SVG = { back: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>' };
-const ROUTE = '/admin/digital';
+let ROUTE = '/admin/digital'; // '/admin/publisher' when the Publisher section is open
+let PUBMODE = false;
 const fmtEur = c => (c / 100).toFixed(2).replace('.', ',') + ' €';
 const langOf = c => (LANGS.find(l => l[0] === c) || [c, c])[1];
 const pageHead = (title, sub) => `<div class="dg-top"><a class="dg-back" href="#${ROUTE}" aria-label="${TA('Înapoi')}">${SVG.back}</a><h2>${esc(title)}</h2>${sub ? `<p class="muted">${sub}</p>` : ''}</div>`;
 
-export async function digitalAdmin(body, sub, id) {
+export async function digitalAdmin(body, sub, id, base = '/admin/digital') {
   body.classList.add('dg');
+  ROUTE = base; PUBMODE = base === '/admin/publisher';
   if (sub === 'new') return form(body, null);
   if (sub === 'import') return importPage(body);
   if (sub === 'edit' && id) { const b = await api.getBook(id).catch(() => null); if (b) return form(body, b); }
@@ -26,25 +28,25 @@ export async function digitalAdmin(body, sub, id) {
 }
 
 async function listPage(body) {
-  const all = (await api.adminBooks()).filter(b => !b.deleted_at && isDigital(b));
+  const all = (await api.adminBooks()).filter(b => !b.deleted_at && (PUBMODE ? isPubPkg(b) : (isDigital(b) && !isPub(b))));
   const st = { q: '', status: 'all', lang: 'all' };
   const pub = all.filter(b => b.status === 'published').length;
   const langs = [...new Set(all.map(b => b.language))].sort();
-  body.innerHTML = `${all.length ? `<div class="dg-sum"><b>${all.length}</b> produse · <b>${pub}</b> ${TA('publicat')}e · <b>${all.length - pub}</b> ciorne · <b>${langs.length}</b> limbi</div>` : ''}
+  body.innerHTML = `${all.length ? `<div class="dg-sum"><b>${all.length}</b> ${PUBMODE ? TA('pachete') : TA('produse')} · <b>${pub}</b> ${TA('publicat')}e · <b>${all.length - pub}</b> ciorne · <b>${langs.length}</b> limbi</div>` : ''}
     ${all.length ? `<div class="dg-bar"><input class="input" id="dg-q" type="search" placeholder="${TA('Caută…')}" autocomplete="off">
       <select class="input" id="dg-st"><option value="all">Stare</option><option value="published">${TA('Publicat')}e</option><option value="draft">Ciorne</option></select>
       <select class="input" id="dg-ln"><option value="all">Limbi</option>${langs.map(l => `<option value="${l}">${esc(langOf(l))}</option>`).join('')}</select></div>
-    <div id="dg-rows" class="dg-list"></div>` : `<div class="panel dg-empty"><div class="dg-empty-ico">${icon('box')}</div><h3>${TA('Nu ai încă produse digitale')}</h3><p class="muted">${TA('Adaugă primul produs: planificator, calendar, organizator, foaie de calcul sau șablon. Clientul îl descarcă imediat după plată.')}</p><div class="dg-cta"><a class="btn btn-buy" href="#${ROUTE}/new">${icon('plus')} ${TA('Adaugă produs digital')}</a><a class="btn btn-ghost" href="#${ROUTE}/import">${icon('upload')} ${TA('Importă un produs gata făcut (.zip)')}</a></div></div>`}`;
+    <div id="dg-rows" class="dg-list"></div>` : `<div class="panel dg-empty"><div class="dg-empty-ico">${icon('box')}</div><h3>${PUBMODE ? TA('Nu ai încă pachete Publisher') : TA('Nu ai încă produse digitale')}</h3><p class="muted">${PUBMODE ? TA('Importă primul pachet (.zip): cartea completă pentru KDP, vândută unui singur cumpărător.') : TA('Adaugă primul produs: planificator, calendar, organizator, foaie de calcul sau șablon. Clientul îl descarcă imediat după plată.')}</p><div class="dg-cta"><a class="btn btn-buy" href="#${ROUTE}/new">${icon('plus')} ${TA('Adaugă produs digital')}</a><a class="btn btn-ghost" href="#${ROUTE}/import">${icon('upload')} ${TA('Importă un produs gata făcut (.zip)')}</a></div></div>`}`;
   if (!all.length) return;
   const draw = () => {
     const w = norm(st.q).split(/\s+/).filter(Boolean);
     const rows = all.filter(b => (st.status === 'all' || b.status === st.status) && (st.lang === 'all' || b.language === st.lang) && w.every(x => norm(b.title + ' ' + (b.subtitle || '')).includes(x)));
     $('#dg-rows', body).innerHTML = rows.length ? rows.map(b => {
       const isPub = b.status === 'published';
-      return `<div class="dg-row"><a class="dg-thumb" href="#/admin/digital/edit/${esc(b.id)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : icon('box')}</a>
-      <div class="dg-info"><a class="dg-ttl" href="#/admin/digital/edit/${esc(b.id)}">${esc(b.title)}</a>
-        <div class="dg-meta"><span class="dg-badge ${isPub ? 'ok' : 'draft'}">${isPub ? TA('Publicat') : TA('Ciornă')}</span><span>${esc(t('ptype1.' + ptypeOf(b)))} · ${esc(String(b.format).toUpperCase())} · ${esc(String(b.language).toUpperCase())}</span><b class="dg-price">${b.price_cents ? fmtEur(b.price_cents) : 'Gratuit'}</b></div></div>
-      <div class="dg-act"><a class="btn btn-ghost btn-sm" href="#/admin/digital/edit/${esc(b.id)}">${TA('Modifică')}</a>${isPub ? `<a class="dg-ic" title="${TA('Vezi în magazin')}" aria-label="${TA('Vezi în magazin')}" href="#/book/${encodeURIComponent(b.id)}" target="_blank" rel="noopener">↗</a>` : ''}<button class="dg-ic dg-del" title="${TA('Șterge')}" aria-label="${TA('Șterge')}" data-del="${esc(b.id)}">🗑</button></div></div>`;
+      return `<div class="dg-row"><a class="dg-thumb" href="#${ROUTE}/edit/${esc(b.id)}">${b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" loading="lazy">` : icon('box')}</a>
+      <div class="dg-info"><a class="dg-ttl" href="#${ROUTE}/edit/${esc(b.id)}">${esc(b.title)}</a>
+        <div class="dg-meta"><span class="dg-badge ${isPub ? 'ok' : 'draft'}">${isPub ? TA('Publicat') : TA('Ciornă')}</span>${b.sold_at ? `<span class="dg-badge draft">${TA('Vândut')}</span>` : (b.reserved_until && new Date(b.reserved_until) > new Date() ? `<span class="dg-badge draft">${TA('Rezervat')}</span>` : '')}<span>${esc(t('ptype1.' + ptypeOf(b)))} · ${esc(String(b.format).toUpperCase())} · ${esc(String(b.language).toUpperCase())}</span><b class="dg-price">${b.price_cents ? fmtEur(b.price_cents) : 'Gratuit'}</b></div></div>
+      <div class="dg-act"><a class="btn btn-ghost btn-sm" href="#${ROUTE}/edit/${esc(b.id)}">${TA('Modifică')}</a>${isPub ? `<a class="dg-ic" title="${TA('Vezi în magazin')}" aria-label="${TA('Vezi în magazin')}" href="#/book/${encodeURIComponent(b.id)}" target="_blank" rel="noopener">↗</a>` : ''}<button class="dg-ic dg-del" title="${TA('Șterge')}" aria-label="${TA('Șterge')}" data-del="${esc(b.id)}">🗑</button></div></div>`;
     }).join('') : ('<p class="muted" style="padding:18px 4px">' + TA('Niciun produs nu se potrivește filtrelor.') + '</p>');
     $$('[data-del]', body).forEach(x => x.onclick = async () => {
       const b = all.find(y => y.id === x.dataset.del); if (!b) return;
@@ -74,7 +76,7 @@ function importPage(body) {
 }
 
 function form(body, b) {
-  const v = b || { product_type: 'planner', language: getLang(), category: CATS[0], status: 'draft', price_cents: 0 };
+  const v = b || { product_type: PUBMODE ? 'publisher' : 'planner', language: getLang(), category: CATS[0], status: 'draft', price_cents: 0 };
   const files = {};
   const draftId = b?.id || crypto.randomUUID();
   const kws = [...(v.keywords || []), '', '', '', '', '', '', ''].slice(0, 7);

@@ -1,6 +1,14 @@
 // Italian and English texts for the admin screens that have fixed Romanian wording (key = Romanian text)
-import { getLang } from './i18n.js?v=20261127020156';
+import { getLang } from './i18n.js?v=20261127024438';
 const IT = {
+ "Vândut": "Venduto",
+ "Rezervat": "Riservato",
+ "pachete": "pacchetti",
+ "produse": "prodotti",
+ "Importă pachet": "Importa pacchetto",
+ "Adaugă pachet": "Aggiungi pacchetto",
+ "Nu ai încă pachete Publisher": "Non hai ancora pacchetti Publisher",
+ "Importă primul pachet (.zip): cartea completă pentru KDP, vândută unui singur cumpărător.": "Importa il primo pacchetto (.zip): il libro completo per KDP, venduto a un solo acquirente.",
  "Importă produs": "Importa prodotto",
  "Adaugă produs digital": "Aggiungi prodotto digitale",
  "Prețul": "Il prezzo",
@@ -135,6 +143,14 @@ const IT = {
  "Produs": "Prodotto"
 };
 const EN = {
+ "Vândut": "Sold",
+ "Rezervat": "Reserved",
+ "pachete": "packages",
+ "produse": "products",
+ "Importă pachet": "Import package",
+ "Adaugă pachet": "Add package",
+ "Nu ai încă pachete Publisher": "You have no Publisher packages yet",
+ "Importă primul pachet (.zip): cartea completă pentru KDP, vândută unui singur cumpărător.": "Import the first package (.zip): the complete book for KDP, sold to one buyer only.",
  "Importă produs": "Import product",
  "Adaugă produs digital": "Add digital product",
  "Prețul": "The price",
