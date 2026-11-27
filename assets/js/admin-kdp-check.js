@@ -14,6 +14,8 @@ const X = {
   p3: ['Color standard, hârtie albă', 'Colore standard, carta bianca', 'Standard color, white paper'],
   p4: ['Color premium, hârtie albă', 'Colore premium, carta bianca', 'Premium color, white paper'],
   pc: ['Număr pagini (gol = din PDF)', 'Numero pagine (vuoto = dal PDF)', 'Page count (empty = from PDF)'],
+  ti: ['INTERIOR', 'INTERNO', 'INTERIOR'],
+  tc: ['COPERTĂ', 'COPERTINA', 'COVER'],
   fi: ['PDF interior', 'PDF interno', 'Interior PDF'],
   fc: ['PDF copertă completă (spate + cotor + față)', 'PDF copertina completa (retro + dorso + fronte)', 'Full wrap cover PDF (back + spine + front)'],
   pick: ['Apasă sau trage fișierul aici', 'Tocca o trascina il file qui', 'Click or drop the file here'],
@@ -48,9 +50,9 @@ const CSS = `<style>
 .kc .kcard{background:#fff;border:1px solid #d5d9d9;border-radius:10px;padding:14px;min-width:0}
 .kc h2{font-size:15px;margin:0 0 8px}.kc label{display:block;font-weight:600;font-size:12.5px;margin:10px 0 3px}
 .kc select,.kc input[type=number]{width:100%;padding:8px;border:1px solid #d5d9d9;border-radius:6px;font:inherit;background:#fff}
-.kc .kdrop{border:2px dashed #c4cbcb;border-radius:8px;padding:12px;text-align:center;cursor:pointer;color:#565959;overflow-wrap:anywhere}
+.kc .kdrop{position:relative;border:2px dashed #c4cbcb;border-radius:8px;padding:12px;text-align:center;cursor:pointer;color:#565959;overflow-wrap:anywhere}
 .kc .kdrop.on{border-color:#067d62;color:#067d62;background:#e6f4f0}
-.kc .kdrop input{display:none}
+.kc .kdrop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 12px;margin:10px 0}.kc .kdrop .kti{font-size:20px;letter-spacing:.5px}.kc .kdrop .khint{font-size:13px}.kc .ki{border-color:#2563a8;color:#2563a8;background:#eef4fb}.kc .kcv{border-color:#d9822b;color:#b45f0c;background:#fdf3e7}.kc .kdrop.on{border-style:solid}.kc .ki.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc .kcv.on{border-color:#067d62;color:#067d62;background:#e6f4f0}.kc .kdrop.over{border-color:#067d62;background:#f0f9f6}.kc .kdrop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
 .kc .kgo{width:100%;margin-top:14px}
 .kc .kver{border-radius:8px;padding:12px 14px;font-weight:700;margin-bottom:12px;background:#fff;border:1px solid #d5d9d9;color:#565959;font-weight:500}
 .kc .kver.ok{background:#e6f4f0;color:#067d62;border:0;font-weight:700}.kc .kver.er{background:#fdeceb;color:#b12704;border:0;font-weight:700}.kc .kver.wr{background:#fff4e0;color:#b36b00;border:0;font-weight:700}
@@ -79,8 +81,8 @@ export function kdpCheckAdmin(body) {
     <label>${esc(K('trim'))}</label><select id="kc-trim">${['8.5x11:8,5 × 11', '8x10:8 × 10', '6x9:6 × 9', '5.5x8.5:5,5 × 8,5', '8.25x8.25:8,25 × 8,25', '8.5x8.5:8,5 × 8,5', '7x10:7 × 10', '5x8:5 × 8'].map(s => { const [v, l] = s.split(':'); return `<option value="${v}">${l} in</option>`; }).join('')}</select>
     <label>${esc(K('paper'))}</label><select id="kc-paper"><option value="0.002252">${esc(K('p1'))}</option><option value="0.0025">${esc(K('p2'))}</option><option value="0.002252">${esc(K('p3'))}</option><option value="0.002347">${esc(K('p4'))}</option></select>
     <label>${esc(K('pc'))}</label><input type="number" id="kc-pc" min="24" max="828">
-    <label>${esc(K('fi'))}</label><div class="kdrop" id="kc-d1">${esc(K('pick'))}<input type="file" accept="application/pdf" id="kc-f1"></div>
-    <label>${esc(K('fc'))}</label><div class="kdrop" id="kc-d2">${esc(K('pick'))}<input type="file" accept="application/pdf" id="kc-f2"></div>
+    <div class="kdrop ki" id="kc-d1"><span class="kic"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><rect x="8" y="6" width="32" height="36" rx="2"/><path d="M8 6v36M14 14h20M14 21h20M14 28h14" stroke-linecap="round"/></svg></span><b class="kti">${esc(K('ti'))}</b><span class="khint">${esc(K('pick'))}</span><input type="file" accept="application/pdf" id="kc-f1"></div>
+    <div class="kdrop kcv" id="kc-d2"><span class="kic"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="9" width="40" height="30" rx="2"/><path d="M20 9v30M24 9v30" /><rect x="27" y="16" width="13" height="14" rx="1" fill="currentColor" stroke="none" opacity="1"/></svg></span><b class="kti">${esc(K('tc'))}</b><span class="khint">${esc(K('pick'))}</span><input type="file" accept="application/pdf" id="kc-f2"></div>
     <button class="btn btn-buy kgo" id="kc-go" disabled>${esc(K('go'))}</button><div class="kprog" id="kc-prog" hidden><div></div></div>
     <p class="knote">${esc(K('note'))}</p></aside>
   <section><div class="kver" id="kc-ver">${esc(K('idle'))}</div><div class="kcard" id="kc-chk" hidden></div>
@@ -92,11 +94,10 @@ export function kdpCheckAdmin(body) {
   const F = {}; let INT = null, COV = null, PAGES = [], LIM = null, spread = 0, pdfjs = null;
   const trim = () => q('#kc-trim').value.split('x').map(Number);
   const bind = n => { const d = q('#kc-d' + n), i = q('#kc-f' + n);
-    d.onclick = () => i.click();
-    d.ondragover = e => e.preventDefault();
-    d.ondrop = e => { e.preventDefault(); if (e.dataTransfer.files[0]) set(n, e.dataTransfer.files[0]); };
+    ['dragenter', 'dragover'].forEach(t => d.addEventListener(t, () => d.classList.add('over')));
+    ['dragleave', 'drop'].forEach(t => d.addEventListener(t, () => d.classList.remove('over')));
     i.onchange = () => i.files[0] && set(n, i.files[0]); };
-  const set = (n, f) => { F[n] = f; const d = q('#kc-d' + n); d.classList.add('on'); d.firstChild.textContent = '✓ ' + f.name + ' (' + (f.size / 1048576).toFixed(1) + ' MB)'; q('#kc-go').disabled = false; };
+  const set = (n, f) => { F[n] = f; const d = q('#kc-d' + n); d.classList.add('on'); d.querySelector('.khint').textContent = '✓ ' + f.name + ' (' + (f.size / 1048576).toFixed(1) + ' MB)'; q('#kc-go').disabled = false; };
   bind(1); bind(2);
   const lib = async () => { if (pdfjs) return pdfjs; await loadScript(VENDOR('pdf.min.js')); pdfjs = window.pdfjsLib; pdfjs.GlobalWorkerOptions.workerSrc = VENDOR('pdf.worker.min.js'); return pdfjs; };
   const open = async f => (await lib()).getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise;
