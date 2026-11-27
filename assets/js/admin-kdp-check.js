@@ -1,7 +1,7 @@
 // Admin → "Verificator KDP": checks an interior PDF and a full-wrap cover PDF against Amazon KDP print rules,
 // entirely in the browser (files never leave the computer). Shows the cover with bleed/safe/spine/barcode guides and the interior page by page.
-import { getLang } from './i18n.js?v=20261127150639';
-import { esc, $, loadScript } from './util.js?v=20261127150639';
+import { getLang } from './i18n.js?v=20261127151329';
+import { esc, $, loadScript } from './util.js?v=20261127151329';
 
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
 const X = {
