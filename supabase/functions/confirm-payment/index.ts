@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
       if (!r.ok) { console.error('stripe', r.status, await r.text()); continue; }
       const s = await r.json();
       if (s.payment_status === 'paid' || s.payment_status === 'no_payment_required') { await fulfill(admin, o, s); paid.push(o.reference); }
-      else if (s.status === 'expired') { await admin.from('orders').update({ status: 'cancelled' }).eq('id', o.id).eq('status', 'pending'); cancelled++; }
+      else if (s.status === 'expired') { await admin.from('orders').update({ status: 'cancelled' }).eq('id', o.id).eq('status', 'pending'); await admin.from('books').update({ reserved_until: null, reserved_order: null, reserved_user: null }).eq('reserved_order', o.id); cancelled++; }
     }
     return json({ checked: (orders || []).length, paid, cancelled });
   } catch (e) {
