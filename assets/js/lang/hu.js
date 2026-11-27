@@ -1,5 +1,18 @@
 // Hungarian interface strings for Librava
 export default {
+  "pub.copyTransfer": "A szerzői jogok átszállnak a vevőre",
+  "pub.relHead": "További kiadásra kész csomagok",
+  "pub.dcHead": "Percek alatt kiadásra kész",
+  "pub.dcSub": "Csak egy vevő, jogokkal együtt",
+  "pub.dcS1": "Fizess biztonságosan",
+  "pub.dcS2": "A ZIP-csomag megjelenik a könyvtáradban",
+  "pub.dcS3": "Töltsd le, és add ki a saját neveden",
+  "pub.dcFoot": "A jogaidat tartalmazó licenc a csomagban van. Vásárlás után a csomag eltűnik az áruházból.",
+  "pub.in1": "Nyomdakész belív",
+  "pub.in2": "Teljes borító",
+  "pub.in3": "A+ képek",
+  "pub.in4": "Hirdetési szövegek",
+  "pub.in5": "Licenc",
   "bf.d": "nap",
   "bf.h": "óra",
   "bf.m": "perc",

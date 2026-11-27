@@ -1,5 +1,18 @@
 // Slovak interface strings for Librava
 export default {
+  "pub.copyTransfer": "Autorské práva prechádzajú na kupujúceho",
+  "pub.relHead": "Ďalšie balíky pripravené na vydanie",
+  "pub.dcHead": "Pripravené na vydanie za pár minút",
+  "pub.dcSub": "Iba jeden kupujúci, práva v cene",
+  "pub.dcS1": "Zaplaťte bezpečne",
+  "pub.dcS2": "Balík ZIP sa zobrazí vo vašej knižnici",
+  "pub.dcS3": "Stiahnite a vydajte pod vlastným menom",
+  "pub.dcFoot": "Licencia s vašimi právami je v balíku. Po kúpe balík zmizne z obchodu.",
+  "pub.in1": "Vnútro pripravené na tlač",
+  "pub.in2": "Kompletný obal",
+  "pub.in3": "Obrázky A+",
+  "pub.in4": "Texty ponuky",
+  "pub.in5": "Licencia",
   "bf.d": "dní",
   "bf.h": "hod",
   "bf.m": "min",

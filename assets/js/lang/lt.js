@@ -1,5 +1,18 @@
 // Lithuanian interface strings for Librava
 export default {
+  "pub.copyTransfer": "Autorių teisės perduodamos pirkėjui",
+  "pub.relHead": "Kiti leidybai paruošti paketai",
+  "pub.dcHead": "Paruošta leisti per kelias minutes",
+  "pub.dcSub": "Tik vienas pirkėjas, teisės įskaičiuotos",
+  "pub.dcS1": "Mokėkite saugiai",
+  "pub.dcS2": "ZIP paketas atsiranda jūsų bibliotekoje",
+  "pub.dcS3": "Atsisiųskite ir leiskite savo vardu",
+  "pub.dcFoot": "Licencija su jūsų teisėmis yra pakete. Po pirkimo paketas dingsta iš parduotuvės.",
+  "pub.in1": "Spaudai paruoštas vidus",
+  "pub.in2": "Pilnas viršelis",
+  "pub.in3": "A+ vaizdai",
+  "pub.in4": "Skelbimo tekstai",
+  "pub.in5": "Licencija",
   "bf.d": "d.",
   "bf.h": "val.",
   "bf.m": "min.",

@@ -1,5 +1,18 @@
 // Danish interface strings for Librava
 export default {
+  "pub.copyTransfer": "Ophavsretten overdrages til køberen",
+  "pub.relHead": "Andre pakker klar til udgivelse",
+  "pub.dcHead": "Klar til udgivelse på få minutter",
+  "pub.dcSub": "Kun én køber, rettigheder inkluderet",
+  "pub.dcS1": "Betal sikkert",
+  "pub.dcS2": "ZIP-pakken vises i dit bibliotek",
+  "pub.dcS3": "Download den og udgiv under dit eget navn",
+  "pub.dcFoot": "Licensen med dine rettigheder ligger i pakken. Efter købet forsvinder den fra butikken.",
+  "pub.in1": "Trykklar indmad",
+  "pub.in2": "Komplet omslag",
+  "pub.in3": "A+-billeder",
+  "pub.in4": "Annoncetekster",
+  "pub.in5": "Licens",
   "bf.d": "dage",
   "bf.h": "timer",
   "bf.m": "min",

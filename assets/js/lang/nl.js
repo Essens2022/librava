@@ -1,5 +1,18 @@
 // Dutch interface strings for Librava
 export default {
+  "pub.copyTransfer": "Auteursrechten gaan over op de koper",
+  "pub.relHead": "Andere publicatieklare pakketten",
+  "pub.dcHead": "In enkele minuten klaar om te publiceren",
+  "pub.dcSub": "Slechts één koper, rechten inbegrepen",
+  "pub.dcS1": "Veilig betalen",
+  "pub.dcS2": "Het ZIP-pakket verschijnt in je bibliotheek",
+  "pub.dcS3": "Download het en publiceer onder je eigen naam",
+  "pub.dcFoot": "De licentie met jouw rechten zit in het pakket. Na aankoop verdwijnt het uit de winkel.",
+  "pub.in1": "Drukklaar binnenwerk",
+  "pub.in2": "Volledige omslag",
+  "pub.in3": "A+-afbeeldingen",
+  "pub.in4": "Advertentieteksten",
+  "pub.in5": "Licentie",
   "bf.d": "dagen",
   "bf.h": "uur",
   "bf.m": "min",

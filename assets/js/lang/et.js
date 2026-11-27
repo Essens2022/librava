@@ -1,5 +1,18 @@
 // Estonian interface strings for Librava
 export default {
+  "pub.copyTransfer": "Autoriõigused lähevad üle ostjale",
+  "pub.relHead": "Muud avaldamisvalmis paketid",
+  "pub.dcHead": "Avaldamisvalmis mõne minutiga",
+  "pub.dcSub": "Ainult üks ostja, õigused kaasas",
+  "pub.dcS1": "Maksa turvaliselt",
+  "pub.dcS2": "ZIP-pakett ilmub sinu raamatukokku",
+  "pub.dcS3": "Laadi alla ja avalda oma nime all",
+  "pub.dcFoot": "Sinu õigustega litsents on paketis. Pärast ostu kaob pakett poest.",
+  "pub.in1": "Trükivalmis sisu",
+  "pub.in2": "Täielik kaas",
+  "pub.in3": "A+ pildid",
+  "pub.in4": "Kuulutuse tekstid",
+  "pub.in5": "Litsents",
   "bf.d": "päeva",
   "bf.h": "tundi",
   "bf.m": "min",

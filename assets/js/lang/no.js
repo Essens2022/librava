@@ -1,5 +1,18 @@
 // Norwegian Bokmål interface strings for Librava
 export default {
+  "pub.copyTransfer": "Opphavsretten overføres til kjøperen",
+  "pub.relHead": "Andre pakker klare til utgivelse",
+  "pub.dcHead": "Klar til utgivelse på minutter",
+  "pub.dcSub": "Bare én kjøper, rettigheter inkludert",
+  "pub.dcS1": "Betal trygt",
+  "pub.dcS2": "ZIP-pakken vises i biblioteket ditt",
+  "pub.dcS3": "Last den ned og utgi under ditt eget navn",
+  "pub.dcFoot": "Lisensen med rettighetene dine ligger i pakken. Etter kjøpet forsvinner den fra butikken.",
+  "pub.in1": "Trykkeklart innmat",
+  "pub.in2": "Komplett omslag",
+  "pub.in3": "A+-bilder",
+  "pub.in4": "Annonsetekster",
+  "pub.in5": "Lisens",
   "bf.d": "dager",
   "bf.h": "timer",
   "bf.m": "min",

@@ -1,5 +1,18 @@
 // Swedish interface strings for Librava
 export default {
+  "pub.copyTransfer": "Upphovsrätten överförs till köparen",
+  "pub.relHead": "Andra paket redo att ges ut",
+  "pub.dcHead": "Redo att ges ut på några minuter",
+  "pub.dcSub": "Endast en köpare, rättigheter ingår",
+  "pub.dcS1": "Betala säkert",
+  "pub.dcS2": "ZIP-paketet visas i ditt bibliotek",
+  "pub.dcS3": "Ladda ner och ge ut under ditt eget namn",
+  "pub.dcFoot": "Licensen med dina rättigheter finns i paketet. Efter köpet försvinner det från butiken.",
+  "pub.in1": "Tryckklart inlaga",
+  "pub.in2": "Komplett omslag",
+  "pub.in3": "A+-bilder",
+  "pub.in4": "Annonstexter",
+  "pub.in5": "Licens",
   "bf.d": "dagar",
   "bf.h": "timmar",
   "bf.m": "min",

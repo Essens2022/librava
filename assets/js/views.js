@@ -1,20 +1,20 @@
-import { CONFIG } from './config.js?v=20261127025022';
-import { askWhy } from './why.js?v=20261127025022';
-import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127025022';
-import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261127025022';
-import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261127025022';
-import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261127025022';
-import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261127025022';
-import { mountPubBanner } from './publisher.js?v=20261127025022';
-import { PAY_LOGOS, payLogo } from './payicons.js?v=20261127025022';
-import { couponLive } from './welcome.js?v=20261127025022';
-import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261127025022';
-import { track } from './track.js?v=20261127025022';
-import { gaEvent } from './ga.js?v=20261127025022';
-import { guessLang } from './langdetect.js?v=20261127025022';
-import { didYouMean } from './search.js?v=20261127025022';
-import { api, editionsOf } from './api.js?v=20261127025022';
-import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261127025022';
+import { CONFIG } from './config.js?v=20261127040757';
+import { askWhy } from './why.js?v=20261127040757';
+import { t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127040757';
+import { esc, $, $$, safeHTML, hasTags, store, norm } from './util.js?v=20261127040757';
+import { offline, downloadBook, fetchBookFile } from './offline.js?v=20261127040757';
+import { legalText, LEGAL_PAGES, LEGAL_VERSION } from './legal.js?v=20261127040757';
+import { PTYPES, ptypeOf, isDigital, isPub, pubSold, kindLabel, hasDigital } from './ptypes.js?v=20261127040757';
+import { mountPubBanner } from './publisher.js?v=20261127040757';
+import { PAY_LOGOS, payLogo } from './payicons.js?v=20261127040757';
+import { couponLive } from './welcome.js?v=20261127040757';
+import { applyOffers, describeOffer, offersForBook, appliedLabel, ladderSteps, ladderState, offerRunning } from './offers.js?v=20261127040757';
+import { track } from './track.js?v=20261127040757';
+import { gaEvent } from './ga.js?v=20261127040757';
+import { guessLang } from './langdetect.js?v=20261127040757';
+import { didYouMean } from './search.js?v=20261127040757';
+import { api, editionsOf } from './api.js?v=20261127040757';
+import { isBakedCover, GIFT_SVG, icon, stars, starPath, cart, go, currentPath, confirmBox, cardHTML, rcardHTML, coverHTML, priceHTML, toast, addedPop, modal, errText, CATS, updateCartCount, langBtn, themePills, aplusHTML, promoHTML, offerSlides, carouselHTML, mountPromos, applyCatOrder, loadCatOrder } from './ui.js?v=20261127040757';
 
 const spinner = '<div class="spinner" role="progressbar" aria-label="…"></div>';
 
@@ -334,7 +334,7 @@ export async function viewBook(el, id) {
     ownedP,
     // reviews are shared by all formats of the same book, as on Amazon (already requested above, in parallel with the book)
     reviewsP,
-    (isDigital(b) ? api.listBooks({ lang: b.language, sort: 'bestsellers' }) : api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' })).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && isDigital(x) === isDigital(b)).sort((x, y) => isDigital(b) ? (ptypeOf(y) === ptypeOf(b)) - (ptypeOf(x) === ptypeOf(b)) : 0).slice(0, 12)),
+    (isDigital(b) ? api.listBooks({ lang: b.language, sort: 'bestsellers' }) : api.listBooks({ category: b.category, lang: b.language, sort: 'bestsellers' })).then(l => l.filter(x => x.id !== b.id && !(b.work_id && x.work_id === b.work_id) && (isPub(b) ? (isPub(x) && !pubSold(x)) : (isDigital(x) === isDigital(b) && !isPub(x)))).sort((x, y) => isDigital(b) ? (ptypeOf(y) === ptypeOf(b)) - (ptypeOf(x) === ptypeOf(b)) : 0).slice(0, 12)),
     api.myReview ? api.myReview(b.id) : null,
     eds.length > 1 ? Promise.all(eds.filter(x => x.id !== b.id).map(x => api.owns(x.id).then(o => o ? x : null).catch(() => null))).then(l => l.filter(Boolean)) : [],
   ]);
@@ -365,15 +365,15 @@ export async function viewBook(el, id) {
       <button class="btn btn-cart btn-block" data-add ${inCart ? 'disabled' : ''}>${esc(inCart ? t('book.inCart') : t('book.addToCart'))}</button>
       <button class="btn btn-buy btn-block" data-buy>${esc(t('book.buyNow'))}</button>`}
       <div class="deliv-card">
-        <div class="dc-head"><span class="dc-bolt">${icon('bolt')}</span><div><b>${esc(t('book.dcHead'))}</b><span>${esc(t('book.dcSub'))}</span></div></div>
-        <ol class="dc-steps"><li><i>1</i><span>${esc(t('book.dcS1'))}</span></li><li><i>2</i><span>${esc(t('book.dcS2'))}</span></li><li><i>3</i><span>${esc(t(isDigital(b) ? 'book.dcS3d' : 'book.dcS3'))}</span></li></ol>
-        <div class="dc-dev" aria-label="${esc(t('book.dcDev'))}">
+        <div class="dc-head"><span class="dc-bolt">${icon('bolt')}</span><div><b>${esc(t(isPub(b) ? 'pub.dcHead' : 'book.dcHead'))}</b><span>${esc(t(isPub(b) ? 'pub.dcSub' : 'book.dcSub'))}</span></div></div>
+        <ol class="dc-steps"><li><i>1</i><span>${esc(t(isPub(b) ? 'pub.dcS1' : 'book.dcS1'))}</span></li><li><i>2</i><span>${esc(t(isPub(b) ? 'pub.dcS2' : 'book.dcS2'))}</span></li><li><i>3</i><span>${esc(t(isPub(b) ? 'pub.dcS3' : isDigital(b) ? 'book.dcS3d' : 'book.dcS3'))}</span></li></ol>
+        ${isPub(b) ? `<ul class="dc-in">${['in1', 'in2', 'in3', 'in4', 'in5'].map(k => `<li>${icon('check')} ${esc(t('pub.' + k))}</li>`).join('')}</ul>` : `<div class="dc-dev" aria-label="${esc(t('book.dcDev'))}">
           <span title="${esc(t('book.dPhone'))}"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg><em>${esc(t('book.dPhone'))}</em></span>
           <span title="${esc(t('book.dTablet'))}"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.2"/><path d="M11 18h2"/></svg><em>${esc(t('book.dTablet'))}</em></span>
           <span title="${esc(t('book.dPc'))}"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="1.8"/><path d="M8 20h8M12 16.5V20"/></svg><em>${esc(t('book.dPc'))}</em></span>
           ${isDigital(b) ? '' : `<span title="Kindle"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8.5 7h7M8.5 10h7M8.5 13h4"/></svg><em>Kindle</em></span>`}
-        </div>
-        <div class="dc-foot">${icon('shield')} ${esc(t(isDigital(b) ? 'book.dcFootD' : 'book.dcFoot'))}</div>
+        </div>`}
+        <div class="dc-foot">${icon('shield')} ${esc(t(isPub(b) ? 'pub.dcFoot' : isDigital(b) ? 'book.dcFootD' : 'book.dcFoot'))}</div>
       </div>`);
 
   el.innerHTML = `<div class="wrap page">
@@ -389,7 +389,7 @@ export async function viewBook(el, id) {
         ${b.series_name ? `<div class="series-line"><a href="#/search?q=${encodeURIComponent(b.series_name)}">${esc(t('book.series'))}: ${esc(b.series_name)}${b.series_number ? ' · ' + b.series_number : ''}</a></div>` : ''}
         <div class="byline">${t('book.by', { author: `<a href="#/search?q=${encodeURIComponent(b.author)}">${esc(b.author)}</a>` })}${(b.contributors || []).map(c => `, ${esc(c.name)} <span class="muted">(${esc(t('kdp.role.' + c.role))})</span>`).join('')}</div>
         ${reviews.length ? `<div class="rating-line" style="margin-top:8px"><b>${avg.toFixed(1)}</b> ${stars(avg)} <a href="#reviews" data-jump="reviews">${esc(t('book.ratings', { n: reviews.length }))}</a></div>` : ''}
-        <ul class="trust-tiles${isDigital(b) ? ' tt4' : ''}">${(isDigital(b) ? [['bolt', t('book.tile1')], ['devices', t('digital.anyDevice')], ['print', t('digital.printA4')], ['shield', t('book.tile3')]] : ['tile1', 'tile2', 'tile3'].map((k, i) => [['bolt', 'devices', 'shield'][i], t('book.' + k)])).map(([ic, tx]) => `<li><span class="tt-ico">${icon(ic)}</span><b>${esc(tx)}</b></li>`).join('')}</ul>
+        <ul class="trust-tiles${isDigital(b) ? ' tt4' : ''}">${(isPub(b) ? [['bolt', t('book.tile1')], ['check', t('pub.rightsYours')], ['shield', t('pub.oneBuyer')], ['box', t('pub.allIncluded')]] : isDigital(b) ? [['bolt', t('book.tile1')], ['devices', t('digital.anyDevice')], ['print', t('digital.printA4')], ['shield', t('book.tile3')]] : ['tile1', 'tile2', 'tile3'].map((k, i) => [['bolt', 'devices', 'shield'][i], t('book.' + k)])).map(([ic, tx]) => `<li><span class="tt-ico">${icon(ic)}</span><b>${esc(tx)}</b></li>`).join('')}</ul>
       </div>
       <div class="book-main book-body">
         <div class="formats" role="list" aria-label="${esc(t('book.d.format'))}">${eds.map(x => `<a role="listitem" class="format-chip${x.id === b.id ? '' : ' alt'}" href="#/book/${encodeURIComponent(x.id)}"${x.id === b.id ? ' aria-current="true"' : ''}><span class="muted">${isDigital(x) ? '' : esc(t('book.color.' + (x.color === 'bw' ? 'bw' : 'color'))) + ' · '}${esc(t('book.formatShort.' + x.format))}</span><b>${x.price_cents ? money(x.price_cents) : esc(t('book.free'))}</b></a>`).join('')}</div>
@@ -413,7 +413,7 @@ export async function viewBook(el, id) {
             ${b.age_min != null || b.age_max != null ? pdRow('book.age', b.age_max != null && b.age_max < 99 ? t('book.ageRange', { a: b.age_min ?? 0, b: b.age_max }) : t('book.agePlus', { a: b.age_min ?? 0 })) : ''}
             ${b.isbn ? pdRow('ISBN', b.isbn, false, true) : ''}
             ${b.librava_id ? pdRow('kdp.lidShort', b.librava_id) : ''}
-            ${pdRow('book.d.copyright', b.rights === 'public' ? t('book.publicDomain') : `© ${copyYear(b)} Librava`)}
+            ${pdRow('book.d.copyright', isPub(b) ? t('pub.copyTransfer') : b.rights === 'public' ? t('book.publicDomain') : `© ${copyYear(b)} Librava`)}
           </dl></div>
           <div class="pd-col"><h3>${esc(t('book.d.groupFile'))}</h3><dl>
             ${isDigital(b) ? pdRow('book.d.type', t('ptype1.' + ptypeOf(b))) : ''}
@@ -433,7 +433,7 @@ export async function viewBook(el, id) {
 
     <div class="promo-slot" data-slot="book-below"></div>
     <div id="series-box"></div>
-    ${related.length ? `<section class="panel" style="margin-top:26px"><h2 class="section-title">${esc(t('book.related'))}</h2><div class="shelf-track">${related.map(cardHTML).join('')}</div></section>` : ''}
+    ${related.length ? `<section class="panel" style="margin-top:26px"><h2 class="section-title">${esc(t(isPub(b) ? 'pub.relHead' : 'book.related'))}</h2><div class="shelf-track">${related.map(cardHTML).join('')}</div></section>` : ''}
 
     <section class="panel" id="reviews" style="margin-top:18px"><div class="reviews-layout">
       <div>
@@ -481,7 +481,7 @@ export async function viewBook(el, id) {
   requestAnimationFrame(() => { if (desc.scrollHeight > desc.clientHeight + 4) more.hidden = false; });
   more.onclick = () => { const c = desc.classList.toggle('clamped'); more.textContent = t(c ? 'book.more' : 'book.less'); };
   // share: the /book/<id>/ address shows the cover, title and price in WhatsApp & co.
-  renderBoughtTogether($('#fbt', el), b, owned, offers);
+  if (!isPub(b)) renderBoughtTogether($('#fbt', el), b, owned, offers);
   renderSeries($('#series-box', el), b, offers);
   $('[data-share]', el)?.addEventListener('click', async () => {
     track('share', { book_id: b.id });

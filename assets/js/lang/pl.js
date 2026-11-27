@@ -1,5 +1,18 @@
 // Polish interface strings for Librava
 export default {
+  "pub.copyTransfer": "Prawa autorskie przechodzą na kupującego",
+  "pub.relHead": "Inne pakiety gotowe do publikacji",
+  "pub.dcHead": "Gotowe do publikacji w kilka minut",
+  "pub.dcSub": "Tylko jeden kupujący, prawa w cenie",
+  "pub.dcS1": "Zapłać bezpiecznie",
+  "pub.dcS2": "Pakiet ZIP pojawi się w Twojej bibliotece",
+  "pub.dcS3": "Pobierz i publikuj pod własnym nazwiskiem",
+  "pub.dcFoot": "Licencja z Twoimi prawami jest w pakiecie. Po zakupie pakiet znika ze sklepu.",
+  "pub.in1": "Wnętrze gotowe do druku",
+  "pub.in2": "Pełna okładka",
+  "pub.in3": "Obrazy A+",
+  "pub.in4": "Teksty oferty",
+  "pub.in5": "Licencja",
   "bf.d": "dni",
   "bf.h": "godz",
   "bf.m": "min",

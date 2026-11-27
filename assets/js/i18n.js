@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261127025022';
-import { CONFIG } from './config.js?v=20261127025022';
-import { store } from './util.js?v=20261127025022';
+import { localize, loadRates } from './localprice.js?v=20261127040757';
+import { CONFIG } from './config.js?v=20261127040757';
+import { store } from './util.js?v=20261127040757';
 
 const D = {
   ro: {
@@ -562,6 +562,19 @@ const D = {
     'pub.reserved': "Un alt cumpărător plătește acest pachet chiar acum. Încearcă din nou peste câteva minute.",
     'pub.sold': "Acest pachet a fost deja vândut.",
     'pub.ai': "Pentru crearea acestui produs s-a folosit AI",
+    'pub.copyTransfer': "Drepturile de autor se transferă cumpărătorului",
+    'pub.relHead': "Alte pachete gata de publicat",
+    'pub.dcHead': "Gata de publicat în câteva minute",
+    'pub.dcSub': "Un singur cumpărător, drepturi incluse",
+    'pub.dcS1': "Plătești în siguranță",
+    'pub.dcS2': "Pachetul ZIP apare în biblioteca ta",
+    'pub.dcS3': "Îl descarci și îl publici sub numele tău",
+    'pub.dcFoot': "Licența cu drepturile tale este în pachet. După cumpărare, pachetul dispare din magazin.",
+    'pub.in1': "Interior gata de tipar",
+    'pub.in2': "Copertă completă",
+    'pub.in3': "Imagini A+",
+    'pub.in4': "Texte pentru anunț",
+    'pub.in5': "Licență",
     'pub.lic': "Include licența de a-l publica și revinde sub numele tău",
     'nav.help': 'Ajutor',
     'nav.admin': 'Panou administrare',
@@ -2295,6 +2308,19 @@ const D = {
     'pub.reserved': "Un altro acquirente sta pagando questo pacchetto in questo momento. Riprova tra qualche minuto.",
     'pub.sold': "Questo pacchetto è già stato venduto.",
     'pub.ai': "È stata usata l'IA per creare questo prodotto",
+    'pub.copyTransfer': "Diritti d'autore trasferiti all'acquirente",
+    'pub.relHead': "Altri pacchetti pronti da pubblicare",
+    'pub.dcHead': "Pronto da pubblicare in pochi minuti",
+    'pub.dcSub': "Un solo acquirente, diritti inclusi",
+    'pub.dcS1': "Paghi in modo sicuro",
+    'pub.dcS2': "Il pacchetto ZIP appare nella tua libreria",
+    'pub.dcS3': "Lo scarichi e lo pubblichi a tuo nome",
+    'pub.dcFoot': "La licenza con i tuoi diritti è nel pacchetto. Dopo l'acquisto il pacchetto scompare dal negozio.",
+    'pub.in1': "Interno pronto per la stampa",
+    'pub.in2': "Copertina completa",
+    'pub.in3': "Immagini A+",
+    'pub.in4': "Testi per l'annuncio",
+    'pub.in5': "Licenza",
     'pub.lic': "Include la licenza per pubblicarlo e rivenderlo a tuo nome",
     'nav.help': 'Aiuto',
     'nav.admin': 'Pannello di gestione',
@@ -4028,6 +4054,19 @@ const D = {
     'pub.reserved': "Another buyer is paying for this package right now. Try again in a few minutes.",
     'pub.sold': "This package has already been sold.",
     'pub.ai': "AI was used to create this product",
+    'pub.copyTransfer': "Copyright transferred to the buyer",
+    'pub.relHead': "Other ready-to-publish packages",
+    'pub.dcHead': "Ready to publish in minutes",
+    'pub.dcSub': "One buyer only, rights included",
+    'pub.dcS1': "Pay securely",
+    'pub.dcS2': "The ZIP package appears in your library",
+    'pub.dcS3': "Download it and publish under your own name",
+    'pub.dcFoot': "The licence with your rights is inside the package. After purchase it is removed from the store.",
+    'pub.in1': "Print-ready interior",
+    'pub.in2': "Full wrap cover",
+    'pub.in3': "A+ images",
+    'pub.in4': "Listing texts",
+    'pub.in5': "Licence",
     'pub.lic': "Includes a license to publish and resell it under your own name",
     'nav.help': 'Help',
     'nav.admin': 'Admin panel',
@@ -5239,7 +5278,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261127025022`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261127040757`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

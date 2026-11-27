@@ -1,5 +1,18 @@
 // Slovenian interface strings for Librava
 export default {
+  "pub.copyTransfer": "Avtorske pravice se prenesejo na kupca",
+  "pub.relHead": "Drugi paketi, pripravljeni za objavo",
+  "pub.dcHead": "Pripravljeno za objavo v nekaj minutah",
+  "pub.dcSub": "Samo en kupec, pravice vključene",
+  "pub.dcS1": "Plačajte varno",
+  "pub.dcS2": "Paket ZIP se prikaže v vaši knjižnici",
+  "pub.dcS3": "Prenesite ga in objavite pod svojim imenom",
+  "pub.dcFoot": "Licenca z vašimi pravicami je v paketu. Po nakupu paket izgine iz trgovine.",
+  "pub.in1": "Notranjost, pripravljena za tisk",
+  "pub.in2": "Celoten ovitek",
+  "pub.in3": "Slike A+",
+  "pub.in4": "Besedila oglasa",
+  "pub.in5": "Licenca",
   "bf.d": "dni",
   "bf.h": "ur",
   "bf.m": "min",

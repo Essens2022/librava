@@ -1,5 +1,18 @@
 // Finnish interface strings for Librava
 export default {
+  "pub.copyTransfer": "Tekijänoikeudet siirtyvät ostajalle",
+  "pub.relHead": "Muut julkaisuvalmiit paketit",
+  "pub.dcHead": "Julkaisuvalmis muutamassa minuutissa",
+  "pub.dcSub": "Vain yksi ostaja, oikeudet mukana",
+  "pub.dcS1": "Maksa turvallisesti",
+  "pub.dcS2": "ZIP-paketti ilmestyy kirjastoosi",
+  "pub.dcS3": "Lataa ja julkaise omalla nimelläsi",
+  "pub.dcFoot": "Oikeutesi sisältävä lisenssi on paketissa. Oston jälkeen paketti poistuu kaupasta.",
+  "pub.in1": "Painovalmis sisusta",
+  "pub.in2": "Täysi kansi",
+  "pub.in3": "A+-kuvat",
+  "pub.in4": "Ilmoitustekstit",
+  "pub.in5": "Lisenssi",
   "bf.d": "päivää",
   "bf.h": "tuntia",
   "bf.m": "min",

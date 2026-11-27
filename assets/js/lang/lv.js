@@ -1,5 +1,18 @@
 // Latvian interface strings for Librava
 export default {
+  "pub.copyTransfer": "Autortiesības tiek nodotas pircējam",
+  "pub.relHead": "Citi izdošanai gatavi komplekti",
+  "pub.dcHead": "Gatavs izdošanai dažās minūtēs",
+  "pub.dcSub": "Tikai viens pircējs, tiesības iekļautas",
+  "pub.dcS1": "Maksājiet droši",
+  "pub.dcS2": "ZIP komplekts parādās jūsu bibliotēkā",
+  "pub.dcS3": "Lejupielādējiet un izdodiet ar savu vārdu",
+  "pub.dcFoot": "Licence ar jūsu tiesībām ir komplektā. Pēc pirkuma komplekts pazūd no veikala.",
+  "pub.in1": "Drukai gatavs iekšlapu bloks",
+  "pub.in2": "Pilns vāks",
+  "pub.in3": "A+ attēli",
+  "pub.in4": "Sludinājuma teksti",
+  "pub.in5": "Licence",
   "bf.d": "dienas",
   "bf.h": "stundas",
   "bf.m": "min",
