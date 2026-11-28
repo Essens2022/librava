@@ -1,11 +1,12 @@
 // Publisher: complete book packages (manuscript, covers, A+ images, listing texts, license) sold to ONE buyer only.
 // Same Librava header, cards, cart and offers; only the product is different. Packages are books with product_type = 'publisher'.
-import { api } from './api.js?v=20261127151329';
-import { t, getLang, langName } from './i18n.js?v=20261127151329';
-import { esc } from './util.js?v=20261127151329';
-import { icon, pubCardHTML } from './ui.js?v=20261127151329';
-import { isPub } from './ptypes.js?v=20261127151329';
-import { CONFIG } from './config.js?v=20261127151329';
+import { api } from './api.js?v=20261128132639';
+import { t, getLang, langName } from './i18n.js?v=20261128132639';
+import { esc } from './util.js?v=20261128132639';
+import { icon, pubCardHTML } from './ui.js?v=20261128132639';
+import { isPub } from './ptypes.js?v=20261128132639';
+import { CONFIG } from './config.js?v=20261128132639';
+import { pubPollHTML, mountPubPoll } from './pubpoll.js?v=20261128132639';
 
 // the electric-blue strip (home + Publisher page): same compact size as the other strips, readable on any phone
 export function pubBannerHTML(covers = []) {
@@ -45,6 +46,7 @@ export async function viewPublisher(el) {
   const chips = langs.length > 1 ? `<span class="pub-chips"><a class="chip${lang ? '' : ' on'}" href="#/publisher?lang=all">${esc(t('pub.allLangs'))}</a>${langs.map(l => `<a class="chip${lang === l ? ' on' : ''}" href="#/publisher?lang=${encodeURIComponent(l)}">${icon('globe')} ${esc(langName(l, true))}</a>`).join('')}</span>` : langs.length ? `<span class="chip">${icon('globe')} ${esc(langName(langs[0], true))}</span>` : '';
   el.innerHTML = `<div class="wrap page pub-page">
     <div class="pub-banner-slot" data-pub-banner></div>
+    ${pubPollHTML()}
     <div class="panel pub-ben"><div><b>©</b>${esc(t('pub.rightsYours'))}</div><div><b>★</b>${esc(t('pub.oneBuyer'))}</div><div><b>${icon('box')}</b>${esc(t('pub.allIncluded'))}</div></div>
     <div class="pub-on"><span class="pub-on-l">${esc(t('pub.publishOn'))}</span>${PLAT.map(([c, n]) => `<span class="pp pp-${c}">${n}</span>`).join('')}</div>
     <div class="panel results-bar pub-bar"><span class="pub-count"><b>${esc(t('pub.packages', { n: shown.length }))}</b>${chips}</span></div>
@@ -57,4 +59,5 @@ export async function viewPublisher(el) {
       <div><b>★</b><span>${esc(t('pub.all'))}</span></div></section>
     <p class="muted pub-ai">${esc(t('pub.ai'))}</p></div>`;
   mountPubBanner(el);
+  mountPubPoll(el);
 }

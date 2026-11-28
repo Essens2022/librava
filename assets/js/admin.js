@@ -1,21 +1,21 @@
 // =====================================================================
 //  ADMIN PANEL: overview, books, add/edit, orders, customers, reviews
 // =====================================================================
-import { CONFIG } from './config.js?v=20261127151329';
-import { TA } from './admin-it.js?v=20261127151329';
-import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261127151329';
-import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261127151329';
-import { resetCompanyCache } from './views.js?v=20261127151329';
-import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261127151329';
-import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261127151329';
-import { OFFER_KINDS, describeOffer } from './offers.js?v=20261127151329';
-import { optimizeBook } from './optimize.js?v=20261127151329';
-import { api } from './api.js?v=20261127151329';
-import { isDigital } from './ptypes.js?v=20261127151329';
-import { kdpCheckAdmin, kdpCheckTitle } from './admin-kdp-check.js?v=20261127151329';
-import { digitalAdmin } from './admin-digital.js?v=20261127151329';
-import { OF_STYLES } from './offerstyles.js?v=20261127151329';
-import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261127151329';
+import { CONFIG } from './config.js?v=20261128132639';
+import { TA } from './admin-it.js?v=20261128132639';
+import { tAdmin as t, money, fmtDate, getLang, langName, LANGS } from './i18n.js?v=20261128132639';
+import { esc, $, $$, loadScript, norm, debounce, safeHTML, plainText, compressImage } from './util.js?v=20261128132639';
+import { resetCompanyCache } from './views.js?v=20261128132639';
+import { NTF_TEMPLATES, fillTemplate } from './ntf-templates.js?v=20261128132639';
+import { REVIEW_FIELDS, readReviewFile, guessMapping, buildReviews } from './review-import.js?v=20261128132639';
+import { OFFER_KINDS, describeOffer } from './offers.js?v=20261128132639';
+import { optimizeBook } from './optimize.js?v=20261128132639';
+import { api } from './api.js?v=20261128132639';
+import { isDigital } from './ptypes.js?v=20261128132639';
+import { kdpCheckAdmin, kdpCheckTitle } from './admin-kdp-check.js?v=20261128132639';
+import { digitalAdmin } from './admin-digital.js?v=20261128132639';
+import { OF_STYLES } from './offerstyles.js?v=20261128132639';
+import { icon, go, currentPath, toast, coverHTML, confirmBox, errText, CATS, modal, stars, aplusHTML, refreshBell, promoHTML, offersBanners, BOOK_LABELS, labelOf, setLabels, FLAG_CODES, flagsOf, setFlags, PROMO_THEMES, PROMO_FONTS, PROMO_STYLES, STRIP_STYLES, safeLink, ntfCardHTML } from './ui.js?v=20261128132639';
 
 const TABS = [
   ['visitors', '/admin/visitors', 'eye', 'admin.tab.visitors'],
@@ -558,7 +558,7 @@ const evLine = e => {
     case 'leave': { const m = /s=(\d+);sc=(\d+)/.exec(e.note || ''); const p = esc(pageLabel(e.path));
       return esc(t('admin.act2.ev.leave')) + (m ? ' — ' + esc(t('admin.act2.ev.leaveInfo', { p: pageLabel(e.path), s: durText(+m[1]), sc: m[2] })) : ' — ' + p); }
     case 'error': case 'pay_error': case 'auth_error': return esc(t('admin.act2.ev.' + e.type)) + (e.note ? ': <i>' + esc(e.note) + '</i>' : '');
-    case 'survey': { const m = /^why=(?:text:\s*(.*)|(\w+))$/.exec(e.note || ''); const k = m ? (m[2] || 'other') : 'other'; const a = t('admin.act2.sv.' + k) + (m && m[1] ? ': ' + m[1] : ''); return esc(t('admin.act2.ev.survey', { a })); }
+    case 'survey': { if (/^pub=/.test(e.note || '')) { const pv = String(e.note).slice(4); const PK = { puzzle: 'Cărți cu puzzle-uri', kids: 'Copii: activități și colorat', journal: 'Jurnale ghidate', recipes: 'Cărți de bucate', planner: 'Planificatoare', selfhelp: 'Dezvoltare personală', fitness: 'Fitness și sănătate', money: 'Bani și activități extra', fiction: 'Romane și romance', learn: 'Învățare și limbi' }; const lab = pv.startsWith('text: ') ? pv.slice(6) : pv.split(',').map(k => TA(PK[k] || k)).join(', '); return esc(t('admin.act2.ev.survey', { a: TA('Sondaj Publisher: ce cărți vor vizitatorii') + ': ' + lab })); } const m = /^why=(?:text:\s*(.*)|(\w+))$/.exec(e.note || ''); const k = m ? (m[2] || 'other') : 'other'; const a = t('admin.act2.sv.' + k) + (m && m[1] ? ': ' + m[1] : ''); return esc(t('admin.act2.ev.survey', { a })); }
     case 'remove_cart': return e.book_title ? esc(t('admin.act2.ev.remove_cart')) + ' «' + esc(e.book_title) + '»' : esc(t('admin.act2.ev.remove_cart'));
     default: return esc(t('admin.act2.ev.' + e.type));
   }
@@ -697,11 +697,19 @@ async function visitorsAdmin(body) {
   const drawWhy = async () => {
     try {
       const rows = await api.adminWhy(cuISO(cuRange())), box = $('#vi-why', body); if (!box) return;
-      const n = {}; rows.forEach(r => { const k = /why=(\w+)/.exec(r.meta?.note || '')?.[1]; if (k) n[k] = (n[k] || 0) + 1; });
+      const n = {}; rows.forEach(r => { const k = /^why=(\w+)/.exec(r.meta?.note || '')?.[1]; if (k) n[k] = (n[k] || 0) + 1; });
       const written = rows.map(r => /why=text: (.+)/.exec(r.meta?.note || '')?.[1]).filter(Boolean);
       const tot = Object.values(n).reduce((a, b) => a + b, 0);
-      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>${TA('Ce îi oprește să cumpere')}</b> <span class="muted">${TA('(răspunsuri ale vizitatorilor:')} ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : ('<p class="muted" style="margin:8px 0 0">' + TA('Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.') + '</p>')}${written.length ? `<div style="margin-top:12px"><b style="font-size:14px">Ce au scris ei</b>${written.slice(0, 20).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>`;
+      box.innerHTML = `<section class="panel" style="margin-bottom:14px"><b>${TA('Ce îi oprește să cumpere')}</b> <span class="muted">${TA('(răspunsuri ale vizitatorilor:')} ${tot})</span>${tot ? Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(WHY[k] || k)}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / tot)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('') : ('<p class="muted" style="margin:8px 0 0">' + TA('Încă nu sunt răspunsuri. Întrebarea apare o dată la fiecare vizitator, după câteva secunde pe pagina unei cărți.') + '</p>')}${written.length ? `<div style="margin-top:12px"><b style="font-size:14px">Ce au scris ei</b>${written.slice(0, 20).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>${pollHTML(rows)}`;
     } catch { }
+  };
+  const PUBK = { puzzle: 'Cărți cu puzzle-uri', kids: 'Copii: activități și colorat', journal: 'Jurnale ghidate', recipes: 'Cărți de bucate', planner: 'Planificatoare', selfhelp: 'Dezvoltare personală', fitness: 'Fitness și sănătate', money: 'Bani și activități extra', fiction: 'Romane și romance', learn: 'Învățare și limbi' };
+  const pollHTML = rows => {
+    const n = {}, txt = []; let voters = 0;
+    rows.forEach(r => { const m = /^pub=(?:text: (.+)|([\w,]+))$/.exec(r.meta?.note || ''); if (!m) return; if (m[1]) txt.push(m[1]); else { voters++; m[2].split(',').forEach(k => n[k] = (n[k] || 0) + 1); } });
+    if (!voters && !txt.length) return '';
+    const mx = Math.max(1, ...Object.values(n));
+    return `<section class="panel" style="margin-bottom:14px"><b>${TA('Sondaj Publisher: ce cărți vor vizitatorii')}</b> <span class="muted">(${TA('voturi:')} ${voters})</span>${Object.entries(n).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:210px">${esc(TA(PUBK[k] || k))}</span><div style="flex:1;background:var(--surface-2,#eef0e8);border-radius:6px"><div style="width:${Math.round(100 * v / mx)}%;background:var(--pista-strong,#4f8a3a);height:14px;border-radius:6px"></div></div><b>${v}</b></div>`).join('')}${txt.length ? `<div style="margin-top:12px"><b style="font-size:14px">${TA('Ce au scris ei')}</b>${txt.slice(0, 30).map(w => `<div style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--surface-2,#eef0e8);font-size:14px">${esc(w)}</div>`).join('')}</div>` : ''}</section>`;
   };
   const draw = async () => {
     if (!body.isConnected || !$('#vi-list', body)) return;

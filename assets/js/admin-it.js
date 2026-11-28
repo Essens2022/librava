@@ -1,6 +1,19 @@
 // Italian and English texts for the admin screens that have fixed Romanian wording (key = Romanian text)
-import { getLang } from './i18n.js?v=20261127151329';
+import { getLang } from './i18n.js?v=20261128132639';
 const IT = {
+ "Învățare și limbi": "Imparare e lingue",
+ "Romane și romance": "Romanzi e romance",
+ "Bani și activități extra": "Soldi e lavoretti extra",
+ "Fitness și sănătate": "Fitness e salute",
+ "Dezvoltare personală": "Crescita personale",
+ "Planificatoare": "Agende e organizer",
+ "Cărți de bucate": "Libri di cucina",
+ "Jurnale ghidate": "Diari guidati",
+ "Copii: activități și colorat": "Bambini: attività e colori",
+ "Cărți cu puzzle-uri": "Libri di enigmistica",
+ "Ce au scris ei": "Cosa hanno scritto",
+ "voturi:": "voti:",
+ "Sondaj Publisher: ce cărți vor vizitatorii": "Sondaggio Publisher: che libri vogliono i visitatori",
  "Vândut": "Venduto",
  "Rezervat": "Riservato",
  "pachete": "pacchetti",
@@ -143,6 +156,19 @@ const IT = {
  "Produs": "Prodotto"
 };
 const EN = {
+ "Învățare și limbi": "Learning and languages",
+ "Romane și romance": "Novels and romance",
+ "Bani și activități extra": "Money and side hustles",
+ "Fitness și sănătate": "Fitness and health",
+ "Dezvoltare personală": "Self-help",
+ "Planificatoare": "Planners",
+ "Cărți de bucate": "Cookbooks",
+ "Jurnale ghidate": "Guided journals",
+ "Copii: activități și colorat": "Kids: activities and coloring",
+ "Cărți cu puzzle-uri": "Puzzle books",
+ "Ce au scris ei": "What they wrote",
+ "voturi:": "votes:",
+ "Sondaj Publisher: ce cărți vor vizitatorii": "Publisher poll: which books visitors want",
  "Vândut": "Sold",
  "Rezervat": "Reserved",
  "pachete": "packages",
