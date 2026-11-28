@@ -1,8 +1,8 @@
 // Publisher page: a one-tap poll "which books do you want to see here?" shown under the blue Publisher strip for a limited time.
 // Anonymous, one vote per device. Votes go to the existing 'survey' events (note "pub=a,b,c" or "pub=text: ..."); results show in Admin → Publisher.
-import { track } from './track.js?v=20261128133101';
-import { store, esc } from './util.js?v=20261128133101';
-import { getLang, langNative } from './i18n.js?v=20261128133101';
+import { track } from './track.js?v=20261128133541';
+import { store, esc } from './util.js?v=20261128133541';
+import { getLang, langNative } from './i18n.js?v=20261128133541';
 
 // the poll is on the site until this moment (about 48 hours after it goes live)
 export const POLL_END = Date.parse('2026-11-30T14:00:00+01:00');
@@ -41,44 +41,52 @@ const cur = () => LANG_OV || getLang();
 const tx = () => P[cur()] || P.en;
 const f = (s, n) => s.replace('{n}', n);
 const WORD = { en: ['Poll', 'Close'], ro: ['Sondaj', 'Închide'], it: ['Sondaggio', 'Chiudi'], fr: ['Sondage', 'Fermer'], de: ['Umfrage', 'Schließen'], es: ['Encuesta', 'Cerrar'], pt: ['Sondagem', 'Fechar'], nl: ['Peiling', 'Sluiten'], pl: ['Ankieta', 'Zamknij'], cs: ['Anketa', 'Zavřít'], sk: ['Anketa', 'Zavrieť'], hu: ['Szavazás', 'Bezár'], bg: ['Анкета', 'Затвори'], hr: ['Anketa', 'Zatvori'], sl: ['Anketa', 'Zapri'], el: ['Δημοσκόπηση', 'Κλείσιμο'], da: ['Afstemning', 'Luk'], sv: ['Omröstning', 'Stäng'], no: ['Avstemning', 'Lukk'], fi: ['Kysely', 'Sulje'], et: ['Küsitlus', 'Sulge'], lv: ['Aptauja', 'Aizvērt'], lt: ['Apklausa', 'Uždaryti'], uk: ['Опитування', 'Закрити'] };
-export const pollActive = () => Date.now() < POLL_END && !store.get('pubpoll-done') && !store.get('pubpoll-skip');
+const isOpen = () => store.get('pubpoll-open', 1) !== 0;
+const bodyHTML = T => `<div class="pq-opts" role="group" aria-label="${esc(T[0])}">${POLL_KEYS.map((k, i) => `<button type="button" class="pq-o" data-k="${k}" style="--h:${HUE[k]}" aria-pressed="false"><span aria-hidden="true">${ICON[k]}</span>${esc(T[2 + i])}</button>`).join('')}</div>
+    <div class="pq-foot"><input type="text" class="pq-in" maxlength="100" autocomplete="off" enterkeyhint="send" placeholder="✍️ ${esc(T[12])}" aria-label="${esc(T[12])}"><button type="button" class="pq-go" disabled>${esc(T[13])}<em class="pq-cnt" hidden></em><b aria-hidden="true">→</b></button></div>`;
 
-// compact card: label + question + close on one line, one scrolling row of topic chips, one line to write your own idea + vote
+// one card that opens and closes like the notifications panel: it never disappears, anyone can answer whenever they like
 export function pubPollHTML() {
-  if (Date.now() >= POLL_END || store.get('pubpoll-skip')) return '';
-  const T = tx(), W = WORD[cur()] || WORD.en, done = !!store.get('pubpoll-done');
-  if (done) { if (store.get('pubpoll-ack')) return ''; store.set('pubpoll-ack', 1); }
-  if (done) return `<section class="pub-poll pq-done" aria-live="polite"><div class="pq-ok"><i>✓</i><b>${esc(T[14])}</b></div>${[...Array(14)].map((_, k) => `<u style="--a:${k * 26}deg;--d:${(k % 4) * 0.05}s;--c:${(k * 47) % 360}"></u>`).join('')}</section>`;
-  return `<section class="pub-poll" aria-labelledby="pq-t"><div class="pq-head"><span class="pq-tag"><i></i>${esc(W[0])}</span><h2 id="pq-t">${esc(T[0])}</h2><label class="pq-lg"><span aria-hidden="true">🌐</span><select class="pq-sel" aria-label="Language">${Object.keys(P).map(l => `<option value="${l}"${l === cur() ? ' selected' : ''}>${esc(langNative(l))}</option>`).join('')}</select></label><button type="button" class="pq-x" aria-label="${esc(W[1])}">×</button></div>
-    <div class="pq-opts" role="group" aria-label="${esc(T[0])}">${POLL_KEYS.map((k, i) => `<button type="button" class="pq-o" data-k="${k}" style="--h:${HUE[k]}" aria-pressed="false"><span aria-hidden="true">${ICON[k]}</span>${esc(T[2 + i])}</button>`).join('')}</div>
-    <div class="pq-foot"><input type="text" class="pq-in" maxlength="100" autocomplete="off" enterkeyhint="send" placeholder="✍️ ${esc(T[12])}" aria-label="${esc(T[12])}"><button type="button" class="pq-go" disabled>${esc(T[13])}<em class="pq-cnt" hidden></em><b aria-hidden="true">→</b></button></div></section>`;
+  if (Date.now() >= POLL_END) return '';
+  const T = tx(), W = WORD[cur()] || WORD.en, open = isOpen(), voted = !!store.get('pubpoll-done');
+  return `<section class="pub-poll${open ? '' : ' pq-shut'}" aria-labelledby="pq-t"><div class="pq-head" role="button" tabindex="0" aria-expanded="${open}" aria-controls="pq-b"><span class="pq-tag"><i></i>${esc(W[0])}${voted ? ' ✓' : ''}</span><h2 id="pq-t">${esc(T[0])}</h2><label class="pq-lg"><span aria-hidden="true">🌐</span><select class="pq-sel" aria-label="Language">${Object.keys(P).map(l => `<option value="${l}"${l === cur() ? ' selected' : ''}>${esc(langNative(l))}</option>`).join('')}</select></label><span class="pq-x" aria-hidden="true">⌄</span></div>
+    <div class="pq-wrap" id="pq-b"><div class="pq-in2">${bodyHTML(T)}</div></div></section>`;
 }
 export function mountPubPoll(root) {
-  const box = root.querySelector('.pub-poll'); if (!box || box.classList.contains('pq-done')) return;
-  const go = box.querySelector('.pq-go'), inp = box.querySelector('.pq-in');
-  const sel = () => [...box.querySelectorAll('.pq-o[aria-pressed="true"]')].map(b => b.dataset.k);
-  const cn = go.querySelector('.pq-cnt');
-  const upd = () => { const n = sel().length; go.disabled = !(n || inp.value.trim()); cn.hidden = !n; cn.textContent = n + '/3'; };
-  box.querySelectorAll('.pq-o').forEach(b => b.onclick = () => {
-    const on = b.getAttribute('aria-pressed') === 'true';
-    if (!on && sel().length >= 3) { box.classList.add('pq-max'); setTimeout(() => box.classList.remove('pq-max'), 450); return; }
-    b.setAttribute('aria-pressed', on ? 'false' : 'true'); upd();
-  });
-  inp.oninput = upd;
-  inp.onkeydown = e => { if (e.key === 'Enter' && !go.disabled) go.click(); };
+  const box = root.querySelector('.pub-poll'); if (!box) return;
+  const T = tx(), head = box.querySelector('.pq-head'), inner = box.querySelector('.pq-in2');
+  const toggle = () => { const shut = box.classList.toggle('pq-shut'); head.setAttribute('aria-expanded', String(!shut)); store.set('pubpoll-open', shut ? 0 : 1); };
+  head.onclick = e => { if (e.target.closest('.pq-lg')) return; toggle(); };
+  head.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === head) { e.preventDefault(); toggle(); } };
+  const wire = () => {
+    const go = inner.querySelector('.pq-go'), inp = inner.querySelector('.pq-in'), cn = go.querySelector('.pq-cnt');
+    const sel = () => [...inner.querySelectorAll('.pq-o[aria-pressed="true"]')].map(b => b.dataset.k);
+    const upd = () => { const n = sel().length; go.disabled = !(n || inp.value.trim()); cn.hidden = !n; cn.textContent = n + '/3'; };
+    inner.querySelectorAll('.pq-o').forEach(b => b.onclick = () => {
+      const on = b.getAttribute('aria-pressed') === 'true';
+      if (!on && sel().length >= 3) { box.classList.add('pq-max'); setTimeout(() => box.classList.remove('pq-max'), 450); return; }
+      b.setAttribute('aria-pressed', on ? 'false' : 'true'); upd();
+    });
+    inp.oninput = upd;
+    inp.onkeydown = e => { if (e.key === 'Enter' && !go.disabled) go.click(); };
+    go.onclick = () => {
+      const ks = sel(), txt = inp.value.replace(/\s+/g, ' ').trim().slice(0, 100);
+      if (ks.length) track('survey', { note: 'pub=' + ks.join(',') });
+      if (txt) track('survey', { note: 'pub=text: ' + txt });
+      store.set('pubpoll-done', 1);
+      box.querySelector('.pq-tag').innerHTML = box.querySelector('.pq-tag').innerHTML.replace(/( ✓)?$/, ' ✓');
+      inner.innerHTML = `<div class="pq-ok"><i>✓</i><b>${esc(T[14])}</b></div>${[...Array(14)].map((_, k) => `<u style="--a:${k * 26}deg;--d:${(k % 4) * 0.05}s;--c:${(k * 47) % 360}"></u>`).join('')}`;
+      // thank you, then it folds itself; opening it again lets the same person answer once more
+      setTimeout(() => { if (!inner.isConnected) return; box.classList.add('pq-shut'); head.setAttribute('aria-expanded', 'false'); store.set('pubpoll-open', 0); setTimeout(() => { inner.innerHTML = bodyHTML(T); wire(); }, 450); }, 2200);
+    };
+  };
+  wire();
   box.querySelector('.pq-sel').onchange = e => {
-    const keep = sel(), txt = inp.value; LANG_OV = e.target.value;
+    LANG_OV = e.target.value;
+    const keep = [...inner.querySelectorAll('.pq-o[aria-pressed="true"]')].map(b => b.dataset.k), txt = inner.querySelector('.pq-in')?.value || '';
     box.outerHTML = pubPollHTML();
     const nb = root.querySelector('.pub-poll'); mountPubPoll(root);
     nb.querySelectorAll('.pq-o').forEach(b => { if (keep.includes(b.dataset.k)) b.setAttribute('aria-pressed', 'true'); });
-    nb.querySelector('.pq-sel').focus(); nb.querySelector('.pq-in').value = txt; nb.querySelector('.pq-in').dispatchEvent(new Event('input'));
-  };
-  box.querySelector('.pq-x').onclick = () => { store.set('pubpoll-skip', 1); box.remove(); };
-  go.onclick = () => {
-    const ks = sel(), txt = inp.value.replace(/\s+/g, ' ').trim().slice(0, 100);
-    if (ks.length) track('survey', { note: 'pub=' + ks.join(',') });
-    if (txt) track('survey', { note: 'pub=text: ' + txt });
-    store.set('pubpoll-done', 1);
-    box.outerHTML = pubPollHTML();
+    nb.querySelector('.pq-sel').focus(); const ni = nb.querySelector('.pq-in'); ni.value = txt; ni.dispatchEvent(new Event('input'));
   };
 }

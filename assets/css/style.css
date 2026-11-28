@@ -4654,3 +4654,17 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pq-done u{position:absolute;left:28px;top:50%;width:8px;height:8px;border-radius:2px;background:hsl(var(--c) 85% 55%);animation:pqc .9s ease-out var(--d) both;text-decoration:none}
 @keyframes pqc{from{transform:rotate(var(--a)) translateX(0);opacity:1}to{transform:rotate(var(--a)) translateX(110px) rotate(280deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pub-poll,.pub-poll::after,.pq-o[aria-pressed="true"],.pq-done u{animation:none}}
+
+/* open / close like the notifications panel */
+.pq-head{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.pq-head:focus-visible{outline:2px solid #5d9b3a;outline-offset:4px;border-radius:10px}
+.pq-x{display:grid;place-items:center;font-size:1.3rem;opacity:.6;transition:transform .3s}
+.pq-x{transform:rotate(180deg)}
+.pq-shut .pq-x{transform:none}
+.pq-wrap{display:grid;grid-template-rows:1fr;transition:grid-template-rows .35s ease}
+.pq-in2{min-height:0;overflow:hidden;position:relative}
+.pq-shut .pq-wrap{grid-template-rows:0fr}
+.pq-shut{padding-bottom:12px}
+.pq-in2 .pq-ok{position:relative;min-height:56px}
+.pq-in2 u{position:absolute;left:28px;top:50%;width:8px;height:8px;border-radius:2px;background:hsl(var(--c) 85% 55%);animation:pqc .9s ease-out var(--d) both}
+@media (max-width:640px){.pq-shut .pq-lg{display:none}.pq-shut .pq-head h2{order:2;flex:1 1 0;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pq-shut .pq-x{order:3}.pq-shut .pq-head{flex-wrap:nowrap}}
