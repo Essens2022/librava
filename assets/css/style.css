@@ -4654,3 +4654,13 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pq-done u{position:absolute;left:28px;top:50%;width:8px;height:8px;border-radius:2px;background:hsl(var(--c) 85% 55%);animation:pqc .9s ease-out var(--d) both;text-decoration:none}
 @keyframes pqc{from{transform:rotate(var(--a)) translateX(0);opacity:1}to{transform:rotate(var(--a)) translateX(110px) rotate(280deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pub-poll,.pub-poll::after,.pq-o[aria-pressed="true"],.pq-done u{animation:none}}
+
+/* Publisher: tidy "N packages + language" bar */
+.pub-bar{padding:12px 14px}
+.pub-count{width:100%;justify-content:space-between;gap:10px 12px}
+.pub-count>b{font-size:17px;line-height:1.2}
+.pub-chips{align-items:center}
+.pub-count .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--pista-soft);color:var(--pista-strong);border:1.5px solid transparent;font-size:14px;font-weight:700;line-height:1;text-decoration:none;white-space:nowrap}
+.pub-count .chip svg{width:17px;height:17px;flex:none;display:block}
+.pub-count a.chip:hover{border-color:var(--pista-strong)}
+.pub-count .chip.on{background:var(--pista-strong);color:#fff}
