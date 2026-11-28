@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EXKLUZÍVNE",
   "pub.buyResell": "Kúp a predávaj ďalej",
   "pub.forPublisher": "Balík pre vydavateľov",
-  "pub.rightsYours": "Autorské práva patria tebe",
+  "pub.rightsYours": "Všetky práva v cene",
   "pub.oneBuyer": "Len jeden kupujúci",
   "pub.allIncluded": "Všetko v cene",
   "pub.soldTag": "Predané",

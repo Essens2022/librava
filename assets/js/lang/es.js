@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EXCLUSIVO",
   "pub.buyResell": "Compra y revende",
   "pub.forPublisher": "Paquete para editores",
-  "pub.rightsYours": "Los derechos de autor son tuyos",
+  "pub.rightsYours": "Todos los derechos incluidos",
   "pub.oneBuyer": "Un solo comprador",
   "pub.allIncluded": "Todo incluido",
   "pub.soldTag": "Vendido",

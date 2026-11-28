@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EKSKLUSIIVNE",
   "pub.buyResell": "Osta ja müü edasi",
   "pub.forPublisher": "Pakett kirjastajatele",
-  "pub.rightsYours": "Autoriõigused on sinu",
+  "pub.rightsYours": "Kõik õigused kaasas",
   "pub.oneBuyer": "Ainult üks ostja",
   "pub.allIncluded": "Kõik kaasas",
   "pub.soldTag": "Müüdud",

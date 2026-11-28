@@ -1,12 +1,12 @@
 // Publisher: complete book packages (manuscript, covers, A+ images, listing texts, license) sold to ONE buyer only.
 // Same Librava header, cards, cart and offers; only the product is different. Packages are books with product_type = 'publisher'.
-import { api } from './api.js?v=20261128142147';
-import { t, getLang, langName } from './i18n.js?v=20261128142147';
-import { esc } from './util.js?v=20261128142147';
-import { icon, pubCardHTML } from './ui.js?v=20261128142147';
-import { isPub } from './ptypes.js?v=20261128142147';
-import { CONFIG } from './config.js?v=20261128142147';
-import { pubPollHTML, mountPubPoll } from './pubpoll.js?v=20261128142147';
+import { api } from './api.js?v=20261128144123';
+import { t, getLang, langName } from './i18n.js?v=20261128144123';
+import { esc } from './util.js?v=20261128144123';
+import { icon, pubCardHTML } from './ui.js?v=20261128144123';
+import { isPub } from './ptypes.js?v=20261128144123';
+import { CONFIG } from './config.js?v=20261128144123';
+import { pubPollHTML, mountPubPoll } from './pubpoll.js?v=20261128144123';
 
 // the electric-blue strip (home + Publisher page): same compact size as the other strips, readable on any phone
 export function pubBannerHTML(covers = []) {

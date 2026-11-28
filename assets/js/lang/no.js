@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EKSKLUSIVT",
   "pub.buyResell": "Kjøp og selg videre",
   "pub.forPublisher": "Pakke for forlag",
-  "pub.rightsYours": "Opphavsretten er din",
+  "pub.rightsYours": "Alle rettigheter inkludert",
   "pub.oneBuyer": "Bare én kjøper",
   "pub.allIncluded": "Alt er med",
   "pub.soldTag": "Solgt",

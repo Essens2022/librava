@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EXCLUSIEF",
   "pub.buyResell": "Koop en verkoop door",
   "pub.forPublisher": "Pakket voor uitgevers",
-  "pub.rightsYours": "De auteursrechten zijn van jou",
+  "pub.rightsYours": "Alle rechten inbegrepen",
   "pub.oneBuyer": "Slechts één koper",
   "pub.allIncluded": "Alles inbegrepen",
   "pub.soldTag": "Verkocht",
