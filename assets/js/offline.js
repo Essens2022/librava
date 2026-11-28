@@ -2,10 +2,10 @@
 //  Books the reader keeps on this device: download a personal copy (PDF / EPUB)
 //  and/or save it inside the browser to read without internet.
 // =====================================================================
-import { blobs, store, loadScript } from './util.js?v=20261128133101';
-import { api } from './api.js?v=20261128133101';
-import { FORMAT_MIME, isPub } from './ptypes.js?v=20261128133101';
-import { personalisePackage } from './pub-license.js?v=20261128133101';
+import { blobs, store, loadScript } from './util.js?v=20261128134406';
+import { api } from './api.js?v=20261128134406';
+import { FORMAT_MIME, isPub } from './ptypes.js?v=20261128134406';
+import { personalisePackage } from './pub-license.js?v=20261128134406';
 
 // the version in the address makes phones fetch a new library file instead of an old saved copy
 const VENDOR = f => new URL('../vendor/' + f + '?v=' + (f.startsWith('pdf.') ? 'pdfjs-3.11.174-legacy' : '1'), import.meta.url).href;
