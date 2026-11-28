@@ -4641,7 +4641,6 @@ body:has(#goal-bar) #app { padding-top: var(--gb-h, 68px); }
 .pq-ok i{width:26px;height:26px;border-radius:50%;background:#5d9b3a;color:#fff;display:grid;place-items:center;font-style:normal}
 @media (min-width:760px){.pq-opts{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none;padding-right:0}}
 @media (prefers-reduced-motion:reduce){.pq-tag i{animation:none}}
-@media (prefers-color-scheme:dark){.pub-poll{background:linear-gradient(135deg,#1c2a18,#181d24)}.pq-o{background:hsl(var(--h) 30% 20%);border-color:hsl(var(--h) 30% 30%);color:#eef5e8}.pq-in{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15)}.pq-x:hover{background:rgba(255,255,255,.1)}}
 @media (max-width:640px){.pq-head{flex-wrap:wrap;row-gap:6px}.pq-tag{order:1}.pq-lg{order:2;margin-left:auto}.pq-x{order:3}.pq-head h2{order:4;flex:1 0 100%;font-size:1.05rem}.pq-sel{max-width:110px}}
 
 .pub-poll{animation:pqin .5s cubic-bezier(.2,.9,.3,1.2) both}

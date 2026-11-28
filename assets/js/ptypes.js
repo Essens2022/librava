@@ -1,6 +1,6 @@
 // Product types: every title is an "ebook" unless the product_type column says otherwise.
 // Digital products (planners, calendars, organizers, spreadsheets, templates, printable games, coloring pages, kids worksheets, wall art, cards) are files that are downloaded and used, not read in the reader.
-import { t } from './i18n.js?v=20261128132639';
+import { t } from './i18n.js?v=20261128133101';
 
 export const PTYPES = ['planner', 'calendar', 'organizer', 'spreadsheet', 'template', 'game', 'coloring', 'kids', 'wallart', 'cards'];
 // Publisher packages (ZIP with manuscript, covers, A+ images, license) are downloaded like digital products but sold as books to ONE buyer only

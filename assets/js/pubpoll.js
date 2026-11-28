@@ -1,8 +1,8 @@
 // Publisher page: a one-tap poll "which books do you want to see here?" shown under the blue Publisher strip for a limited time.
 // Anonymous, one vote per device. Votes go to the existing 'survey' events (note "pub=a,b,c" or "pub=text: ..."); results show in Admin → Publisher.
-import { track } from './track.js?v=20261128132639';
-import { store, esc } from './util.js?v=20261128132639';
-import { getLang, langNative } from './i18n.js?v=20261128132639';
+import { track } from './track.js?v=20261128133101';
+import { store, esc } from './util.js?v=20261128133101';
+import { getLang, langNative } from './i18n.js?v=20261128133101';
 
 // the poll is on the site until this moment (about 48 hours after it goes live)
 export const POLL_END = Date.parse('2026-11-30T14:00:00+01:00');
