@@ -1,6 +1,6 @@
 // Publisher packages: at download time the licence inside the ZIP is replaced with one made out to the buyer
 // (name, email, order number, date). The PDF is built in the browser with pdf-lib.
-import { loadScript } from './util.js?v=20261128134406';
+import { loadScript } from './util.js?v=20261128134417';
 
 const VENDOR = f => new URL('../vendor/' + f + '?v=1', import.meta.url).href;
 const ascii = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '').trim();
