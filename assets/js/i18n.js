@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261128134417';
-import { CONFIG } from './config.js?v=20261128134417';
-import { store } from './util.js?v=20261128134417';
+import { localize, loadRates } from './localprice.js?v=20261128142147';
+import { CONFIG } from './config.js?v=20261128142147';
+import { store } from './util.js?v=20261128142147';
 
 const D = {
   ro: {
@@ -2291,7 +2291,7 @@ const D = {
     'pub.exclusive': "ESCLUSIVO",
     'pub.buyResell': "Acquista e rivendi",
     'pub.forPublisher': "Pacchetto per publisher",
-    'pub.rightsYours': "Diritti d'autore tuoi",
+    'pub.rightsYours': "I diritti d'autore sono tuoi",
     'pub.oneBuyer': "Unico acquirente",
     'pub.allIncluded': "Tutto incluso",
     'pub.soldTag': "Venduto",
@@ -5278,7 +5278,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261128134417`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261128142147`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it
