@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "ΑΠΟΚΛΕΙΣΤΙΚΟ",
   "pub.buyResell": "Αγόρασε και μεταπούλησε",
   "pub.forPublisher": "Πακέτο για εκδότες",
-  "pub.rightsYours": "Όλα τα δικαιώματα περιλαμβάνονται",
+  "pub.rightsYours": "Όλα τα πνευματικά δικαιώματα περιλαμβάνονται",
   "pub.oneBuyer": "Μόνο ένας αγοραστής",
   "pub.allIncluded": "Όλα περιλαμβάνονται",
   "pub.soldTag": "Πουλήθηκε",

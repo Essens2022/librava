@@ -1,6 +1,6 @@
-import { localize, loadRates } from './localprice.js?v=20261128144123';
-import { CONFIG } from './config.js?v=20261128144123';
-import { store } from './util.js?v=20261128144123';
+import { localize, loadRates } from './localprice.js?v=20261128144436';
+import { CONFIG } from './config.js?v=20261128144436';
+import { store } from './util.js?v=20261128144436';
 
 const D = {
   ro: {
@@ -545,7 +545,7 @@ const D = {
     'pub.exclusive': "EXCLUSIV",
     'pub.buyResell': "Cumperi și revinzi",
     'pub.forPublisher': "Pachet pentru publisheri",
-    'pub.rightsYours': "Toate drepturile incluse",
+    'pub.rightsYours': "Toate drepturile de autor incluse",
     'pub.oneBuyer': "Un singur cumpărător",
     'pub.allIncluded': "Totul inclus",
     'pub.soldTag': "Vândut",
@@ -2291,7 +2291,7 @@ const D = {
     'pub.exclusive': "ESCLUSIVO",
     'pub.buyResell': "Acquista e rivendi",
     'pub.forPublisher': "Pacchetto per publisher",
-    'pub.rightsYours': "Tutti i diritti inclusi",
+    'pub.rightsYours': "Tutti i diritti d'autore inclusi",
     'pub.oneBuyer': "Unico acquirente",
     'pub.allIncluded': "Tutto incluso",
     'pub.soldTag': "Venduto",
@@ -4037,7 +4037,7 @@ const D = {
     'pub.exclusive': "EXCLUSIVE",
     'pub.buyResell': "Buy and resell",
     'pub.forPublisher': "Package for publishers",
-    'pub.rightsYours': "All rights included",
+    'pub.rightsYours': "All copyright included",
     'pub.oneBuyer': "One buyer only",
     'pub.allIncluded': "Everything included",
     'pub.soldTag': "Sold",
@@ -5278,7 +5278,7 @@ export function isLangChosen() { return CODES.includes(store.get('lang')); }
 
 export async function loadLang(l) {
   if (D[l]) return true;
-  try { const m = await import(`./lang/${l}.js?v=20261128144123`); D[l] = m.default; return true; }
+  try { const m = await import(`./lang/${l}.js?v=20261128144436`); D[l] = m.default; return true; }
   catch (e) { console.warn('Language file missing:', l, e); return false; }
 }
 // remember=false when the language came from the device, true when the visitor picked it

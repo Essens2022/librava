@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "KIZÁRÓLAGOS",
   "pub.buyResell": "Vedd meg és add tovább",
   "pub.forPublisher": "Csomag kiadóknak",
-  "pub.rightsYours": "Minden jog benne van",
+  "pub.rightsYours": "Minden szerzői jog benne van",
   "pub.oneBuyer": "Csak egy vevő",
   "pub.allIncluded": "Minden benne van",
   "pub.soldTag": "Eladva",

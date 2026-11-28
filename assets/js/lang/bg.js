@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "ЕКСКЛУЗИВНО",
   "pub.buyResell": "Купи и препродай",
   "pub.forPublisher": "Пакет за издатели",
-  "pub.rightsYours": "Всички права са включени",
+  "pub.rightsYours": "Всички авторски права са включени",
   "pub.oneBuyer": "Само един купувач",
   "pub.allIncluded": "Всичко включено",
   "pub.soldTag": "Продаден",

@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EKSKLIUZYVAS",
   "pub.buyResell": "Pirk ir parduok toliau",
   "pub.forPublisher": "Paketas leidėjams",
-  "pub.rightsYours": "Visos teisės įskaičiuotos",
+  "pub.rightsYours": "Visos autorių teisės įskaičiuotos",
   "pub.oneBuyer": "Tik vienas pirkėjas",
   "pub.allIncluded": "Viskas įskaičiuota",
   "pub.soldTag": "Parduota",

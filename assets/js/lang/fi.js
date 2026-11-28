@@ -124,7 +124,7 @@ export default {
   "pub.exclusive": "EKSKLUSIIVINEN",
   "pub.buyResell": "Osta ja myy edelleen",
   "pub.forPublisher": "Paketti kustantajille",
-  "pub.rightsYours": "Kaikki oikeudet mukana",
+  "pub.rightsYours": "Kaikki tekijänoikeudet mukana",
   "pub.oneBuyer": "Vain yksi ostaja",
   "pub.allIncluded": "Kaikki mukana",
   "pub.soldTag": "Myyty",
